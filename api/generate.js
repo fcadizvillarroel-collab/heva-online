@@ -1,7 +1,6 @@
-// api/generate.js — Formato Universal Compatible con Vercel
+// api/generate.js — Motor Multi-IA con Autoselección de Modelos Activos
 
 module.exports = async function handler(req, res) {
-  // Cabeceras CORS
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -17,8 +16,8 @@ module.exports = async function handler(req, res) {
 
   const {
     asignatura = 'Estudios Sociales',
-    nivel = 'III_BASICO',
-    marcoCurricular = 'DECRETO_257_2009',
+    nivel = 'III NIVEL BÁSICO',
+    marcoCurricular = 'Decreto Supremo N° 257/2009 EPJA',
     objetivoAprendizaje = '',
     temaEspecifico = '',
     tipoMaterial = 'GUIA',
@@ -33,43 +32,50 @@ module.exports = async function handler(req, res) {
   if (!GROQ_API_KEY && !GEMINI_API_KEY) {
     return res.status(400).json({
       error: 'Claves no detectadas',
-      detalle: 'Debes agregar GROQ_API_KEY o GEMINI_API_KEY en las Environment Variables de Vercel y hacer Redeploy.'
+      detalle: 'Configura GROQ_API_KEY o GEMINI_API_KEY en las variables de entorno de Vercel y haz Redeploy.'
     });
   }
 
   try {
-    // 1. PLANIFICADOR ANDRAGÓGICO
-    const promptPlan = `
-Eres Diseñador Curricular de EPJA Chile (Escuela Héctor Valenzuela CEA de Villarrica).
-Diseña un plan breve para:
-Asignatura: ${asignatura} | Nivel: ${nivel} | Tema: ${temaEspecifico} | Objetivo: ${objetivoAprendizaje}
-Alternativas: ${cantAlternativas} | Desarrollo: ${cantDesarrollo} | Casos: ${cantCasos}
+    // 1. Resolver los mejores modelos activos para esta cuenta
+    const modeloGroq = GROQ_API_KEY ? await resolverModeloGroq(GROQ_API_KEY) : null;
+    const modeloGemini = GEMINI_API_KEY ? await resolverModeloGemini(GEMINI_API_KEY) : null;
 
-Responde ÚNICAMENTE un JSON con:
+    // 2. PLANIFICADOR ANDRAGÓGICO
+    const promptPlan = `
+Actúa como Diseñador Curricular especialista en EPJA Chile para la Escuela Héctor Valenzuela CEA de Villarrica.
+Crea un plan pedagógico andragógico breve para:
+Nivel: ${nivel} | Asignatura: ${asignatura} | Marco: ${marcoCurricular}
+Tema: ${temaEspecifico} | Objetivo: ${objetivoAprendizaje}
+Requerimientos: ${cantAlternativas} alternativas, ${cantDesarrollo} preguntas de desarrollo y ${cantCasos} casos situacionales laborales.
+
+Responde ÚNICAMENTE en formato JSON válido:
 {
-  "enfoque": "andragogía adultos",
-  "subtemasPermitidos": ["subtema 1", "subtema 2"],
+  "enfoqueAndragogico": "estrategia para adultos",
+  "subtemasPermitidos": ["concepto clave 1", "concepto clave 2"],
   "subtemasProhibidos": ["anacronismos de otras unidades"]
 }
 `;
 
-    const plan = await ejecutarLlamadaIA(promptPlan, GROQ_API_KEY, GEMINI_API_KEY);
+    const plan = await llamarIAConFallback(promptPlan, GROQ_API_KEY, modeloGroq, GEMINI_API_KEY, modeloGemini);
 
-    // 2. REDACTOR PEDAGÓGICO
+    // 3. REDACTOR PEDAGÓGICO COMPLETO
     const promptRedactor = `
-Eres un profesor de EPJA en la Escuela Héctor Valenzuela CEA de Villarrica, Chile.
-Redacta el material pedagógico completo para adultos trabajadores.
+Eres un destacado profesor de EPJA en la Escuela Héctor Valenzuela CEA de Villarrica, Chile.
+Redacta el material pedagógico completo para personas jóvenes y adultas (contexto laboral y formativo).
 Plan: ${JSON.stringify(plan)}
-Asignatura: ${asignatura} | Nivel: ${nivel} | Tema: ${temaEspecifico}
-Requisitos:
-- Exactamente ${cantAlternativas} preguntas de selección múltiple con 4 opciones (A, B, C, D) y su clave correcta.
-- Exactamente ${cantDesarrollo} preguntas de desarrollo con rúbrica según Decreto 67.
-- ${cantCasos} casos reales cotidianos o laborales de adultos.
+Nivel: ${nivel} | Asignatura: ${asignatura} | Tema: ${temaEspecifico}
 
-Responde ÚNICAMENTE un JSON con esta estructura:
+REGLAS:
+- Redacta exactamente ${cantAlternativas} preguntas de selección múltiple con 4 alternativas (A, B, C, D) y su clave correcta.
+- Las respuestas correctas deben estar desordenadas al azar (sin patrones como A, B, C, D).
+- Redacta exactamente ${cantDesarrollo} preguntas de desarrollo con rúbrica analítica según Decreto 67.
+- Redacta ${cantCasos} casos reales cotidianos o laborales de adultos.
+
+Responde ÚNICAMENTE en formato JSON válido con esta estructura:
 {
-  "titulo": "Título profesional del material",
-  "introduccionLectura": "Texto de lectura contextualizada completo (mínimo 280 palabras)",
+  "titulo": "Título formal del material",
+  "introduccionLectura": "Lectura contextualizada completa (mínimo 280 palabras)",
   "casosEstudio": [
     { "id": 1, "titulo": "...", "contextoReal": "...", "preguntaReflexion": "..." }
   ],
@@ -99,7 +105,7 @@ Responde ÚNICAMENTE un JSON con esta estructura:
 }
 `;
 
-    const material = await ejecutarLlamadaIA(promptRedactor, GROQ_API_KEY, GEMINI_API_KEY);
+    const material = await llamarIAConFallback(promptRedactor, GROQ_API_KEY, modeloGroq, GEMINI_API_KEY, modeloGemini);
 
     return res.status(200).json({
       exito: true,
@@ -107,7 +113,7 @@ Responde ÚNICAMENTE un JSON con esta estructura:
     });
 
   } catch (error) {
-    console.error('Error en proceso:', error);
+    console.error('Error detallado:', error);
     return res.status(500).json({
       error: 'Error de IA',
       detalle: error.message
@@ -115,12 +121,63 @@ Responde ÚNICAMENTE un JSON con esta estructura:
   }
 };
 
-// Función de llamada a Groq y Gemini
-async function ejecutarLlamadaIA(prompt, groqKey, geminiKey) {
-  let errores = [];
+// Autodetección del modelo activo de Groq
+async function resolverModeloGroq(key) {
+  try {
+    const r = await fetch('https://api.groq.com/openai/v1/models', {
+      headers: { 'Authorization': `Bearer ${key}` }
+    });
+    if (r.ok) {
+      const data = await r.json();
+      const disponibles = (data.data || []).map(m => m.id);
+      // Priorizar los modelos oficiales activos
+      const candidatos = [
+        'openai/gpt-oss-120b',
+        'openai/gpt-oss-20b',
+        'llama-3.1-8b-instant',
+        'llama-3.3-70b-versatile'
+      ];
+      for (const c of candidatos) {
+        if (disponibles.includes(c)) return c;
+      }
+      if (disponibles.length > 0) return disponibles[0];
+    }
+  } catch (e) {
+    console.warn('Error listando modelos Groq:', e.message);
+  }
+  return 'openai/gpt-oss-120b';
+}
 
-  // Intentar con Groq
-  if (groqKey) {
+// Autodetección del modelo activo de Gemini
+async function resolverModeloGemini(key) {
+  try {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+    if (r.ok) {
+      const data = await r.json();
+      const modelos = (data.models || []).filter(m => m.supportedGenerationMethods?.includes('generateContent'));
+      const candidatos = [
+        'models/gemini-2.5-flash',
+        'models/gemini-2.0-flash',
+        'models/gemini-1.5-flash',
+        'models/gemini-1.5-pro'
+      ];
+      for (const c of candidatos) {
+        if (modelos.some(m => m.name === c)) return c.replace('models/', '');
+      }
+      if (modelos.length > 0) return modelos[0].name.replace('models/', '');
+    }
+  } catch (e) {
+    console.warn('Error listando modelos Gemini:', e.message);
+  }
+  return 'gemini-2.0-flash';
+}
+
+// Orquestador con conmutación por error
+async function llamarIAConFallback(prompt, groqKey, modeloGroq, geminiKey, modeloGemini) {
+  let bitacoraErrores = [];
+
+  // Intento 1: Groq
+  if (groqKey && modeloGroq) {
     try {
       const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
@@ -129,9 +186,9 @@ async function ejecutarLlamadaIA(prompt, groqKey, geminiKey) {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
+          model: modeloGroq,
           messages: [
-            { role: 'system', content: 'Responde ÚNICAMENTE con código JSON válido sin texto adicional.' },
+            { role: 'system', content: 'Responde exclusivamente con código JSON válido parseable, sin explicaciones ni markdown.' },
             { role: 'user', content: prompt }
           ],
           response_format: { type: 'json_object' },
@@ -141,19 +198,20 @@ async function ejecutarLlamadaIA(prompt, groqKey, geminiKey) {
 
       const data = await resp.json();
       if (!resp.ok) {
-        errores.push(`Groq: ${data.error?.message || resp.statusText}`);
+        bitacoraErrores.push(`Groq (${modeloGroq}): ${data.error?.message || resp.statusText}`);
       } else {
-        return JSON.parse(data.choices[0]?.message?.content);
+        const texto = data.choices[0]?.message?.content;
+        return limpiarYParsearJSON(texto);
       }
     } catch (e) {
-      errores.push(`Groq conexión: ${e.message}`);
+      bitacoraErrores.push(`Groq conexión: ${e.message}`);
     }
   }
 
-  // Intentar con Gemini
-  if (geminiKey) {
+  // Intento 2: Google Gemini
+  if (geminiKey && modeloGemini) {
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modeloGemini}:generateContent?key=${geminiKey}`;
       const resp = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -168,14 +226,20 @@ async function ejecutarLlamadaIA(prompt, groqKey, geminiKey) {
 
       const data = await resp.json();
       if (!resp.ok) {
-        errores.push(`Gemini: ${data.error?.message || resp.statusText}`);
+        bitacoraErrores.push(`Gemini (${modeloGemini}): ${data.error?.message || resp.statusText}`);
       } else {
-        return JSON.parse(data.candidates[0]?.content?.parts[0]?.text);
+        const texto = data.candidates[0]?.content?.parts[0]?.text;
+        return limpiarYParsearJSON(texto);
       }
     } catch (e) {
-      errores.push(`Gemini conexión: ${e.message}`);
+      bitacoraErrores.push(`Gemini conexión: ${e.message}`);
     }
   }
 
-  throw new Error(errores.join(' | ') || 'No se pudo conectar con ningún proveedor.');
+  throw new Error(bitacoraErrores.join(' | ') || 'Fallo general de conexión con la IA.');
+}
+
+function limpiarYParsearJSON(texto) {
+  const limpio = texto.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+  return JSON.parse(limpio);
 }
