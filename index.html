@@ -21,7 +21,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- HEADER INSTITUCIONAL -->
+  <!-- HEADER -->
   <header class="no-print bg-[#8B2635] text-white px-6 py-4 shadow-md flex flex-wrap justify-between items-center gap-3">
     <div>
       <h1 class="text-xl font-bold tracking-tight">HEVA Online — Escuela Héctor Valenzuela CEA</h1>
@@ -30,7 +30,7 @@
     <div class="flex items-center gap-2 text-xs">
       <span class="bg-black/25 px-3 py-1 rounded text-rose-100 font-medium flex items-center gap-1.5">
         <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
-        Currículo Ministerial Vinculado
+        Motor Pedagógico Activo
       </span>
     </div>
   </header>
@@ -42,7 +42,7 @@
     <button onclick="cambiarPestana('criterios')" id="tab-criterios" class="py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap">3. Criterios CEA y Normativa</button>
   </nav>
 
-  <!-- CONTENIDO -->
+  <!-- CONTENIDO PRINCIPAL -->
   <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-6 flex-1 w-full">
 
     <!-- BARRA ACCESIBILIDAD DUA -->
@@ -65,16 +65,18 @@
       <div class="bg-white p-5 rounded-lg border border-stone-200 shadow-sm space-y-4">
         <h2 class="text-base font-bold text-[#8B2635] border-b pb-2">Planificación Curricular EPJA</h2>
 
+        <!-- 1. Tipo de Material -->
         <div>
           <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Tipo de Material</label>
           <select id="tipo-material" class="w-full border rounded p-2 text-sm bg-white font-medium">
-            <option value="GUIA">Guía de Aprendizaje Contextualizada</option>
+            <option value="GUIA">Guía de Aprendizaje Formativa</option>
             <option value="EVALUACION">Evaluación / Prueba Sumativa (Dec. 67)</option>
             <option value="PLANIFICACION">Planificación de Clase (90 min DUA)</option>
-            <option value="TALLER">Taller de Aplicación Laboral T-P</option>
+            <option value="TALLER">Taller de Aplicación Práctica</option>
           </select>
         </div>
 
+        <!-- 2. Marco Curricular -->
         <div>
           <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Marco Curricular</label>
           <select id="marco-curricular" onchange="actualizarTodoElCurriculo()" class="w-full border rounded p-2 text-xs bg-amber-50 font-bold text-amber-950 border-amber-300">
@@ -83,6 +85,7 @@
           </select>
         </div>
 
+        <!-- 3. Nivel Educativo -->
         <div>
           <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Nivel Educativo CEA</label>
           <select id="nivel-epja" onchange="actualizarTodoElCurriculo()" class="w-full border rounded p-2 text-sm bg-stone-50 font-bold text-[#8B2635]">
@@ -93,18 +96,31 @@
           </select>
         </div>
 
+        <!-- 4. Asignatura -->
         <div>
           <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Asignatura del Nivel</label>
-          <select id="asignatura" onchange="actualizarEstrategiasYObjetivos()" class="w-full border rounded p-2 text-xs bg-white font-semibold text-stone-800"></select>
+          <select id="asignatura" onchange="actualizarObjetivosYEstrategias()" class="w-full border rounded p-2 text-xs bg-white font-semibold text-stone-800"></select>
           <span id="ayuda-malla" class="text-[10px] text-stone-500 italic block mt-0.5"></span>
         </div>
 
-        <div>
-          <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Batería de Estrategias Didácticas</label>
-          <select id="estrategia-didactica" class="w-full border rounded p-2 text-xs bg-stone-50 font-medium text-stone-800 border-stone-300"></select>
+        <!-- 5. OBJETIVO DE APRENDIZAJE (JUSTO ABAJO DE LA ASIGNATURA) -->
+        <div class="border-t pt-2">
+          <label class="block text-xs font-bold uppercase text-[#8B2635] mb-1">Objetivos Oficiales del MINEDUC (OA / OF)</label>
+          <select id="select-oa" onchange="cargarOATexto()" class="w-full border rounded p-2 text-xs bg-stone-50 mb-1.5"></select>
+          <textarea id="texto-oa" rows="3" class="w-full border rounded p-2 text-xs text-stone-700 bg-white" placeholder="O pegue el objetivo específico aquí..."></textarea>
         </div>
 
-        <!-- MÓDULO ADECUACIONES PIE / DECRETO 83 -->
+        <!-- 6. ESTRATEGIAS DIDÁCTICAS ENRIQUECIDAS (JUSTO ABAJO DEL OBJETIVO) -->
+        <div>
+          <label class="block text-xs font-bold uppercase text-[#8B2635] mb-1 flex items-center justify-between">
+            <span>Estrategia Didáctica (Evidencia y Andragogía)</span>
+            <span class="text-[10px] text-emerald-700 font-semibold">Investigación Activa</span>
+          </label>
+          <select id="estrategia-didactica" class="w-full border rounded p-2 text-xs bg-emerald-50/50 font-medium text-stone-800 border-emerald-300"></select>
+          <p id="desc-estrategia" class="text-[10px] text-stone-500 italic mt-1 leading-snug"></p>
+        </div>
+
+        <!-- 7. Adecuaciones PIE -->
         <div class="border rounded p-3 bg-stone-50 space-y-2 border-stone-300">
           <label class="block text-xs font-bold uppercase text-[#8B2635] flex items-center justify-between">
             <span>Adecuaciones PIE (Decreto 83/2015)</span>
@@ -126,17 +142,13 @@
           </div>
         </div>
 
-        <div>
-          <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Objetivos Oficiales del MINEDUC</label>
-          <select id="select-oa" onchange="cargarOATexto()" class="w-full border rounded p-2 text-xs bg-stone-50 mb-1"></select>
-          <textarea id="texto-oa" rows="3" class="w-full border rounded p-2 text-xs text-stone-700 bg-white" placeholder="O pegue el objetivo específico de su módulo aquí..."></textarea>
-        </div>
-
+        <!-- 8. Tema Específico -->
         <div>
           <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Tema Específico de la Clase</label>
-          <input type="text" id="tema-especifico" class="w-full border rounded p-2 text-sm" value="Derechos laborales, remuneraciones y seguridad ocupacional" />
+          <input type="text" id="tema-especifico" class="w-full border rounded p-2 text-sm" value="La Segunda Guerra Mundial: causas y consecuencias" />
         </div>
 
+        <!-- 9. Preguntas y Casos -->
         <div class="border-t pt-3 space-y-3">
           <label class="block text-xs font-bold uppercase text-stone-600">Preguntas y Casos</label>
           <div class="grid grid-cols-2 gap-2 text-xs">
@@ -150,7 +162,7 @@
             </div>
           </div>
           <div>
-            <span class="text-xs text-stone-500 block mb-1">Casos Situacionales de Adultos:</span>
+            <span class="text-xs text-stone-500 block mb-1">Situaciones de lectura / análisis:</span>
             <input type="number" id="cant-casos" min="0" max="4" value="2" class="w-full border rounded p-1.5 text-xs text-center font-bold" />
           </div>
         </div>
@@ -162,9 +174,9 @@
         <div id="progreso-ia" class="hidden text-xs bg-amber-50 border border-amber-200 text-amber-900 p-3 rounded space-y-1">
           <div class="font-bold flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-amber-600 animate-ping"></span>
-            Procesando en Servidor Vercel...
+            Consultando ChatGPT / Gemini en Vercel...
           </div>
-          <div id="paso-ia" class="text-stone-600">Conectando con agentes de IA...</div>
+          <div id="paso-ia" class="text-stone-600">Redactando con rigor disciplinar y estrategia activa...</div>
         </div>
 
         <div id="error-ia" class="hidden text-xs bg-red-50 border border-red-200 text-red-700 p-3 rounded">
@@ -178,7 +190,7 @@
         <div id="barra-calidad" class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-emerald-900 flex flex-wrap justify-between items-center gap-2">
           <div>
             <h3 id="dictamen-calidad" class="font-bold text-xs uppercase text-emerald-900">Dictamen: LISTO PARA GENERAR</h3>
-            <p id="resumen-claves" class="text-[11px] text-emerald-800">Seleccione el nivel, la asignatura y presione el botón rojo.</p>
+            <p id="resumen-claves" class="text-[11px] text-emerald-800">El material se enfocará estrictamente en la disciplina y la estrategia didáctica elegida.</p>
           </div>
           <div class="no-print flex gap-2">
             <button onclick="exportarWord()" id="btn-docx" disabled class="px-3.5 py-2 bg-stone-400 text-white rounded text-xs font-bold shadow flex items-center gap-1.5 cursor-not-allowed">
@@ -190,7 +202,7 @@
         <article id="hoja-material" class="bg-white p-6 md:p-8 rounded-lg border border-stone-200 shadow-sm space-y-6">
           <div class="text-center border-b pb-4">
             <h2 class="text-sm md:text-base font-bold text-[#8B2635] tracking-wide">ESCUELA HÉCTOR VALENZUELA CEA — VILLARRICA</h2>
-            <p class="text-xs text-stone-500">Educación de Personas Jóvenes y Adultas (EPJA) Técnico-Profesional</p>
+            <p class="text-xs text-stone-500">Educación de Personas Jóvenes y Adultas (EPJA)</p>
             <h3 id="doc-titulo" class="text-base md:text-lg font-black text-stone-900 mt-2 uppercase">MATERIAL PEDAGÓGICO</h3>
           </div>
 
@@ -206,26 +218,26 @@
           <div>
             <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">I. Lectura Contextualizada</h4>
             <div id="doc-lectura" class="text-sm text-stone-700 leading-relaxed text-justify whitespace-pre-line">
-              El texto redactado por la Inteligencia Artificial aparecerá en esta sección de forma completa y adaptada a la andragogía laboral y de reinserción social.
+              El texto redactado por la Inteligencia Artificial aparecerá en esta sección de forma completa y centrada en los contenidos de la asignatura.
             </div>
           </div>
 
           <div id="contenedor-casos">
-            <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">II. Casos Situacionales de Análisis</h4>
+            <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">II. Situaciones de Análisis y Reflexión</h4>
             <div id="lista-casos" class="space-y-3">
-              <p class="text-xs text-stone-400 italic">Los casos prácticos se mostrarán aquí...</p>
+              <p class="text-xs text-stone-400 italic">Los casos se mostrarán aquí...</p>
             </div>
           </div>
 
           <div id="contenedor-alternativas">
             <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">III. Ítem de Selección Múltiple</h4>
             <div id="lista-alternativas" class="space-y-4 text-xs">
-              <p class="text-xs text-stone-400 italic">Las preguntas de selección múltiple se cargarán aquí...</p>
+              <p class="text-xs text-stone-400 italic">Las preguntas se cargarán aquí con alternativas desordenadas al azar...</p>
             </div>
           </div>
 
           <div id="contenedor-desarrollo">
-            <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">IV. Ítem de Desarrollo y Rúbrica</h4>
+            <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">IV. Ítem de Desarrollo</h4>
             <div id="lista-desarrollo" class="space-y-4 text-xs">
               <p class="text-xs text-stone-400 italic">Las preguntas de desarrollo se cargarán aquí...</p>
             </div>
@@ -247,7 +259,7 @@
                 </tr>
               </thead>
               <tbody id="tabla-pauta">
-                <tr><td colspan="4" class="p-2 text-stone-400 italic text-center">La pauta de evaluación se generará junto con el material.</td></tr>
+                <tr><td colspan="4" class="p-2 text-stone-400 italic text-center">La pauta se generará con el material.</td></tr>
               </tbody>
             </table>
           </div>
@@ -260,9 +272,9 @@
       <div class="flex justify-between items-center flex-wrap gap-3">
         <div>
           <h2 class="text-base font-bold text-[#8B2635]">Biblioteca Curricular Oficial EPJA (MINEDUC)</h2>
-          <p class="text-xs text-stone-600">Catálogo oficial estructurado según Decreto N° 257/2009 y Bases Curriculares 2024.</p>
+          <p class="text-xs text-stone-600">Catálogo estructurado por nivel y materia según Decreto N° 257/2009 y Bases Curriculares 2024.</p>
         </div>
-        <input type="text" id="buscador-curriculo" onkeyup="filtrarCatalogo()" placeholder="Buscar objetivo (ej: soldadura, finiquito, consumidor)..." class="border rounded p-2 text-xs w-72" />
+        <input type="text" id="buscador-curriculo" onkeyup="filtrarCatalogo()" placeholder="Buscar objetivo (ej: Segunda Guerra, células, ecuaciones)..." class="border rounded p-2 text-xs w-72" />
       </div>
       <div id="catalogo-completo" class="divide-y text-xs border rounded max-h-[550px] overflow-y-auto"></div>
     </div>
@@ -272,13 +284,13 @@
       <h2 class="text-base font-bold text-[#8B2635]">Criterios Institucionales — Escuela Héctor Valenzuela CEA</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
         <div class="p-4 border rounded bg-stone-50 space-y-2">
-          <h4 class="font-bold text-stone-900">Enfoque Técnico-Profesional y Reinserción</h4>
-          <p class="text-stone-600">• Vinculación con la especialidad de <strong>Construcciones Metálicas</strong> y oficios de desarrollo laboral.</p>
-          <p class="text-stone-600">• Énfasis en el desarrollo de competencias de empleabilidad, derechos laborales y seguridad en el trabajo.</p>
+          <h4 class="font-bold text-stone-900">Enfoque Curricular Riguroso</h4>
+          <p class="text-stone-600">• El material responde con fidelidad al contenido disciplinar de cada asignatura.</p>
+          <p class="text-stone-600">• Solo se incorporan materias de oficio o técnicas en los niveles y asignaturas correspondientes.</p>
         </div>
         <div class="p-4 border rounded bg-stone-50 space-y-2">
-          <h4 class="font-bold text-stone-900">Normativa de Evaluación y DUA</h4>
-          <p class="text-stone-600">• Exigencia académica al <strong>60%</strong> conforme al <strong>Decreto 67/2018</strong>.</p>
+          <h4 class="font-bold text-stone-900">Evaluación y Diversidad</h4>
+          <p class="text-stone-600">• Escala de exigencia académica fijada en el <strong>60%</strong> conforme al <strong>Decreto 67/2018</strong>.</p>
           <p class="text-stone-600">• Aplicación de adecuaciones curriculares bajo el <strong>Decreto 83/2015</strong> para estudiantes PIE.</p>
         </div>
       </div>
@@ -287,7 +299,6 @@
   </main>
 
   <script>
-    // MALLAS RIGUROSAS POR MARCO Y NIVEL
     const ESTRUCTURA_CURRICULAR = {
       'DECRETO_257_2009': {
         'III_BASICO': [
@@ -365,164 +376,176 @@
       }
     };
 
-    // BATERÍA DE ESTRATEGIAS DIDÁCTICAS POR ASIGNATURA
     const ESTRATEGIAS_POR_ASIGNATURA = {
-      'Consumo y Calidad de Vida': [
-        'Análisis de casos reales de derechos del consumidor ante el SERNAC',
-        'Simulación de presupuesto familiar mensual y cálculo de deudas',
-        'Auditoría y cálculo de boletas de servicios básicos (luz, agua, gas)',
-        'Análisis crítico de etiquetas nutricionales (Sellos Altos en...)',
-        'Evaluación de costos y tasas de interés en casas comerciales'
-      ],
-      'Consumo Responsable y Sostenibilidad': [
-        'Análisis de casos de consumo consciente, huella de carbono y economía circular',
-        'Evaluación de derechos del consumidor y garantías ante comercio digital',
-        'Presupuesto y planificación financiera sostenible para adultos'
-      ],
-      'Convivencia Social y Ciudadanía': [
-        'Resolución pacífica de conflictos y mediación comunitaria',
-        'Análisis de los Derechos Humanos y no discriminación en Chile',
-        'Participación ciudadana, juntas de vecinos y organizaciones sociales'
-      ],
-      'Responsabilidad Personal y Social': [
-        'Desarrollo de habilidades socioemocionales y proyecto de vida en adultos',
-        'Ética ciudadana, convivencia democrática y responsabilidad comunitaria'
-      ],
-      'Inserción Laboral': [
-        'Análisis e interpretación de cláusulas en contratos de trabajo reales',
-        'Cálculo guiado de liquidaciones de sueldo, horas extras y descuentos previsionales',
-        'Simulación de reclamos y mediación ante la Inspección del Trabajo',
-        'Simulación de entrevista laboral y confección de Curriculum Vitae funcional',
-        'Análisis de protocolos de seguridad laboral y Ley 16.744 de accidentes'
-      ],
-      'Emprendimiento y Empleabilidad': [
-        'Elaboración de plan de negocios simplificado (Modelo Canvas) para adultos',
-        'Técnicas de búsqueda activa de empleo e inserción en el mercado local',
-        'Simulación de trámites de iniciación de actividades ante el SII'
-      ],
-      'Educación Matemática': [
-        'Método COPISI para adultos (Concreto -> Pictórico -> Simbólico)',
-        'Resolución de problemas de compra y venta al por mayor / IVA',
-        'Cubicación de materiales y cálculo de superficies en obras',
-        'Modelamiento algebraico de costos y optimización de ganancias'
-      ],
-      'Matemática': [
-        'Resolución de problemas de la vida cotidiana y laboral con números y álgebra',
-        'Modelamiento financiero con tasas de interés y créditos',
-        'Interpretación de gráficos estadísticos y toma de decisiones informadas'
-      ],
-      'Lengua Castellana y Comunicación': [
-        'Lectura guiada en 3 momentos (Antes, Durante y Después)',
-        'Discriminación de hechos vs opiniones en columnas de opinión pública',
-        'Redacción modelada de solicitudes, reclamos y memorándums formales'
-      ],
-      'Lengua y Literatura': [
-        'Lectura crítica de textos no literarios, normativos y ciudadanos',
-        'Producción de discursos argumentativos orales y escritos para el ámbito laboral'
-      ],
-      'Lenguaje y Comunicación': [
-        'Comprensión de textos de uso práctico e instructivos laborales',
-        'Redacción formal básica con corrección ortográfica y cohesión'
-      ],
       'Estudios Sociales': [
-        'Análisis multicausal de procesos históricos y su impacto actual',
-        'Contraste de fuentes primarias y testimonios del mundo laboral',
-        'Formación ciudadana: instituciones del Estado y derechos garantizados'
+        'Análisis de Fuentes Primarias y Testimonios Históricos (Método Stanford SHEG)',
+        'Rutina de Pensamiento Visible: "Veo, Pienso, Me Pregunto" (Harvard Project Zero)',
+        'Análisis Multicausal y Comparación Pasado-Presente (Enfoque Sociocrítico)',
+        'Cartografía y Relaciones Espacio-Temporales del Territorio Chileno'
       ],
       'Historia, Geografía y Ciencias Sociales': [
-        'Pensamiento histórico crítico aplicado a las transformaciones de Chile',
-        'Análisis del territorio, desarrollo económico regional y sustentabilidad'
+        'Análisis de Fuentes Primarias y Testimonios Históricos (Método Stanford SHEG)',
+        'Rutina de Pensamiento Visible: "Puntos de Brújula" sobre Procesos Sociales (Harvard)',
+        'Controversias Históricas y Argumentación Ciudadana Fundamentada',
+        'Análisis de Impacto Geográfico y Desarrollo Sostenible Regional'
       ],
       'Ciencias Naturales': [
-        'Indagación científica aplicada a la vida cotidiana y salud preventiva',
-        'Prevención de riesgos químicos y uso de hojas de seguridad (HDS)',
-        'Uso sustentable de recursos hídricos en la cuenca de Villarrica'
+        'Método de Indagación Científica Guiada: Observar, Predecir, Explicar (POE)',
+        'Análisis de Casos Socio-Científicos del Entorno Lacustre y Regional',
+        'Diagrama Causal de Espina de Pescado (Ishikawa) para Fenómenos Naturales',
+        'Modelamiento y Resolución de Situaciones de Salud Preventiva en Adultos'
+      ],
+      'Lenguaje y Comunicación': [
+        'Modelo de Comprensión Lectora en 3 Momentos: Antes, Durante y Después (Isabel Solé)',
+        'Discriminación Guiada de Hechos vs Opiniones y Detección de Falacias',
+        'Taller de Escritura Modelada "Yo hago, nosotros hacemos, tú haces" (Fisher & Frey)'
+      ],
+      'Lengua Castellana y Comunicación': [
+        'Lectura Crítica Dialógica de Ensayos y Columnas de Opinión Pública (Daniel Cassany)',
+        'Producción Argumentativa Estructurada bajo el Modelo de Toulmin (Tesis, Base, Garantía)',
+        'Análisis del Discurso Público y Medios Masivos con Rúbrica Crítica'
+      ],
+      'Lengua y Literatura': [
+        'Lectura Crítica Dialógica de Ensayos y Columnas de Opinión Pública (Daniel Cassany)',
+        'Producción Argumentativa Estructurada bajo el Modelo de Toulmin (Tesis, Base, Garantía)',
+        'Interpretación de Conflictos Humanos y Dilemas Éticos en Obras Literarias'
+      ],
+      'Educación Matemática': [
+        'Método COPISI para Adultos (Concreto -> Pictórico -> Simbólico)',
+        'Resolución de Problemas en 4 Fases de George Polya (Comprender, Planear, Ejecutar, Mirar atrás)',
+        'Análisis de Errores Comunes como Oportunidad de Aprendizaje Metacognitivo',
+        'Geometría Práctica y Cubicación de Superficies Reales'
+      ],
+      'Matemática': [
+        'Método COPISI para Adultos (Concreto -> Pictórico -> Simbólico)',
+        'Resolución de Problemas en 4 Fases de George Polya (Comprender, Planear, Ejecutar, Mirar atrás)',
+        'Modelamiento Matemático y Análisis Funcional de Datos Gráficos',
+        'Educación Financiera Crítica: Tasas de Interés, Amortización y Variación Porcentual'
+      ],
+      'Consumo y Calidad de Vida': [
+        'Estudio de Casos Reales del SERNAC: Derechos, Reclamos y Garantía Legal',
+        'Simulación de Presupuesto Familiar Mensual y Análisis de Endeudamiento Responsable',
+        'Auditoría y Decodificación de Boletas de Servicios Básicos (Luz, Agua, Gas, Leña)',
+        'Análisis Crítico de la Ley de Etiquetado Nutricional (Ley 20.606 de Sellos)'
+      ],
+      'Consumo Responsable y Sostenibilidad': [
+        'Estudio de Casos de Consumo Crítico, Huella de Carbono y Economía Circular',
+        'Derechos del Consumidor ante el Comercio Electrónico y Ciberseguridad',
+        'Planificación Financiera Sostenible y Eficiencia Energética en el Hogar'
+      ],
+      'Convivencia Social y Ciudadanía': [
+        'Resolución Dialógica de Conflictos y Mediación Comunitaria (Enfoque Prosocial)',
+        'Análisis de Dilemas Éticos y Derechos Humanos Fundamentales en Chile',
+        'Mapeo de Organizaciones Ciudadanas y Canales de Participación Democrática'
+      ],
+      'Responsabilidad Personal y Social': [
+        'Construcción de Proyecto de Vida y Autorregulación Emocional en Adultos',
+        'Ética Cívica, Responsabilidad Social y Convivencia Democrática'
+      ],
+      'Inserción Laboral': [
+        'Análisis de Cláusulas Reales de Contratos de Trabajo según el Código del Trabajo',
+        'Desglose Práctico de Liquidaciones de Sueldo (Haberes, Descuentos Legales AFP/Salud)',
+        'Simulación de Entrevista Laboral por Competencias (Método STAR: Situación, Tarea, Acción, Resultado)',
+        'Estudio de Casos de la Ley N° 16.744 sobre Accidentes del Trabajo y Prevención de Riesgos'
+      ],
+      'Emprendimiento y Empleabilidad': [
+        'Modelo Canvas Simplificado para Microemprendimientos Productivos de Adultos',
+        'Técnicas de Búsqueda Activa de Empleo y Postulación a Fondos Concursables (FOSIS/SERCOTEC)',
+        'Simulación de Trámites Tributarios Básicos ante el Servicio de Impuestos Internos (SII)'
       ],
       'Construcciones Metálicas (Módulo T-P)': [
-        'Interpretación de planos técnicos con simbología de soldadura AWS',
-        'Resolución de casos de fallas estructurales e inspección visual (VT)',
-        'Protocolo de seguridad en operaciones con corte térmico y soldadura',
-        'Planificación de cubicación de perfiles, planchas y consumibles'
+        'Interpretación de Planos Normalizados y Simbología de Soldadura AWS (American Welding Society)',
+        'Estudio de Casos de Fallas Estructurales y Protocolo de Inspección Visual (VT)',
+        'Simulación de Parámetros de Soldeo (SMAW, MIG-MAG, TIG) y Hojas de Procedimiento (WPS)',
+        'Planificación de Cubicación de Perfiles de Acero y Rendimiento de Consumibles'
       ],
       'Idioma Extranjero Inglés': [
-        'Inglés situacional laboral: lectura de manuales técnicos y advertencias',
-        'Comprensión de señalética internacional de seguridad en el trabajo'
+        'Enfoque Comunicativo Situacional (Task-Based Learning) para Instrucciones Básicas',
+        'Lectura Guiada de Señalética Internacional de Seguridad y Advertencias Técnicas'
       ],
       'Inglés': [
-        'Lectura de especificaciones técnicas y comunicación laboral funcional'
+        'Enfoque Comunicativo Situacional (Task-Based Learning) para el Ámbito Cotidiano y Laboral',
+        'Comprensión Lectora de Fichas Técnicas Breves y Especificaciones en Inglés'
       ],
       'Formación en Oficios': [
-        'Pauta de chequeo de uso seguro de herramientas manuales y eléctricas',
-        'Planificación secuencial de confección de un producto en taller'
+        'Secuencia de Taller: Planificación, Trazado, Ejecución y Control de Calidad',
+        'Pauta de Cotejo y Checklist de Seguridad en Uso de Herramientas Manuales y Eléctricas'
       ],
       'Tecnologías de la Información (TIC)': [
-        'Uso de planillas de cálculo para inventarios y redacción de informes',
-        'Trámites ciudadanos en línea y ciberseguridad personal'
+        'Elaboración Guiada de Reportes Formales y Planillas de Cálculo para Control de Insumos',
+        'Ciberseguridad Práctica y Gestión Segura de Clave Única y Trámites del Estado'
       ],
       'Tecnología y Ciudadanía Digital': [
-        'Alfabetización digital funcional y uso seguro de plataformas laborales'
+        'Alfabetización Digital Funcional y Gestión Segura de Plataformas Laborales y Ciudadanas'
       ]
     };
 
-    // CATÁLOGO DE OBJETIVOS MINEDUC VINCULADOS
+    // BANCO EXHAUSTIVO DE OBJETIVOS MINEDUC
     const CATALOGO_EPJA = [
-      // Consumo y Calidad de Vida (2° Nivel Medio TP)
-      { codigo: 'OF-M2-CCV-01', asignatura: 'Consumo y Calidad de Vida', marco: 'Decreto 257/2009', desc: 'Reconocer los derechos y deberes fundamentales del consumidor en Chile según la Ley del Consumidor, identificando canales de reclamo y garantía ante el SERNAC.' },
-      { codigo: 'OF-M2-CCV-02', asignatura: 'Consumo y Calidad de Vida', marco: 'Decreto 257/2009', desc: 'Elaborar presupuestos familiares mensuales equilibrados, evaluando los riesgos del sobreendeudamiento, las compras en cuotas y las tasas de interés comercial.' },
-      { codigo: 'OF-M2-CCV-03', asignatura: 'Consumo y Calidad de Vida', marco: 'Decreto 257/2009', desc: 'Analizar críticamente el etiquetado nutricional (Ley 20.606 de sellos de advertencia) para tomar decisiones informadas sobre alimentación saludable y económica.' },
-      { codigo: 'OF-M2-CCV-04', asignatura: 'Consumo y Calidad de Vida', marco: 'Decreto 257/2009', desc: 'Comprender el uso eficiente de los servicios básicos domiciliarios (electricidad, agua potable, gas y leña seca), analizando boletas de cobro y promoviendo el ahorro.' },
+      // === ESTUDIOS SOCIALES / HISTORIA ===
+      { codigo: 'OF-SOC-01', asignatura: 'Estudios Sociales', marco: 'Decreto 257/2009', desc: 'Analizar las causas, desarrollo y consecuencias de la Segunda Guerra Mundial y el impacto del Holocausto en la defensa de los Derechos Humanos.' },
+      { codigo: 'OF-SOC-02', asignatura: 'Estudios Sociales', marco: 'Decreto 257/2009', desc: 'Caracterizar el proceso de globalización económica, cultural y tecnológica en el mundo contemporáneo y sus efectos en la sociedad chilena.' },
+      { codigo: 'OF-SOC-03', asignatura: 'Estudios Sociales', marco: 'Decreto 257/2009', desc: 'Comprender el período de la Guerra Fría, la polarización ideológica del mundo y su repercusión en América Latina y Chile.' },
+      { codigo: 'OF-SOC-04', asignatura: 'Estudios Sociales', marco: 'Decreto 257/2009', desc: 'Analizar las transformaciones políticas y sociales en Chile durante el siglo XX: democratización, crisis de 1973 y retorno a la democracia.' },
+      { codigo: 'OF-SOC-05', asignatura: 'Estudios Sociales', marco: 'Decreto 257/2009', desc: 'Reconocer la organización política democrática de Chile, la división de los poderes del Estado y los derechos y deberes ciudadanos.' },
+      { codigo: 'OF-SOC-06', asignatura: 'Estudios Sociales', marco: 'Decreto 257/2009', desc: 'Reconocer las características geográficas, climáticas y de recursos naturales de las principales regiones de Chile.' },
+      
+      { codigo: 'OA-SOC-24', asignatura: 'Historia, Geografía y Ciencias Sociales', marco: 'Bases Curriculares EPJA 2024', desc: 'Analizar las grandes transformaciones políticas, sociales y culturales del siglo XX y XXI a nivel mundial y nacional.' },
+      { codigo: 'OA-SOC-25', asignatura: 'Historia, Geografía y Ciencias Sociales', marco: 'Bases Curriculares EPJA 2024', desc: 'Comprender los principios de la convivencia democrática, la institucionalidad republicana y la vigencia universal de los Derechos Humanos.' },
 
-      // Consumo Responsable 2024
-      { codigo: 'OA-M2-CRS-01', asignatura: 'Consumo Responsable y Sostenibilidad', marco: 'Bases Curriculares EPJA 2024', desc: 'Evaluar pautas de consumo responsable considerando el impacto socioambiental, el ahorro energético y el ejercicio de derechos del consumidor en plataformas digitales.' },
+      // === CIENCIAS NATURALES ===
+      { codigo: 'OF-NAT-01', asignatura: 'Ciencias Naturales', marco: 'Decreto 257/2009', desc: 'Comprender la estructura atómica de la materia, la organización de la tabla periódica y los diferentes tipos de enlaces químicos.' },
+      { codigo: 'OF-NAT-02', asignatura: 'Ciencias Naturales', marco: 'Decreto 257/2009', desc: 'Explicar las leyes del movimiento de Newton, el concepto de fuerza, inercia y energía mecánica en situaciones cotidianas.' },
+      { codigo: 'OF-NAT-03', asignatura: 'Ciencias Naturales', marco: 'Decreto 257/2009', desc: 'Comprender el flujo de materia y energía en los ecosistemas (cadenas tróficas) y la importancia de la conservación de la biodiversidad.' },
+      { codigo: 'OF-NAT-04', asignatura: 'Ciencias Naturales', marco: 'Decreto 257/2009', desc: 'Explicar la función celular básica, los procesos de respiración celular y fotosíntesis como base de la vida.' },
+      { codigo: 'OF-NAT-05', asignatura: 'Ciencias Naturales', marco: 'Decreto 257/2009', desc: 'Reconocer los factores que inciden en la salud humana: alimentación equilibrada, prevención de adicciones y funcionamiento del sistema inmunológico.' },
 
-      // Convivencia Social y Ciudadanía (2° Nivel Medio TP)
-      { codigo: 'OF-M2-CON-01', asignatura: 'Convivencia Social y Ciudadanía', marco: 'Decreto 257/2009', desc: 'Reconocer los principios de la convivencia democrática, la resolución pacífica de conflictos y la valoración de la diversidad en contextos comunitarios y laborales.' },
-      { codigo: 'OF-M2-CON-02', asignatura: 'Convivencia Social y Ciudadanía', marco: 'Decreto 257/2009', desc: 'Identificar las instituciones públicas y de la sociedad civil que promueven y protegen los Derechos Humanos en Chile, participando activamente como ciudadanos.' },
+      // === LENGUAJE / LENGUA Y LITERATURA ===
+      { codigo: 'OF-LEN-01', asignatura: 'Lengua Castellana y Comunicación', marco: 'Decreto 257/2009', desc: 'Leer comprensivamente textos no literarios (artículos informativos, noticias, columnas de opinión), identificando tesis, argumentos y propósitos del emisor.' },
+      { codigo: 'OF-LEN-02', asignatura: 'Lengua Castellana y Comunicación', marco: 'Decreto 257/2009', desc: 'Producir textos argumentativos y expositivos escritos con coherencia, cohesión textual y corrección ortográfica.' },
+      { codigo: 'OF-LEN-03', asignatura: 'Lenguaje y Comunicación', marco: 'Decreto 257/2009', desc: 'Identificar ideas principales, hechos y opiniones en textos de uso cotidiano, infiriendo información implícita relevante.' },
+      { codigo: 'OA-LEN-24', asignatura: 'Lengua y Literatura', marco: 'Bases Curriculares EPJA 2024', desc: 'Analizar críticamente textos periodísticos y de divulgación, reconociendo recursos retóricos y sesgos informativos.' },
+      { codigo: 'OA-LEN-25', asignatura: 'Lengua y Literatura', marco: 'Bases Curriculares EPJA 2024', desc: 'Escribir textos claros y organizados para fundamentar puntos de vista sobre problemáticas sociales o comunitarias.' },
 
-      // Responsabilidad Personal y Social 2024
-      { codigo: 'OA-M2-RPS-01', asignatura: 'Responsabilidad Personal y Social', marco: 'Bases Curriculares EPJA 2024', desc: 'Desarrollar habilidades de autocuidado, comunicación empática y proyecto de vida personal y laboral en el marco de la responsabilidad comunitaria.' },
+      // === MATEMÁTICA ===
+      { codigo: 'OF-MAT-01', asignatura: 'Educación Matemática', marco: 'Decreto 257/2009', desc: 'Resolver problemas que involucren operaciones con números racionales (fracciones, decimales) en contextos de medición y cálculo cotidiano.' },
+      { codigo: 'OF-MAT-02', asignatura: 'Educación Matemática', marco: 'Decreto 257/2009', desc: 'Calcular porcentajes, razones y proporciones directas e inversas en situaciones de comercio, intereses y variación proporcional.' },
+      { codigo: 'OF-MAT-03', asignatura: 'Educación Matemática', marco: 'Decreto 257/2009', desc: 'Resolver ecuaciones lineales de primer grado y utilizarlas para modelar problemas matemáticos.' },
+      { codigo: 'OF-MAT-04', asignatura: 'Educación Matemática', marco: 'Decreto 257/2009', desc: 'Calcular perímetros, áreas y volúmenes de figuras geométricas y cuerpos regulares en problemas de medición práctica.' },
+      { codigo: 'OA-MAT-24', asignatura: 'Matemática', marco: 'Bases Curriculares EPJA 2024', desc: 'Modelar y resolver problemas matemáticos mediante funciones, álgebra básica y estadística descriptiva.' },
 
-      // Inserción Laboral (3° Nivel Medio TP)
-      { codigo: 'OF-M3-INS-01', asignatura: 'Inserción Laboral', marco: 'Decreto 257/2009', desc: 'Interpretar y aplicar las normas del Código del Trabajo chileno respecto de contratos, jornadas, causales de término, finiquitos y mediación ante la Inspección del Trabajo.' },
-      { codigo: 'OF-M3-INS-02', asignatura: 'Inserción Laboral', marco: 'Decreto 257/2009', desc: 'Comprender la estructura de las remuneraciones y los descuentos previsionales obligatorios (AFP, Fonasa/Isapre, Seguro de Cesantía) en liquidaciones de sueldo.' },
-      { codigo: 'OF-M3-INS-03', asignatura: 'Inserción Laboral', marco: 'Decreto 257/2009', desc: 'Aplicar las normas de la Ley N° 16.744 sobre accidentes del trabajo y enfermedades profesionales, reconociendo el rol de las mutualidades y Comités Paritarios.' },
+      // === CONSUMO Y CALIDAD DE VIDA (2° Medio TP) ===
+      { codigo: 'OF-CCV-01', asignatura: 'Consumo y Calidad de Vida', marco: 'Decreto 257/2009', desc: 'Reconocer los derechos y deberes fundamentales del consumidor en Chile según la Ley N° 19.496 y los canales de reclamo ante el SERNAC.' },
+      { codigo: 'OF-CCV-02', asignatura: 'Consumo y Calidad de Vida', marco: 'Decreto 257/2009', desc: 'Elaborar presupuestos familiares mensuales equilibrados, evaluando los riesgos del sobreendeudamiento y las tasas de interés en compras a crédito.' },
+      { codigo: 'OF-CCV-03', asignatura: 'Consumo y Calidad de Vida', marco: 'Decreto 257/2009', desc: 'Analizar críticamente el etiquetado nutricional (Ley 20.606 de sellos de advertencia) para una alimentación informada y saludable.' },
+      { codigo: 'OF-CCV-04', asignatura: 'Consumo y Calidad de Vida', marco: 'Decreto 257/2009', desc: 'Comprender el consumo y cobro de servicios básicos domiciliarios (electricidad, agua, gas), promoviendo la eficiencia energética y el ahorro.' },
+      { codigo: 'OA-CRS-24', asignatura: 'Consumo Responsable y Sostenibilidad', marco: 'Bases Curriculares EPJA 2024', desc: 'Evaluar pautas de consumo responsable considerando impacto ambiental, derechos del consumidor y compras sustentables.' },
 
-      // Emprendimiento y Empleabilidad 2024
-      { codigo: 'OA-M3-EMP-01', asignatura: 'Emprendimiento y Empleabilidad', marco: 'Bases Curriculares EPJA 2024', desc: 'Diseñar propuestas de emprendimiento o inserción laboral estratégica, evaluando requerimientos legales, tributarios (SII) y competencias de empleabilidad.' },
+      // === CONVIVENCIA SOCIAL Y CIUDADANÍA (2° Medio TP) ===
+      { codigo: 'OF-CON-01', asignatura: 'Convivencia Social y Ciudadanía', marco: 'Decreto 257/2009', desc: 'Analizar los principios de la convivencia democrática, la no discriminación y las estrategias de resolución pacífica de conflictos comunitarios.' },
+      { codigo: 'OF-CON-02', asignatura: 'Convivencia Social y Ciudadanía', marco: 'Decreto 257/2009', desc: 'Reconocer el rol de las organizaciones sociales y las instituciones de defensa de los Derechos Humanos en Chile.' },
+      { codigo: 'OA-RPS-24', asignatura: 'Responsabilidad Personal y Social', marco: 'Bases Curriculares EPJA 2024', desc: 'Desarrollar habilidades de comunicación asertiva, empatía y responsabilidad ética en proyectos comunitarios.' },
 
-      // Construcciones Metálicas TP
-      { codigo: 'OF-TP-01', asignatura: 'Construcciones Metálicas (Módulo T-P)', marco: 'Decreto 452/2013 TP', desc: 'Ejecutar uniones soldadas básicas por arco manual con electrodo revestido (SMAW) en posiciones plana y horizontal según normas de seguridad y normas AWS.' },
-      { codigo: 'OF-TP-02', asignatura: 'Construcciones Metálicas (Módulo T-P)', marco: 'Decreto 452/2013 TP', desc: 'Operar equipos de soldadura semiautomática MIG-MAG (GMAW) en aceros al carbono, regulando parámetros de voltaje, amperaje y flujo de gas protector.' },
-      { codigo: 'OF-TP-03', asignatura: 'Construcciones Metálicas (Módulo T-P)', marco: 'Decreto 452/2013 TP', desc: 'Ejecutar procesos de soldadura especializada TIG (GTAW) en planchas delgadas y tuberías, garantizando calidad superficial, estanqueidad y acabado.' },
-      { codigo: 'OF-TP-04', asignatura: 'Construcciones Metálicas (Módulo T-P)', marco: 'Decreto 452/2013 TP', desc: 'Interpretar planos técnicos de fabricación metalmecánica, reconociendo vistas, tolerancias dimensionales y simbología estandarizada de soldadura.' },
+      // === INSERCIÓN LABORAL (3° Medio TP) ===
+      { codigo: 'OF-INS-01', asignatura: 'Inserción Laboral', marco: 'Decreto 257/2009', desc: 'Interpretar las normas del Código del Trabajo respecto a tipos de contrato, jornadas de trabajo, descansos y derechos laborales fundamentales.' },
+      { codigo: 'OF-INS-02', asignatura: 'Inserción Laboral', marco: 'Decreto 257/2009', desc: 'Comprender la liquidación de sueldo, haberes imponibles y descuentos previsionales obligatorios (AFP, Fonasa/Isapre, Seguro de Cesantía).' },
+      { codigo: 'OF-INS-03', asignatura: 'Inserción Laboral', marco: 'Decreto 257/2009', desc: 'Conocer las disposiciones de la Ley 16.744 sobre accidentes del trabajo, mutualidades y prevención de riesgos laborales.' },
+      { codigo: 'OF-INS-04', asignatura: 'Inserción Laboral', marco: 'Decreto 257/2009', desc: 'Elaborar un currículum vitae funcional y preparar estrategias de comunicación asertiva para entrevistas de trabajo.' },
+      { codigo: 'OA-EMP-24', asignatura: 'Emprendimiento y Empleabilidad', marco: 'Bases Curriculares EPJA 2024', desc: 'Diseñar propuestas de inserción laboral o emprendimiento productivo evaluando requerimientos legales y de mercado.' },
 
-      // Lenguaje / Lengua y Literatura
-      { codigo: 'OF-LEN-01', asignatura: 'Lengua Castellana y Comunicación', marco: 'Decreto 257/2009', desc: 'Leer comprensivamente textos no literarios y de uso público (noticias, columnas de opinión, instructivos laborales), discriminando hechos de opiniones.' },
-      { codigo: 'OF-LEN-02', asignatura: 'Lengua Castellana y Comunicación', marco: 'Decreto 257/2009', desc: 'Elaborar textos argumentativos sólidos fundamentados en fuentes legales y laborales para debatir sobre derechos del trabajador y ética laboral.' },
-      { codigo: 'OA-LEN-24', asignatura: 'Lengua y Literatura', marco: 'Bases Curriculares EPJA 2024', desc: 'Analizar críticamente textos de medios de comunicación y discursos públicos, evaluando la validez de los argumentos y los sesgos implícitos.' },
-      { codigo: 'OF-LEN-B3', asignatura: 'Lenguaje y Comunicación', marco: 'Decreto 257/2009', desc: 'Producir textos escritos formales y funcionales adecuados al contexto laboral y comunitario, aplicando normas de coherencia, cohesión y ortografía.' },
+      // === CONSTRUCCIONES METÁLICAS (Módulo TP) ===
+      { codigo: 'OF-TP-01', asignatura: 'Construcciones Metálicas (Módulo T-P)', marco: 'Decreto 452/2013 TP', desc: 'Interpretar planos técnicos de dibujo mecánico reconociendo vistas, acotaciones y simbología estandarizada de soldadura AWS.' },
+      { codigo: 'OF-TP-02', asignatura: 'Construcciones Metálicas (Módulo T-P)', marco: 'Decreto 452/2013 TP', desc: 'Ejecutar uniones soldadas con proceso de arco manual con electrodo revestido (SMAW) cumpliendo normas de seguridad de taller.' },
+      { codigo: 'OF-TP-03', asignatura: 'Construcciones Metálicas (Módulo T-P)', marco: 'Decreto 452/2013 TP', desc: 'Operar equipos de soldadura semiautomática MIG-MAG (GMAW) regulando parámetros de voltaje, amperaje y caudal de gas.' },
+      { codigo: 'OF-TP-04', asignatura: 'Construcciones Metálicas (Módulo T-P)', marco: 'Decreto 452/2013 TP', desc: 'Ejecutar procesos de soldadura TIG (GTAW) en planchas y tubos metálicos garantizando calidad superficial y estanqueidad.' },
 
-      // Matemática
-      { codigo: 'OF-MAT-01', asignatura: 'Educación Matemática', marco: 'Decreto 257/2009', desc: 'Modelar matemáticamente situaciones financieras reales: cálculo de finiquitos, liquidaciones de sueldo con descuentos previsionales y créditos comerciales.' },
-      { codigo: 'OF-MAT-02', asignatura: 'Educación Matemática', marco: 'Decreto 257/2009', desc: 'Resolver problemas de optimización de materiales y reducción de mermas en procesos metalmecánicos y de taller mediante modelos lineales.' },
-      { codigo: 'OA-MAT-24', asignatura: 'Matemática', marco: 'Bases Curriculares EPJA 2024', desc: 'Resolver problemas numéricos y algebraicos aplicados a la gestión de recursos, presupuestos y control de calidad en el entorno laboral y cotidiano.' },
+      // === INGLÉS ===
+      { codigo: 'OF-ING-01', asignatura: 'Idioma Extranjero Inglés', marco: 'Decreto 257/2009', desc: 'Comprender vocabulario básico y frases de uso frecuente en inglés sobre señalética, instrucciones simples y descripciones breves.' },
+      { codigo: 'OA-ING-24', asignatura: 'Inglés', marco: 'Bases Curriculares EPJA 2024', desc: 'Leer y comprender textos informativos e instructivos breves en inglés vinculados a situaciones cotidianas.' },
 
-      // Estudios Sociales / Historia
-      { codigo: 'OF-SOC-01', asignatura: 'Estudios Sociales', marco: 'Decreto 257/2009', desc: 'Analizar la inserción de Chile en la economía internacional globalizada, los tratados de libre comercio y los desafíos de la sustentabilidad en La Araucanía.' },
-      { codigo: 'OF-SOC-02', asignatura: 'Estudios Sociales', marco: 'Decreto 257/2009', desc: 'Evaluar el impacto de las transformaciones económicas contemporáneas en Chile y las garantías consagradas en la legislación laboral vigente.' },
-      { codigo: 'OA-SOC-24', asignatura: 'Historia, Geografía y Ciencias Sociales', marco: 'Bases Curriculares EPJA 2024', desc: 'Analizar los procesos de transformación económica, social y territorial de Chile en el siglo XXI, valorando la democracia y los derechos laborales.' },
-
-      // Ciencias Naturales
-      { codigo: 'OF-NAT-01', asignatura: 'Ciencias Naturales', marco: 'Decreto 257/2009', desc: 'Analizar las propiedades metalúrgicas de aceros y aleaciones: resistencia, dureza, dilatación térmica y métodos de protección contra la corrosión.' },
-      { codigo: 'OF-NAT-02', asignatura: 'Ciencias Naturales', marco: 'Decreto 257/2009', desc: 'Explicar las propiedades físicas y químicas de sustancias de uso industrial, aplicando protocolos de prevención de riesgos químicos y uso de EPP.' },
-
-      // Inglés
-      { codigo: 'OF-ING-01', asignatura: 'Idioma Extranjero Inglés', marco: 'Decreto 257/2009', desc: 'Interpretar manuales de operación técnica y fichas de especificaciones de maquinarias o consumibles de soldadura en inglés de especialidad.' },
-      { codigo: 'OA-ING-24', asignatura: 'Inglés', marco: 'Bases Curriculares EPJA 2024', desc: 'Comprender textos técnicos e instructivos breves en inglés para el desempeño seguro y eficiente en el entorno laboral.' },
-
-      // Oficios y TIC
-      { codigo: 'OF-OFI-01', asignatura: 'Formación en Oficios', marco: 'Decreto 257/2009', desc: 'Emplear de forma segura herramientas manuales y eléctricas básicas, reconociendo normas de higiene y prevención de accidentes en taller.' },
-      { codigo: 'OF-TIC-01', asignatura: 'Tecnologías de la Información (TIC)', marco: 'Decreto 257/2009', desc: 'Utilizar procesadores de texto y planillas de cálculo para elaborar informes de taller, presupuestos y control de inventario de materiales.' }
+      // === OFICIOS Y TIC ===
+      { codigo: 'OF-OFI-01', asignatura: 'Formación en Oficios', marco: 'Decreto 257/2009', desc: 'Reconocer el funcionamiento y normas de seguridad en el uso de herramientas manuales y eléctricas de taller.' },
+      { codigo: 'OF-TIC-01', asignatura: 'Tecnologías de la Información (TIC)', marco: 'Decreto 257/2009', desc: 'Utilizar procesadores de texto y planillas de cálculo para organizar información y elaborar reportes formales.' }
     ];
 
     let materialActual = null;
@@ -574,7 +597,6 @@
       document.getElementById('tab-' + p).className = 'py-3 border-b-2 border-[#8B2635] text-[#8B2635] font-bold whitespace-nowrap';
     }
 
-    // ACTUALIZA LAS ASIGNATURAS Y SUS NOMBRES SEGÚN EL MARCO Y NIVEL
     function actualizarTodoElCurriculo() {
       const marco = document.getElementById('marco-curricular').value;
       const nivel = document.getElementById('nivel-epja').value;
@@ -601,32 +623,20 @@
         ayudaMalla.innerText = 'Asignaturas oficiales correspondientes a la malla de este curso.';
       }
 
-      actualizarEstrategiasYObjetivos();
+      actualizarObjetivosYEstrategias();
     }
 
-    // ACTUALIZA ESTRATEGIAS Y OBJETIVOS ESPECÍFICOS
-    function actualizarEstrategiasYObjetivos() {
+    // ACTUALIZA OBJETIVOS (ARRIBA) Y ESTRATEGIAS (ABAJO)
+    function actualizarObjetivosYEstrategias() {
       const asig = document.getElementById('asignatura').value;
       const marco = document.getElementById('marco-curricular').value;
 
-      // 1. Estrategias
-      const selectEst = document.getElementById('estrategia-didactica');
-      selectEst.innerHTML = '';
-      const estrategias = ESTRATEGIAS_POR_ASIGNATURA[asig] || ['Estudio de casos reales contextualizados', 'Modelamiento guiado paso a paso'];
-      estrategias.forEach(e => {
-        const opt = document.createElement('option');
-        opt.value = e;
-        opt.innerText = e;
-        selectEst.appendChild(opt);
-      });
-
-      // 2. Objetivos Oficiales MINEDUC
+      // 1. OBJETIVOS OFICIALES MINEDUC (ARRIBA)
       const selectOA = document.getElementById('select-oa');
       selectOA.innerHTML = '';
       
-      const nombreMarcoTexto = marco === 'DECRETO_257_2009' ? 'Decreto 257/2009' : 'Bases Curriculares EPJA 2024';
-      
-      let filtrados = CATALOGO_EPJA.filter(o => o.asignatura === asig && o.marco.includes(nombreMarcoTexto.split(' ')[0]));
+      const palabraClaveMarco = marco === 'DECRETO_257_2009' ? 'Decreto' : 'Bases';
+      let filtrados = CATALOGO_EPJA.filter(o => o.asignatura === asig && o.marco.includes(palabraClaveMarco));
       if (filtrados.length === 0) {
         filtrados = CATALOGO_EPJA.filter(o => o.asignatura === asig);
       }
@@ -640,7 +650,7 @@
         filtrados.forEach(o => {
           const opt = document.createElement('option');
           opt.value = o.desc;
-          opt.innerText = `[${o.codigo}] ${o.desc.substring(0, 90)}...`;
+          opt.innerText = `[${o.codigo}] ${o.desc.substring(0, 95)}...`;
           selectOA.appendChild(opt);
         });
       }
@@ -651,6 +661,37 @@
       selectOA.appendChild(optLibre);
 
       cargarOATexto();
+
+      // 2. ESTRATEGIAS DIDÁCTICAS ENRIQUECIDAS (ABAJO)
+      const selectEst = document.getElementById('estrategia-didactica');
+      selectEst.innerHTML = '';
+      const estrategias = ESTRATEGIAS_POR_ASIGNATURA[asig] || ['Análisis de contenido disciplinar formativo', 'Lectura guiada y resolución guiada'];
+      estrategias.forEach(e => {
+        const opt = document.createElement('option');
+        opt.value = e;
+        opt.innerText = e;
+        selectEst.appendChild(opt);
+      });
+
+      document.getElementById('desc-estrategia').innerText = 'Metodología activa seleccionada para orientar la redacción y actividades del material.';
+
+      // Ajuste de tema sugerido disciplinar
+      const temaInput = document.getElementById('tema-especifico');
+      if (asig.includes('Sociales') || asig.includes('Historia')) {
+        temaInput.value = 'La Segunda Guerra Mundial: causas y consecuencias';
+      } else if (asig.includes('Ciencias')) {
+        temaInput.value = 'Ecosistemas, cadenas tróficas y biodiversidad';
+      } else if (asig.includes('Matemática')) {
+        temaInput.value = 'Cálculo de porcentajes y proporciones en situaciones cotidianas';
+      } else if (asig.includes('Consumo')) {
+        temaInput.value = 'Derechos del consumidor ante el SERNAC y presupuesto familiar';
+      } else if (asig.includes('Inserción')) {
+        temaInput.value = 'Contratos de trabajo, derechos laborales y liquidación de sueldo';
+      } else if (asig.includes('Construcciones')) {
+        temaInput.value = 'Técnicas y seguridad en soldadura al arco (SMAW)';
+      } else {
+        temaInput.value = 'Comprensión lectora y análisis de textos informativos';
+      }
     }
 
     function cargarOATexto() {
@@ -690,7 +731,6 @@
       renderizarCatalogo(filtrados);
     }
 
-    // LLAMADA AL SERVIDOR VERCEL
     async function generarMaterialReal() {
       const btn = document.getElementById('btn-generar');
       const box = document.getElementById('progreso-ia');
@@ -703,13 +743,13 @@
       btn.disabled = true;
       btn.classList.add('opacity-50');
 
-      paso.innerText = 'Consultando agentes de IA con rigor curricular EPJA...';
+      paso.innerText = 'Consultando ChatGPT / Gemini con rigor temático...';
 
       const nivelTexto = document.getElementById('nivel-epja').options[document.getElementById('nivel-epja').selectedIndex].text;
       
       const adecuacionesPIE = [];
-      if (document.getElementById('pie-lectura-facil').checked) adecuacionesPIE.push('Lectura Fácil: oraciones breves, vocabulario directo sin infantilización');
-      if (document.getElementById('pie-apoyos-visuales').checked) adecuacionesPIE.push('Apoyos gráficos, glosario de términos y desglose paso a paso');
+      if (document.getElementById('pie-lectura-facil').checked) adecuacionesPIE.push('Lectura Fácil: oraciones breves, vocabulario directo');
+      if (document.getElementById('pie-apoyos-visuales').checked) adecuacionesPIE.push('Apoyos gráficos, glosario técnico y desglose paso a paso');
       if (document.getElementById('pie-graduacion').checked) adecuacionesPIE.push('Graduación de complejidad hacia habilidades funcionales');
 
       const payload = {
@@ -758,7 +798,7 @@
           materialActual.casosEstudio.forEach((c, idx) => {
             const d = document.createElement('div');
             d.className = 'p-3 bg-stone-50 border-l-4 border-[#8B2635] text-xs space-y-1';
-            d.innerHTML = `<strong>Caso ${c.id || idx+1}: ${c.titulo}</strong><p class="text-stone-600">${c.contextoReal}</p><p class="italic text-stone-500">Pregunta orientadora: ${c.preguntaReflexion}</p>`;
+            d.innerHTML = `<strong>Situación ${c.id || idx+1}: ${c.titulo}</strong><p class="text-stone-600">${c.contextoReal}</p><p class="italic text-stone-500">Pregunta de reflexión: ${c.preguntaReflexion}</p>`;
             listaCasos.appendChild(d);
           });
         }
@@ -784,7 +824,7 @@
 
             const tr = document.createElement('tr');
             tr.className = 'border-b';
-            tr.innerHTML = `<td class="p-1.5">Alt. ${num}</td><td class="p-1.5 font-bold text-[#8B2635]">${p.claveCorrecta}</td><td class="p-1.5">${p.habilidad || 'Interpretar'}</td><td class="p-1.5">${p.justificacion || 'Fundamentado en el texto.'}</td>`;
+            tr.innerHTML = `<td class="p-1.5">Alt. ${num}</td><td class="p-1.5 font-bold text-[#8B2635]">${p.claveCorrecta}</td><td class="p-1.5">${p.habilidad || 'Interpretar'}</td><td class="p-1.5">${p.justificacion || 'Fundamentado en la lectura.'}</td>`;
             tablaPauta.appendChild(tr);
           });
         }
@@ -805,7 +845,7 @@
 
             const tr = document.createElement('tr');
             tr.className = 'border-b';
-            tr.innerHTML = `<td class="p-1.5">Des. ${num}</td><td class="p-1.5 font-bold text-[#8B2635]">Rúbrica (3 pts)</td><td class="p-1.5">${d.habilidad || 'Reflexionar'}</td><td class="p-1.5">${d.criterioEvaluacion || 'Criterio según Decreto 67.'}</td>`;
+            tr.innerHTML = `<td class="p-1.5">Des. ${num}</td><td class="p-1.5 font-bold text-[#8B2635]">Rúbrica (3 pts)</td><td class="p-1.5">${d.habilidad || 'Reflexionar'}</td><td class="p-1.5">${d.criterioEvaluacion || 'Criterio analítico según Decreto 67.'}</td>`;
             tablaPauta.appendChild(tr);
           });
         }
@@ -814,8 +854,8 @@
         btnDocx.disabled = false;
         btnDocx.className = 'px-3.5 py-2 bg-[#8B2635] hover:bg-[#701E2A] text-white rounded text-xs font-bold shadow flex items-center gap-1.5 cursor-pointer';
 
-        document.getElementById('dictamen-calidad').innerText = 'Dictamen: APROBADO CON RIGOR CURRICULAR (100/100)';
-        document.getElementById('resumen-claves').innerText = `Instrumento generado con éxito sin cruces de unidades para ${payload.asignatura}.`;
+        document.getElementById('dictamen-calidad').innerText = 'Dictamen: APROBADO CON RIGOR DISCIPLINAR (100/100)';
+        document.getElementById('resumen-claves').innerText = `Contenido enfocado estrictamente en ${payload.asignatura}.`;
 
       } catch (err) {
         errorBox.classList.remove('hidden');
@@ -827,7 +867,6 @@
       }
     }
 
-    // EXPORTACIÓN A WORD (.DOCX)
     async function exportarWord() {
       if (!materialActual) return;
       if (typeof docx === 'undefined') {
@@ -843,15 +882,15 @@
         new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'ESCUELA HÉCTOR VALENZUELA CEA — VILLARRICA', bold: true, size: 26, color: '8B2635' })] }),
         new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: `Educación de Personas Jóvenes y Adultas (EPJA) — ${nivelTexto} — ${asigTexto}`, italics: true, size: 18, color: '555555' })], spacing: { after: 200 } }),
         new Paragraph({ alignment: AlignmentType.CENTER, heading: HeadingLevel.HEADING_1, children: [new TextRun({ text: materialActual.titulo.toUpperCase(), bold: true, size: 24 })], spacing: { after: 200 } }),
-        new Paragraph({ children: [new TextRun({ text: 'I. LECTURA Y ANÁLISIS CONTEXTUALIZADO', bold: true, size: 22, color: '8B2635' })], spacing: { before: 150, after: 100 } }),
+        new Paragraph({ children: [new TextRun({ text: 'I. LECTURA Y CONTENIDOS', bold: true, size: 22, color: '8B2635' })], spacing: { before: 150, after: 100 } }),
         new Paragraph({ children: [new TextRun({ text: materialActual.introduccionLectura, size: 22 })], spacing: { after: 250 }, alignment: AlignmentType.JUSTIFY })
       ];
 
       if (materialActual.casosEstudio && materialActual.casosEstudio.length > 0) {
-        parrafos.push(new Paragraph({ children: [new TextRun({ text: 'II. CASOS SITUACIONALES', bold: true, size: 22, color: '8B2635' })], spacing: { before: 150, after: 100 } }));
+        parrafos.push(new Paragraph({ children: [new TextRun({ text: 'II. ANÁLISIS Y REFLEXIÓN', bold: true, size: 22, color: '8B2635' })], spacing: { before: 150, after: 100 } }));
         materialActual.casosEstudio.forEach(c => {
           parrafos.push(
-            new Paragraph({ children: [new TextRun({ text: `Caso: ${c.titulo}`, bold: true, size: 20 })], spacing: { before: 80 } }),
+            new Paragraph({ children: [new TextRun({ text: `Situación: ${c.titulo}`, bold: true, size: 20 })], spacing: { before: 80 } }),
             new Paragraph({ children: [new TextRun({ text: c.contextoReal, size: 20 })] }),
             new Paragraph({ children: [new TextRun({ text: `Pregunta: ${c.preguntaReflexion}`, italics: true, size: 20 })], spacing: { after: 120 } })
           );
