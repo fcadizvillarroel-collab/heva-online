@@ -1,7 +1,8 @@
-// api/generate.js — Motor Multi-IA para HEVA Online
+// api/generate.js — Formato Universal Compatible con Vercel
 
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Credentials', true);
+module.exports = async function handler(req, res) {
+  // Cabeceras CORS
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -30,32 +31,31 @@ export default async function handler(req, res) {
   const GEMINI_API_KEY = (process.env.GEMINI_API_KEY || '').trim();
 
   if (!GROQ_API_KEY && !GEMINI_API_KEY) {
-    return res.status(500).json({
-      error: 'Claves no encontradas en Vercel',
-      detalle: 'No se detectó GROQ_API_KEY ni GEMINI_API_KEY en las Environment Variables de Vercel.'
+    return res.status(400).json({
+      error: 'Claves no detectadas',
+      detalle: 'Debes agregar GROQ_API_KEY o GEMINI_API_KEY en las Environment Variables de Vercel y hacer Redeploy.'
     });
   }
 
   try {
-    // AGENTE 1: PLANIFICADOR
+    // 1. PLANIFICADOR ANDRAGÓGICO
     const promptPlan = `
-Eres un Diseñador Curricular especialista en EPJA Chile (Escuela Héctor Valenzuela CEA, Villarrica).
-Genera un plan de trabajo andragógico para:
+Eres Diseñador Curricular de EPJA Chile (Escuela Héctor Valenzuela CEA de Villarrica).
+Diseña un plan breve para:
 Asignatura: ${asignatura} | Nivel: ${nivel} | Tema: ${temaEspecifico} | Objetivo: ${objetivoAprendizaje}
-Cantidad alternativas: ${cantAlternativas} | Cantidad desarrollo: ${cantDesarrollo} | Casos: ${cantCasos}
+Alternativas: ${cantAlternativas} | Desarrollo: ${cantDesarrollo} | Casos: ${cantCasos}
 
-Responde ÚNICAMENTE un JSON con esta estructura exacta:
+Responde ÚNICAMENTE un JSON con:
 {
   "enfoque": "andragogía adultos",
   "subtemasPermitidos": ["subtema 1", "subtema 2"],
-  "subtemasProhibidos": ["anacronismos o temas de otras unidades"],
-  "distribucionClaves": ["A", "B", "C", "D"]
+  "subtemasProhibidos": ["anacronismos de otras unidades"]
 }
 `;
 
     const plan = await ejecutarLlamadaIA(promptPlan, GROQ_API_KEY, GEMINI_API_KEY);
 
-    // AGENTE 2: REDACTOR PEDAGÓGICO
+    // 2. REDACTOR PEDAGÓGICO
     const promptRedactor = `
 Eres un profesor de EPJA en la Escuela Héctor Valenzuela CEA de Villarrica, Chile.
 Redacta el material pedagógico completo para adultos trabajadores.
@@ -66,7 +66,7 @@ Requisitos:
 - Exactamente ${cantDesarrollo} preguntas de desarrollo con rúbrica según Decreto 67.
 - ${cantCasos} casos reales cotidianos o laborales de adultos.
 
-Responde ÚNICAMENTE un JSON con esta estructura exacta:
+Responde ÚNICAMENTE un JSON con esta estructura:
 {
   "titulo": "Título profesional del material",
   "introduccionLectura": "Texto de lectura contextualizada completo (mínimo 280 palabras)",
@@ -107,19 +107,19 @@ Responde ÚNICAMENTE un JSON con esta estructura exacta:
     });
 
   } catch (error) {
-    console.error('Error detallado de IA:', error);
+    console.error('Error en proceso:', error);
     return res.status(500).json({
-      error: 'Error al consultar la IA',
+      error: 'Error de IA',
       detalle: error.message
     });
   }
-}
+};
 
-// Función con diagnóstico transparente de errores
+// Función de llamada a Groq y Gemini
 async function ejecutarLlamadaIA(prompt, groqKey, geminiKey) {
   let errores = [];
 
-  // 1. Probar Groq si está configurado
+  // Intentar con Groq
   if (groqKey) {
     try {
       const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -131,7 +131,7 @@ async function ejecutarLlamadaIA(prompt, groqKey, geminiKey) {
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
           messages: [
-            { role: 'system', content: 'Responde ÚNICAMENTE con código JSON válido parseable, sin bloques markdown.' },
+            { role: 'system', content: 'Responde ÚNICAMENTE con código JSON válido sin texto adicional.' },
             { role: 'user', content: prompt }
           ],
           response_format: { type: 'json_object' },
@@ -141,17 +141,16 @@ async function ejecutarLlamadaIA(prompt, groqKey, geminiKey) {
 
       const data = await resp.json();
       if (!resp.ok) {
-        errores.push(`Groq falló (${resp.status}): ${data.error?.message || 'Error de clave o cuota'}`);
+        errores.push(`Groq: ${data.error?.message || resp.statusText}`);
       } else {
-        const contenido = data.choices[0]?.message?.content;
-        return JSON.parse(contenido);
+        return JSON.parse(data.choices[0]?.message?.content);
       }
     } catch (e) {
-      errores.push(`Groq red: ${e.message}`);
+      errores.push(`Groq conexión: ${e.message}`);
     }
   }
 
-  // 2. Probar Google Gemini (modelo universal gemini-1.5-flash)
+  // Intentar con Gemini
   if (geminiKey) {
     try {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`;
@@ -169,15 +168,14 @@ async function ejecutarLlamadaIA(prompt, groqKey, geminiKey) {
 
       const data = await resp.json();
       if (!resp.ok) {
-        errores.push(`Gemini falló (${resp.status}): ${data.error?.message || 'Error de clave o cuota'}`);
+        errores.push(`Gemini: ${data.error?.message || resp.statusText}`);
       } else {
-        const texto = data.candidates[0]?.content?.parts[0]?.text;
-        return JSON.parse(texto);
+        return JSON.parse(data.candidates[0]?.content?.parts[0]?.text);
       }
     } catch (e) {
-      errores.push(`Gemini red: ${e.message}`);
+      errores.push(`Gemini conexión: ${e.message}`);
     }
   }
 
-  throw new Error(errores.join(' | ') || 'No se pudo conectar con los proveedores.');
+  throw new Error(errores.join(' | ') || 'No se pudo conectar con ningún proveedor.');
 }
