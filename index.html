@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HEVA Online — Escuela Héctor Valenzuela CEA</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Librería para generar archivos Word (.docx) descargables y editables -->
   <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
   <style>
     :root { --font-base: 16px; }
@@ -22,7 +21,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- ENCABEZADO INSTITUCIONAL -->
+  <!-- ENCABEZADO -->
   <header class="no-print bg-[#8B2635] text-white px-6 py-4 shadow-md flex flex-wrap justify-between items-center gap-3">
     <div>
       <h1 class="text-xl font-bold tracking-tight">HEVA Online — Escuela Héctor Valenzuela CEA</h1>
@@ -43,10 +42,10 @@
     <button onclick="cambiarPestana('criterios')" id="tab-criterios" class="py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap">3. Criterios CEA Villarrica</button>
   </nav>
 
-  <!-- CONTENEDOR PRINCIPAL -->
+  <!-- CONTENIDO -->
   <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-6 flex-1 w-full">
 
-    <!-- BARRA ACCESIBILIDAD DUA -->
+    <!-- DUA TOOLBAR -->
     <div class="no-print bg-stone-100 border border-stone-300 rounded-lg p-3 flex flex-wrap items-center justify-between gap-3 text-sm">
       <div class="flex items-center gap-2 flex-wrap">
         <span class="font-bold text-stone-700 text-xs">Accesibilidad DUA:</span>
@@ -56,13 +55,13 @@
         <button onclick="toggleContraste()" class="px-3 py-1 bg-stone-800 text-white rounded text-xs font-semibold hover:bg-black">Alto Contraste</button>
         <button onclick="leerEnVozAlta()" id="btn-voz" class="px-3 py-1 bg-sky-700 text-white rounded text-xs font-semibold hover:bg-sky-800">Lectura Asistida</button>
       </div>
-      <button onclick="window.print()" class="px-3 py-1 bg-stone-700 text-white rounded text-xs font-semibold hover:bg-stone-900">Imprimir para Sala de Clases</button>
+      <button onclick="window.print()" class="px-3 py-1 bg-stone-700 text-white rounded text-xs font-semibold hover:bg-stone-900">Imprimir para Sala</button>
     </div>
 
-    <!-- PESTAÑA: GENERADOR PEDAGÓGICO -->
+    <!-- SECCIÓN GENERADOR -->
     <div id="seccion-crear" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-      <!-- Formulario de Configuración Docente -->
+      <!-- Formulario -->
       <div class="bg-white p-5 rounded-lg border border-stone-200 shadow-sm space-y-4">
         <h2 class="text-base font-bold text-[#8B2635] border-b pb-2">Parámetros de la Clase</h2>
 
@@ -118,7 +117,6 @@
           <input type="text" id="tema-especifico" class="w-full border rounded p-2 text-sm" value="La globalización y su impacto en el trabajo y comercio en Chile" />
         </div>
 
-        <!-- Parámetros de Preguntas -->
         <div class="border-t pt-3 space-y-3">
           <label class="block text-xs font-bold uppercase text-stone-600">Preguntas y Casos</label>
           <div class="grid grid-cols-2 gap-2 text-xs">
@@ -131,7 +129,6 @@
               <input type="number" id="cant-desarrollo" min="0" max="10" value="2" class="w-full border rounded p-1.5 text-center font-bold" />
             </div>
           </div>
-
           <div>
             <span class="text-xs text-stone-500 block mb-1">Casos Situacionales de Adultos:</span>
             <input type="number" id="cant-casos" min="0" max="4" value="2" class="w-full border rounded p-1.5 text-xs text-center font-bold" />
@@ -142,30 +139,26 @@
           <span>Generar con Inteligencia Artificial</span>
         </button>
 
-        <!-- Indicador de Progreso en Vivo -->
         <div id="progreso-ia" class="hidden text-xs bg-amber-50 border border-amber-200 text-amber-900 p-3 rounded space-y-1">
           <div class="font-bold flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-amber-600 animate-ping"></span>
             Procesando en Servidor Vercel...
           </div>
-          <div id="paso-ia" class="text-stone-600">Conectando con agentes de IA...</div>
+          <div id="paso-ia" class="text-stone-600">Consultando modelos Llama 3.3 / Gemini...</div>
         </div>
 
-        <!-- Alerta de Error -->
         <div id="error-ia" class="hidden text-xs bg-red-50 border border-red-200 text-red-700 p-3 rounded">
-          <strong class="block mb-1 font-bold">Aviso del Sistema:</strong>
+          <strong class="block mb-1 font-bold">Respuesta del Servidor:</strong>
           <span id="mensaje-error"></span>
         </div>
       </div>
 
-      <!-- Visor del Material Generado y Descargas -->
+      <!-- Visor -->
       <div class="lg:col-span-2 space-y-4">
-
-        <!-- Barra de Estado y Descargas -->
         <div id="barra-calidad" class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-emerald-900 flex flex-wrap justify-between items-center gap-2">
           <div>
             <h3 id="dictamen-calidad" class="font-bold text-xs uppercase text-emerald-900">Dictamen: LISTO PARA GENERAR</h3>
-            <p id="resumen-claves" class="text-[11px] text-emerald-800">Configure los parámetros a la izquierda y presione "Generar con Inteligencia Artificial".</p>
+            <p id="resumen-claves" class="text-[11px] text-emerald-800">Presione "Generar con Inteligencia Artificial" para redactar el material en tiempo real.</p>
           </div>
           <div class="no-print flex gap-2">
             <button onclick="exportarWord()" id="btn-docx" disabled class="px-3.5 py-2 bg-stone-400 text-white rounded text-xs font-bold shadow flex items-center gap-1.5 cursor-not-allowed">
@@ -174,17 +167,13 @@
           </div>
         </div>
 
-        <!-- Hoja del Documento Escolar -->
         <article id="hoja-material" class="bg-white p-6 md:p-8 rounded-lg border border-stone-200 shadow-sm space-y-6">
-          
-          <!-- Membrete Escuela -->
           <div class="text-center border-b pb-4">
             <h2 class="text-sm md:text-base font-bold text-[#8B2635] tracking-wide">ESCUELA HÉCTOR VALENZUELA CEA — VILLARRICA</h2>
             <p class="text-xs text-stone-500">Educación de Personas Jóvenes y Adultas (EPJA)</p>
             <h3 id="doc-titulo" class="text-base md:text-lg font-black text-stone-900 mt-2 uppercase">MATERIAL PEDAGÓGICO</h3>
           </div>
 
-          <!-- Ficha Alumno -->
           <div class="grid grid-cols-2 md:grid-cols-3 gap-2 border p-3 rounded text-xs bg-stone-50">
             <div><strong>Estudiante:</strong> _______________________</div>
             <div><strong>RUN:</strong> _______________</div>
@@ -194,39 +183,34 @@
             <div><strong>Puntaje:</strong> ___ pts</div>
           </div>
 
-          <!-- Contenido: Lectura -->
           <div>
             <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">I. Lectura Contextualizada</h4>
             <div id="doc-lectura" class="text-sm text-stone-700 leading-relaxed text-justify whitespace-pre-line">
-              El texto redactado por la Inteligencia Artificial aparecerá en esta sección de forma completa y contextualizada en el mundo adulto y laboral.
+              El texto redactado por la Inteligencia Artificial aparecerá en esta sección de forma completa y contextualizada.
             </div>
           </div>
 
-          <!-- Casos de Estudio -->
           <div id="contenedor-casos">
-            <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">II. Casos Situacionales de la Vida Cotidiana y Laboral</h4>
+            <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">II. Casos Situacionales</h4>
             <div id="lista-casos" class="space-y-3">
-              <p class="text-xs text-stone-400 italic">Los casos prácticos para debate en aula se mostrarán aquí...</p>
+              <p class="text-xs text-stone-400 italic">Los casos prácticos se mostrarán aquí...</p>
             </div>
           </div>
 
-          <!-- Preguntas Alternativas -->
           <div id="contenedor-alternativas">
             <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">III. Ítem de Selección Múltiple</h4>
             <div id="lista-alternativas" class="space-y-4 text-xs">
-              <p class="text-xs text-stone-400 italic">Las preguntas con alternativas A, B, C y D se cargarán aquí...</p>
+              <p class="text-xs text-stone-400 italic">Las preguntas de selección múltiple se cargarán aquí...</p>
             </div>
           </div>
 
-          <!-- Preguntas Desarrollo -->
           <div id="contenedor-desarrollo">
-            <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">IV. Ítem de Desarrollo y Argumentación</h4>
+            <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">IV. Ítem de Desarrollo</h4>
             <div id="lista-desarrollo" class="space-y-4 text-xs">
-              <p class="text-xs text-stone-400 italic">Las preguntas de desarrollo y argumentación se cargarán aquí...</p>
+              <p class="text-xs text-stone-400 italic">Las preguntas de desarrollo se cargarán aquí...</p>
             </div>
           </div>
 
-          <!-- Pauta de Corrección y Rúbrica -->
           <div class="pauta-print border-t-2 border-stone-800 pt-4 bg-stone-50 p-4 rounded text-xs space-y-3">
             <div class="flex justify-between items-center">
               <span class="font-bold text-[#8B2635] uppercase">Pauta Docente de Corrección y Criterios (Decreto 67)</span>
@@ -243,25 +227,21 @@
                 </tr>
               </thead>
               <tbody id="tabla-pauta">
-                <tr>
-                  <td colspan="4" class="p-2 text-stone-400 italic text-center">La pauta de evaluación se generará junto con el material.</td>
-                </tr>
+                <tr><td colspan="4" class="p-2 text-stone-400 italic text-center">La pauta de evaluación se generará junto con el material.</td></tr>
               </tbody>
             </table>
           </div>
-
         </article>
       </div>
     </div>
 
-    <!-- PESTAÑA: BASES CURRICULARES -->
+    <!-- SECCIÓN CURRÍCULO -->
     <div id="seccion-curriculo" class="hidden bg-white p-6 rounded-lg border border-stone-200 space-y-4">
       <h2 class="text-base font-bold text-[#8B2635]">Bases Curriculares Oficiales EPJA (MINEDUC)</h2>
-      <p class="text-xs text-stone-600">Catálogo verificado contra el <strong>Decreto Supremo N° 257/2009</strong> y las <strong>Bases Curriculares EPJA 2024 (Decreto N° 182/2023)</strong>. El sistema no permite inventar objetivos ficticios.</p>
       <div id="catalogo-completo" class="divide-y text-xs border rounded"></div>
     </div>
 
-    <!-- PESTAÑA: CRITERIOS CEA VILLARRICA -->
+    <!-- SECCIÓN CRITERIOS -->
     <div id="seccion-criterios" class="hidden bg-white p-6 rounded-lg border border-stone-200 space-y-4">
       <h2 class="text-base font-bold text-[#8B2635]">Criterios Institucionales — Escuela Héctor Valenzuela CEA</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
@@ -272,15 +252,13 @@
         </div>
         <div class="p-4 border rounded bg-stone-50 space-y-2">
           <h4 class="font-bold text-stone-900">Enfoque Andragógico DUA</h4>
-          <p class="text-stone-600">• Vinculación constante de contenidos con la realidad laboral y ciudadana de los estudiantes adultos de Villarrica.</p>
-          <p class="text-stone-600">• Textos claros, sin infantilización y con tipografía accesible.</p>
+          <p class="text-stone-600">• Vinculación constante con el contexto laboral de Villarrica.</p>
         </div>
       </div>
     </div>
 
   </main>
 
-  <!-- SCRIPT DE COMUNICACIÓN CON EL SERVIDOR -->
   <script>
     const CATALOGO_EPJA = [
       { codigo: 'EPJA-B3-SOC-01', asignatura: 'Estudios Sociales', nivel: 'III_BASICO', marco: 'Decreto 257/2009', desc: 'Caracterizar los principales rasgos del proceso de globalización económica, tecnológica y cultural, evaluando sus repercusiones en la vida cotidiana y laboral en Chile.' },
@@ -311,7 +289,7 @@
 
     function leerEnVozAlta() {
       if (!('speechSynthesis' in window)) {
-        alert('Tu navegador no soporta lectura por voz.');
+        alert('Navegador sin soporte de voz.');
         return;
       }
       if (leyendo) {
@@ -372,7 +350,7 @@
       });
     }
 
-    // LLAMADA REAL AL SERVIDOR DE VERCEL (/api/generate)
+    // LLAMADA ROBUSTA AL SERVIDOR CON LECTURA DE ERRORES REAL
     async function generarMaterialReal() {
       const btn = document.getElementById('btn-generar');
       const box = document.getElementById('progreso-ia');
@@ -385,7 +363,7 @@
       btn.disabled = true;
       btn.classList.add('opacity-50');
 
-      paso.innerText = 'IA 1: Planificando estructura y delimitando contenidos con Llama 3.3 / Gemini...';
+      paso.innerText = 'Consultando agentes de IA en Vercel...';
 
       const payload = {
         asignatura: document.getElementById('asignatura').value,
@@ -406,15 +384,21 @@
           body: JSON.stringify(payload)
         });
 
-        const data = await respuesta.json();
+        const textoPlano = await respuesta.text();
+        let data;
+        try {
+          data = JSON.parse(textoPlano);
+        } catch (e) {
+          throw new Error(`El servidor devolvió un error (Código ${respuesta.status}): ${textoPlano.substring(0, 200)}`);
+        }
 
         if (!respuesta.ok) {
-          throw new Error(data.mensaje || data.error || 'Fallo en la comunicación con el servidor.');
+          throw new Error(data.detalle || data.error || 'Error desconocido.');
         }
 
         materialActual = data.material;
 
-        // Renderizar el contenido real en pantalla
+        // Renderizar contenido
         document.getElementById('doc-titulo').innerText = materialActual.titulo || payload.temaEspecifico.toUpperCase();
         document.getElementById('doc-nivel').innerHTML = `<strong>Nivel:</strong> ${payload.nivel} | <strong>Asignatura:</strong> ${payload.asignatura}`;
         document.getElementById('doc-lectura').innerText = materialActual.introduccionLectura;
@@ -450,10 +434,9 @@
             `;
             listaAlt.appendChild(div);
 
-            // Pauta
             const tr = document.createElement('tr');
             tr.className = 'border-b';
-            tr.innerHTML = `<td class="p-1.5">Alt. ${num}</td><td class="p-1.5 font-bold text-[#8B2635]">${p.claveCorrecta}</td><td class="p-1.5">${p.habilidad || 'Interpretar'}</td><td class="p-1.5">${p.justificacion || 'Fundamentado en el texto base.'}</td>`;
+            tr.innerHTML = `<td class="p-1.5">Alt. ${num}</td><td class="p-1.5 font-bold text-[#8B2635]">${p.claveCorrecta}</td><td class="p-1.5">${p.habilidad || 'Interpretar'}</td><td class="p-1.5">${p.justificacion || 'Fundamentado en el texto.'}</td>`;
             tablaPauta.appendChild(tr);
           });
         }
@@ -474,12 +457,12 @@
 
             const tr = document.createElement('tr');
             tr.className = 'border-b';
-            tr.innerHTML = `<td class="p-1.5">Des. ${num}</td><td class="p-1.5 font-bold text-[#8B2635]">Rúbrica (3 pts)</td><td class="p-1.5">${d.habilidad || 'Reflexionar'}</td><td class="p-1.5">${d.criterioEvaluacion || 'Criterio de logro según Decreto 67.'}</td>`;
+            tr.innerHTML = `<td class="p-1.5">Des. ${num}</td><td class="p-1.5 font-bold text-[#8B2635]">Rúbrica (3 pts)</td><td class="p-1.5">${d.habilidad || 'Reflexionar'}</td><td class="p-1.5">${d.criterioEvaluacion || 'Criterio según Decreto 67.'}</td>`;
             tablaPauta.appendChild(tr);
           });
         }
 
-        // Habilitar botón de descarga Word
+        // Habilitar DOCX
         const btnDocx = document.getElementById('btn-docx');
         btnDocx.disabled = false;
         btnDocx.className = 'px-3.5 py-2 bg-[#8B2635] hover:bg-[#701E2A] text-white rounded text-xs font-bold shadow flex items-center gap-1.5 cursor-pointer';
@@ -497,11 +480,11 @@
       }
     }
 
-    // EXPORTACIÓN A WORD (.DOCX) CON MEMBRETE DEL CEA
+    // EXPORTACIÓN A WORD (.DOCX)
     async function exportarWord() {
       if (!materialActual) return;
       if (typeof docx === 'undefined') {
-        alert('Cargando librería de Word, intente en un momento...');
+        alert('Cargando librería de Word, intente en 3 segundos...');
         return;
       }
       const { Document, Packer, Paragraph, TextRun, HeadingLevel, PageBreak, AlignmentType } = docx;
@@ -514,7 +497,6 @@
         new Paragraph({ children: [new TextRun({ text: materialActual.introduccionLectura, size: 22 })], spacing: { after: 250 }, alignment: AlignmentType.JUSTIFY })
       ];
 
-      // Agregar Casos
       if (materialActual.casosEstudio && materialActual.casosEstudio.length > 0) {
         parrafos.push(new Paragraph({ children: [new TextRun({ text: 'II. CASOS SITUACIONALES', bold: true, size: 22, color: '8B2635' })], spacing: { before: 150, after: 100 } }));
         materialActual.casosEstudio.forEach(c => {
@@ -526,7 +508,6 @@
         });
       }
 
-      // Agregar Alternativas
       if (materialActual.preguntasAlternativas && materialActual.preguntasAlternativas.length > 0) {
         parrafos.push(new Paragraph({ children: [new TextRun({ text: 'III. SELECCIÓN MÚLTIPLE', bold: true, size: 22, color: '8B2635' })], spacing: { before: 150, after: 100 } }));
         materialActual.preguntasAlternativas.forEach((p, idx) => {
@@ -537,7 +518,6 @@
         });
       }
 
-      // Salto de página para la Pauta
       parrafos.push(new Paragraph({ children: [new PageBreak()] }));
       parrafos.push(
         new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'PAUTA DE CORRECCIÓN (USO EXCLUSIVO DOCENTE - DECRETO 67)', bold: true, size: 22, color: '8B2635' })] }),
