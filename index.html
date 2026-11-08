@@ -21,16 +21,16 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- ENCABEZADO -->
+  <!-- ENCABEZADO INSTITUCIONAL -->
   <header class="no-print bg-[#8B2635] text-white px-6 py-4 shadow-md flex flex-wrap justify-between items-center gap-3">
     <div>
       <h1 class="text-xl font-bold tracking-tight">HEVA Online — Escuela Héctor Valenzuela CEA</h1>
-      <p class="text-xs text-rose-100">Motor Pedagógico con Inteligencia Artificial Multimodelo | EPJA Villarrica</p>
+      <p class="text-xs text-rose-100">Educación de Personas Jóvenes y Adultas (EPJA) Técnico-Profesional | Villarrica</p>
     </div>
     <div class="flex items-center gap-2 text-xs">
       <span class="bg-black/20 px-3 py-1 rounded text-rose-100 flex items-center gap-1.5 font-medium">
         <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
-        Vercel Serverless IA Activo
+        Servidor Vercel IA Conectado
       </span>
     </div>
   </header>
@@ -38,14 +38,14 @@
   <!-- NAVEGACIÓN -->
   <nav class="no-print bg-white border-b border-stone-200 px-6 flex gap-6 text-sm font-medium overflow-x-auto">
     <button onclick="cambiarPestana('crear')" id="tab-crear" class="py-3 border-b-2 border-[#8B2635] text-[#8B2635] font-bold whitespace-nowrap">1. Generador Pedagógico</button>
-    <button onclick="cambiarPestana('curriculo')" id="tab-curriculo" class="py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap">2. Bases Curriculares EPJA</button>
+    <button onclick="cambiarPestana('curriculo')" id="tab-curriculo" class="py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap">2. Biblioteca de Objetivos MINEDUC</button>
     <button onclick="cambiarPestana('criterios')" id="tab-criterios" class="py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap">3. Criterios CEA Villarrica</button>
   </nav>
 
   <!-- CONTENIDO -->
   <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-6 flex-1 w-full">
 
-    <!-- DUA TOOLBAR -->
+    <!-- BARRA ACCESIBILIDAD DUA -->
     <div class="no-print bg-stone-100 border border-stone-300 rounded-lg p-3 flex flex-wrap items-center justify-between gap-3 text-sm">
       <div class="flex items-center gap-2 flex-wrap">
         <span class="font-bold text-stone-700 text-xs">Accesibilidad DUA:</span>
@@ -58,42 +58,43 @@
       <button onclick="window.print()" class="px-3 py-1 bg-stone-700 text-white rounded text-xs font-semibold hover:bg-stone-900">Imprimir para Sala</button>
     </div>
 
-    <!-- SECCIÓN GENERADOR -->
+    <!-- PESTAÑA: GENERADOR -->
     <div id="seccion-crear" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-      <!-- Formulario -->
+      <!-- Formulario de Configuración -->
       <div class="bg-white p-5 rounded-lg border border-stone-200 shadow-sm space-y-4">
-        <h2 class="text-base font-bold text-[#8B2635] border-b pb-2">Parámetros de la Clase</h2>
+        <h2 class="text-base font-bold text-[#8B2635] border-b pb-2">Configuración Pedagógica EPJA</h2>
 
         <div>
           <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Tipo de Material</label>
           <select id="tipo-material" class="w-full border rounded p-2 text-sm bg-white">
-            <option value="GUIA">Guía de Aprendizaje</option>
-            <option value="EVALUACION">Evaluación / Prueba (Decreto 67)</option>
+            <option value="GUIA">Guía de Aprendizaje Contextualizada</option>
+            <option value="EVALUACION">Evaluación / Prueba Sumativa (Dec. 67)</option>
             <option value="PLANIFICACION">Planificación de Clase (90 min DUA)</option>
-            <option value="TALLER">Taller Práctico / Situacional</option>
+            <option value="TALLER">Taller de Aplicación Laboral T-P</option>
           </select>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Asignatura</label>
-            <select id="asignatura" onchange="actualizarOAs()" class="w-full border rounded p-2 text-xs bg-white">
-              <option value="Estudios Sociales">Estudios Sociales</option>
-              <option value="Lengua Castellana y Comunicación">Lengua y Comunicación</option>
-              <option value="Educación Matemática">Educación Matemática</option>
-              <option value="Ciencias Naturales">Ciencias Naturales</option>
-              <option value="Idioma Extranjero Inglés">Inglés</option>
+            <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Nivel EPJA del CEA</label>
+            <select id="nivel-epja" onchange="actualizarOAs()" class="w-full border rounded p-2 text-xs bg-white font-semibold text-[#8B2635]">
+              <option value="III_BASICO">III NIVEL BÁSICO (7°-8°)</option>
+              <option value="I_MEDIO_TP">I NIVEL MEDIO T-P (1°-2°)</option>
+              <option value="II_MEDIO_TP">SEGUNDO NIVEL MEDIO T-P (3°)</option>
+              <option value="III_MEDIO_TP">TERCER NIVEL MEDIO T-P (4°)</option>
             </select>
           </div>
+
           <div>
-            <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Nivel EPJA</label>
-            <select id="nivel-epja" onchange="actualizarOAs()" class="w-full border rounded p-2 text-xs bg-white">
-              <option value="III_BASICO">III Nivel Básico (7°-8°)</option>
-              <option value="I_BASICO">I Nivel Básico (1°-4°)</option>
-              <option value="II_BASICO">II Nivel Básico (5°-6°)</option>
-              <option value="I_MEDIO">I Nivel Medio (1°-2°)</option>
-              <option value="II_MEDIO">II Nivel Medio (3°-4°)</option>
+            <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Asignatura / Área</label>
+            <select id="asignatura" onchange="actualizarOAs()" class="w-full border rounded p-2 text-xs bg-white">
+              <option value="Estudios Sociales">Estudios Sociales</option>
+              <option value="Lengua Castellana y Comunicación">Lengua Castellana y Comunicación</option>
+              <option value="Educación Matemática">Educación Matemática</option>
+              <option value="Ciencias Naturales">Ciencias Naturales</option>
+              <option value="Idioma Extranjero Inglés">Idioma Extranjero Inglés</option>
+              <option value="Especialidad Técnico-Profesional">Módulo Técnico-Profesional (T-P)</option>
             </select>
           </div>
         </div>
@@ -101,20 +102,21 @@
         <div>
           <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Marco Curricular</label>
           <select id="marco-curricular" class="w-full border rounded p-2 text-xs bg-stone-50">
-            <option value="DECRETO_257_2009">Decreto Supremo N° 257/2009 (Vigente)</option>
-            <option value="BASES_CURRICULARES_2024">Bases Curriculares EPJA 2024</option>
+            <option value="DECRETO_257_2009">Decreto Supremo N° 257/2009 (Vigente EPJA)</option>
+            <option value="BASES_CURRICULARES_2024">Bases Curriculares EPJA 2024 (Decreto 182/2023)</option>
+            <option value="PLAN_DIFERENCIADO_TP">Formación Diferenciada TP (Decreto 452/2013)</option>
           </select>
         </div>
 
         <div>
-          <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Objetivo de Aprendizaje (OA)</label>
+          <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Objetivos de Aprendizaje (MINEDUC)</label>
           <select id="select-oa" onchange="cargarOATexto()" class="w-full border rounded p-2 text-xs bg-stone-50 mb-1"></select>
-          <textarea id="texto-oa" rows="2" class="w-full border rounded p-2 text-xs text-stone-700 bg-white" placeholder="O redacte su propio objetivo..."></textarea>
+          <textarea id="texto-oa" rows="3" class="w-full border rounded p-2 text-xs text-stone-700 bg-white" placeholder="O pegue el objetivo específico de su módulo aquí..."></textarea>
         </div>
 
         <div>
           <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Tema Específico de la Clase</label>
-          <input type="text" id="tema-especifico" class="w-full border rounded p-2 text-sm" value="La globalización y su impacto en el trabajo y comercio en Chile" />
+          <input type="text" id="tema-especifico" class="w-full border rounded p-2 text-sm" value="Inserción laboral, derechos del trabajador y mercado regional" />
         </div>
 
         <div class="border-t pt-3 space-y-3">
@@ -153,12 +155,12 @@
         </div>
       </div>
 
-      <!-- Visor -->
+      <!-- Visor del Material -->
       <div class="lg:col-span-2 space-y-4">
         <div id="barra-calidad" class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-emerald-900 flex flex-wrap justify-between items-center gap-2">
           <div>
             <h3 id="dictamen-calidad" class="font-bold text-xs uppercase text-emerald-900">Dictamen: LISTO PARA GENERAR</h3>
-            <p id="resumen-claves" class="text-[11px] text-emerald-800">Presione "Generar con Inteligencia Artificial" para redactar el material en tiempo real.</p>
+            <p id="resumen-claves" class="text-[11px] text-emerald-800">Seleccione el nivel, la asignatura y presione el botón rojo.</p>
           </div>
           <div class="no-print flex gap-2">
             <button onclick="exportarWord()" id="btn-docx" disabled class="px-3.5 py-2 bg-stone-400 text-white rounded text-xs font-bold shadow flex items-center gap-1.5 cursor-not-allowed">
@@ -170,7 +172,7 @@
         <article id="hoja-material" class="bg-white p-6 md:p-8 rounded-lg border border-stone-200 shadow-sm space-y-6">
           <div class="text-center border-b pb-4">
             <h2 class="text-sm md:text-base font-bold text-[#8B2635] tracking-wide">ESCUELA HÉCTOR VALENZUELA CEA — VILLARRICA</h2>
-            <p class="text-xs text-stone-500">Educación de Personas Jóvenes y Adultas (EPJA)</p>
+            <p class="text-xs text-stone-500">Educación de Personas Jóvenes y Adultas (EPJA) Técnico-Profesional</p>
             <h3 id="doc-titulo" class="text-base md:text-lg font-black text-stone-900 mt-2 uppercase">MATERIAL PEDAGÓGICO</h3>
           </div>
 
@@ -179,19 +181,19 @@
             <div><strong>RUN:</strong> _______________</div>
             <div><strong>Fecha:</strong> _______________</div>
             <div id="doc-nivel"><strong>Nivel:</strong> III Nivel Básico</div>
-            <div><strong>Exigencia:</strong> 60%</div>
+            <div><strong>Exigencia:</strong> 60% (Dec. 67)</div>
             <div><strong>Puntaje:</strong> ___ pts</div>
           </div>
 
           <div>
             <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">I. Lectura Contextualizada</h4>
             <div id="doc-lectura" class="text-sm text-stone-700 leading-relaxed text-justify whitespace-pre-line">
-              El texto redactado por la Inteligencia Artificial aparecerá en esta sección de forma completa y contextualizada.
+              El texto redactado por la Inteligencia Artificial aparecerá en esta sección de forma completa y contextualizada en el mundo adulto y técnico-laboral.
             </div>
           </div>
 
           <div id="contenedor-casos">
-            <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">II. Casos Situacionales</h4>
+            <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">II. Casos Situacionales de la Vida Cotidiana y Laboral</h4>
             <div id="lista-casos" class="space-y-3">
               <p class="text-xs text-stone-400 italic">Los casos prácticos se mostrarán aquí...</p>
             </div>
@@ -205,7 +207,7 @@
           </div>
 
           <div id="contenedor-desarrollo">
-            <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">IV. Ítem de Desarrollo</h4>
+            <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">IV. Ítem de Desarrollo y Rúbrica</h4>
             <div id="lista-desarrollo" class="space-y-4 text-xs">
               <p class="text-xs text-stone-400 italic">Las preguntas de desarrollo se cargarán aquí...</p>
             </div>
@@ -235,24 +237,26 @@
       </div>
     </div>
 
-    <!-- SECCIÓN CURRÍCULO -->
+    <!-- PESTAÑA: CURRÍCULO COMPLETO -->
     <div id="seccion-curriculo" class="hidden bg-white p-6 rounded-lg border border-stone-200 space-y-4">
-      <h2 class="text-base font-bold text-[#8B2635]">Bases Curriculares Oficiales EPJA (MINEDUC)</h2>
-      <div id="catalogo-completo" class="divide-y text-xs border rounded"></div>
+      <h2 class="text-base font-bold text-[#8B2635]">Biblioteca de Objetivos Curriculares Oficiales EPJA (MINEDUC)</h2>
+      <p class="text-xs text-stone-600">Catálogo oficial estructurado según el <strong>Decreto N° 257/2009</strong>, las <strong>Bases Curriculares EPJA 2024</strong> y los planes diferenciados Técnico-Profesionales.</p>
+      <div id="catalogo-completo" class="divide-y text-xs border rounded max-h-[500px] overflow-y-auto"></div>
     </div>
 
-    <!-- SECCIÓN CRITERIOS -->
+    <!-- PESTAÑA: CRITERIOS CEA -->
     <div id="seccion-criterios" class="hidden bg-white p-6 rounded-lg border border-stone-200 space-y-4">
       <h2 class="text-base font-bold text-[#8B2635]">Criterios Institucionales — Escuela Héctor Valenzuela CEA</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
         <div class="p-4 border rounded bg-stone-50 space-y-2">
-          <h4 class="font-bold text-stone-900">Normativa de Evaluación</h4>
-          <p class="text-stone-600">• Escala de exigencia académica fijada en el <strong>60%</strong> para nota 4.0.</p>
-          <p class="text-stone-600">• Enfoque formativo y sumativo conforme al <strong>Decreto 67/2018</strong>.</p>
+          <h4 class="font-bold text-stone-900">Enfoque Técnico-Profesional (T-P)</h4>
+          <p class="text-stone-600">• Vinculación de los aprendizajes con el contexto laboral real de la zona lacustre y regional de La Araucanía.</p>
+          <p class="text-stone-600">• Promoción de competencias de empleabilidad, derechos laborales y seguridad en el trabajo.</p>
         </div>
         <div class="p-4 border rounded bg-stone-50 space-y-2">
-          <h4 class="font-bold text-stone-900">Enfoque Andragógico DUA</h4>
-          <p class="text-stone-600">• Vinculación constante con el contexto laboral de Villarrica.</p>
+          <h4 class="font-bold text-stone-900">Normativa de Evaluación</h4>
+          <p class="text-stone-600">• Exigencia académica al <strong>60%</strong> conforme al <strong>Decreto 67/2018</strong>.</p>
+          <p class="text-stone-600">• Rúbricas analíticas obligatorias para ítems de desarrollo y desempeño técnico.</p>
         </div>
       </div>
     </div>
@@ -260,12 +264,67 @@
   </main>
 
   <script>
+    // CATÁLOGO CURRICULAR EPJA COMPLETO POR NIVEL Y ASIGNATURA
     const CATALOGO_EPJA = [
-      { codigo: 'EPJA-B3-SOC-01', asignatura: 'Estudios Sociales', nivel: 'III_BASICO', marco: 'Decreto 257/2009', desc: 'Caracterizar los principales rasgos del proceso de globalización económica, tecnológica y cultural, evaluando sus repercusiones en la vida cotidiana y laboral en Chile.' },
-      { codigo: 'EPJA-B3-SOC-02', asignatura: 'Estudios Sociales', nivel: 'III_BASICO', marco: 'Decreto 257/2009', desc: 'Analizar las causas y consecuencias de la Segunda Guerra Mundial, reconociendo el impacto de los totalitarismos, el Holocausto y la Declaración Universal de Derechos Humanos.' },
-      { codigo: 'EPJA-B3-LEN-01', asignatura: 'Lengua Castellana y Comunicación', nivel: 'III_BASICO', marco: 'Decreto 257/2009', desc: 'Leer comprensivamente textos no literarios (artículos, cartas laborales, normativas), identificando hechos, opiniones e intenciones del emisor.' },
-      { codigo: 'EPJA-M1-MAT-01', asignatura: 'Educación Matemática', nivel: 'I_MEDIO', marco: 'Bases EPJA 2024', desc: 'Resolver problemas matemáticos y financieros de la vida cotidiana (cálculo de remuneraciones, imposiciones previsionales, tasas de interés y presupuestos del hogar).' },
-      { codigo: 'EPJA-B3-NAT-01', asignatura: 'Ciencias Naturales', nivel: 'III_BASICO', marco: 'Decreto 257/2009', desc: 'Evaluar el impacto de las actividades humanas en los recursos hídricos y ecosistemas locales, promoviendo el desarrollo sustentable.' }
+      // ================= III NIVEL BÁSICO =================
+      { codigo: 'OF-B3-SOC-01', asignatura: 'Estudios Sociales', nivel: 'III_BASICO', marco: 'Decreto 257/2009', desc: 'Caracterizar los principales rasgos de la globalización económica, tecnológica y cultural, evaluando sus repercusiones en la vida cotidiana de las personas y en la economía de Chile.' },
+      { codigo: 'OF-B3-SOC-02', asignatura: 'Estudios Sociales', nivel: 'III_BASICO', marco: 'Decreto 257/2009', desc: 'Analizar las causas y consecuencias de los grandes conflictos bélicos del siglo XX, la crisis de los totalitarismos y la defensa universal de los Derechos Humanos.' },
+      { codigo: 'OF-B3-SOC-03', asignatura: 'Estudios Sociales', nivel: 'III_BASICO', marco: 'Decreto 257/2009', desc: 'Reconocer los principales problemas socioambientales del Chile actual y su relación con los modos de producción y consumo sustentable a nivel regional y comunal.' },
+
+      { codigo: 'OF-B3-LEN-01', asignatura: 'Lengua Castellana y Comunicación', nivel: 'III_BASICO', marco: 'Decreto 257/2009', desc: 'Leer comprensivamente textos no literarios y de uso público (noticias, columnas, instructivos laborales), discriminando hechos, opiniones e intenciones del emisor.' },
+      { codigo: 'OF-B3-LEN-02', asignatura: 'Lengua Castellana y Comunicación', nivel: 'III_BASICO', marco: 'Decreto 257/2009', desc: 'Producir textos escritos formales y funcionales adecuados al contexto laboral y comunitario, aplicando normas de coherencia, cohesión y ortografía.' },
+
+      { codigo: 'OF-B3-MAT-01', asignatura: 'Educación Matemática', nivel: 'III_BASICO', marco: 'Decreto 257/2009', desc: 'Resolver problemas numéricos que involucren operaciones con números enteros y racionales aplicados al comercio, presupuestos familiares y medidas cotidianas.' },
+      { codigo: 'OF-B3-MAT-02', asignatura: 'Educación Matemática', nivel: 'III_BASICO', marco: 'Decreto 257/2009', desc: 'Calcular porcentajes, razones y proporciones directas e inversas en situaciones de interés financiero, descuentos comerciales y rendimiento de materiales.' },
+
+      { codigo: 'OF-B3-NAT-01', asignatura: 'Ciencias Naturales', nivel: 'III_BASICO', marco: 'Decreto 257/2009', desc: 'Comprender los ciclos de la materia y los flujos de energía en los ecosistemas, valorando el uso sustentable de los recursos hídricos en la cuenca del Lago Villarrica.' },
+      { codigo: 'OF-B3-NAT-02', asignatura: 'Ciencias Naturales', nivel: 'III_BASICO', marco: 'Decreto 257/2009', desc: 'Reconocer los factores que inciden en la salud preventiva del adulto, la nutrición balanceada y la prevención de enfermedades crónicas laborales.' },
+
+      { codigo: 'OF-B3-ING-01', asignatura: 'Idioma Extranjero Inglés', nivel: 'III_BASICO', marco: 'Decreto 257/2009', desc: 'Comprender expresiones y vocabulario básico cotidiano en inglés relacionado con información personal, trabajo y señalética de seguridad.' },
+
+      // ================= I NIVEL MEDIO T-P =================
+      { codigo: 'OF-M1-SOC-01', asignatura: 'Estudios Sociales', nivel: 'I_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Analizar las transformaciones políticas, sociales y económicas en Chile durante los siglos XIX y XX, valorando la lucha por los derechos laborales y la justicia social.' },
+      { codigo: 'OF-M1-SOC-02', asignatura: 'Estudios Sociales', nivel: 'I_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Comprender las características geográficas y económicas de Chile, identificando las potencialidades productivas y los desafíos laborales de La Araucanía.' },
+
+      { codigo: 'OF-M1-LEN-01', asignatura: 'Lengua Castellana y Comunicación', nivel: 'I_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Analizar críticamente textos de medios masivos de comunicación, reconociendo recursos argumentativos, sesgos de información y propósitos comunicativos implícitos.' },
+      { codigo: 'OF-M1-LEN-02', asignatura: 'Lengua Castellana y Comunicación', nivel: 'I_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Redactar documentos laborales formales (currículum vitae, cartas de presentación, memorándums, solicitudes de servicio) con claridad y precisión técnica.' },
+
+      { codigo: 'OF-M1-MAT-01', asignatura: 'Educación Matemática', nivel: 'I_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Utilizar modelos algebraicos y ecuaciones de primer grado para resolver situaciones prácticas de costos, producción y rentabilidad en actividades productivas.' },
+      { codigo: 'OF-M1-MAT-02', asignatura: 'Educación Matemática', nivel: 'I_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Interpretar y representar información estadística mediante tablas y gráficos en reportes de trabajo, control de inventario y tendencias del empleo.' },
+
+      { codigo: 'OF-M1-NAT-01', asignatura: 'Ciencias Naturales', nivel: 'I_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Explicar las propiedades químicas y físicas de sustancias de uso cotidiano y laboral, aplicando protocolos de seguridad química y prevención de riesgos.' },
+
+      { codigo: 'OF-M1-ING-01', asignatura: 'Idioma Extranjero Inglés', nivel: 'I_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Comprender textos breves e instructivos técnicos sencillos en inglés, identificando pasos de operación y normas de seguridad en el trabajo.' },
+
+      // ================= SEGUNDO NIVEL MEDIO T-P =================
+      { codigo: 'OF-M2-SOC-01', asignatura: 'Estudios Sociales', nivel: 'II_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Evaluar el impacto de las transformaciones económicas neoliberales en Chile contemporáneo y las garantías fundamentales del Código del Trabajo.' },
+      { codigo: 'OF-M2-SOC-02', asignatura: 'Estudios Sociales', nivel: 'II_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Reconocer los mecanismos de participación ciudadana y las instituciones del Estado democrático vinculadas a la protección de los trabajadores y el medio ambiente.' },
+
+      { codigo: 'OF-M2-LEN-01', asignatura: 'Lengua Castellana y Comunicación', nivel: 'II_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Elaborar textos argumentativos sólidos fundamentados en fuentes confiables para debatir sobre problemáticas sociolaborales y éticas del trabajo.' },
+      { codigo: 'OF-M2-LEN-02', asignatura: 'Lengua Castellana y Comunicación', nivel: 'II_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Interpretar textos normativos y jurídicos básicos (contratos de trabajo, convenios colectivos, leyes laborales vigentes en Chile).' },
+
+      { codigo: 'OF-M2-MAT-01', asignatura: 'Educación Matemática', nivel: 'II_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Modelar matemáticamente situaciones financieras complejas: cálculo de finiquitos, liquidaciones de sueldo con descuentos previsionales (AFP, Fonasa) y créditos de consumo.' },
+      { codigo: 'OF-M2-MAT-02', asignatura: 'Educación Matemática', nivel: 'II_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Aplicar conceptos de geometría y trigonometría en el cálculo de áreas, volúmenes y trazados en proyectos técnicos y constructivos.' },
+
+      { codigo: 'OF-M2-NAT-01', asignatura: 'Ciencias Naturales', nivel: 'II_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Analizar el impacto ambiental de los procesos industriales y agropecuarios en el sur de Chile, promoviendo tecnologías limpias y eficiencia energética.' },
+
+      { codigo: 'OF-M2-ING-01', asignatura: 'Idioma Extranjero Inglés', nivel: 'II_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Redactar mensajes y correos electrónicos laborales estandarizados en inglés, solicitando o entregando información comercial y técnica básica.' },
+
+      // ================= TERCER NIVEL MEDIO T-P =================
+      { codigo: 'OF-M3-SOC-01', asignatura: 'Estudios Sociales', nivel: 'III_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Analizar la inserción de Chile en la economía internacional globalizada, los tratados de libre comercio y los desafíos de la sustentabilidad en La Araucanía.' },
+
+      { codigo: 'OF-M3-LEN-01', asignatura: 'Lengua Castellana y Comunicación', nivel: 'III_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Desarrollar habilidades de comunicación oral efectiva para entrevistas laborales, exposición de proyectos técnicos y argumentación en equipos de trabajo.' },
+
+      { codigo: 'OF-M3-MAT-01', asignatura: 'Educación Matemática', nivel: 'III_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Resolver problemas de optimización de recursos, control de calidad y estimación de presupuestos de obras o servicios mediante herramientas matemáticas.' },
+
+      { codigo: 'OF-M3-NAT-01', asignatura: 'Ciencias Naturales', nivel: 'III_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Evaluar los protocolos de seguridad ocupacional, primeros auxilios y toxicología laboral en el ámbito productivo técnico.' },
+
+      { codigo: 'OF-M3-ING-01', asignatura: 'Idioma Extranjero Inglés', nivel: 'III_MEDIO_TP', marco: 'Decreto 257/2009', desc: 'Interpretar manuales de operación técnica y fichas de especificaciones de maquinarias o software en inglés de especialidad.' },
+
+      // ================= MÓDULO TÉCNICO-PROFESIONAL =================
+      { codigo: 'OF-TP-MOD-01', asignatura: 'Especialidad Técnico-Profesional', nivel: 'I_MEDIO_TP', marco: 'PLAN_DIFERENCIADO_TP', desc: 'Aplicar normas de seguridad, higiene y uso correcto de equipos de protección personal (EPP) en talleres y puestos de trabajo.' },
+      { codigo: 'OF-TP-MOD-02', asignatura: 'Especialidad Técnico-Profesional', nivel: 'II_MEDIO_TP', marco: 'PLAN_DIFERENCIADO_TP', desc: 'Ejecutar procesos técnicos de mantenimiento, diagnóstico o servicio de acuerdo a estándares de calidad y especificaciones del fabricante.' },
+      { codigo: 'OF-TP-MOD-03', asignatura: 'Especialidad Técnico-Profesional', nivel: 'III_MEDIO_TP', marco: 'PLAN_DIFERENCIADO_TP', desc: 'Diseñar y gestionar proyectos productivos o de servicios técnicos considerando costos, cubicación de materiales y normativa legal vigente.' }
     ];
 
     let materialActual = null;
@@ -317,26 +376,51 @@
       document.getElementById('tab-' + p).className = 'py-3 border-b-2 border-[#8B2635] text-[#8B2635] font-bold whitespace-nowrap';
     }
 
+    // ACTUALIZA LA LISTA DE OBJETIVOS SEGÚN EL NIVEL Y ASIGNATURA SELECCIONADOS
     function actualizarOAs() {
       const asig = document.getElementById('asignatura').value;
       const nivel = document.getElementById('nivel-epja').value;
       const select = document.getElementById('select-oa');
       select.innerHTML = '';
 
-      const filtrados = CATALOGO_EPJA.filter(o => o.asignatura === asig && o.nivel === nivel);
-      if (filtrados.length === 0) filtrados.push(CATALOGO_EPJA[0]);
+      let filtrados = CATALOGO_EPJA.filter(o => o.asignatura === asig && o.nivel === nivel);
+      
+      // Si es módulo TP, mostramos los objetivos técnicos
+      if (asig === 'Especialidad Técnico-Profesional') {
+        filtrados = CATALOGO_EPJA.filter(o => o.asignatura === 'Especialidad Técnico-Profesional');
+      }
 
-      filtrados.forEach(o => {
+      if (filtrados.length === 0) {
         const opt = document.createElement('option');
-        opt.value = o.desc;
-        opt.innerText = `[${o.codigo}] ${o.desc.substring(0, 80)}...`;
+        opt.value = '';
+        opt.innerText = '-- Ingrese su propio objetivo en el cuadro inferior --';
         select.appendChild(opt);
-      });
+      } else {
+        filtrados.forEach(o => {
+          const opt = document.createElement('option');
+          opt.value = o.desc;
+          opt.innerText = `[${o.codigo}] ${o.desc.substring(0, 85)}...`;
+          select.appendChild(opt);
+        });
+      }
+
+      // Opción libre siempre disponible
+      const optLibre = document.createElement('option');
+      optLibre.value = 'CUSTOM';
+      optLibre.innerText = '✍️ [PERSONALIZADO] Redactar o pegar mi propio objetivo...';
+      select.appendChild(optLibre);
+
       cargarOATexto();
     }
 
     function cargarOATexto() {
-      document.getElementById('texto-oa').value = document.getElementById('select-oa').value;
+      const valor = document.getElementById('select-oa').value;
+      if (valor === 'CUSTOM') {
+        document.getElementById('texto-oa').value = '';
+        document.getElementById('texto-oa').focus();
+      } else {
+        document.getElementById('texto-oa').value = valor;
+      }
     }
 
     function renderizarCatalogo() {
@@ -344,13 +428,19 @@
       cont.innerHTML = '';
       CATALOGO_EPJA.forEach(o => {
         const div = document.createElement('div');
-        div.className = 'p-3 hover:bg-stone-50 flex justify-between items-center';
-        div.innerHTML = `<div><strong>[${o.codigo}] ${o.asignatura} (${o.nivel})</strong><p class="text-stone-600 mt-0.5">${o.desc}</p></div><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[11px] whitespace-nowrap">${o.marco}</span>`;
+        div.className = 'p-3 hover:bg-stone-50 flex justify-between items-center gap-3';
+        div.innerHTML = `
+          <div>
+            <strong>[${o.codigo}] ${o.asignatura} — ${o.nivel.replace(/_/g, ' ')}</strong>
+            <p class="text-stone-600 mt-0.5 text-xs">${o.desc}</p>
+          </div>
+          <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px] whitespace-nowrap">${o.marco}</span>
+        `;
         cont.appendChild(div);
       });
     }
 
-    // LLAMADA ROBUSTA AL SERVIDOR CON LECTURA DE ERRORES REAL
+    // LLAMADA AL SERVIDOR VERCEL
     async function generarMaterialReal() {
       const btn = document.getElementById('btn-generar');
       const box = document.getElementById('progreso-ia');
@@ -363,11 +453,13 @@
       btn.disabled = true;
       btn.classList.add('opacity-50');
 
-      paso.innerText = 'Consultando agentes de IA en Vercel...';
+      paso.innerText = 'Consultando agentes de IA en Vercel con currículo EPJA T-P...';
+
+      const nivelTexto = document.getElementById('nivel-epja').options[document.getElementById('nivel-epja').selectedIndex].text;
 
       const payload = {
         asignatura: document.getElementById('asignatura').value,
-        nivel: document.getElementById('nivel-epja').value,
+        nivel: nivelTexto,
         marcoCurricular: document.getElementById('marco-curricular').value,
         objetivoAprendizaje: document.getElementById('texto-oa').value,
         temaEspecifico: document.getElementById('tema-especifico').value,
@@ -462,13 +554,13 @@
           });
         }
 
-        // Habilitar DOCX
+        // Habilitar Descarga Word
         const btnDocx = document.getElementById('btn-docx');
         btnDocx.disabled = false;
         btnDocx.className = 'px-3.5 py-2 bg-[#8B2635] hover:bg-[#701E2A] text-white rounded text-xs font-bold shadow flex items-center gap-1.5 cursor-pointer';
 
         document.getElementById('dictamen-calidad').innerText = 'Dictamen: APROBADO CON IA REAL (100/100)';
-        document.getElementById('resumen-claves').innerText = `Material generado con éxito por modelos de lenguaje reales y verificado bajo currículo EPJA.`;
+        document.getElementById('resumen-claves').innerText = `Instrumento generado y verificado bajo marco EPJA T-P para la Escuela Héctor Valenzuela CEA.`;
 
       } catch (err) {
         errorBox.classList.remove('hidden');
@@ -480,7 +572,7 @@
       }
     }
 
-    // EXPORTACIÓN A WORD (.DOCX)
+    // EXPORTACIÓN A WORD (.DOCX) CON MEMBRETE DEL CEA
     async function exportarWord() {
       if (!materialActual) return;
       if (typeof docx === 'undefined') {
@@ -489,9 +581,11 @@
       }
       const { Document, Packer, Paragraph, TextRun, HeadingLevel, PageBreak, AlignmentType } = docx;
 
+      const nivelTexto = document.getElementById('nivel-epja').options[document.getElementById('nivel-epja').selectedIndex].text;
+
       const parrafos = [
         new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'ESCUELA HÉCTOR VALENZUELA CEA — VILLARRICA', bold: true, size: 26, color: '8B2635' })] }),
-        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'Educación de Personas Jóvenes y Adultas (EPJA)', italics: true, size: 18, color: '555555' })], spacing: { after: 200 } }),
+        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: `Educación de Personas Jóvenes y Adultas (EPJA) — ${nivelTexto}`, italics: true, size: 18, color: '555555' })], spacing: { after: 200 } }),
         new Paragraph({ alignment: AlignmentType.CENTER, heading: HeadingLevel.HEADING_1, children: [new TextRun({ text: materialActual.titulo.toUpperCase(), bold: true, size: 24 })], spacing: { after: 200 } }),
         new Paragraph({ children: [new TextRun({ text: 'I. LECTURA Y ANÁLISIS CONTEXTUALIZADO', bold: true, size: 22, color: '8B2635' })], spacing: { before: 150, after: 100 } }),
         new Paragraph({ children: [new TextRun({ text: materialActual.introduccionLectura, size: 22 })], spacing: { after: 250 }, alignment: AlignmentType.JUSTIFY })
