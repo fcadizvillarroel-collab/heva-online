@@ -3,43 +3,49 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HEVA Online — Escuela Héctor Valenzuela CEA</title>
+  <title>HEVA Online — Suite Pedagógica EPJA</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
   <style>
     :root { --font-base: 16px; }
     body { font-size: var(--font-base); background-color: #FDFBF7; color: #2D3748; font-family: system-ui, -apple-system, sans-serif; }
     .alto-contraste { background-color: #121212 !important; color: #FFFFFF !important; }
     .alto-contraste div, .alto-contraste section, .alto-contraste article { background-color: #1E1E1E !important; color: #FFFFFF !important; border-color: #4A5568 !important; }
     .alto-contraste input, .alto-contraste select, .alto-contraste textarea { background-color: #2D3748 !important; color: #FFF !important; }
+    [contenteditable="true"]:hover { outline: 2px dashed #8B2635; cursor: text; }
+    [contenteditable="true"]:focus { outline: 2px solid #8B2635; background-color: #FFFDF9; }
     @media print {
       .no-print { display: none !important; }
-      body { background: white !important; color: black !important; font-size: 11pt !important; }
+      body { background: white !important; color: black !important; font-size: 10.5pt !important; }
       .pauta-print { page-break-before: always; }
+      .modo-ahorro { padding: 0 !important; margin: 0 !important; }
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- HEADER -->
+  <!-- HEADER INSTITUCIONAL -->
   <header class="no-print bg-[#8B2635] text-white px-6 py-4 shadow-md flex flex-wrap justify-between items-center gap-3">
     <div>
       <h1 class="text-xl font-bold tracking-tight">HEVA Online — Escuela Héctor Valenzuela CEA</h1>
-      <p class="text-xs text-rose-100">Educación de Personas Jóvenes y Adultas (EPJA) Técnico-Profesional | Villarrica</p>
+      <p class="text-xs text-rose-100">Suite Pedagógica Andragógica | Villarrica (Modelos EPJA, DUA y Metodologías Activas)</p>
     </div>
     <div class="flex items-center gap-2 text-xs">
       <span class="bg-black/25 px-3 py-1 rounded text-rose-100 font-medium flex items-center gap-1.5">
         <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
-        Motor Pedagógico Activo
+        ChatGPT / Gemini Calibrado
       </span>
     </div>
   </header>
 
-  <!-- NAVEGACIÓN -->
-  <nav class="no-print bg-white border-b border-stone-200 px-6 flex gap-6 text-sm font-medium overflow-x-auto">
-    <button onclick="cambiarPestana('crear')" id="tab-crear" class="py-3 border-b-2 border-[#8B2635] text-[#8B2635] font-bold whitespace-nowrap">1. Generador Pedagógico</button>
-    <button onclick="cambiarPestana('curriculo')" id="tab-curriculo" class="py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap">2. Biblioteca de Objetivos MINEDUC</button>
-    <button onclick="cambiarPestana('criterios')" id="tab-criterios" class="py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap">3. Criterios CEA y Normativa</button>
+  <!-- NAVEGACIÓN POR HERRAMIENTAS (MAGICSCHOOL STYLE) -->
+  <nav class="no-print bg-white border-b border-stone-200 px-6 flex gap-4 text-xs md:text-sm font-medium overflow-x-auto">
+    <button onclick="cambiarHerramienta('crear')" id="tab-crear" class="py-3 border-b-2 border-[#8B2635] text-[#8B2635] font-bold whitespace-nowrap">🎓 Generador de Instrumentos</button>
+    <button onclick="cambiarHerramienta('diffit')" id="tab-diffit" class="py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap">🔄 Diferenciador Multinivel (Diffit)</button>
+    <button onclick="cambiarHerramienta('remediacion')" id="tab-remediacion" class="py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap">🩹 Plan de Remediación</button>
+    <button onclick="cambiarHerramienta('guardados')" id="tab-guardados" class="py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap">💾 Mis Materiales</button>
+    <button onclick="cambiarHerramienta('curriculo')" id="tab-curriculo" class="py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap">📚 Catálogo MINEDUC</button>
   </nav>
 
   <!-- CONTENIDO PRINCIPAL -->
@@ -55,28 +61,32 @@
         <button onclick="toggleContraste()" class="px-3 py-1 bg-stone-800 text-white rounded text-xs font-semibold hover:bg-black">Alto Contraste</button>
         <button onclick="leerEnVozAlta()" id="btn-voz" class="px-3 py-1 bg-sky-700 text-white rounded text-xs font-semibold hover:bg-sky-800">Lectura Asistida</button>
       </div>
-      <button onclick="window.print()" class="px-3 py-1 bg-stone-700 text-white rounded text-xs font-semibold hover:bg-stone-900">Imprimir para Sala</button>
+      <div class="flex items-center gap-2">
+        <label class="flex items-center gap-1.5 text-xs text-stone-700 cursor-pointer">
+          <input type="checkbox" id="check-ahorro-toner" onchange="toggleModoAhorro()" />
+          <span>Modo Ahorro de Tóner</span>
+        </label>
+        <button onclick="window.print()" class="px-3 py-1 bg-stone-700 text-white rounded text-xs font-semibold hover:bg-stone-900">Imprimir</button>
+      </div>
     </div>
 
-    <!-- SECCIÓN GENERADOR -->
-    <div id="seccion-crear" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- HERRAMIENTA 1: GENERADOR CURRICULAR (GUÍAS Y EVALUACIONES) -->
+    <div id="panel-crear" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-      <!-- Formulario Docente -->
+      <!-- Formulario Guiado -->
       <div class="bg-white p-5 rounded-lg border border-stone-200 shadow-sm space-y-4">
-        <h2 class="text-base font-bold text-[#8B2635] border-b pb-2">Planificación Curricular EPJA</h2>
+        <h2 class="text-base font-bold text-[#8B2635] border-b pb-2">Planificación del Instrumento</h2>
 
-        <!-- 1. Tipo de Material -->
         <div>
           <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Tipo de Material</label>
           <select id="tipo-material" class="w-full border rounded p-2 text-sm bg-white font-medium">
             <option value="GUIA">Guía de Aprendizaje Formativa</option>
             <option value="EVALUACION">Evaluación / Prueba Sumativa (Dec. 67)</option>
             <option value="PLANIFICACION">Planificación de Clase (90 min DUA)</option>
-            <option value="TALLER">Taller de Aplicación Práctica</option>
+            <option value="TALLER">Taller Práctico / Módulo T-P</option>
           </select>
         </div>
 
-        <!-- 2. Marco Curricular -->
         <div>
           <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Marco Curricular</label>
           <select id="marco-curricular" onchange="actualizarTodoElCurriculo()" class="w-full border rounded p-2 text-xs bg-amber-50 font-bold text-amber-950 border-amber-300">
@@ -85,7 +95,6 @@
           </select>
         </div>
 
-        <!-- 3. Nivel Educativo -->
         <div>
           <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Nivel Educativo CEA</label>
           <select id="nivel-epja" onchange="actualizarTodoElCurriculo()" class="w-full border rounded p-2 text-sm bg-stone-50 font-bold text-[#8B2635]">
@@ -96,31 +105,48 @@
           </select>
         </div>
 
-        <!-- 4. Asignatura -->
         <div>
           <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Asignatura del Nivel</label>
           <select id="asignatura" onchange="actualizarObjetivosYEstrategias()" class="w-full border rounded p-2 text-xs bg-white font-semibold text-stone-800"></select>
           <span id="ayuda-malla" class="text-[10px] text-stone-500 italic block mt-0.5"></span>
         </div>
 
-        <!-- 5. OBJETIVO DE APRENDIZAJE (JUSTO ABAJO DE LA ASIGNATURA) -->
+        <!-- OBJETIVO DE APRENDIZAJE (JUSTO ABAJO DE ASIGNATURA) -->
         <div class="border-t pt-2">
-          <label class="block text-xs font-bold uppercase text-[#8B2635] mb-1">Objetivos Oficiales del MINEDUC (OA / OF)</label>
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-xs font-bold uppercase text-[#8B2635]">Objetivo Oficial MINEDUC</label>
+            <span id="contador-oas" class="text-[10px] bg-rose-100 text-[#8B2635] px-1.5 py-0.5 rounded font-bold"></span>
+          </div>
           <select id="select-oa" onchange="cargarOATexto()" class="w-full border rounded p-2 text-xs bg-stone-50 mb-1.5"></select>
           <textarea id="texto-oa" rows="3" class="w-full border rounded p-2 text-xs text-stone-700 bg-white" placeholder="O pegue el objetivo específico aquí..."></textarea>
         </div>
 
-        <!-- 6. ESTRATEGIAS DIDÁCTICAS ENRIQUECIDAS (JUSTO ABAJO DEL OBJETIVO) -->
+        <!-- ESTRATEGIA DIDÁCTICA CON EVIDENCIA (JUSTO ABAJO DEL OBJETIVO) -->
         <div>
           <label class="block text-xs font-bold uppercase text-[#8B2635] mb-1 flex items-center justify-between">
-            <span>Estrategia Didáctica (Evidencia y Andragogía)</span>
+            <span>Estrategia Pedagógica (Evidencia y Andragogía)</span>
             <span class="text-[10px] text-emerald-700 font-semibold">Investigación Activa</span>
           </label>
           <select id="estrategia-didactica" class="w-full border rounded p-2 text-xs bg-emerald-50/50 font-medium text-stone-800 border-emerald-300"></select>
           <p id="desc-estrategia" class="text-[10px] text-stone-500 italic mt-1 leading-snug"></p>
         </div>
 
-        <!-- 7. Adecuaciones PIE -->
+        <!-- TRANSFORMADOR BRISK: Apunte propio del docente -->
+        <div class="border rounded p-2.5 bg-sky-50/50 border-sky-200 space-y-1">
+          <label class="block text-xs font-bold uppercase text-sky-900 flex items-center justify-between">
+            <span>Transformar Apunte Propio (Estilo Brisk)</span>
+            <span class="text-[10px] text-sky-600 font-normal">Opcional</span>
+          </label>
+          <textarea id="texto-referencia" rows="2" class="w-full border rounded p-1.5 text-xs bg-white text-stone-700" placeholder="Pega aquí tu apunte o noticia para que la IA evalúe EXCLUSIVAMENTE sobre él..."></textarea>
+        </div>
+
+        <!-- INSTRUCCIONES PERSONALIZADAS DE TONO Y ESTILO -->
+        <div>
+          <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Instrucciones Especiales del Docente (Tono libre)</label>
+          <input type="text" id="instrucciones-docente" class="w-full border rounded p-2 text-xs text-stone-700" placeholder="Ej: Redacta con tono motivador, menciona ejemplos del sur de Chile..." />
+        </div>
+
+        <!-- ADECUACIONES PIE -->
         <div class="border rounded p-3 bg-stone-50 space-y-2 border-stone-300">
           <label class="block text-xs font-bold uppercase text-[#8B2635] flex items-center justify-between">
             <span>Adecuaciones PIE (Decreto 83/2015)</span>
@@ -137,18 +163,16 @@
             </label>
             <label class="flex items-center gap-2">
               <input type="checkbox" id="pie-graduacion" class="rounded text-[#8B2635]" />
-              <span>Graduación de complejidad (foco en habilidades funcionales)</span>
+              <span>Graduación de complejidad (habilidades funcionales)</span>
             </label>
           </div>
         </div>
 
-        <!-- 8. Tema Específico -->
         <div>
           <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Tema Específico de la Clase</label>
           <input type="text" id="tema-especifico" class="w-full border rounded p-2 text-sm" value="La Segunda Guerra Mundial: causas y consecuencias" />
         </div>
 
-        <!-- 9. Preguntas y Casos -->
         <div class="border-t pt-3 space-y-3">
           <label class="block text-xs font-bold uppercase text-stone-600">Preguntas y Casos</label>
           <div class="grid grid-cols-2 gap-2 text-xs">
@@ -165,9 +189,15 @@
             <span class="text-xs text-stone-500 block mb-1">Situaciones de lectura / análisis:</span>
             <input type="number" id="cant-casos" min="0" max="4" value="2" class="w-full border rounded p-1.5 text-xs text-center font-bold" />
           </div>
+          <div class="pt-1">
+            <label class="flex items-center gap-2 text-xs text-stone-700">
+              <input type="checkbox" id="check-ticket-salida" checked class="rounded text-[#8B2635]" />
+              <span>Incluir Ticket de Salida Formativo (1/2 página)</span>
+            </label>
+          </div>
         </div>
 
-        <button onclick="generarMaterialReal()" id="btn-generar" class="w-full py-3 bg-[#8B2635] hover:bg-[#701E2A] text-white font-bold rounded shadow transition flex items-center justify-center gap-2">
+        <button onclick="generarMaterialReal('GENERADOR_ESTANDAR')" id="btn-generar" class="w-full py-3 bg-[#8B2635] hover:bg-[#701E2A] text-white font-bold rounded shadow transition flex items-center justify-center gap-2">
           <span>Generar con Inteligencia Artificial</span>
         </button>
 
@@ -185,16 +215,22 @@
         </div>
       </div>
 
-      <!-- Visor del Material Generado -->
+      <!-- Visor del Material (Editable en Vivo) -->
       <div class="lg:col-span-2 space-y-4">
         <div id="barra-calidad" class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-emerald-900 flex flex-wrap justify-between items-center gap-2">
           <div>
             <h3 id="dictamen-calidad" class="font-bold text-xs uppercase text-emerald-900">Dictamen: LISTO PARA GENERAR</h3>
-            <p id="resumen-claves" class="text-[11px] text-emerald-800">El material se enfocará estrictamente en la disciplina y la estrategia didáctica elegida.</p>
+            <p id="resumen-claves" class="text-[11px] text-emerald-800">Haz clic en cualquier texto para editarlo directamente antes de descargar.</p>
           </div>
-          <div class="no-print flex gap-2">
-            <button onclick="exportarWord()" id="btn-docx" disabled class="px-3.5 py-2 bg-stone-400 text-white rounded text-xs font-bold shadow flex items-center gap-1.5 cursor-not-allowed">
-              <span>📄 Descargar Word (.docx)</span>
+          <div class="no-print flex gap-2 flex-wrap">
+            <button onclick="guardarEnHistorial()" id="btn-guardar-doc" disabled class="px-3 py-1.5 bg-stone-600 text-white rounded text-xs font-semibold shadow hover:bg-stone-800 disabled:opacity-50">
+              💾 Guardar
+            </button>
+            <button onclick="exportarWord()" id="btn-docx" disabled class="px-3 py-1.5 bg-[#8B2635] hover:bg-[#701E2A] text-white rounded text-xs font-bold shadow flex items-center gap-1 disabled:opacity-50 cursor-not-allowed">
+              📄 Word (.docx)
+            </button>
+            <button onclick="exportarPowerPoint()" id="btn-pptx" disabled class="px-3 py-1.5 bg-amber-700 hover:bg-amber-800 text-white rounded text-xs font-bold shadow flex items-center gap-1 disabled:opacity-50 cursor-not-allowed">
+              📊 PowerPoint (.pptx)
             </button>
           </div>
         </div>
@@ -203,7 +239,7 @@
           <div class="text-center border-b pb-4">
             <h2 class="text-sm md:text-base font-bold text-[#8B2635] tracking-wide">ESCUELA HÉCTOR VALENZUELA CEA — VILLARRICA</h2>
             <p class="text-xs text-stone-500">Educación de Personas Jóvenes y Adultas (EPJA)</p>
-            <h3 id="doc-titulo" class="text-base md:text-lg font-black text-stone-900 mt-2 uppercase">MATERIAL PEDAGÓGICO</h3>
+            <h3 id="doc-titulo" contenteditable="true" class="text-base md:text-lg font-black text-stone-900 mt-2 uppercase">MATERIAL PEDAGÓGICO</h3>
           </div>
 
           <div class="grid grid-cols-2 md:grid-cols-3 gap-2 border p-3 rounded text-xs bg-stone-50">
@@ -212,16 +248,18 @@
             <div><strong>Fecha:</strong> _______________</div>
             <div id="doc-nivel"><strong>Nivel:</strong> III NIVEL BÁSICO</div>
             <div><strong>Exigencia:</strong> 60% (Dec. 67)</div>
-            <div><strong>Puntaje:</strong> ___ pts</div>
+            <div id="doc-puntaje"><strong>Puntaje:</strong> ___ / 16 pts</div>
           </div>
 
+          <!-- I. Lectura -->
           <div>
-            <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">I. Lectura Contextualizada</h4>
-            <div id="doc-lectura" class="text-sm text-stone-700 leading-relaxed text-justify whitespace-pre-line">
+            <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">I. Lectura Contextualizada (Haz clic para editar)</h4>
+            <div id="doc-lectura" contenteditable="true" class="text-sm text-stone-700 leading-relaxed text-justify whitespace-pre-line p-2 rounded border border-transparent hover:border-stone-200">
               El texto redactado por la Inteligencia Artificial aparecerá en esta sección de forma completa y centrada en los contenidos de la asignatura.
             </div>
           </div>
 
+          <!-- II. Casos -->
           <div id="contenedor-casos">
             <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">II. Situaciones de Análisis y Reflexión</h4>
             <div id="lista-casos" class="space-y-3">
@@ -229,6 +267,7 @@
             </div>
           </div>
 
+          <!-- III. Alternativas -->
           <div id="contenedor-alternativas">
             <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">III. Ítem de Selección Múltiple</h4>
             <div id="lista-alternativas" class="space-y-4 text-xs">
@@ -236,6 +275,7 @@
             </div>
           </div>
 
+          <!-- IV. Desarrollo -->
           <div id="contenedor-desarrollo">
             <h4 class="font-bold text-[#8B2635] text-sm uppercase mb-2">IV. Ítem de Desarrollo</h4>
             <div id="lista-desarrollo" class="space-y-4 text-xs">
@@ -243,55 +283,215 @@
             </div>
           </div>
 
-          <div class="pauta-print border-t-2 border-stone-800 pt-4 bg-stone-50 p-4 rounded text-xs space-y-3">
+          <!-- V. Lista de Cotejo T-P -->
+          <div id="contenedor-cotejo-tp" class="hidden border rounded p-4 bg-amber-50/50 border-amber-200 text-xs space-y-2">
+            <h4 class="font-bold text-amber-950 uppercase">V. Pauta de Observación y Desempeño en Taller (T-P)</h4>
+            <table class="w-full text-left border-collapse text-xs bg-white border">
+              <thead>
+                <tr class="bg-amber-100 border-b text-amber-950">
+                  <th class="p-1.5 border">Criterio Técnico / Seguridad</th>
+                  <th class="p-1.5 border">Indicador de Desempeño Observable</th>
+                  <th class="p-1.5 border text-center w-16">Logrado</th>
+                  <th class="p-1.5 border text-center w-20">Por Lograr</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-cotejo-tp"></tbody>
+            </table>
+          </div>
+
+          <!-- VI. Hoja de Respuestas Desprendible -->
+          <div id="contenedor-hoja-respuestas" class="border-t-2 border-dashed border-stone-400 pt-4 bg-stone-50 p-4 rounded text-xs space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-stone-800 uppercase flex items-center gap-1.5">
+                <span>✂️ Hoja de Respuestas Rápida (Desprendible)</span>
+              </span>
+              <span class="text-stone-500 italic">Nombre Estudiante: _______________________</span>
+            </div>
+            <p class="text-[11px] text-stone-500">Marque con una equis (X) la letra de su respuesta para corrección inmediata:</p>
+            <div id="grilla-burbujas" class="grid grid-cols-3 sm:grid-cols-6 gap-2 pt-1"></div>
+          </div>
+
+          <!-- VII. Ticket de Salida Formativo -->
+          <div id="contenedor-ticket-salida" class="border-t-2 border-dashed border-sky-400 pt-4 bg-sky-50/50 p-4 rounded text-xs space-y-2">
+            <div class="flex justify-between items-center text-sky-900">
+              <span class="font-bold uppercase">🎫 Ticket de Salida de la Clase (Cierre Formativo 3 min)</span>
+              <span class="text-stone-500">Fecha: _____________</span>
+            </div>
+            <div class="space-y-1.5 pt-1">
+              <div>
+                <p id="ticket-p1" contenteditable="true" class="font-semibold text-stone-800">1. ¿Cuál es el aprendizaje principal de la sesión de hoy?</p>
+                <div class="h-8 border-b border-dashed border-sky-300"></div>
+              </div>
+              <div class="pt-1">
+                <p id="ticket-p2" contenteditable="true" class="font-semibold text-stone-800">2. ¿En qué situación concreta podrías aplicar lo aprendido?</p>
+                <div class="h-8 border-b border-dashed border-sky-300"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- VIII. Pauta de Corrección y Escala 60% -->
+          <div class="pauta-print border-t-2 border-stone-800 pt-4 bg-stone-50 p-4 rounded text-xs space-y-4">
             <div class="flex justify-between items-center">
               <span class="font-bold text-[#8B2635] uppercase">Pauta Docente de Corrección y Criterios (Decreto 67)</span>
               <span class="text-stone-500 italic">Uso Exclusivo Docente</span>
             </div>
             
-            <table class="w-full text-left border-collapse text-xs">
+            <table class="w-full text-left border-collapse text-xs bg-white border">
               <thead>
                 <tr class="bg-stone-200 border-b">
-                  <th class="p-1.5">Ítem</th>
-                  <th class="p-1.5 font-bold">Clave / Puntaje</th>
-                  <th class="p-1.5">Habilidad</th>
-                  <th class="p-1.5">Criterio de Evaluación y Evidencia</th>
+                  <th class="p-1.5 border">Ítem</th>
+                  <th class="p-1.5 font-bold border">Clave / Puntaje</th>
+                  <th class="p-1.5 border">Habilidad</th>
+                  <th class="p-1.5 border">Criterio de Evaluación y Evidencia</th>
                 </tr>
               </thead>
               <tbody id="tabla-pauta">
                 <tr><td colspan="4" class="p-2 text-stone-400 italic text-center">La pauta se generará con el material.</td></tr>
               </tbody>
             </table>
+
+            <div class="border rounded p-3 bg-white space-y-2">
+              <h5 class="font-bold text-stone-800 text-xs flex justify-between">
+                <span>Tabla de Conversión Puntaje a Nota (Exigencia 60% — Decreto 67)</span>
+                <span id="label-corte-nota" class="text-[#8B2635]">Puntaje de Aprobación (4.0): -- pts</span>
+              </h5>
+              <div id="tabla-escala-notas" class="grid grid-cols-4 sm:grid-cols-8 gap-1 text-[11px] font-mono text-center max-h-40 overflow-y-auto"></div>
+            </div>
           </div>
         </article>
       </div>
     </div>
 
-    <!-- SECCIÓN CURRÍCULO COMPLETO -->
-    <div id="seccion-curriculo" class="hidden bg-white p-6 rounded-lg border border-stone-200 space-y-4">
+    <!-- HERRAMIENTA 2: DIFERENCIADOR MULTINIVEL (DIFFIT STYLE) -->
+    <div id="panel-diffit" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-lg border border-stone-200 shadow-sm space-y-4">
+        <div>
+          <h2 class="text-base font-bold text-[#8B2635] flex items-center gap-2">
+            <span>🔄 Diferenciador Multinivel de Textos (Estilo Diffit)</span>
+          </h2>
+          <p class="text-xs text-stone-600 mt-1">Genera dos versiones del mismo tema: una <strong>Versión Estándar</strong> y una <strong>Versión Nivelada DUA (Lectura Fácil)</strong> con glosario de apoyo para atender estudiantes con dificultades lectoras.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Asignatura</label>
+            <input type="text" id="diffit-asig" class="w-full border rounded p-2 text-xs" value="Estudios Sociales" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Nivel EPJA</label>
+            <input type="text" id="diffit-nivel" class="w-full border rounded p-2 text-xs" value="III NIVEL BÁSICO" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Tema a Diferenciar</label>
+            <input type="text" id="diffit-tema" class="w-full border rounded p-2 text-xs" value="La Segunda Guerra Mundial: causas y consecuencias" />
+          </div>
+        </div>
+
+        <button onclick="generarDiffit()" id="btn-generar-diffit" class="px-5 py-2.5 bg-[#8B2635] hover:bg-[#701E2A] text-white rounded font-bold text-xs shadow flex items-center gap-2">
+          <span>Generar Lecturas Diferenciadas</span>
+        </button>
+
+        <div id="visor-diffit" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+          <div class="p-4 border rounded bg-stone-50 space-y-2">
+            <span class="text-xs font-bold uppercase bg-stone-200 px-2 py-0.5 rounded text-stone-800">Versión 1: Lectura Estándar</span>
+            <div id="diffit-texto-estandar" contenteditable="true" class="text-xs text-stone-700 leading-relaxed text-justify whitespace-pre-line p-2 bg-white rounded border"></div>
+          </div>
+          <div class="p-4 border rounded bg-emerald-50/50 border-emerald-200 space-y-2">
+            <span class="text-xs font-bold uppercase bg-emerald-100 px-2 py-0.5 rounded text-emerald-900">Versión 2: Lectura Fácil DUA (Apoyo PIE)</span>
+            <div id="diffit-texto-dua" contenteditable="true" class="text-xs text-stone-700 leading-relaxed text-justify whitespace-pre-line p-2 bg-white rounded border border-emerald-200"></div>
+            <div class="pt-2">
+              <strong class="text-[11px] text-emerald-950 uppercase block mb-1">Glosario de Apoyo:</strong>
+              <div id="diffit-glosario" class="space-y-1 text-xs"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HERRAMIENTA 3: PLAN DE REMEDIACIÓN Y NIVELACIÓN -->
+    <div id="panel-remediacion" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-lg border border-stone-200 shadow-sm space-y-4">
+        <div>
+          <h2 class="text-base font-bold text-[#8B2635] flex items-center gap-2">
+            <span>🩹 Plan de Remediación y Nivelación Escolar</span>
+          </h2>
+          <p class="text-xs text-stone-600 mt-1">Genera una ficha de recuperación para estudiantes con notas bajo 4.0: síntesis conceptual, un ejercicio modelado paso a paso y 3 actividades de reaprendizaje progresivo.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Asignatura</label>
+            <input type="text" id="remed-asig" class="w-full border rounded p-2 text-xs" value="Educación Matemática" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Nivel EPJA</label>
+            <input type="text" id="remed-nivel" class="w-full border rounded p-2 text-xs" value="I NIVEL MEDIO T-P" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Contenido no logrado</label>
+            <input type="text" id="remed-tema" class="w-full border rounded p-2 text-xs" value="Ecuaciones lineales y cálculo de porcentajes" />
+          </div>
+        </div>
+
+        <button onclick="generarRemediacion()" id="btn-generar-remed" class="px-5 py-2.5 bg-[#8B2635] hover:bg-[#701E2A] text-white rounded font-bold text-xs shadow flex items-center gap-2">
+          <span>Generar Plan de Remediación</span>
+        </button>
+
+        <div id="visor-remediacion" class="hidden space-y-4 pt-4 border-t">
+          <div class="p-4 border rounded bg-amber-50 border-amber-200 space-y-1">
+            <strong class="text-xs font-bold uppercase text-amber-950">1. Diagnóstico del Error Común:</strong>
+            <p id="remed-diagnostico" class="text-xs text-stone-700"></p>
+          </div>
+          <div class="p-4 border rounded bg-white space-y-2">
+            <strong class="text-xs font-bold uppercase text-[#8B2635]">2. Ejercicio Típico Modelado Paso a Paso:</strong>
+            <p id="remed-modelado-enunciado" class="text-xs font-semibold text-stone-900"></p>
+            <p id="remed-modelado-pasos" class="text-xs text-stone-700 bg-stone-50 p-2 rounded whitespace-pre-line"></p>
+          </div>
+          <div class="p-4 border rounded bg-white space-y-3">
+            <strong class="text-xs font-bold uppercase text-stone-800">3. Actividades de Reaprendizaje Progresivo:</strong>
+            <div id="remed-actividades" class="space-y-2 text-xs"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PESTAÑA 4: MIS MATERIALES GUARDADOS -->
+    <div id="panel-guardados" class="hidden bg-white p-6 rounded-lg border border-stone-200 space-y-4">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-base font-bold text-[#8B2635]">Mis Materiales Guardados (Memoria Local)</h2>
+          <p class="text-xs text-stone-600">Guías y evaluaciones almacenadas en tu navegador para no perder tu trabajo.</p>
+        </div>
+        <button onclick="limpiarTodoElHistorial()" class="text-xs text-red-600 hover:underline">Borrar todo el historial</button>
+      </div>
+      <div id="lista-guardados" class="space-y-2 text-xs"></div>
+    </div>
+
+    <!-- PESTAÑA 5: BIBLIOTECA MINEDUC -->
+    <div id="panel-curriculo" class="hidden bg-white p-6 rounded-lg border border-stone-200 space-y-4">
       <div class="flex justify-between items-center flex-wrap gap-3">
         <div>
           <h2 class="text-base font-bold text-[#8B2635]">Biblioteca Curricular Oficial EPJA (MINEDUC)</h2>
           <p class="text-xs text-stone-600">Catálogo estructurado por nivel y materia según Decreto N° 257/2009 y Bases Curriculares 2024.</p>
         </div>
-        <input type="text" id="buscador-curriculo" onkeyup="filtrarCatalogo()" placeholder="Buscar objetivo (ej: Segunda Guerra, células, ecuaciones)..." class="border rounded p-2 text-xs w-72" />
+        <input type="text" id="buscador-curriculo" onkeyup="filtrarCatalogo()" placeholder="Buscar objetivo..." class="border rounded p-2 text-xs w-72" />
       </div>
       <div id="catalogo-completo" class="divide-y text-xs border rounded max-h-[550px] overflow-y-auto"></div>
     </div>
 
-    <!-- SECCIÓN CRITERIOS -->
-    <div id="seccion-criterios" class="hidden bg-white p-6 rounded-lg border border-stone-200 space-y-4">
+    <!-- PESTAÑA 6: CRITERIOS CEA -->
+    <div id="panel-criterios" class="hidden bg-white p-6 rounded-lg border border-stone-200 space-y-4">
       <h2 class="text-base font-bold text-[#8B2635]">Criterios Institucionales — Escuela Héctor Valenzuela CEA</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
         <div class="p-4 border rounded bg-stone-50 space-y-2">
-          <h4 class="font-bold text-stone-900">Enfoque Curricular Riguroso</h4>
-          <p class="text-stone-600">• El material responde con fidelidad al contenido disciplinar de cada asignatura.</p>
-          <p class="text-stone-600">• Solo se incorporan materias de oficio o técnicas en los niveles y asignaturas correspondientes.</p>
+          <h4 class="font-bold text-stone-900">Enfoque Curricular y Metodologías Activas</h4>
+          <p class="text-stone-600">• El material responde con rigor disciplinar a la asignatura y al Objetivo de Aprendizaje.</p>
+          <p class="text-stone-600">• Se aplican estrategias andragógicas basadas en evidencia (Harvard Project Zero, Marzano, Hattie, Solé y Polya).</p>
         </div>
         <div class="p-4 border rounded bg-stone-50 space-y-2">
           <h4 class="font-bold text-stone-900">Evaluación y Diversidad</h4>
-          <p class="text-stone-600">• Escala de exigencia académica fijada en el <strong>60%</strong> conforme al <strong>Decreto 67/2018</strong>.</p>
-          <p class="text-stone-600">• Aplicación de adecuaciones curriculares bajo el <strong>Decreto 83/2015</strong> para estudiantes PIE.</p>
+          <p class="text-stone-600">• Exigencia académica al <strong>60%</strong> conforme al <strong>Decreto 67/2018</strong>.</p>
+          <p class="text-stone-600">• Diferenciación y adecuaciones curriculares bajo el <strong>Decreto 83/2015</strong> para estudiantes PIE.</p>
         </div>
       </div>
     </div>
@@ -299,95 +499,34 @@
   </main>
 
   <script>
+    // MATRIZ EXHAUSTIVA DE ASIGNATURAS Y NOMBRES POR MARCO
     const ESTRUCTURA_CURRICULAR = {
       'DECRETO_257_2009': {
-        'III_BASICO': [
-          'Lenguaje y Comunicación',
-          'Educación Matemática',
-          'Estudios Sociales',
-          'Ciencias Naturales',
-          'Idioma Extranjero Inglés',
-          'Formación en Oficios'
-        ],
-        'I_MEDIO_TP': [
-          'Lengua Castellana y Comunicación',
-          'Educación Matemática',
-          'Estudios Sociales',
-          'Ciencias Naturales',
-          'Idioma Extranjero Inglés',
-          'Tecnologías de la Información (TIC)',
-          'Construcciones Metálicas (Módulo T-P)'
-        ],
-        'II_MEDIO_TP': [
-          'Consumo y Calidad de Vida',
-          'Convivencia Social y Ciudadanía',
-          'Lengua Castellana y Comunicación',
-          'Educación Matemática',
-          'Estudios Sociales',
-          'Ciencias Naturales',
-          'Idioma Extranjero Inglés',
-          'Construcciones Metálicas (Módulo T-P)'
-        ],
-        'III_MEDIO_TP': [
-          'Inserción Laboral',
-          'Lengua Castellana y Comunicación',
-          'Educación Matemática',
-          'Estudios Sociales',
-          'Idioma Extranjero Inglés',
-          'Construcciones Metálicas (Módulo T-P)'
-        ]
+        'III_BASICO': ['Lenguaje y Comunicación', 'Educación Matemática', 'Estudios Sociales', 'Ciencias Naturales', 'Idioma Extranjero Inglés', 'Formación en Oficios'],
+        'I_MEDIO_TP': ['Lengua Castellana y Comunicación', 'Educación Matemática', 'Estudios Sociales', 'Ciencias Naturales', 'Idioma Extranjero Inglés', 'Tecnologías de la Información (TIC)', 'Construcciones Metálicas (Módulo T-P)'],
+        'II_MEDIO_TP': ['Consumo y Calidad de Vida', 'Convivencia Social y Ciudadanía', 'Lengua Castellana y Comunicación', 'Educación Matemática', 'Estudios Sociales', 'Ciencias Naturales', 'Idioma Extranjero Inglés', 'Construcciones Metálicas (Módulo T-P)'],
+        'III_MEDIO_TP': ['Inserción Laboral', 'Lengua Castellana y Comunicación', 'Educación Matemática', 'Estudios Sociales', 'Idioma Extranjero Inglés', 'Construcciones Metálicas (Módulo T-P)']
       },
       'BASES_CURRICULARES_2024': {
-        'III_BASICO': [
-          'Lenguaje y Comunicación',
-          'Matemática',
-          'Historia, Geografía y Ciencias Sociales',
-          'Ciencias Naturales',
-          'Inglés',
-          'Formación en Oficios'
-        ],
-        'I_MEDIO_TP': [
-          'Lengua y Literatura',
-          'Matemática',
-          'Historia, Geografía y Ciencias Sociales',
-          'Ciencias Naturales',
-          'Inglés',
-          'Tecnología y Ciudadanía Digital',
-          'Construcciones Metálicas (Módulo T-P)'
-        ],
-        'II_MEDIO_TP': [
-          'Consumo Responsable y Sostenibilidad',
-          'Responsabilidad Personal y Social',
-          'Lengua y Literatura',
-          'Matemática',
-          'Historia, Geografía y Ciencias Sociales',
-          'Ciencias Naturales',
-          'Inglés',
-          'Construcciones Metálicas (Módulo T-P)'
-        ],
-        'III_MEDIO_TP': [
-          'Emprendimiento y Empleabilidad',
-          'Lengua y Literatura',
-          'Matemática',
-          'Historia, Geografía y Ciencias Sociales',
-          'Inglés',
-          'Construcciones Metálicas (Módulo T-P)'
-        ]
+        'III_BASICO': ['Lenguaje y Comunicación', 'Matemática', 'Historia, Geografía y Ciencias Sociales', 'Ciencias Naturales', 'Inglés', 'Formación en Oficios'],
+        'I_MEDIO_TP': ['Lengua y Literatura', 'Matemática', 'Historia, Geografía y Ciencias Sociales', 'Ciencias Naturales', 'Inglés', 'Tecnología y Ciudadanía Digital', 'Construcciones Metálicas (Módulo T-P)'],
+        'II_MEDIO_TP': ['Consumo Responsable y Sostenibilidad', 'Responsabilidad Personal y Social', 'Lengua y Literatura', 'Matemática', 'Historia, Geografía y Ciencias Sociales', 'Ciencias Naturales', 'Inglés', 'Construcciones Metálicas (Módulo T-P)'],
+        'III_MEDIO_TP': ['Emprendimiento y Empleabilidad', 'Lengua y Literatura', 'Matemática', 'Historia, Geografía y Ciencias Sociales', 'Inglés', 'Construcciones Metálicas (Módulo T-P)']
       }
     };
 
+    // BATERÍA DE ESTRATEGIAS DIDÁCTICAS ENRIQUECIDAS
     const ESTRATEGIAS_POR_ASIGNATURA = {
       'Estudios Sociales': [
-        'Análisis de Fuentes Primarias y Testimonios Históricos (Método Stanford SHEG)',
+        'Análisis de Fuentes Primarias y Testimonios Históricos (Stanford SHEG)',
         'Rutina de Pensamiento Visible: "Veo, Pienso, Me Pregunto" (Harvard Project Zero)',
         'Análisis Multicausal y Comparación Pasado-Presente (Enfoque Sociocrítico)',
         'Cartografía y Relaciones Espacio-Temporales del Territorio Chileno'
       ],
       'Historia, Geografía y Ciencias Sociales': [
-        'Análisis de Fuentes Primarias y Testimonios Históricos (Método Stanford SHEG)',
+        'Análisis de Fuentes Primarias y Testimonios Históricos (Stanford SHEG)',
         'Rutina de Pensamiento Visible: "Puntos de Brújula" sobre Procesos Sociales (Harvard)',
-        'Controversias Históricas y Argumentación Ciudadana Fundamentada',
-        'Análisis de Impacto Geográfico y Desarrollo Sostenible Regional'
+        'Controversias Históricas y Argumentación Ciudadana Fundamentada'
       ],
       'Ciencias Naturales': [
         'Método de Indagación Científica Guiada: Observar, Predecir, Explicar (POE)',
@@ -407,8 +546,7 @@
       ],
       'Lengua y Literatura': [
         'Lectura Crítica Dialógica de Ensayos y Columnas de Opinión Pública (Daniel Cassany)',
-        'Producción Argumentativa Estructurada bajo el Modelo de Toulmin (Tesis, Base, Garantía)',
-        'Interpretación de Conflictos Humanos y Dilemas Éticos en Obras Literarias'
+        'Producción Argumentativa Estructurada bajo el Modelo de Toulmin (Tesis, Base, Garantía)'
       ],
       'Educación Matemática': [
         'Método COPISI para Adultos (Concreto -> Pictórico -> Simbólico)',
@@ -418,8 +556,7 @@
       ],
       'Matemática': [
         'Método COPISI para Adultos (Concreto -> Pictórico -> Simbólico)',
-        'Resolución de Problemas en 4 Fases de George Polya (Comprender, Planear, Ejecutar, Mirar atrás)',
-        'Modelamiento Matemático y Análisis Funcional de Datos Gráficos',
+        'Resolución de Problemas en 4 Fases de George Polya',
         'Educación Financiera Crítica: Tasas de Interés, Amortización y Variación Porcentual'
       ],
       'Consumo y Calidad de Vida': [
@@ -430,33 +567,29 @@
       ],
       'Consumo Responsable y Sostenibilidad': [
         'Estudio de Casos de Consumo Crítico, Huella de Carbono y Economía Circular',
-        'Derechos del Consumidor ante el Comercio Electrónico y Ciberseguridad',
-        'Planificación Financiera Sostenible y Eficiencia Energética en el Hogar'
+        'Derechos del Consumidor ante el Comercio Electrónico y Ciberseguridad'
       ],
       'Convivencia Social y Ciudadanía': [
         'Resolución Dialógica de Conflictos y Mediación Comunitaria (Enfoque Prosocial)',
-        'Análisis de Dilemas Éticos y Derechos Humanos Fundamentales en Chile',
-        'Mapeo de Organizaciones Ciudadanas y Canales de Participación Democrática'
+        'Análisis de Dilemas Éticos y Derechos Humanos Fundamentales en Chile'
       ],
       'Responsabilidad Personal y Social': [
-        'Construcción de Proyecto de Vida y Autorregulación Emocional en Adultos',
-        'Ética Cívica, Responsabilidad Social y Convivencia Democrática'
+        'Construcción de Proyecto de Vida y Autorregulación Emocional en Adultos'
       ],
       'Inserción Laboral': [
         'Análisis de Cláusulas Reales de Contratos de Trabajo según el Código del Trabajo',
         'Desglose Práctico de Liquidaciones de Sueldo (Haberes, Descuentos Legales AFP/Salud)',
-        'Simulación de Entrevista Laboral por Competencias (Método STAR: Situación, Tarea, Acción, Resultado)',
+        'Simulación de Entrevista Laboral por Competencias (Método STAR)',
         'Estudio de Casos de la Ley N° 16.744 sobre Accidentes del Trabajo y Prevención de Riesgos'
       ],
       'Emprendimiento y Empleabilidad': [
         'Modelo Canvas Simplificado para Microemprendimientos Productivos de Adultos',
-        'Técnicas de Búsqueda Activa de Empleo y Postulación a Fondos Concursables (FOSIS/SERCOTEC)',
-        'Simulación de Trámites Tributarios Básicos ante el Servicio de Impuestos Internos (SII)'
+        'Técnicas de Búsqueda Activa de Empleo y Postulación a Fondos Concursables'
       ],
       'Construcciones Metálicas (Módulo T-P)': [
         'Interpretación de Planos Normalizados y Simbología de Soldadura AWS (American Welding Society)',
         'Estudio de Casos de Fallas Estructurales y Protocolo de Inspección Visual (VT)',
-        'Simulación de Parámetros de Soldeo (SMAW, MIG-MAG, TIG) y Hojas de Procedimiento (WPS)',
+        'Simulación de Parámetros de Soldeo (SMAW, MIG-MAG, TIG) y Hojas WPS',
         'Planificación de Cubicación de Perfiles de Acero y Rendimiento de Consumibles'
       ],
       'Idioma Extranjero Inglés': [
@@ -464,89 +597,289 @@
         'Lectura Guiada de Señalética Internacional de Seguridad y Advertencias Técnicas'
       ],
       'Inglés': [
-        'Enfoque Comunicativo Situacional (Task-Based Learning) para el Ámbito Cotidiano y Laboral',
-        'Comprensión Lectora de Fichas Técnicas Breves y Especificaciones en Inglés'
+        'Enfoque Comunicativo Situacional (Task-Based Learning) para el Ámbito Cotidiano y Laboral'
       ],
       'Formación en Oficios': [
         'Secuencia de Taller: Planificación, Trazado, Ejecución y Control de Calidad',
-        'Pauta de Cotejo y Checklist de Seguridad en Uso de Herramientas Manuales y Eléctricas'
+        'Pauta de Cotejo y Checklist de Seguridad en Uso de Herramientas'
       ],
       'Tecnologías de la Información (TIC)': [
-        'Elaboración Guiada de Reportes Formales y Planillas de Cálculo para Control de Insumos',
-        'Ciberseguridad Práctica y Gestión Segura de Clave Única y Trámites del Estado'
+        'Elaboración Guiada de Reportes Formales y Planillas de Cálculo para Control de Insumos'
       ],
       'Tecnología y Ciudadanía Digital': [
-        'Alfabetización Digital Funcional y Gestión Segura de Plataformas Laborales y Ciudadanas'
+        'Alfabetización Digital Funcional y Gestión Segura de Plataformas'
       ]
     };
 
-    // BANCO EXHAUSTIVO DE OBJETIVOS MINEDUC
-    const CATALOGO_EPJA = [
-      // === ESTUDIOS SOCIALES / HISTORIA ===
-      { codigo: 'OF-SOC-01', asignatura: 'Estudios Sociales', marco: 'Decreto 257/2009', desc: 'Analizar las causas, desarrollo y consecuencias de la Segunda Guerra Mundial y el impacto del Holocausto en la defensa de los Derechos Humanos.' },
-      { codigo: 'OF-SOC-02', asignatura: 'Estudios Sociales', marco: 'Decreto 257/2009', desc: 'Caracterizar el proceso de globalización económica, cultural y tecnológica en el mundo contemporáneo y sus efectos en la sociedad chilena.' },
-      { codigo: 'OF-SOC-03', asignatura: 'Estudios Sociales', marco: 'Decreto 257/2009', desc: 'Comprender el período de la Guerra Fría, la polarización ideológica del mundo y su repercusión en América Latina y Chile.' },
-      { codigo: 'OF-SOC-04', asignatura: 'Estudios Sociales', marco: 'Decreto 257/2009', desc: 'Analizar las transformaciones políticas y sociales en Chile durante el siglo XX: democratización, crisis de 1973 y retorno a la democracia.' },
-      { codigo: 'OF-SOC-05', asignatura: 'Estudios Sociales', marco: 'Decreto 257/2009', desc: 'Reconocer la organización política democrática de Chile, la división de los poderes del Estado y los derechos y deberes ciudadanos.' },
-      { codigo: 'OF-SOC-06', asignatura: 'Estudios Sociales', marco: 'Decreto 257/2009', desc: 'Reconocer las características geográficas, climáticas y de recursos naturales de las principales regiones de Chile.' },
-      
-      { codigo: 'OA-SOC-24', asignatura: 'Historia, Geografía y Ciencias Sociales', marco: 'Bases Curriculares EPJA 2024', desc: 'Analizar las grandes transformaciones políticas, sociales y culturales del siglo XX y XXI a nivel mundial y nacional.' },
-      { codigo: 'OA-SOC-25', asignatura: 'Historia, Geografía y Ciencias Sociales', marco: 'Bases Curriculares EPJA 2024', desc: 'Comprender los principios de la convivencia democrática, la institucionalidad republicana y la vigencia universal de los Derechos Humanos.' },
-
-      // === CIENCIAS NATURALES ===
-      { codigo: 'OF-NAT-01', asignatura: 'Ciencias Naturales', marco: 'Decreto 257/2009', desc: 'Comprender la estructura atómica de la materia, la organización de la tabla periódica y los diferentes tipos de enlaces químicos.' },
-      { codigo: 'OF-NAT-02', asignatura: 'Ciencias Naturales', marco: 'Decreto 257/2009', desc: 'Explicar las leyes del movimiento de Newton, el concepto de fuerza, inercia y energía mecánica en situaciones cotidianas.' },
-      { codigo: 'OF-NAT-03', asignatura: 'Ciencias Naturales', marco: 'Decreto 257/2009', desc: 'Comprender el flujo de materia y energía en los ecosistemas (cadenas tróficas) y la importancia de la conservación de la biodiversidad.' },
-      { codigo: 'OF-NAT-04', asignatura: 'Ciencias Naturales', marco: 'Decreto 257/2009', desc: 'Explicar la función celular básica, los procesos de respiración celular y fotosíntesis como base de la vida.' },
-      { codigo: 'OF-NAT-05', asignatura: 'Ciencias Naturales', marco: 'Decreto 257/2009', desc: 'Reconocer los factores que inciden en la salud humana: alimentación equilibrada, prevención de adicciones y funcionamiento del sistema inmunológico.' },
-
-      // === LENGUAJE / LENGUA Y LITERATURA ===
-      { codigo: 'OF-LEN-01', asignatura: 'Lengua Castellana y Comunicación', marco: 'Decreto 257/2009', desc: 'Leer comprensivamente textos no literarios (artículos informativos, noticias, columnas de opinión), identificando tesis, argumentos y propósitos del emisor.' },
-      { codigo: 'OF-LEN-02', asignatura: 'Lengua Castellana y Comunicación', marco: 'Decreto 257/2009', desc: 'Producir textos argumentativos y expositivos escritos con coherencia, cohesión textual y corrección ortográfica.' },
-      { codigo: 'OF-LEN-03', asignatura: 'Lenguaje y Comunicación', marco: 'Decreto 257/2009', desc: 'Identificar ideas principales, hechos y opiniones en textos de uso cotidiano, infiriendo información implícita relevante.' },
-      { codigo: 'OA-LEN-24', asignatura: 'Lengua y Literatura', marco: 'Bases Curriculares EPJA 2024', desc: 'Analizar críticamente textos periodísticos y de divulgación, reconociendo recursos retóricos y sesgos informativos.' },
-      { codigo: 'OA-LEN-25', asignatura: 'Lengua y Literatura', marco: 'Bases Curriculares EPJA 2024', desc: 'Escribir textos claros y organizados para fundamentar puntos de vista sobre problemáticas sociales o comunitarias.' },
-
-      // === MATEMÁTICA ===
-      { codigo: 'OF-MAT-01', asignatura: 'Educación Matemática', marco: 'Decreto 257/2009', desc: 'Resolver problemas que involucren operaciones con números racionales (fracciones, decimales) en contextos de medición y cálculo cotidiano.' },
-      { codigo: 'OF-MAT-02', asignatura: 'Educación Matemática', marco: 'Decreto 257/2009', desc: 'Calcular porcentajes, razones y proporciones directas e inversas en situaciones de comercio, intereses y variación proporcional.' },
-      { codigo: 'OF-MAT-03', asignatura: 'Educación Matemática', marco: 'Decreto 257/2009', desc: 'Resolver ecuaciones lineales de primer grado y utilizarlas para modelar problemas matemáticos.' },
-      { codigo: 'OF-MAT-04', asignatura: 'Educación Matemática', marco: 'Decreto 257/2009', desc: 'Calcular perímetros, áreas y volúmenes de figuras geométricas y cuerpos regulares en problemas de medición práctica.' },
-      { codigo: 'OA-MAT-24', asignatura: 'Matemática', marco: 'Bases Curriculares EPJA 2024', desc: 'Modelar y resolver problemas matemáticos mediante funciones, álgebra básica y estadística descriptiva.' },
-
-      // === CONSUMO Y CALIDAD DE VIDA (2° Medio TP) ===
-      { codigo: 'OF-CCV-01', asignatura: 'Consumo y Calidad de Vida', marco: 'Decreto 257/2009', desc: 'Reconocer los derechos y deberes fundamentales del consumidor en Chile según la Ley N° 19.496 y los canales de reclamo ante el SERNAC.' },
-      { codigo: 'OF-CCV-02', asignatura: 'Consumo y Calidad de Vida', marco: 'Decreto 257/2009', desc: 'Elaborar presupuestos familiares mensuales equilibrados, evaluando los riesgos del sobreendeudamiento y las tasas de interés en compras a crédito.' },
-      { codigo: 'OF-CCV-03', asignatura: 'Consumo y Calidad de Vida', marco: 'Decreto 257/2009', desc: 'Analizar críticamente el etiquetado nutricional (Ley 20.606 de sellos de advertencia) para una alimentación informada y saludable.' },
-      { codigo: 'OF-CCV-04', asignatura: 'Consumo y Calidad de Vida', marco: 'Decreto 257/2009', desc: 'Comprender el consumo y cobro de servicios básicos domiciliarios (electricidad, agua, gas), promoviendo la eficiencia energética y el ahorro.' },
-      { codigo: 'OA-CRS-24', asignatura: 'Consumo Responsable y Sostenibilidad', marco: 'Bases Curriculares EPJA 2024', desc: 'Evaluar pautas de consumo responsable considerando impacto ambiental, derechos del consumidor y compras sustentables.' },
-
-      // === CONVIVENCIA SOCIAL Y CIUDADANÍA (2° Medio TP) ===
-      { codigo: 'OF-CON-01', asignatura: 'Convivencia Social y Ciudadanía', marco: 'Decreto 257/2009', desc: 'Analizar los principios de la convivencia democrática, la no discriminación y las estrategias de resolución pacífica de conflictos comunitarios.' },
-      { codigo: 'OF-CON-02', asignatura: 'Convivencia Social y Ciudadanía', marco: 'Decreto 257/2009', desc: 'Reconocer el rol de las organizaciones sociales y las instituciones de defensa de los Derechos Humanos en Chile.' },
-      { codigo: 'OA-RPS-24', asignatura: 'Responsabilidad Personal y Social', marco: 'Bases Curriculares EPJA 2024', desc: 'Desarrollar habilidades de comunicación asertiva, empatía y responsabilidad ética en proyectos comunitarios.' },
-
-      // === INSERCIÓN LABORAL (3° Medio TP) ===
-      { codigo: 'OF-INS-01', asignatura: 'Inserción Laboral', marco: 'Decreto 257/2009', desc: 'Interpretar las normas del Código del Trabajo respecto a tipos de contrato, jornadas de trabajo, descansos y derechos laborales fundamentales.' },
-      { codigo: 'OF-INS-02', asignatura: 'Inserción Laboral', marco: 'Decreto 257/2009', desc: 'Comprender la liquidación de sueldo, haberes imponibles y descuentos previsionales obligatorios (AFP, Fonasa/Isapre, Seguro de Cesantía).' },
-      { codigo: 'OF-INS-03', asignatura: 'Inserción Laboral', marco: 'Decreto 257/2009', desc: 'Conocer las disposiciones de la Ley 16.744 sobre accidentes del trabajo, mutualidades y prevención de riesgos laborales.' },
-      { codigo: 'OF-INS-04', asignatura: 'Inserción Laboral', marco: 'Decreto 257/2009', desc: 'Elaborar un currículum vitae funcional y preparar estrategias de comunicación asertiva para entrevistas de trabajo.' },
-      { codigo: 'OA-EMP-24', asignatura: 'Emprendimiento y Empleabilidad', marco: 'Bases Curriculares EPJA 2024', desc: 'Diseñar propuestas de inserción laboral o emprendimiento productivo evaluando requerimientos legales y de mercado.' },
-
-      // === CONSTRUCCIONES METÁLICAS (Módulo TP) ===
-      { codigo: 'OF-TP-01', asignatura: 'Construcciones Metálicas (Módulo T-P)', marco: 'Decreto 452/2013 TP', desc: 'Interpretar planos técnicos de dibujo mecánico reconociendo vistas, acotaciones y simbología estandarizada de soldadura AWS.' },
-      { codigo: 'OF-TP-02', asignatura: 'Construcciones Metálicas (Módulo T-P)', marco: 'Decreto 452/2013 TP', desc: 'Ejecutar uniones soldadas con proceso de arco manual con electrodo revestido (SMAW) cumpliendo normas de seguridad de taller.' },
-      { codigo: 'OF-TP-03', asignatura: 'Construcciones Metálicas (Módulo T-P)', marco: 'Decreto 452/2013 TP', desc: 'Operar equipos de soldadura semiautomática MIG-MAG (GMAW) regulando parámetros de voltaje, amperaje y caudal de gas.' },
-      { codigo: 'OF-TP-04', asignatura: 'Construcciones Metálicas (Módulo T-P)', marco: 'Decreto 452/2013 TP', desc: 'Ejecutar procesos de soldadura TIG (GTAW) en planchas y tubos metálicos garantizando calidad superficial y estanqueidad.' },
-
-      // === INGLÉS ===
-      { codigo: 'OF-ING-01', asignatura: 'Idioma Extranjero Inglés', marco: 'Decreto 257/2009', desc: 'Comprender vocabulario básico y frases de uso frecuente en inglés sobre señalética, instrucciones simples y descripciones breves.' },
-      { codigo: 'OA-ING-24', asignatura: 'Inglés', marco: 'Bases Curriculares EPJA 2024', desc: 'Leer y comprender textos informativos e instructivos breves en inglés vinculados a situaciones cotidianas.' },
-
-      // === OFICIOS Y TIC ===
-      { codigo: 'OF-OFI-01', asignatura: 'Formación en Oficios', marco: 'Decreto 257/2009', desc: 'Reconocer el funcionamiento y normas de seguridad en el uso de herramientas manuales y eléctricas de taller.' },
-      { codigo: 'OF-TIC-01', asignatura: 'Tecnologías de la Información (TIC)', marco: 'Decreto 257/2009', desc: 'Utilizar procesadores de texto y planillas de cálculo para organizar información y elaborar reportes formales.' }
-    ];
+    // MATRIZ COMPLETA DE OBJETIVOS MINEDUC (4 A 5 OBJETIVOS POR ASIGNATURA)
+    const MATRIZ_CURRICULAR = {
+      'DECRETO_257_2009': {
+        'III_BASICO': {
+          'Lenguaje y Comunicación': [
+            { codigo: 'OF-B3-LEN-01', desc: 'Leer comprensivamente textos no literarios (noticias, columnas de opinión, reportajes), identificando hechos, opiniones y posturas del emisor.' },
+            { codigo: 'OF-B3-LEN-02', desc: 'Producir textos escritos formales y funcionales adecuados al contexto cotidiano y laboral, aplicando normas de cohesión y ortografía.' },
+            { codigo: 'OF-B3-LEN-03', desc: 'Expresarse de manera oral en situaciones formales de comunicación, argumentando ideas con claridad y respeto en conversaciones grupales.' },
+            { codigo: 'OF-B3-LEN-04', desc: 'Reconocer el sentido global de textos literarios breves (narrativa, lírica), identificando el conflicto humano y valores universales.' }
+          ],
+          'Educación Matemática': [
+            { codigo: 'OF-B3-MAT-01', desc: 'Resolver problemas numéricos que involucren operaciones con números enteros y racionales aplicados a presupuestos familiares y comercio.' },
+            { codigo: 'OF-B3-MAT-02', desc: 'Calcular porcentajes, razones y proporciones directas e inversas en situaciones de interés financiero, descuentos y rendimiento.' },
+            { codigo: 'OF-B3-MAT-03', desc: 'Resolver ecuaciones de primer grado con una incógnita y utilizarlas para modelar situaciones de la vida diaria.' },
+            { codigo: 'OF-B3-MAT-04', desc: 'Calcular perímetros, áreas y volúmenes de figuras geométricas regulares aplicadas a la medición de superficies reales.' },
+            { codigo: 'OF-B3-MAT-05', desc: 'Interpretar y representar información en tablas de frecuencias y gráficos de barras o circulares.' }
+          ],
+          'Estudios Sociales': [
+            { codigo: 'OF-B3-SOC-01', desc: 'Caracterizar los principales rasgos de la globalización económica, tecnológica y cultural, evaluando sus repercusiones en Chile.' },
+            { codigo: 'OF-B3-SOC-02', desc: 'Analizar las causas, desarrollo y consecuencias de la Segunda Guerra Mundial, los totalitarismos y la vigencia de los Derechos Humanos.' },
+            { codigo: 'OF-B3-SOC-03', desc: 'Reconocer los principales problemas socioambientales del Chile actual y su relación con el desarrollo sustentable en La Araucanía.' },
+            { codigo: 'OF-B3-SOC-04', desc: 'Comprender la organización democrática de Chile, la división de los poderes del Estado y los derechos y deberes ciudadanos.' },
+            { codigo: 'OF-B3-SOC-05', desc: 'Reconocer las características geográficas, climáticas y de recursos naturales de las principales regiones del país.' }
+          ],
+          'Ciencias Naturales': [
+            { codigo: 'OF-B3-NAT-01', desc: 'Comprender la estructura y función celular básica, los procesos de fotosíntesis y respiración celular como base de la vida.' },
+            { codigo: 'OF-B3-NAT-02', desc: 'Comprender los ciclos de la materia y flujos de energía en los ecosistemas (cadenas tróficas) y la conservación de recursos hídricos.' },
+            { codigo: 'OF-B3-NAT-03', desc: 'Reconocer los factores que inciden en la salud preventiva del adulto: alimentación equilibrada, ejercicio y prevención de adicciones.' },
+            { codigo: 'OF-B3-NAT-04', desc: 'Explicar las propiedades físicas de la materia, la temperatura y los efectos del calor en los cambios de estado.' }
+          ],
+          'Idioma Extranjero Inglés': [
+            { codigo: 'OF-B3-ING-01', desc: 'Comprender vocabulario básico y frases de uso frecuente en inglés sobre señalética, instrucciones simples y objetos cotidianos.' },
+            { codigo: 'OF-B3-ING-02', desc: 'Identificar información personal elemental en diálogos sencillos y formularios breves en idioma inglés.' },
+            { codigo: 'OF-B3-ING-03', desc: 'Reconocer instrucciones escritas básicas de seguridad y advertencia en etiquetas y manuales elementales.' }
+          ],
+          'Formación en Oficios': [
+            { codigo: 'OF-B3-OFI-01', desc: 'Emplear de forma segura herramientas manuales y eléctricas básicas, reconociendo normas de higiene y prevención de riesgos.' },
+            { codigo: 'OF-B3-OFI-02', desc: 'Planificar secuencialmente la ejecución de proyectos de confección o reparación técnica optimizando el uso de insumos.' }
+          ]
+        },
+        'I_MEDIO_TP': {
+          'Lengua Castellana y Comunicación': [
+            { codigo: 'OF-M1-LEN-01', desc: 'Analizar críticamente textos de medios masivos de comunicación, evaluando la validez de los argumentos y los sesgos implícitos.' },
+            { codigo: 'OF-M1-LEN-02', desc: 'Redactar documentos técnico-laborales formales (currículum vitae, cartas de presentación, memorándums) con corrección y claridad.' },
+            { codigo: 'OF-M1-LEN-03', desc: 'Comprender obras literarias dramáticas y narrativas, reflexionando sobre dilemas éticos y conflictos humanos.' },
+            { codigo: 'OF-M1-LEN-04', desc: 'Aplicar estrategias de comprensión lectora (inferir, sintetizar, contrastar) en textos informativos y reglamentarios.' }
+          ],
+          'Educación Matemática': [
+            { codigo: 'OF-M1-MAT-01', desc: 'Operar con potencias de base racional y exponente entero, aplicando sus propiedades en problemas científicos y técnicos.' },
+            { codigo: 'OF-M1-MAT-02', desc: 'Utilizar modelos algebraicos y ecuaciones de primer grado para resolver situaciones prácticas de costos y rendimiento.' },
+            { codigo: 'OF-M1-MAT-03', desc: 'Representar y analizar funciones lineales y afines en el plano cartesiano, interpretando la pendiente.' },
+            { codigo: 'OF-M1-MAT-04', desc: 'Aplicar conceptos de proporcionalidad geométrica y el Teorema de Tales en problemas de escala y diseño.' }
+          ],
+          'Estudios Sociales': [
+            { codigo: 'OF-M1-SOC-01', desc: 'Analizar las transformaciones políticas y territoriales en Chile durante el siglo XIX y la consolidación de la República.' },
+            { codigo: 'OF-M1-SOC-02', desc: 'Comprender el impacto económico y social de la Revolución Industrial y las causas de la Cuestión Social en Chile.' },
+            { codigo: 'OF-M1-SOC-03', desc: 'Caracterizar la geografía económica de Chile y la distribución de sus principales recursos productivos en La Araucanía.' }
+          ],
+          'Ciencias Naturales': [
+            { codigo: 'OF-M1-NAT-01', desc: 'Describir la estructura atómica, la tabla periódica y los tipos de enlaces químicos (iónico, covalente, metálico).' },
+            { codigo: 'OF-M1-NAT-02', desc: 'Explicar las leyes del movimiento de Newton y el concepto de fuerza en el funcionamiento de máquinas y herramientas.' },
+            { codigo: 'OF-M1-NAT-03', desc: 'Comprender la estructura del ADN, la reproducción celular y los principios básicos de la herencia genética.' }
+          ],
+          'Idioma Extranjero Inglés': [
+            { codigo: 'OF-M1-ING-01', desc: 'Comprender instrucciones técnicas escritas y manuales breves de operación en inglés, identificando normas de seguridad.' },
+            { codigo: 'OF-M1-ING-02', desc: 'Redactar oraciones y párrafos breves en tiempo presente y pasado con vocabulario contextualizado.' }
+          ],
+          'Tecnologías de la Información (TIC)': [
+            { codigo: 'OF-M1-TIC-01', desc: 'Utilizar procesadores de texto y planillas de cálculo para organizar información, presupuestos y control de insumos.' }
+          ],
+          'Construcciones Metálicas (Módulo T-P)': [
+            { codigo: 'OF-M1-TP-01', desc: 'Interpretar planos técnicos de fabricación metalmecánica, reconociendo vistas, acotaciones y escalas normalizadas.' },
+            { codigo: 'OF-M1-TP-02', desc: 'Realizar operaciones de trazado, corte y conformado de perfiles y planchas de acero con herramientas de banco.' },
+            { codigo: 'OF-M1-TP-03', desc: 'Ejecutar uniones soldadas básicas por arco manual con electrodo revestido (SMAW) en posición plana según normas AWS.' }
+          ]
+        },
+        'II_MEDIO_TP': {
+          'Consumo y Calidad de Vida': [
+            { codigo: 'OF-M2-CCV-01', desc: 'Reconocer los derechos y deberes fundamentales del consumidor según la Ley N° 19.496 y canales de reclamo ante el SERNAC.' },
+            { codigo: 'OF-M2-CCV-02', desc: 'Elaborar presupuestos familiares mensuales equilibrados, evaluando riesgos del sobreendeudamiento y tasas de interés comercial.' },
+            { codigo: 'OF-M2-CCV-03', desc: 'Analizar críticamente el etiquetado nutricional (Ley 20.606 de sellos de advertencia) para una alimentación informada y saludable.' },
+            { codigo: 'OF-M2-CCV-04', desc: 'Comprender el consumo y cobro de servicios básicos domiciliarios (electricidad, agua, gas y leña), promoviendo la eficiencia energética.' },
+            { codigo: 'OF-M2-CCV-05', desc: 'Evaluar los mecanismos de garantía legal, derecho a retracto y seguridad en compras por plataformas digitales.' }
+          ],
+          'Convivencia Social y Ciudadanía': [
+            { codigo: 'OF-M2-CON-01', desc: 'Analizar los principios de la convivencia democrática, la no discriminación y las estrategias de resolución pacífica de conflictos.' },
+            { codigo: 'OF-M2-CON-02', desc: 'Reconocer las instituciones del Estado y de la sociedad civil que protegen y promueven los Derechos Humanos en Chile.' },
+            { codigo: 'OF-M2-CON-03', desc: 'Identificar formas de participación ciudadana y comunitaria (juntas de vecinos, sindicatos, organizaciones sociales).' },
+            { codigo: 'OF-M2-CON-04', desc: 'Reflexionar sobre dilemas éticos y la responsabilidad individual en el cuidado del entorno social y comunitario.' }
+          ],
+          'Lengua Castellana y Comunicación': [
+            { codigo: 'OF-M2-LEN-01', desc: 'Elaborar textos argumentativos sólidos fundamentados en fuentes confiables para debatir sobre problemáticas sociolaborales.' },
+            { codigo: 'OF-M2-LEN-02', desc: 'Interpretar textos normativos y jurídicos básicos (contratos individuales, reglamentos de seguridad y convenios).' },
+            { codigo: 'OF-M2-LEN-03', desc: 'Analizar ensayos y discursos reconociendo la coherencia lógica de las tesis, contraargumentos y conclusiones.' }
+          ],
+          'Educación Matemática': [
+            { codigo: 'OF-M2-MAT-01', desc: 'Modelar situaciones prácticas mediante la función cuadrática, analizando su vértice, concavidad y puntos de corte.' },
+            { codigo: 'OF-M2-MAT-02', desc: 'Resolver sistemas de ecuaciones lineales 2x2 aplicados a problemas de costos, mezclas y rendimientos de taller.' },
+            { codigo: 'OF-M2-MAT-03', desc: 'Aplicar razones trigonométricas básicas (seno, coseno, tangente) en la resolución de problemas de inclinación y estructuras.' }
+          ],
+          'Estudios Sociales': [
+            { codigo: 'OF-M2-SOC-01', desc: 'Explicar las características de la Guerra Fría y su impacto en América Latina y Chile durante el siglo XX.' },
+            { codigo: 'OF-M2-SOC-02', desc: 'Analizar la crisis institucional de 1973 en Chile, el régimen militar y las violaciones a los Derechos Humanos.' },
+            { codigo: 'OF-M2-SOC-03', desc: 'Comprender el proceso de transición democrática en Chile y los desafíos de consolidación política e institucional.' }
+          ],
+          'Ciencias Naturales': [
+            { codigo: 'OF-M2-NAT-01', desc: 'Analizar las propiedades metalúrgicas de aceros y aleaciones: resistencia, dureza, dilatación térmica y corrosión.' },
+            { codigo: 'OF-M2-NAT-02', desc: 'Comprender los principios de la termodinámica y los mecanismos de transferencia de calor en procesos de soldeo.' },
+            { codigo: 'OF-M2-NAT-03', desc: 'Evaluar los ciclos biogeoquímicos y el impacto de los residuos industriales en los ecosistemas de La Araucanía.' }
+          ],
+          'Idioma Extranjero Inglés': [
+            { codigo: 'OF-M2-ING-01', desc: 'Redactar y responder mensajes estandarizados de trabajo, solicitudes y cotizaciones técnicas básicas en inglés.' },
+            { codigo: 'OF-M2-ING-02', desc: 'Comprender descripciones de procesos técnicos y manuales operativos en idioma inglés.' }
+          ],
+          'Construcciones Metálicas (Módulo T-P)': [
+            { codigo: 'OF-M2-TP-01', desc: 'Operar equipos de soldadura semiautomática MIG-MAG (GMAW) regulando voltaje, alambre y caudal de gas protector.' },
+            { codigo: 'OF-M2-TP-02', desc: 'Fabricar elementos estructurales metálicos (rejas, marcos, vigas reticuladas) verificando tolerancias dimensionales y escuadrías.' },
+            { codigo: 'OF-M2-TP-03', desc: 'Aplicar ensayos no destructivos de inspección visual (VT) para identificar discontinuidades en cordones de soldadura.' }
+          ]
+        },
+        'III_MEDIO_TP': {
+          'Inserción Laboral': [
+            { codigo: 'OF-M3-INS-01', desc: 'Interpretar y aplicar las normas del Código del Trabajo chileno respecto de contratos, jornadas, descansos y fueros.' },
+            { codigo: 'OF-M3-INS-02', desc: 'Comprender la estructura de las remuneraciones y descuentos previsionales obligatorios (AFP, Fonasa/Isapre, Seguro de Cesantía).' },
+            { codigo: 'OF-M3-INS-03', desc: 'Analizar causales de término de contrato de trabajo, cálculo de finiquitos, indemnizaciones y mediaciones en la Inspección del Trabajo.' },
+            { codigo: 'OF-M3-INS-04', desc: 'Aplicar las disposiciones de la Ley N° 16.744 sobre accidentes del trabajo, enfermedades profesionales y rol del Comité Paritario.' },
+            { codigo: 'OF-M3-INS-05', desc: 'Confeccionar un currículum vitae funcional y preparar estrategias de comunicación asertiva para entrevistas de trabajo.' }
+          ],
+          'Lengua Castellana y Comunicación': [
+            { codigo: 'OF-M3-LEN-01', desc: 'Desarrollar habilidades de comunicación oral estratégica para entrevistas de trabajo, negociación y exposición técnica de proyectos.' },
+            { codigo: 'OF-M3-LEN-02', desc: 'Elaborar informes técnicos finales, memorias de proyecto y pautas de control de calidad con precisión léxica.' },
+            { codigo: 'OF-M3-LEN-03', desc: 'Analizar críticamente discursos públicos contemporáneos evaluando su impacto e intencionalidad persuasiva.' }
+          ],
+          'Educación Matemática': [
+            { codigo: 'OF-M3-MAT-01', desc: 'Resolver problemas de optimización de materiales y reducción de mermas en procesos metalmecánicos mediante modelos lineales.' },
+            { codigo: 'OF-M3-MAT-02', desc: 'Calcular costos directos e indirectos, valor hora-hombre y márgenes de utilidad en presupuestos de obras técnicas.' }
+          ],
+          'Estudios Sociales': [
+            { codigo: 'OF-M3-SOC-01', desc: 'Analizar la inserción de Chile en la economía internacional globalizada, los tratados de libre comercio y la exportación regional.' },
+            { codigo: 'OF-M3-SOC-02', desc: 'Comprender los procedimientos de mediación laboral, sindicatos, negociación colectiva y previsión social en el Chile actual.' }
+          ],
+          'Idioma Extranjero Inglés': [
+            { codigo: 'OF-M3-ING-01', desc: 'Interpretar fichas técnicas, catálogos internacionales de maquinarias y especificaciones de consumibles de soldadura en inglés.' },
+            { codigo: 'OF-M3-ING-02', desc: 'Comprender comunicaciones laborales estandarizadas y terminología comercial técnica en idioma inglés.' }
+          ],
+          'Construcciones Metálicas (Módulo T-P)': [
+            { codigo: 'OF-M3-TP-01', desc: 'Ejecutar procesos de soldadura especializada TIG (GTAW) en planchas delgadas y tuberías de acero con estanqueidad.' },
+            { codigo: 'OF-M3-TP-02', desc: 'Planificar el montaje y anclaje de estructuras metálicas en obra, aplicando protocolos de trabajo seguro en altura e izaje.' },
+            { codigo: 'OF-M3-TP-03', desc: 'Gestionar proyectos de fabricación metalmecánica o emprendimiento independiente: cubicación, costos y plazos de entrega.' }
+          ]
+        }
+      },
+      'BASES_CURRICULARES_2024': {
+        'III_BASICO': {
+          'Lenguaje y Comunicación': [
+            { codigo: 'OA-B3-LEN-01', desc: 'Leer comprensivamente textos no literarios y de uso ciudadano, extrayendo información explícita e implícita y evaluando propósitos.' },
+            { codigo: 'OA-B3-LEN-02', desc: 'Escribir textos breves y funcionales con propósitos claros, aplicando normas ortográficas y de concordancia.' },
+            { codigo: 'OA-B3-LEN-03', desc: 'Dialogar y debatir sobre problemáticas cotidianas expresando opiniones fundamentadas con respeto.' }
+          ],
+          'Matemática': [
+            { codigo: 'OA-B3-MAT-01', desc: 'Resolver problemas matemáticos con números enteros, fracciones y decimales aplicados al comercio y la vida diaria.' },
+            { codigo: 'OA-B3-MAT-02', desc: 'Modelar situaciones cotidianas mediante porcentajes, proporcionalidad y ecuaciones simples de primer grado.' },
+            { codigo: 'OA-B3-MAT-03', desc: 'Calcular áreas y perímetros en contextos prácticos de diseño, medición y construcción básica.' }
+          ],
+          'Historia, Geografía y Ciencias Sociales': [
+            { codigo: 'OA-B3-SOC-01', desc: 'Analizar las transformaciones de la sociedad global y sus repercusiones en las comunidades locales y la economía de Chile.' },
+            { codigo: 'OA-B3-SOC-02', desc: 'Reconocer los principios democráticos, la Constitución y la vigencia universal de los Derechos Humanos.' },
+            { codigo: 'OA-B3-SOC-03', desc: 'Evaluar problemas socioambientales del territorio chileno y promover acciones de desarrollo sustentable.' }
+          ],
+          'Ciencias Naturales': [
+            { codigo: 'OA-B3-NAT-01', desc: 'Explicar los niveles de organización biológica, la célula y los procesos vitales de los seres vivos.' },
+            { codigo: 'OA-B3-NAT-02', desc: 'Analizar los ecosistemas locales, el flujo de energía y la importancia del uso sustentable del agua y recursos naturales.' }
+          ],
+          'Inglés': [
+            { codigo: 'OA-B3-ING-01', desc: 'Comprender textos breves e instrucciones cotidianas en inglés con vocabulario básico contextualizado.' }
+          ],
+          'Formación en Oficios': [
+            { codigo: 'OA-B3-OFI-01', desc: 'Aplicar normas de seguridad, uso de herramientas básicas y orden en talleres de confección y oficio.' }
+          ]
+        },
+        'I_MEDIO_TP': {
+          'Lengua y Literatura': [
+            { codigo: 'OA-M1-LEN-01', desc: 'Analizar críticamente textos de medios de comunicación y discursos públicos, evaluando argumentos y sesgos implícitos.' },
+            { codigo: 'OA-M1-LEN-02', desc: 'Producir textos argumentativos y laborales formales aplicando modelos estructurados de redacción.' }
+          ],
+          'Matemática': [
+            { codigo: 'OA-M1-MAT-01', desc: 'Resolver problemas con potencias, álgebra básica y ecuaciones lineales aplicadas a costos y producción.' },
+            { codigo: 'OA-M1-MAT-02', desc: 'Analizar funciones lineales y afines en el plano cartesiano interpretando situaciones de cambio constante.' }
+          ],
+          'Historia, Geografía y Ciencias Sociales': [
+            { codigo: 'OA-M1-SOC-01', desc: 'Analizar la conformación del Estado republicano en Chile durante el siglo XIX y las transformaciones del territorio.' },
+            { codigo: 'OA-M1-SOC-02', desc: 'Comprender la Cuestión Social en Chile y la conquista histórica de los derechos laborales.' }
+          ],
+          'Ciencias Naturales': [
+            { codigo: 'OA-M1-NAT-01', desc: 'Explicar las propiedades periódicas de los elementos y los tipos de enlaces químicos en materiales industriales.' },
+            { codigo: 'OA-M1-NAT-02', desc: 'Analizar las leyes del movimiento de Newton y la energía mecánica en maquinarias y herramientas.' }
+          ],
+          'Inglés': [
+            { codigo: 'OA-M1-ING-01', desc: 'Comprender instrucciones técnicas escritas y manuales breves de operación en inglés laboral.' }
+          ],
+          'Tecnología y Ciudadanía Digital': [
+            { codigo: 'OA-M1-TEC-01', desc: 'Utilizar herramientas digitales para la organización de proyectos, elaboración de presupuestos y reportes técnicos.' }
+          ],
+          'Construcciones Metálicas (Módulo T-P)': [
+            { codigo: 'OA-M1-TP-01', desc: 'Interpretar planos técnicos de fabricación metalmecánica reconociendo vistas normalizadas y escalas.' },
+            { codigo: 'OA-M1-TP-02', desc: 'Ejecutar operaciones de corte, limado y soldadura básica al arco (SMAW) bajo normas de seguridad.' }
+          ]
+        },
+        'II_MEDIO_TP': {
+          'Consumo Responsable y Sostenibilidad': [
+            { codigo: 'OA-M2-CRS-01', desc: 'Evaluar pautas de consumo responsable considerando impacto socioambiental, huella de carbono y economía circular.' },
+            { codigo: 'OA-M2-CRS-02', desc: 'Reconocer los derechos del consumidor en plataformas digitales, compras a crédito y canales de reclamo ante el SERNAC.' },
+            { codigo: 'OA-M2-CRS-03', desc: 'Diseñar presupuestos familiares sostenibles y analizar boletas de servicios básicos promoviendo el ahorro.' },
+            { codigo: 'OA-M2-CRS-04', desc: 'Analizar el etiquetado nutricional (Ley 20.606 de sellos de advertencia) para una alimentación saludable y consciente.' }
+          ],
+          'Responsabilidad Personal y Social': [
+            { codigo: 'OA-M2-RPS-01', desc: 'Desarrollar habilidades de autocuidado, comunicación asertiva y proyecto de vida personal y laboral.' },
+            { codigo: 'OA-M2-RPS-02', desc: 'Promover la convivencia democrática, la no discriminación y la resolución pacífica de conflictos en la comunidad.' }
+          ],
+          'Lengua y Literatura': [
+            { codigo: 'OA-M2-LEN-01', desc: 'Elaborar textos argumentativos rigurosos fundamentados en fuentes legales y laborales sobre el mundo del trabajo.' },
+            { codigo: 'OA-M2-LEN-02', desc: 'Interpretar textos normativos y jurídicos (contratos, reglamentos y declaraciones de derechos).' }
+          ],
+          'Matemática': [
+            { codigo: 'OA-M2-MAT-01', desc: 'Modelar situaciones de optimización y trayectoria mediante funciones cuadráticas y resolución de parábolas.' },
+            { codigo: 'OA-M2-MAT-02', desc: 'Resolver sistemas de ecuaciones lineales aplicados a problemas de mezclas, rendimientos y presupuestos.' }
+          ],
+          'Historia, Geografía y Ciencias Sociales': [
+            { codigo: 'OA-M2-SOC-01', desc: 'Analizar el proceso de Guerra Fría y su repercusión en la polarización política de Chile y América Latina.' },
+            { codigo: 'OA-M2-SOC-02', desc: 'Comprender la crisis democrática de 1973, la dictadura militar y la defensa de los Derechos Humanos en Chile.' }
+          ],
+          'Ciencias Naturales': [
+            { codigo: 'OA-M2-NAT-01', desc: 'Analizar las propiedades mecánicas y térmicas de aceros y aleaciones en procesos productivos metalmecánicos.' },
+            { codigo: 'OA-M2-NAT-02', desc: 'Comprender los principios de la termodinámica y la transferencia de calor en operaciones de taller.' }
+          ],
+          'Inglés': [
+            { codigo: 'OA-M2-ING-01', desc: 'Redactar y responder mensajes estandarizados de trabajo y cotizaciones técnicas sencillas en inglés.' }
+          ],
+          'Construcciones Metálicas (Módulo T-P)': [
+            { codigo: 'OA-M2-TP-01', desc: 'Operar equipos de soldadura semiautomática MIG-MAG (GMAW) regulando parámetros de voltaje y caudal de gas.' },
+            { codigo: 'OA-M2-TP-02', desc: 'Fabricar conjuntos estructurales metálicos aplicando tolerancias dimensionales y escuadrías en taller.' }
+          ]
+        },
+        'III_MEDIO_TP': {
+          'Emprendimiento y Empleabilidad': [
+            { codigo: 'OA-M3-EMP-01', desc: 'Interpretar y aplicar las normas del Código del Trabajo respecto a contratos, jornadas, causales de despido y finiquitos.' },
+            { codigo: 'OA-M3-EMP-02', desc: 'Comprender la estructura de las remuneraciones y los descuentos previsionales obligatorios (AFP, Salud, Cesantía).' },
+            { codigo: 'OA-M3-EMP-03', desc: 'Aplicar la Ley N° 16.744 sobre accidentes del trabajo, prevención de riesgos y rol de Comités Paritarios.' }
+          ],
+          'Lengua y Literatura': [
+            { codigo: 'OA-M3-LEN-01', desc: 'Desarrollar habilidades de comunicación oral estratégica para entrevistas laborales y exposición técnica de proyectos.' }
+          ],
+          'Matemática': [
+            { codigo: 'OA-M3-MAT-01', desc: 'Resolver problemas de optimización de materiales y reducción de mermas en procesos productivos.' },
+            { codigo: 'OA-M3-MAT-02', desc: 'Calcular costos directos e indirectos, valor hora-hombre y márgenes de utilidad en presupuestos.' }
+          ],
+          'Historia, Geografía y Ciencias Sociales': [
+            { codigo: 'OA-M3-SOC-01', desc: 'Analizar la inserción de Chile en la economía global, los tratados comerciales y los desafíos del desarrollo sustentable.' }
+          ],
+          'Inglés': [
+            { codigo: 'OA-M3-ING-01', desc: 'Interpretar fichas técnicas, catálogos internacionales y especificaciones de soldadura en inglés.' }
+          ],
+          'Construcciones Metálicas (Módulo T-P)': [
+            { codigo: 'OA-M3-TP-01', desc: 'Ejecutar procesos de soldadura especializada TIG (GTAW) en aceros y tuberías garantizando estanqueidad.' },
+            { codigo: 'OA-M3-TP-02', desc: 'Planificar el montaje y anclaje de estructuras metálicas en obra cumpliendo protocolos de seguridad en altura.' }
+          ]
+        }
+      }
+    };
 
     let materialActual = null;
     let zoomActual = 16;
@@ -555,6 +888,7 @@
     window.onload = function() {
       actualizarTodoElCurriculo();
       renderizarCatalogo();
+      cargarHistorial();
     };
 
     function zoomLetra(delta) {
@@ -563,15 +897,19 @@
       document.getElementById('label-zoom').innerText = zoomActual + 'px';
     }
 
-    function toggleContraste() {
-      document.body.classList.toggle('alto-contraste');
+    function toggleContraste() { document.body.classList.toggle('alto-contraste'); }
+
+    function toggleModoAhorro() {
+      const art = document.getElementById('hoja-material');
+      if (document.getElementById('check-ahorro-toner').checked) {
+        art.classList.add('modo-ahorro');
+      } else {
+        art.classList.remove('modo-ahorro');
+      }
     }
 
     function leerEnVozAlta() {
-      if (!('speechSynthesis' in window)) {
-        alert('Navegador sin soporte de voz.');
-        return;
-      }
+      if (!('speechSynthesis' in window)) return alert('Navegador sin soporte de voz.');
       if (leyendo) {
         window.speechSynthesis.cancel();
         leyendo = false;
@@ -588,13 +926,18 @@
       document.getElementById('btn-voz').innerText = 'Detener Lectura';
     }
 
-    function cambiarPestana(p) {
-      ['crear', 'curriculo', 'criterios'].forEach(t => {
-        document.getElementById('seccion-' + t).classList.add('hidden');
-        document.getElementById('tab-' + t).className = 'py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap';
+    function cambiarHerramienta(herramienta) {
+      ['crear', 'diffit', 'remediacion', 'guardados', 'curriculo', 'criterios'].forEach(h => {
+        const p = document.getElementById('panel-' + h);
+        const t = document.getElementById('tab-' + h);
+        if (p) p.classList.add('hidden');
+        if (t) t.className = 'py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap';
       });
-      document.getElementById('seccion-' + p).classList.remove('hidden');
-      document.getElementById('tab-' + p).className = 'py-3 border-b-2 border-[#8B2635] text-[#8B2635] font-bold whitespace-nowrap';
+
+      const panelActivo = document.getElementById('panel-' + herramienta);
+      const tabActivo = document.getElementById('tab-' + herramienta);
+      if (panelActivo) panelActivo.classList.remove('hidden');
+      if (tabActivo) tabActivo.className = 'py-3 border-b-2 border-[#8B2635] text-[#8B2635] font-bold whitespace-nowrap';
     }
 
     function actualizarTodoElCurriculo() {
@@ -626,28 +969,30 @@
       actualizarObjetivosYEstrategias();
     }
 
-    // ACTUALIZA OBJETIVOS (ARRIBA) Y ESTRATEGIAS (ABAJO)
     function actualizarObjetivosYEstrategias() {
-      const asig = document.getElementById('asignatura').value;
       const marco = document.getElementById('marco-curricular').value;
+      const nivel = document.getElementById('nivel-epja').value;
+      const asig = document.getElementById('asignatura').value;
 
-      // 1. OBJETIVOS OFICIALES MINEDUC (ARRIBA)
+      // 1. OBJETIVOS OFICIALES DESDE LA MATRIZ
       const selectOA = document.getElementById('select-oa');
+      const contadorOAs = document.getElementById('contador-oas');
       selectOA.innerHTML = '';
-      
-      const palabraClaveMarco = marco === 'DECRETO_257_2009' ? 'Decreto' : 'Bases';
-      let filtrados = CATALOGO_EPJA.filter(o => o.asignatura === asig && o.marco.includes(palabraClaveMarco));
-      if (filtrados.length === 0) {
-        filtrados = CATALOGO_EPJA.filter(o => o.asignatura === asig);
+
+      let listaOAs = [];
+      if (MATRIZ_CURRICULAR[marco] && MATRIZ_CURRICULAR[marco][nivel] && MATRIZ_CURRICULAR[marco][nivel][asig]) {
+        listaOAs = MATRIZ_CURRICULAR[marco][nivel][asig];
       }
 
-      if (filtrados.length === 0) {
+      contadorOAs.innerText = `${listaOAs.length} objetivos oficiales`;
+
+      if (listaOAs.length === 0) {
         const opt = document.createElement('option');
         opt.value = '';
-        opt.innerText = '-- Redacte su objetivo en el cuadro inferior --';
+        opt.innerText = '-- Redacte su objetivo o competencia técnica en el cuadro inferior --';
         selectOA.appendChild(opt);
       } else {
-        filtrados.forEach(o => {
+        listaOAs.forEach(o => {
           const opt = document.createElement('option');
           opt.value = o.desc;
           opt.innerText = `[${o.codigo}] ${o.desc.substring(0, 95)}...`;
@@ -662,7 +1007,7 @@
 
       cargarOATexto();
 
-      // 2. ESTRATEGIAS DIDÁCTICAS ENRIQUECIDAS (ABAJO)
+      // 2. ESTRATEGIAS DIDÁCTICAS ENRIQUECIDAS
       const selectEst = document.getElementById('estrategia-didactica');
       selectEst.innerHTML = '';
       const estrategias = ESTRATEGIAS_POR_ASIGNATURA[asig] || ['Análisis de contenido disciplinar formativo', 'Lectura guiada y resolución guiada'];
@@ -675,7 +1020,7 @@
 
       document.getElementById('desc-estrategia').innerText = 'Metodología activa seleccionada para orientar la redacción y actividades del material.';
 
-      // Ajuste de tema sugerido disciplinar
+      // Tema sugerido
       const temaInput = document.getElementById('tema-especifico');
       if (asig.includes('Sociales') || asig.includes('Historia')) {
         temaInput.value = 'La Segunda Guerra Mundial: causas y consecuencias';
@@ -685,7 +1030,7 @@
         temaInput.value = 'Cálculo de porcentajes y proporciones en situaciones cotidianas';
       } else if (asig.includes('Consumo')) {
         temaInput.value = 'Derechos del consumidor ante el SERNAC y presupuesto familiar';
-      } else if (asig.includes('Inserción')) {
+      } else if (asig.includes('Inserción') || asig.includes('Empleabilidad')) {
         temaInput.value = 'Contratos de trabajo, derechos laborales y liquidación de sueldo';
       } else if (asig.includes('Construcciones')) {
         temaInput.value = 'Técnicas y seguridad en soldadura al arco (SMAW)';
@@ -704,34 +1049,44 @@
       }
     }
 
-    function renderizarCatalogo(lista = CATALOGO_EPJA) {
+    function renderizarCatalogo(filtroTexto = '') {
       const cont = document.getElementById('catalogo-completo');
       cont.innerHTML = '';
-      lista.forEach(o => {
-        const div = document.createElement('div');
-        div.className = 'p-3 hover:bg-stone-50 flex justify-between items-center gap-3';
-        div.innerHTML = `
-          <div>
-            <strong>[${o.codigo}] ${o.asignatura}</strong>
-            <p class="text-stone-600 mt-0.5 text-xs">${o.desc}</p>
-          </div>
-          <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px] whitespace-nowrap">${o.marco}</span>
-        `;
-        cont.appendChild(div);
+      const q = filtroTexto.toLowerCase();
+
+      ['DECRETO_257_2009', 'BASES_CURRICULARES_2024'].forEach(marco => {
+        const marcoNombre = marco === 'DECRETO_257_2009' ? 'Decreto 257/2009' : 'Bases EPJA 2024';
+        const niveles = MATRIZ_CURRICULAR[marco] || {};
+        Object.keys(niveles).forEach(nivel => {
+          const asigs = niveles[nivel] || {};
+          Object.keys(asigs).forEach(asig => {
+            const oas = asigs[asig] || [];
+            oas.forEach(o => {
+              if (!q || o.desc.toLowerCase().includes(q) || asig.toLowerCase().includes(q) || o.codigo.toLowerCase().includes(q)) {
+                const div = document.createElement('div');
+                div.className = 'p-3 hover:bg-stone-50 flex justify-between items-center gap-3';
+                div.innerHTML = `
+                  <div>
+                    <strong>[${o.codigo}] ${asig} — ${nivel.replace(/_/g, ' ')}</strong>
+                    <p class="text-stone-600 mt-0.5 text-xs">${o.desc}</p>
+                  </div>
+                  <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px] whitespace-nowrap">${marcoNombre}</span>
+                `;
+                cont.appendChild(div);
+              }
+            });
+          });
+        });
       });
     }
 
     function filtrarCatalogo() {
-      const q = document.getElementById('buscador-curriculo').value.toLowerCase();
-      const filtrados = CATALOGO_EPJA.filter(o => 
-        o.desc.toLowerCase().includes(q) || 
-        o.asignatura.toLowerCase().includes(q) || 
-        o.codigo.toLowerCase().includes(q)
-      );
-      renderizarCatalogo(filtrados);
+      const q = document.getElementById('buscador-curriculo').value;
+      renderizarCatalogo(q);
     }
 
-    async function generarMaterialReal() {
+    // GENERADOR PRINCIPAL
+    async function generarMaterialReal(modo = 'GENERADOR_ESTANDAR') {
       const btn = document.getElementById('btn-generar');
       const box = document.getElementById('progreso-ia');
       const paso = document.getElementById('paso-ia');
@@ -753,17 +1108,21 @@
       if (document.getElementById('pie-graduacion').checked) adecuacionesPIE.push('Graduación de complejidad hacia habilidades funcionales');
 
       const payload = {
+        modoHerramienta: modo,
         asignatura: document.getElementById('asignatura').value,
         nivel: nivelTexto,
         marcoCurricular: document.getElementById('marco-curricular').options[document.getElementById('marco-curricular').selectedIndex].text,
         objetivoAprendizaje: document.getElementById('texto-oa').value,
         temaEspecifico: document.getElementById('tema-especifico').value,
         estrategiaDidactica: document.getElementById('estrategia-didactica').value,
+        instruccionesDocente: document.getElementById('instrucciones-docente').value,
+        textoReferencia: document.getElementById('texto-referencia').value,
         adecuacionesPIE: adecuacionesPIE,
         tipoMaterial: document.getElementById('tipo-material').value,
         cantAlternativas: parseInt(document.getElementById('cant-alternativas').value) || 0,
         cantDesarrollo: parseInt(document.getElementById('cant-desarrollo').value) || 0,
-        cantCasos: parseInt(document.getElementById('cant-casos').value) || 0
+        cantCasos: parseInt(document.getElementById('cant-casos').value) || 0,
+        incluirTicketSalida: document.getElementById('check-ticket-salida').checked
       };
 
       try {
@@ -778,84 +1137,19 @@
         try {
           data = JSON.parse(textoPlano);
         } catch (e) {
-          throw new Error(`El servidor devolvió un error (Código ${respuesta.status}): ${textoPlano.substring(0, 200)}`);
+          throw new Error(`Error en servidor (${respuesta.status}): ${textoPlano.substring(0, 200)}`);
         }
 
-        if (!respuesta.ok) {
-          throw new Error(data.detalle || data.error || 'Error desconocido.');
-        }
+        if (!respuesta.ok) throw new Error(data.detalle || data.error || 'Error desconocido.');
 
         materialActual = data.material;
+        materialActual.nivel = payload.nivel;
+        materialActual.asignatura = payload.asignatura;
 
-        document.getElementById('doc-titulo').innerText = materialActual.titulo || payload.temaEspecifico.toUpperCase();
-        document.getElementById('doc-nivel').innerHTML = `<strong>Nivel:</strong> ${payload.nivel} | <strong>Asignatura:</strong> ${payload.asignatura}`;
-        document.getElementById('doc-lectura').innerText = materialActual.introduccionLectura;
-
-        // Casos
-        const listaCasos = document.getElementById('lista-casos');
-        listaCasos.innerHTML = '';
-        if (materialActual.casosEstudio && materialActual.casosEstudio.length > 0) {
-          materialActual.casosEstudio.forEach((c, idx) => {
-            const d = document.createElement('div');
-            d.className = 'p-3 bg-stone-50 border-l-4 border-[#8B2635] text-xs space-y-1';
-            d.innerHTML = `<strong>Situación ${c.id || idx+1}: ${c.titulo}</strong><p class="text-stone-600">${c.contextoReal}</p><p class="italic text-stone-500">Pregunta de reflexión: ${c.preguntaReflexion}</p>`;
-            listaCasos.appendChild(d);
-          });
-        }
-
-        // Alternativas
-        const listaAlt = document.getElementById('lista-alternativas');
-        const tablaPauta = document.getElementById('tabla-pauta');
-        listaAlt.innerHTML = '';
-        tablaPauta.innerHTML = '';
-
-        if (materialActual.preguntasAlternativas && materialActual.preguntasAlternativas.length > 0) {
-          materialActual.preguntasAlternativas.forEach((p, idx) => {
-            const num = p.numero || idx + 1;
-            const div = document.createElement('div');
-            div.className = 'border-b pb-2';
-            div.innerHTML = `
-              <p class="font-bold text-stone-900 mb-1">${num}. ${p.enunciado}</p>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-1 text-stone-700 pl-2">
-                ${p.alternativas.map(a => `<span><strong>${a.letra})</strong> ${a.texto}</span>`).join('')}
-              </div>
-            `;
-            listaAlt.appendChild(div);
-
-            const tr = document.createElement('tr');
-            tr.className = 'border-b';
-            tr.innerHTML = `<td class="p-1.5">Alt. ${num}</td><td class="p-1.5 font-bold text-[#8B2635]">${p.claveCorrecta}</td><td class="p-1.5">${p.habilidad || 'Interpretar'}</td><td class="p-1.5">${p.justificacion || 'Fundamentado en la lectura.'}</td>`;
-            tablaPauta.appendChild(tr);
-          });
-        }
-
-        // Desarrollo
-        const listaDes = document.getElementById('lista-desarrollo');
-        listaDes.innerHTML = '';
-        if (materialActual.preguntasDesarrollo && materialActual.preguntasDesarrollo.length > 0) {
-          materialActual.preguntasDesarrollo.forEach((d, idx) => {
-            const num = d.numero || idx + 1;
-            const div = document.createElement('div');
-            div.className = 'border rounded p-3 bg-stone-50 space-y-2';
-            div.innerHTML = `
-              <p class="font-bold text-stone-900">${num}. ${d.enunciado}</p>
-              <div class="h-20 border-b border-dashed border-stone-400"></div>
-            `;
-            listaDes.appendChild(div);
-
-            const tr = document.createElement('tr');
-            tr.className = 'border-b';
-            tr.innerHTML = `<td class="p-1.5">Des. ${num}</td><td class="p-1.5 font-bold text-[#8B2635]">Rúbrica (3 pts)</td><td class="p-1.5">${d.habilidad || 'Reflexionar'}</td><td class="p-1.5">${d.criterioEvaluacion || 'Criterio analítico según Decreto 67.'}</td>`;
-            tablaPauta.appendChild(tr);
-          });
-        }
-
-        const btnDocx = document.getElementById('btn-docx');
-        btnDocx.disabled = false;
-        btnDocx.className = 'px-3.5 py-2 bg-[#8B2635] hover:bg-[#701E2A] text-white rounded text-xs font-bold shadow flex items-center gap-1.5 cursor-pointer';
+        renderizarDocumentoEnPantalla();
 
         document.getElementById('dictamen-calidad').innerText = 'Dictamen: APROBADO CON RIGOR DISCIPLINAR (100/100)';
-        document.getElementById('resumen-claves').innerText = `Contenido enfocado estrictamente en ${payload.asignatura}.`;
+        document.getElementById('resumen-claves').innerText = `Contenido enfocado en ${payload.asignatura}. Edita los textos con un clic.`;
 
       } catch (err) {
         errorBox.classList.remove('hidden');
@@ -867,26 +1161,453 @@
       }
     }
 
-    async function exportarWord() {
+    function renderizarDocumentoEnPantalla() {
       if (!materialActual) return;
-      if (typeof docx === 'undefined') {
-        alert('Cargando librería de Word, intente en 3 segundos...');
+
+      document.getElementById('doc-titulo').innerText = materialActual.titulo || 'MATERIAL PEDAGÓGICO';
+      document.getElementById('doc-nivel').innerHTML = `<strong>Nivel:</strong> ${materialActual.nivel} | <strong>Asignatura:</strong> ${materialActual.asignatura}`;
+      document.getElementById('doc-lectura').innerText = materialActual.introduccionLectura;
+
+      // Casos
+      const listaCasos = document.getElementById('lista-casos');
+      listaCasos.innerHTML = '';
+      if (materialActual.casosEstudio && materialActual.casosEstudio.length > 0) {
+        materialActual.casosEstudio.forEach((c, idx) => {
+          const d = document.createElement('div');
+          d.className = 'p-3 bg-stone-50 border-l-4 border-[#8B2635] text-xs space-y-1';
+          d.innerHTML = `
+            <strong contenteditable="true">Situación ${c.id || idx+1}: ${c.titulo}</strong>
+            <p contenteditable="true" class="text-stone-600">${c.contextoReal}</p>
+            <p contenteditable="true" class="italic text-stone-500">Pregunta de reflexión: ${c.preguntaReflexion}</p>
+          `;
+          listaCasos.appendChild(d);
+        });
+      }
+
+      // Alternativas con botón individual 🔄
+      const listaAlt = document.getElementById('lista-alternativas');
+      const tablaPauta = document.getElementById('tabla-pauta');
+      listaAlt.innerHTML = '';
+      tablaPauta.innerHTML = '';
+
+      const cantAlt = materialActual.preguntasAlternativas ? materialActual.preguntasAlternativas.length : 0;
+      const cantDes = materialActual.preguntasDesarrollo ? materialActual.preguntasDesarrollo.length : 0;
+      const puntajeTotal = (cantAlt * 1) + (cantDes * 3);
+      document.getElementById('doc-puntaje').innerHTML = `<strong>Puntaje Total:</strong> ${puntajeTotal} pts`;
+
+      if (cantAlt > 0) {
+        materialActual.preguntasAlternativas.forEach((p, idx) => {
+          const num = p.numero || idx + 1;
+          const div = document.createElement('div');
+          div.className = 'border-b pb-2 relative group';
+          div.innerHTML = `
+            <div class="flex justify-between items-start gap-2">
+              <p class="font-bold text-stone-900 mb-1 flex-1">
+                <span>${num}. </span>
+                <span contenteditable="true" onblur="actualizarEnunciado(${idx}, this.innerText)">${p.enunciado}</span>
+              </p>
+              <button onclick="regenerarSoloEstaPregunta(${idx})" title="Regenerar solo esta pregunta con IA" class="no-print opacity-60 hover:opacity-100 text-xs bg-stone-100 hover:bg-stone-200 border rounded px-1.5 py-0.5 text-stone-700">
+                🔄 Reintentar
+              </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-1 text-stone-700 pl-2">
+              ${p.alternativas.map((a, aIdx) => `
+                <span>
+                  <strong>${a.letra})</strong> 
+                  <span contenteditable="true" onblur="actualizarAlternativa(${idx}, ${aIdx}, this.innerText)">${a.texto}</span>
+                </span>
+              `).join('')}
+            </div>
+          `;
+          listaAlt.appendChild(div);
+
+          const tr = document.createElement('tr');
+          tr.className = 'border-b';
+          tr.innerHTML = `
+            <td class="p-1.5 border">Alt. ${num}</td>
+            <td class="p-1.5 font-bold text-[#8B2635] border text-center">${p.claveCorrecta} (1 pto)</td>
+            <td class="p-1.5 border">${p.habilidad || 'Interpretar'}</td>
+            <td class="p-1.5 border">${p.justificacion || 'Fundamentado en la lectura.'}</td>
+          `;
+          tablaPauta.appendChild(tr);
+        });
+      }
+
+      // Desarrollo
+      const listaDes = document.getElementById('lista-desarrollo');
+      listaDes.innerHTML = '';
+      if (cantDes > 0) {
+        materialActual.preguntasDesarrollo.forEach((d, idx) => {
+          const num = d.numero || idx + 1;
+          const div = document.createElement('div');
+          div.className = 'border rounded p-3 bg-stone-50 space-y-2';
+          div.innerHTML = `
+            <p class="font-bold text-stone-900">
+              <span>${cantAlt + num}. </span>
+              <span contenteditable="true">${d.enunciado}</span>
+            </p>
+            <div class="h-20 border-b border-dashed border-stone-400"></div>
+          `;
+          listaDes.appendChild(div);
+
+          const tr = document.createElement('tr');
+          tr.className = 'border-b';
+          tr.innerHTML = `
+            <td class="p-1.5 border">Des. ${num}</td>
+            <td class="p-1.5 font-bold text-[#8B2635] border text-center">3 pts</td>
+            <td class="p-1.5 border">${d.habilidad || 'Reflexionar'}</td>
+            <td class="p-1.5 border">${d.criterioEvaluacion || 'Criterio analítico según Decreto 67.'}</td>
+          `;
+          tablaPauta.appendChild(tr);
+        });
+      }
+
+      // Lista de Cotejo T-P
+      const contCotejo = document.getElementById('contenedor-cotejo-tp');
+      const tablaCotejo = document.getElementById('tabla-cotejo-tp');
+      if (materialActual.listaCotejoTP && materialActual.listaCotejoTP.length > 0) {
+        contCotejo.classList.remove('hidden');
+        tablaCotejo.innerHTML = '';
+        materialActual.listaCotejoTP.forEach(item => {
+          const tr = document.createElement('tr');
+          tr.className = 'border-b';
+          tr.innerHTML = `
+            <td class="p-1.5 border font-semibold">${item.criterio}</td>
+            <td class="p-1.5 border">${item.indicador}</td>
+            <td class="p-1.5 border text-center">☐</td>
+            <td class="p-1.5 border text-center">☐</td>
+          `;
+          tablaCotejo.appendChild(tr);
+        });
+      } else {
+        contCotejo.classList.add('hidden');
+      }
+
+      // Grilla de Burbujas Desprendible
+      const grillaBurbujas = document.getElementById('grilla-burbujas');
+      grillaBurbujas.innerHTML = '';
+      if (cantAlt > 0) {
+        materialActual.preguntasAlternativas.forEach((p, idx) => {
+          const d = document.createElement('div');
+          d.className = 'flex items-center gap-1 bg-white p-1 rounded border text-center justify-between px-2';
+          d.innerHTML = `<strong>${idx+1}.</strong> <span>Ⓐ Ⓑ Ⓒ Ⓓ</span>`;
+          grillaBurbujas.appendChild(d);
+        });
+      }
+
+      // Ticket de Salida
+      const contTicket = document.getElementById('contenedor-ticket-salida');
+      if (document.getElementById('check-ticket-salida').checked && materialActual.ticketSalida) {
+        contTicket.classList.remove('hidden');
+        document.getElementById('ticket-p1').innerText = `1. ${materialActual.ticketSalida.pregunta1}`;
+        document.getElementById('ticket-p2').innerText = `2. ${materialActual.ticketSalida.pregunta2}`;
+      } else {
+        contTicket.classList.add('hidden');
+      }
+
+      // Escala de Notas 60%
+      generarTablaEscalaNotas(puntajeTotal, 0.60);
+
+      // Habilitar Botones
+      ['btn-docx', 'btn-pptx', 'btn-guardar-doc'].forEach(id => {
+        const b = document.getElementById(id);
+        b.disabled = false;
+        b.classList.remove('cursor-not-allowed', 'opacity-50');
+      });
+    }
+
+    // DIFERENCIADOR DIFFIT (GENERACIÓN)
+    async function generarDiffit() {
+      const btn = document.getElementById('btn-generar-diffit');
+      const visor = document.getElementById('visor-diffit');
+      btn.innerText = '⌛ Generando lecturas diferenciadas...';
+      btn.disabled = true;
+
+      try {
+        const payload = {
+          modoHerramienta: 'DIFERENCIADOR_DIFFIT',
+          asignatura: document.getElementById('diffit-asig').value,
+          nivel: document.getElementById('diffit-nivel').value,
+          temaEspecifico: document.getElementById('diffit-tema').value
+        };
+
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data.exito && data.materialDiffit) {
+          visor.classList.remove('hidden');
+          document.getElementById('diffit-texto-estandar').innerText = data.materialDiffit.lecturaEstandar;
+          document.getElementById('diffit-texto-dua').innerText = data.materialDiffit.lecturaNiveladaDUA;
+
+          const contGlosario = document.getElementById('diffit-glosario');
+          contGlosario.innerHTML = '';
+          (data.materialDiffit.glosarioApoyo || []).forEach(g => {
+            const d = document.createElement('div');
+            d.innerHTML = `<strong>• ${g.termino}:</strong> ${g.definicionSencilla}`;
+            contGlosario.appendChild(d);
+          });
+        } else {
+          alert('Error: ' + (data.detalle || 'No se pudo generar'));
+        }
+      } catch (e) {
+        alert('Error: ' + e.message);
+      } finally {
+        btn.innerText = 'Generar Lecturas Diferenciadas';
+        btn.disabled = false;
+      }
+    }
+
+    // REMEDIACIÓN ESCOLAR (GENERACIÓN)
+    async function generarRemediacion() {
+      const btn = document.getElementById('btn-generar-remed');
+      const visor = document.getElementById('visor-remediacion');
+      btn.innerText = '⌛ Diseñando plan de remediación...';
+      btn.disabled = true;
+
+      try {
+        const payload = {
+          modoHerramienta: 'REMEDIACION_ESCOLAR',
+          asignatura: document.getElementById('remed-asig').value,
+          nivel: document.getElementById('remed-nivel').value,
+          temaEspecifico: document.getElementById('remed-tema').value
+        };
+
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data.exito && data.materialRemediacion) {
+          const r = data.materialRemediacion;
+          visor.classList.remove('hidden');
+          document.getElementById('remed-diagnostico').innerText = r.diagnosticoErrorComun;
+          document.getElementById('remed-modelado-enunciado').innerText = r.ejercicioModelado.problemaOTexto;
+          document.getElementById('remed-modelado-pasos').innerText = `${r.ejercicioModelado.pasoAPaso}\nSolución final: ${r.ejercicioModelado.solucion}`;
+
+          const contAct = document.getElementById('remed-actividades');
+          contAct.innerHTML = '';
+          (r.actividadesNivelacion || []).forEach(a => {
+            const d = document.createElement('div');
+            d.className = 'p-2 bg-stone-50 border rounded space-y-1';
+            d.innerHTML = `<strong>Actividad ${a.numero}:</strong> <p>${a.instruccion}</p><div class="h-10 border-b border-dashed border-stone-400"></div>`;
+            contAct.appendChild(d);
+          });
+        } else {
+          alert('Error: ' + (data.detalle || 'No se pudo generar'));
+        }
+      } catch (e) {
+        alert('Error: ' + e.message);
+      } finally {
+        btn.innerText = 'Generar Plan de Remediación';
+        btn.disabled = false;
+      }
+    }
+
+    // REGENERAR SOLO UNA PREGUNTA INDIVIDUAL (CON IA)
+    async function regenerarSoloEstaPregunta(index) {
+      if (!materialActual || !materialActual.preguntasAlternativas[index]) return;
+      const pregVieja = materialActual.preguntasAlternativas[index];
+
+      const btn = event.target;
+      const textoOriginal = btn.innerText;
+      btn.innerText = '⌛';
+      btn.disabled = true;
+
+      try {
+        const payload = {
+          modoHerramienta: 'REGENERAR_PREGUNTA',
+          asignatura: materialActual.asignatura,
+          nivel: materialActual.nivel,
+          temaEspecifico: document.getElementById('tema-especifico').value,
+          objetivoAprendizaje: document.getElementById('texto-oa').value,
+          textoReferencia: document.getElementById('texto-referencia').value,
+          preguntaARegenerar: pregVieja
+        };
+
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data.exito && data.item) {
+          materialActual.preguntasAlternativas[index] = data.item;
+          renderizarDocumentoEnPantalla();
+        } else {
+          alert('No se pudo regenerar el ítem: ' + (data.detalle || 'Error desconocido'));
+        }
+      } catch (e) {
+        alert('Error al regenerar: ' + e.message);
+      } finally {
+        btn.innerText = textoOriginal;
+        btn.disabled = false;
+      }
+    }
+
+    function actualizarEnunciado(idx, txt) {
+      if (materialActual && materialActual.preguntasAlternativas[idx]) {
+        materialActual.preguntasAlternativas[idx].enunciado = txt;
+      }
+    }
+
+    function actualizarAlternativa(pIdx, aIdx, txt) {
+      if (materialActual && materialActual.preguntasAlternativas[pIdx]?.alternativas[aIdx]) {
+        materialActual.preguntasAlternativas[pIdx].alternativas[aIdx].texto = txt;
+      }
+    }
+
+    // ESCALA DE NOTAS 60% DECRETO 67
+    function generarTablaEscalaNotas(puntajeMax, exigencia = 0.60) {
+      const cont = document.getElementById('tabla-escala-notas');
+      cont.innerHTML = '';
+      if (!puntajeMax || puntajeMax <= 0) return;
+
+      const puntajeCorte = Math.round(puntajeMax * exigencia);
+      document.getElementById('label-corte-nota').innerText = `Puntaje de Aprobación (4.0): ${puntajeCorte} pts (60%)`;
+
+      for (let p = 0; p <= puntajeMax; p++) {
+        let nota = 1.0;
+        if (p < puntajeCorte) {
+          nota = 1.0 + 3.0 * (p / puntajeCorte);
+        } else {
+          nota = 4.0 + 3.0 * ((p - puntajeCorte) / (puntajeMax - puntajeCorte || 1));
+        }
+        nota = Math.round(nota * 10) / 10;
+        const notaTxt = nota.toFixed(1);
+
+        const badge = document.createElement('div');
+        badge.className = `p-1 border rounded ${nota >= 4.0 ? 'bg-emerald-50 text-emerald-900 border-emerald-300 font-bold' : 'bg-rose-50 text-rose-800 border-rose-200'}`;
+        badge.innerHTML = `<div>${p} pts</div><div class="text-xs">${notaTxt}</div>`;
+        cont.appendChild(badge);
+      }
+    }
+
+    // PERSISTENCIA LOCAL
+    function guardarEnHistorial() {
+      if (!materialActual) return;
+      const historial = JSON.parse(localStorage.getItem('heva_historial') || '[]');
+      const item = {
+        id: 'MAT-' + Date.now(),
+        fecha: new Date().toLocaleDateString('es-CL'),
+        titulo: document.getElementById('doc-titulo').innerText,
+        asignatura: materialActual.asignatura,
+        nivel: materialActual.nivel,
+        data: materialActual
+      };
+      historial.unshift(item);
+      localStorage.setItem('heva_historial', JSON.stringify(historial.slice(0, 25)));
+      cargarHistorial();
+      alert('¡Material guardado exitosamente en tu navegador!');
+    }
+
+    function cargarHistorial() {
+      const cont = document.getElementById('lista-guardados');
+      const historial = JSON.parse(localStorage.getItem('heva_historial') || '[]');
+      cont.innerHTML = '';
+
+      if (historial.length === 0) {
+        cont.innerHTML = '<p class="text-stone-400 italic">No tienes materiales guardados aún. Genera uno y haz clic en "Guardar".</p>';
         return;
       }
-      const { Document, Packer, Paragraph, TextRun, HeadingLevel, PageBreak, AlignmentType } = docx;
 
-      const nivelTexto = document.getElementById('nivel-epja').options[document.getElementById('nivel-epja').selectedIndex].text;
-      const asigTexto = document.getElementById('asignatura').value;
+      historial.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'p-3 bg-stone-50 border rounded flex justify-between items-center';
+        div.innerHTML = `
+          <div>
+            <strong>${item.titulo}</strong>
+            <p class="text-[11px] text-stone-500">${item.asignatura} | ${item.nivel} | Fecha: ${item.fecha}</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="recuperarMaterial(${idx})" class="px-2.5 py-1 bg-[#8B2635] text-white rounded font-bold text-xs">Abrir en Editor</button>
+            <button onclick="borrarDelHistorial(${idx})" class="px-2 py-1 bg-stone-200 hover:bg-stone-300 text-stone-700 rounded text-xs">Borrar</button>
+          </div>
+        `;
+        cont.appendChild(div);
+      });
+    }
+
+    function recuperarMaterial(idx) {
+      const historial = JSON.parse(localStorage.getItem('heva_historial') || '[]');
+      if (historial[idx]) {
+        materialActual = historial[idx].data;
+        renderizarDocumentoEnPantalla();
+        cambiarHerramienta('crear');
+      }
+    }
+
+    function borrarDelHistorial(idx) {
+      const historial = JSON.parse(localStorage.getItem('heva_historial') || '[]');
+      historial.splice(idx, 1);
+      localStorage.setItem('heva_historial', JSON.stringify(historial));
+      cargarHistorial();
+    }
+
+    function limpiarTodoElHistorial() {
+      if (confirm('¿Seguro que deseas eliminar todos los materiales guardados?')) {
+        localStorage.removeItem('heva_historial');
+        cargarHistorial();
+      }
+    }
+
+    // EXPORTACIÓN A POWERPOINT (.PPTX)
+    async function exportarPowerPoint() {
+      if (!materialActual) return;
+      if (typeof PptxGenJS === 'undefined') return alert('Cargando librería de PowerPoint...');
+
+      const pptx = new PptxGenJS();
+      pptx.layout = 'LAYOUT_16x9';
+
+      const slide1 = pptx.addSlide();
+      slide1.background = { color: 'FDFBF7' };
+      slide1.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 0.4, fill: { color: '8B2635' } });
+      slide1.addText('ESCUELA HÉCTOR VALENZUELA CEA — VILLARRICA', { x: 0.8, y: 0.8, fontSize: 16, bold: true, color: '8B2635' });
+      slide1.addText((materialActual.titulo || 'CLASE EPJA').toUpperCase(), { x: 0.8, y: 2.0, w: 11, fontSize: 30, bold: true, color: '1A202C' });
+      slide1.addText(`${materialActual.asignatura}  |  ${materialActual.nivel}`, { x: 0.8, y: 4.8, fontSize: 18, color: '4A5568' });
+
+      const slide2 = pptx.addSlide();
+      slide2.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 0.2, fill: { color: '8B2635' } });
+      slide2.addText('LECTURA DE ANÁLISIS', { x: 0.8, y: 0.5, fontSize: 14, bold: true, color: '8B2635' });
+      const extracto = materialActual.introduccionLectura.substring(0, 600) + '...';
+      slide2.addText(extracto, { x: 0.8, y: 1.2, w: 11.5, h: 5.5, fontSize: 16, color: '2D3748', align: 'justify' });
+
+      if (materialActual.preguntasAlternativas) {
+        materialActual.preguntasAlternativas.slice(0, 4).forEach((p, idx) => {
+          const s = pptx.addSlide();
+          s.addText(`PREGUNTA ${idx+1}`, { x: 0.8, y: 0.5, fontSize: 14, bold: true, color: '8B2635' });
+          s.addText(p.enunciado, { x: 0.8, y: 1.1, w: 11.5, fontSize: 20, bold: true, color: '1A202C' });
+          p.alternativas.forEach((a, aIdx) => {
+            s.addText(`${a.letra})  ${a.texto}`, { x: 1.0, y: 2.8 + (aIdx * 0.9), w: 11, fontSize: 18, color: '2D3748' });
+          });
+        });
+      }
+
+      pptx.writeFile({ fileName: `${(materialActual.titulo || 'clase').replace(/[^a-z0-9]/gi, '_')}.pptx` });
+    }
+
+    // EXPORTACIÓN A WORD (.DOCX)
+    async function exportarWord() {
+      if (!materialActual) return;
+      if (typeof docx === 'undefined') return alert('Cargando librería de Word...');
+
+      const { Document, Packer, Paragraph, TextRun, HeadingLevel, PageBreak, AlignmentType } = docx;
 
       const parrafos = [
         new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'ESCUELA HÉCTOR VALENZUELA CEA — VILLARRICA', bold: true, size: 26, color: '8B2635' })] }),
-        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: `Educación de Personas Jóvenes y Adultas (EPJA) — ${nivelTexto} — ${asigTexto}`, italics: true, size: 18, color: '555555' })], spacing: { after: 200 } }),
+        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: `Educación de Personas Jóvenes y Adultas (EPJA) — ${materialActual.nivel} — ${materialActual.asignatura}`, italics: true, size: 18, color: '555555' })], spacing: { after: 200 } }),
         new Paragraph({ alignment: AlignmentType.CENTER, heading: HeadingLevel.HEADING_1, children: [new TextRun({ text: materialActual.titulo.toUpperCase(), bold: true, size: 24 })], spacing: { after: 200 } }),
         new Paragraph({ children: [new TextRun({ text: 'I. LECTURA Y CONTENIDOS', bold: true, size: 22, color: '8B2635' })], spacing: { before: 150, after: 100 } }),
         new Paragraph({ children: [new TextRun({ text: materialActual.introduccionLectura, size: 22 })], spacing: { after: 250 }, alignment: AlignmentType.JUSTIFY })
       ];
 
-      if (materialActual.casosEstudio && materialActual.casosEstudio.length > 0) {
+      if (materialActual.casosEstudio) {
         parrafos.push(new Paragraph({ children: [new TextRun({ text: 'II. ANÁLISIS Y REFLEXIÓN', bold: true, size: 22, color: '8B2635' })], spacing: { before: 150, after: 100 } }));
         materialActual.casosEstudio.forEach(c => {
           parrafos.push(
@@ -897,7 +1618,7 @@
         });
       }
 
-      if (materialActual.preguntasAlternativas && materialActual.preguntasAlternativas.length > 0) {
+      if (materialActual.preguntasAlternativas) {
         parrafos.push(new Paragraph({ children: [new TextRun({ text: 'III. SELECCIÓN MÚLTIPLE', bold: true, size: 22, color: '8B2635' })], spacing: { before: 150, after: 100 } }));
         materialActual.preguntasAlternativas.forEach((p, idx) => {
           parrafos.push(new Paragraph({ children: [new TextRun({ text: `${idx+1}. ${p.enunciado}`, bold: true, size: 20 })], spacing: { before: 100 } }));
