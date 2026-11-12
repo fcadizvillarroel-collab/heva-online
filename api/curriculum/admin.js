@@ -1,12 +1,4 @@
-// api/curriculum/admin.js — Gestión de Staging, Ingesta CSV y Auditoría Curricular
-
-const { createClient } = require('@supabase/supabase-js');
-const crypto = require('crypto');
-
-const supabase = createClient(
-  process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
+// api/curriculum/admin.js — Conector Directo a Supabase REST API (Cero dependencias externas)
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -16,175 +8,197 @@ module.exports = async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
+  const SUPABASE_URL = (process.env.SUPABASE_URL || '').trim().replace(/\/$/, '');
+  const SUPABASE_KEY = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    return res.status(500).json({
+      error: 'Variables de Supabase faltantes en Vercel',
+      detalle: 'Configura SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY en Vercel y haz Redeploy.'
+    });
+  }
+
+  // Verificación opcional de token administrativo si está definido en Vercel
+  const ADMIN_TOKEN = (process.env.HEVA_ACCESS_TOKEN || '').trim();
+  if (ADMIN_TOKEN && req.method === 'POST') {
+    const auth = req.headers.authorization || '';
+    if (auth !== `Bearer ${ADMIN_TOKEN}`) {
+      return res.status(403).json({ error: 'Acceso restringido: token administrativo inválido o ausente.' });
+    }
+  }
+
+  const sbHeaders = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=representation'
+  };
+
   const { action = 'list' } = req.query;
 
   try {
-    // 1. LISTAR REGISTROS DE STAGING CON FILTROS
-    if (req.method === 'GET' || action === 'list') {
+    // 1. LISTAR REGISTROS DE STAGING
+    if (req.method === 'GET' && action === 'list') {
       const { marco, estado, nivel, asignatura } = req.query;
-      let query = supabase.from('curriculo_staging').select('*');
+      const params = new URLSearchParams({ select: '*', order: 'clave_interna.asc', limit: '500' });
+      if (marco) params.set('marco', `eq.${marco}`);
+      if (estado) params.set('estado', `eq.${estado}`);
+      if (nivel) params.set('nivel', `eq.${nivel}`);
+      if (asignatura) params.set('asignatura', `eq.${asignatura}`);
 
-      if (marco) query = query.eq('marco', marco);
-      if (estado) query = query.eq('estado', estado);
-      if (nivel) query = query.eq('nivel', nivel);
-      if (asignatura) query = query.eq('asignatura', asignatura);
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/curriculo_staging?${params.toString()}`, { headers: sbHeaders });
+      const items = await r.json();
+      if (!r.ok) throw new Error(items.message || 'Error consultando curriculo_staging');
 
-      const { data: items, error } = await query.order('created_at', { ascending: false }).limit(200);
-
-      if (error) throw error;
-      return res.status(200).json({ total: items ? items.length : 0, items: items || [] });
+      return res.status(200).json({ total: items.length, items });
     }
 
-    // 2. INGESTA MASIVA DESDE CSV SIN SOBREESCRITURA (Idempotencia SHA-256)
-    if (req.method === 'POST' && action === 'import-batch') {
-      const { registros } = req.body || {};
-      if (!Array.isArray(registros) || registros.length === 0) {
-        return res.status(400).json({ error: 'Se requiere arreglo de registros para importar.' });
-      }
+    // 2. LISTAR OBJETIVOS PUBLICADOS (Exclusivo verificados para el selector docente)
+    if (req.method === 'GET' && action === 'verified') {
+      const { marco, nivel, asignatura } = req.query;
+      const params = new URLSearchParams({ select: '*', vigente: 'eq.true', order: 'codigo_oficial.asc' });
+      if (marco) params.set('marco', `eq.${marco}`);
+      if (nivel) params.set('nivel', `eq.${nivel}`);
+      if (asignatura) params.set('asignatura', `eq.${asignatura}`);
 
-      let insertados = 0;
-      let conflictos = [];
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/curriculo_publicado?${params.toString()}`, { headers: sbHeaders });
+      const objetivos = await r.json();
+      if (!r.ok) throw new Error(objetivos.message || 'Error consultando curriculo_publicado');
 
-      for (let i = 0; i < registros.length; i++) {
-        const r = registros[i];
-        if (!r.texto_literal || !r.codigo_declarado) continue;
-
-        // Hash SHA-256 único por combinación canónica de contenido
-        const canonico = `${r.marco || 'DECRETO_257_2009'}_${r.nivel || ''}_${r.asignatura || ''}_${r.tipo || 'OF'}_${r.texto_literal.trim()}`;
-        const checksum = crypto.createHash('sha256').update(canonico).digest('hex');
-
-        // Verificar si ya existe exactamente el mismo contenido
-        const { data: existente } = await supabase
-          .from('curriculo_staging')
-          .select('id, codigo_declarado, estado')
-          .eq('checksum_contenido', checksum)
-          .maybeSingle();
-
-        if (existente) {
-          // Registrar conflicto sin sobreescribir
-          await supabase.from('curriculo_conflictos_importacion').insert({
-            codigo_declarado: r.codigo_declarado,
-            checksum_intentado: checksum,
-            fila_origen: i + 1,
-            motivo_conflicto: `Registro ya presente en staging (ID: ${existente.id}, Estado: ${existente.estado})`,
-            datos_conflicto: r
-          });
-          conflictos.push({ fila: i + 1, codigo: r.codigo_declarado, motivo: 'Registro duplicado existente' });
-        } else {
-          // Insertar en Staging como PENDIENTE y NO comprobado físicamente
-          const { error: insErr } = await supabase.from('curriculo_staging').insert({
-            codigo_declarado: r.codigo_declarado.trim(),
-            marco: r.marco === 'BASES_CURRICULARES_2024' ? 'BASES_CURRICULARES_2024' : 'DECRETO_257_2009',
-            nivel: r.nivel || 'III_BASICO',
-            asignatura: r.asignatura || 'General',
-            tipo: ['OA','OF','CMO','HABILIDAD','ACTITUD','CONOCIMIENTO_ESENCIAL'].includes(r.tipo) ? r.tipo : 'OF',
-            texto_literal: r.texto_literal.trim(),
-            fuente_documento: r.fuente_documento || 'Documento no especificado',
-            pagina_declarada: r.pagina_declarada || 'S/P',
-            ubicacion_docx: r.ubicacion_docx || 'datos/importacion_supabase_staging.csv',
-            referencia_comprobada: false, // OBLIGATORIO: Falso hasta cotejo humano
-            estado: 'PENDIENTE',
-            checksum_contenido: checksum
-          });
-
-          if (insErr) {
-            conflictos.push({ fila: i + 1, codigo: r.codigo_declarado, motivo: insErr.message });
-          } else {
-            insertados++;
-          }
-        }
-      }
-
-      return res.status(200).json({
-        exito: true,
-        totalEnviados: registros.length,
-        insertadosEnStaging: insertados,
-        conflictosDetectados: conflictos.length,
-        conflictos
-      });
+      return res.status(200).json({ total: objetivos.length, objetivos });
     }
 
-    // 3. APROBACIÓN Y PUBLICACIÓN EN CATÁLOGO DOCENTE
+    // 3. APROBAR Y PUBLICAR EN CATÁLOGO DOCENTE
     if (req.method === 'POST' && action === 'approve') {
       const { stagingId, comprobadoDocumentalmente, notas } = req.body || {};
       if (!stagingId) return res.status(400).json({ error: 'stagingId requerido.' });
 
-      const { data: item, error: itemErr } = await supabase
-        .from('curriculo_staging')
-        .select('*')
-        .eq('id', stagingId)
-        .single();
+      if (!comprobadoDocumentalmente) {
+        return res.status(400).json({
+          error: 'Verificación requerida',
+          detalle: 'Marca la casilla certificando el cotejo físico contra el documento fuente antes de publicar.'
+        });
+      }
 
-      if (itemErr || !item) return res.status(404).json({ error: 'Registro no encontrado en staging.' });
+      const rItem = await fetch(`${SUPABASE_URL}/rest/v1/curriculo_staging?id=eq.${encodeURIComponent(stagingId)}&select=*`, { headers: sbHeaders });
+      const arr = await rItem.json();
+      const item = arr?.[0];
+      if (!item) return res.status(404).json({ error: 'Registro no encontrado en staging.' });
 
-      // Publicar en curriculo_publicado
-      const { data: pub, error: pubErr } = await supabase
-        .from('curriculo_publicado')
-        .insert({
+      const rPub = await fetch(`${SUPABASE_URL}/rest/v1/curriculo_publicado`, {
+        method: 'POST',
+        headers: sbHeaders,
+        body: JSON.stringify({
           staging_id: item.id,
-          codigo_oficial: item.codigo_declarado,
+          clave_interna: item.clave_interna,
+          codigo_oficial: item.codigo_declarado || item.numero || item.clave_interna,
           marco: item.marco,
+          etapa: item.etapa,
+          formacion: item.formacion,
           nivel: item.nivel,
           asignatura: item.asignatura,
           tipo: item.tipo,
-          texto_literal: item.texto_literal,
-          fuente_documento: item.fuente_documento,
-          pagina_oficial: item.pagina_declarada,
+          eje: item.eje,
+          texto_literal: item.texto_literal || item.texto,
+          fuente_documento: item.fuente_documento || item.fuente,
+          pagina_oficial: item.pagina_declarada || item.pagina_pdf || 'S/P',
+          vigente_desde: item.vigente_desde,
+          vigente_hasta: item.vigente_hasta,
           vigente: true
         })
-        .select()
-        .single();
+      });
+      const pub = await rPub.json();
+      if (!rPub.ok) return res.status(409).json({ error: 'Fallo al publicar', detalle: pub.message || JSON.stringify(pub) });
 
-      if (pubErr) return res.status(409).json({ error: 'Fallo al publicar (posible código duplicado)', detalle: pubErr.message });
-
-      // Actualizar estado en Staging
-      await supabase.from('curriculo_staging').update({
-        estado: 'APROBADO',
-        referencia_comprobada: Boolean(comprobadoDocumentalmente),
-        notas_revision: notas,
-        revisado_at: new Date().toISOString()
-      }).eq('id', stagingId);
-
-      // Registrar auditoría inmutable
-      await supabase.from('curriculo_auditoria').insert({
-        staging_id: stagingId,
-        accion: 'APROBACION_Y_PUBLICACION',
-        estado_anterior: item.estado,
-        estado_nuevo: 'APROBADO',
-        cambios_json: { publicado_id: pub.id, notas }
+      await fetch(`${SUPABASE_URL}/rest/v1/curriculo_staging?id=eq.${encodeURIComponent(stagingId)}`, {
+        method: 'PATCH',
+        headers: sbHeaders,
+        body: JSON.stringify({
+          estado: 'APROBADO',
+          referencia_comprobada: true,
+          notas_revision: notas || '',
+          revisado_at: new Date().toISOString()
+        })
       });
 
-      return res.status(200).json({ exito: true, publicado: pub });
+      await fetch(`${SUPABASE_URL}/rest/v1/curriculo_auditoria`, {
+        method: 'POST',
+        headers: sbHeaders,
+        body: JSON.stringify({
+          staging_id: stagingId,
+          accion: 'APROBACION_Y_PUBLICACION',
+          estado_anterior: item.estado,
+          estado_nuevo: 'APROBADO',
+          cambios_json: { publicado_id: pub?.[0]?.id, notas }
+        })
+      });
+
+      return res.status(200).json({ exito: true, publicado: pub?.[0] });
     }
 
-    // 4. RECHAZAR O CORREGIR
-    if (req.method === 'POST' && action === 'reject') {
-      const { stagingId, motivo } = req.body || {};
-      await supabase.from('curriculo_staging').update({
-        estado: 'RECHAZADO',
-        notas_revision: motivo,
-        revisado_at: new Date().toISOString()
-      }).eq('id', stagingId);
-
-      return res.status(200).json({ exito: true });
-    }
-
+    // 4. CORREGIR TEXTO EN STAGING
     if (req.method === 'POST' && action === 'correct') {
       const { stagingId, textoCorregido, notas } = req.body || {};
-      await supabase.from('curriculo_staging').update({
-        texto_literal: textoCorregido.trim(),
-        estado: 'CORREGIDO',
-        notas_revision: notas,
-        revisado_at: new Date().toISOString()
-      }).eq('id', stagingId);
+      if (!stagingId || !textoCorregido) return res.status(400).json({ error: 'Datos incompletos.' });
+
+      const rUpd = await fetch(`${SUPABASE_URL}/rest/v1/curriculo_staging?id=eq.${encodeURIComponent(stagingId)}`, {
+        method: 'PATCH',
+        headers: sbHeaders,
+        body: JSON.stringify({
+          texto: textoCorregido.trim(),
+          texto_literal: textoCorregido.trim(),
+          estado: 'CORREGIDO',
+          notas_revision: notas || '',
+          revisado_at: new Date().toISOString()
+        })
+      });
+      if (!rUpd.ok) throw new Error('No se pudo guardar la corrección.');
+
+      await fetch(`${SUPABASE_URL}/rest/v1/curriculo_auditoria`, {
+        method: 'POST',
+        headers: sbHeaders,
+        body: JSON.stringify({
+          staging_id: stagingId,
+          accion: 'CORRECCION_TEXTO',
+          estado_nuevo: 'CORREGIDO',
+          cambios_json: { textoCorregido, notas }
+        })
+      });
 
       return res.status(200).json({ exito: true });
     }
 
-    return res.status(400).json({ error: 'Acción no soportada.' });
+    // 5. RECHAZAR REGISTRO
+    if (req.method === 'POST' && action === 'reject') {
+      const { stagingId, motivo } = req.body || {};
+      if (!stagingId) return res.status(400).json({ error: 'stagingId requerido.' });
 
+      await fetch(`${SUPABASE_URL}/rest/v1/curriculo_staging?id=eq.${encodeURIComponent(stagingId)}`, {
+        method: 'PATCH',
+        headers: sbHeaders,
+        body: JSON.stringify({
+          estado: 'RECHAZADO',
+          notas_revision: motivo || 'Rechazado en revisión curricular',
+          revisado_at: new Date().toISOString()
+        })
+      });
+
+      await fetch(`${SUPABASE_URL}/rest/v1/curriculo_auditoria`, {
+        method: 'POST',
+        headers: sbHeaders,
+        body: JSON.stringify({
+          staging_id: stagingId,
+          accion: 'RECHAZO',
+          estado_nuevo: 'RECHAZADO',
+          cambios_json: { motivo }
+        })
+      });
+
+      return res.status(200).json({ exito: true });
+    }
+
+    return res.status(400).json({ error: 'Acción no reconocida.' });
   } catch (error) {
-    console.error('Error en admin curricular:', error);
     return res.status(500).json({ error: 'Error de servidor', detalle: error.message });
   }
 };
