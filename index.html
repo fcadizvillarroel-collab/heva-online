@@ -33,7 +33,7 @@
     <div class="flex items-center gap-2 text-xs">
       <span class="bg-black/25 px-3 py-1 rounded text-rose-100 font-medium flex items-center gap-1.5">
         <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
-        Supabase Staging & Catálogo Activo
+        Supabase Conectado (407 Registros)
       </span>
     </div>
   </header>
@@ -41,7 +41,7 @@
   <!-- NAVEGACIÓN -->
   <nav class="no-print bg-white border-b border-stone-200 px-6 flex gap-4 text-xs md:text-sm font-medium overflow-x-auto">
     <button onclick="cambiarHerramienta('crear')" id="tab-crear" class="py-3 border-b-2 border-[#8B2635] text-[#8B2635] font-bold whitespace-nowrap">🎓 Generador de Instrumentos</button>
-    <button onclick="cambiarHerramienta('staging')" id="tab-staging" class="py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap">🛠️ Revisión Staging (407 Candidatos)</button>
+    <button onclick="cambiarHerramienta('staging')" id="tab-staging" class="py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap">🛠️ Revisión Staging (407 Registros)</button>
     <button onclick="cambiarHerramienta('diffit')" id="tab-diffit" class="py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap">🔄 Diferenciador (Diffit)</button>
     <button onclick="cambiarHerramienta('remediacion')" id="tab-remediacion" class="py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap">🩹 Plan de Remediación</button>
     <button onclick="cambiarHerramienta('guardados')" id="tab-guardados" class="py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap">💾 Mis Materiales</button>
@@ -64,7 +64,7 @@
     </div>
 
     <!-- ====================================================================== -->
-    <!-- PESTAÑA: REVISIÓN DE STAGING (ADMIN / UTP - 407 REGISTROS) -->
+    <!-- PESTAÑA: REVISIÓN DE STAGING (407 REGISTROS DE SUPABASE LADO A LADO) -->
     <!-- ====================================================================== -->
     <div id="panel-staging" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-lg border border-stone-200 shadow-sm space-y-4">
@@ -72,55 +72,42 @@
         <div class="flex justify-between items-start flex-wrap gap-3 border-b pb-3">
           <div>
             <h2 class="text-base font-bold text-[#8B2635] flex items-center gap-2">
-              <span>🛠️ Módulo de Administración Curricular y Cotejo de Staging</span>
+              <span>🛠️ Cotejo y Verificación Curricular de Staging</span>
             </h2>
             <p class="text-xs text-stone-600 mt-1">
-              Revise lado a lado los registros candidatos contra las fuentes oficiales. <strong>Ningún registro se publica en el catálogo docente hasta ser aprobado formalmente.</strong>
+              Revise lado a lado los 407 registros importados en Supabase frente a su fuente y página declarada. Los registros aprobados pasan al catálogo oficial docente.
             </p>
           </div>
-          <!-- Cargar CSV de Staging directamente desde el navegador -->
-          <div class="flex items-center gap-2 bg-stone-50 p-2 rounded border border-stone-300">
-            <label class="text-xs font-bold text-stone-700">Importar CSV de Staging:</label>
-            <input type="file" id="archivo-csv-staging" accept=".csv" class="text-xs" />
-            <button onclick="procesarCSVStaging()" id="btn-subir-csv" class="px-3 py-1 bg-[#8B2635] hover:bg-[#701E2A] text-white rounded text-xs font-bold">Subir a Supabase</button>
+          <div class="flex items-center gap-3">
+            <button onclick="cargarStagingDesdeServidor()" class="px-3 py-1.5 bg-stone-700 hover:bg-stone-800 text-white rounded text-xs font-bold flex items-center gap-1.5">
+              <span>🔄 Recargar Registros</span>
+            </button>
           </div>
         </div>
 
-        <div id="alerta-staging" class="hidden text-xs p-3 rounded"></div>
-
         <!-- Filtros de Staging -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+        <div class="flex gap-4 text-xs items-center flex-wrap">
           <div>
-            <label class="font-bold text-stone-700 block mb-1">Marco Curricular</label>
-            <select id="filtro-staging-marco" onchange="cargarStagingDesdeServidor()" class="w-full border rounded p-1.5 bg-white">
-              <option value="">Todos los marcos</option>
-              <option value="DECRETO_257_2009">Decreto 257/2009</option>
-              <option value="BASES_CURRICULARES_2024">Bases Curriculares 2024</option>
-            </select>
-          </div>
-          <div>
-            <label class="font-bold text-stone-700 block mb-1">Estado de Revisión</label>
-            <select id="filtro-staging-estado" onchange="cargarStagingDesdeServidor()" class="w-full border rounded p-1.5 bg-white">
-              <option value="PENDIENTE">Pendientes (Sin verificar)</option>
+            <label class="font-bold text-stone-700 mr-2">Filtrar por Estado:</label>
+            <select id="filtro-staging-estado" onchange="cargarStagingDesdeServidor()" class="border rounded p-1.5 bg-white">
+              <option value="PENDIENTE">Pendientes de Cotejo</option>
               <option value="APROBADO">Aprobados y Publicados</option>
               <option value="RECHAZADO">Rechazados</option>
               <option value="CORREGIDO">Corregidos en Staging</option>
             </select>
           </div>
-          <div class="col-span-2 flex items-end">
-            <span id="contador-staging-registros" class="text-stone-500 font-mono text-xs">Cargando registros...</span>
-          </div>
+          <span id="contador-staging-registros" class="text-stone-500 font-mono text-xs font-bold">Cargando 407 registros...</span>
         </div>
 
         <!-- Visor Lado a Lado -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
           
-          <!-- Lista de Registros Candidatos -->
-          <div class="border rounded bg-stone-50 max-h-[500px] overflow-y-auto divide-y" id="lista-staging-items"></div>
+          <!-- Lista de Registros Candidatos de Supabase -->
+          <div class="border rounded bg-stone-50 max-h-[550px] overflow-y-auto divide-y" id="lista-staging-items"></div>
 
           <!-- Panel de Cotejo y Acciones (Lado a Lado) -->
           <div class="lg:col-span-2 border rounded p-5 bg-white space-y-4" id="panel-detalle-staging">
-            <p class="text-xs text-stone-400 italic text-center py-10">Seleccione un registro de la lista izquierda para cotejarlo contra su documento fuente.</p>
+            <p class="text-xs text-stone-400 italic text-center py-12">Seleccione un registro de la lista izquierda para cotejarlo contra su documento fuente.</p>
           </div>
 
         </div>
@@ -434,26 +421,25 @@
     }
 
     // ------------------------------------------------------------------------
-    // MÓDULO DE STAGING Y COTEJO LADO A LADO
+    // MÓDULO DE STAGING Y COTEJO LADO A LADO CON COLUMNAS REALES DE SUPABASE
     // ------------------------------------------------------------------------
     async function cargarStagingDesdeServidor() {
       const cont = document.getElementById('lista-staging-items');
       const contador = document.getElementById('contador-staging-registros');
-      const marco = document.getElementById('filtro-staging-marco').value;
       const estado = document.getElementById('filtro-staging-estado').value;
 
       contador.innerText = 'Consultando Supabase...';
       cont.innerHTML = '';
 
       try {
-        const res = await fetch(`/api/curriculum/admin?action=list&marco=${marco}&estado=${estado}`);
+        const res = await fetch(`/api/curriculum/admin?action=list&estado=${estado}`);
         const data = await res.json();
         itemsStaging = data.items || [];
-        contador.innerText = `${itemsStaging.length} registros encontrados en Supabase (${estado})`;
+        contador.innerText = `${itemsStaging.length} registros cargados desde Supabase (${estado})`;
 
         if (itemsStaging.length === 0) {
-          cont.innerHTML = '<p class="text-xs text-stone-400 p-4 italic text-center">No hay registros con este filtro. Sube tu CSV de datos arriba.</p>';
-          document.getElementById('panel-detalle-staging').innerHTML = '<p class="text-xs text-stone-400 italic text-center py-10">No hay selección activa.</p>';
+          cont.innerHTML = '<p class="text-xs text-stone-400 p-4 italic text-center">No hay registros con este filtro en Supabase.</p>';
+          document.getElementById('panel-detalle-staging').innerHTML = '<p class="text-xs text-stone-400 italic text-center py-12">No hay selección activa.</p>';
           return;
         }
 
@@ -462,11 +448,11 @@
           d.className = 'p-3 hover:bg-stone-100 cursor-pointer text-xs';
           d.innerHTML = `
             <div class="flex justify-between items-center font-bold">
-              <span>[${it.tipo}] ${it.codigo_declarado}</span>
+              <span>[${it.tipo || it.formacion || 'OF'}] ${it.clave_interna || it.numero || idx+1}</span>
               <span class="${it.referencia_comprobada ? 'text-emerald-700' : 'text-rose-700'}">${it.referencia_comprobada ? '✓ Cotejado' : '⚠ Sin Comprobar'}</span>
             </div>
-            <div class="text-[11px] text-stone-500">${it.asignatura} · ${it.nivel}</div>
-            <p class="text-stone-600 truncate mt-1">${it.texto_literal}</p>
+            <div class="text-[11px] text-stone-500">${it.asignatura || 'General'} · ${it.nivel || it.etapa || 'EPJA'}</div>
+            <p class="text-stone-600 truncate mt-1">${it.texto}</p>
           `;
           d.onclick = () => verDetalleLadoALado(it);
           cont.appendChild(d);
@@ -475,7 +461,7 @@
         verDetalleLadoALado(itemsStaging[0]);
 
       } catch (e) {
-        contador.innerText = 'Error al consultar staging: ' + e.message;
+        contador.innerText = 'Error de conexión: ' + e.message;
       }
     }
 
@@ -485,25 +471,25 @@
       p.innerHTML = `
         <div class="flex justify-between items-center border-b pb-2">
           <div>
-            <h3 class="font-bold text-sm text-[#8B2635]">Cotejo Documental: [${item.tipo}] ${item.codigo_declarado}</h3>
-            <span class="text-xs text-stone-500">${item.asignatura} · ${item.nivel} · ${item.marco}</span>
+            <h3 class="font-bold text-sm text-[#8B2635]">Cotejo Documental: ${item.clave_interna || item.numero || 'Registro'}</h3>
+            <span class="text-xs text-stone-500">${item.asignatura || 'General'} · ${item.nivel || item.etapa || ''} · ${item.marco || 'Decreto 257'}</span>
           </div>
           <span class="text-xs px-2 py-0.5 rounded font-bold ${item.estado === 'APROBADO' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${item.estado}</span>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-2">
-          <!-- Lado Izquierdo: Texto extraído -->
+          <!-- Lado Izquierdo: Texto real del objetivo -->
           <div class="space-y-2">
             <strong class="block text-stone-800 uppercase">1. Texto Literal en Staging (Editable):</strong>
-            <textarea id="staging-texto-edit" rows="6" class="w-full border rounded p-2 text-xs bg-stone-50 text-stone-800">${item.texto_literal}</textarea>
+            <textarea id="staging-texto-edit" rows="6" class="w-full border rounded p-2 text-xs bg-stone-50 text-stone-800">${item.texto || ''}</textarea>
           </div>
 
           <!-- Lado Derecho: Metadatos y Fuente Oficial -->
           <div class="space-y-2 bg-stone-50 p-3 rounded border">
             <strong class="block text-sky-900 uppercase">2. Fuente Oficial Declarada:</strong>
-            <p><strong>Documento:</strong> ${item.fuente_documento}</p>
-            <p><strong>Página declarada:</strong> Pág. ${item.pagina_declarada}</p>
-            <p><strong>Ubicación DOCX:</strong> <span class="font-mono text-[11px]">${item.ubicacion_docx}</span></p>
+            <p><strong>Documento Fuente:</strong> ${item.fuente || 'MINEDUC'}</p>
+            <p><strong>Página PDF:</strong> Pág. ${item.pagina_pdf || 'S/P'}</p>
+            <p><strong>Eje / Formación:</strong> ${item.eje || item.formacion || 'General'}</p>
             <div class="p-2 rounded ${item.referencia_comprobada ? 'bg-emerald-100 text-emerald-900' : 'bg-rose-100 text-rose-900'} mt-2">
               ${item.referencia_comprobada ? '✓ Referencia física cotejada con éxito.' : '⚠ Aún no se coteja contra el PDF ministerial oficial.'}
             </div>
@@ -515,8 +501,8 @@
         </div>
 
         <div class="pt-2">
-          <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Notas de Revisión / Auditoría:</label>
-          <input type="text" id="staging-notas" value="${item.notas_revision || ''}" placeholder="Justifique su aprobación, rechazo o corrección..." class="w-full border rounded p-2 text-xs" />
+          <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Notas de Revisión / Auditoría UTP:</label>
+          <input type="text" id="staging-notas" value="${item.notas_revision || ''}" placeholder="Detalle observaciones o justifique aprobación..." class="w-full border rounded p-2 text-xs" />
         </div>
 
         <div class="flex gap-2 pt-3 border-t">
@@ -562,72 +548,8 @@
       }
     }
 
-    // SUBIR CSV DE DATOS DIRECTAMENTE A SUPABASE
-    async function procesarCSVStaging() {
-      const fileInput = document.getElementById('archivo-csv-staging');
-      const btn = document.getElementById('btn-subir-csv');
-      const alerta = document.getElementById('alerta-staging');
-
-      if (!fileInput.files || fileInput.files.length === 0) {
-        return alert('Por favor selecciona el archivo CSV de datos en tu computador.');
-      }
-
-      const file = fileInput.files[0];
-      btn.innerText = '⌛ Procesando e importando...';
-      btn.disabled = true;
-
-      try {
-        const texto = await file.text();
-        const lineas = texto.split(/\r?\n/).filter(l => l.trim().length > 0);
-        
-        // Parsear líneas CSV
-        const registros = [];
-        const inicio = lineas[0].toLowerCase().includes('codigo') ? 1 : 0;
-
-        for (let i = inicio; i < lineas.length; i++) {
-          const cols = lineas[i].split(';').map(c => c.trim().replace(/^"|"$/g, ''));
-          if (cols.length >= 6) {
-            registros.push({
-              codigo_declarado: cols[0],
-              marco: cols[1],
-              nivel: cols[2],
-              asignatura: cols[3],
-              tipo: cols[4],
-              texto_literal: cols[5],
-              fuente_documento: cols[6] || 'Documento ministerial',
-              pagina_declarada: cols[7] || 'S/P',
-              ubicacion_docx: cols[8] || 'datos/importacion_supabase_staging.csv'
-            });
-          }
-        }
-
-        const res = await fetch('/api/curriculum/admin?action=import-batch', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ registros })
-        });
-
-        const data = await res.json();
-        alerta.classList.remove('hidden');
-        if (data.exito) {
-          alerta.className = 'text-xs p-3 rounded bg-emerald-50 text-emerald-900 border border-emerald-300';
-          alerta.innerHTML = `<strong>Importación Completada:</strong> Se procesaron ${data.totalEnviados} filas. Nuevos insertados: <strong>${data.insertadosEnStaging}</strong>. Conflictos/duplicados evitados: <strong>${data.conflictosDetectados}</strong>.`;
-          cargarStagingDesdeServidor();
-        } else {
-          alerta.className = 'text-xs p-3 rounded bg-rose-50 text-rose-900 border border-rose-300';
-          alerta.innerText = 'Error en importación: ' + (data.detalle || data.error);
-        }
-
-      } catch (e) {
-        alert('Error al leer el archivo CSV: ' + e.message);
-      } finally {
-        btn.innerText = 'Subir a Supabase';
-        btn.disabled = false;
-      }
-    }
-
     // ------------------------------------------------------------------------
-    // SELECTOR CURRICULAR DOCENTE (SOLO PUBLICADOS)
+    // SELECTOR DOCENTE: CONSULTA OBJETIVOS VERIFICADOS DE SUPABASE
     // ------------------------------------------------------------------------
     const ESTRUCTURA_CURRICULAR = {
       'DECRETO_257_2009': {
@@ -664,18 +586,47 @@
       actualizarObjetivosYEstrategias();
     }
 
-    function actualizarObjetivosYEstrategias() {
+    async function actualizarObjetivosYEstrategias() {
+      const marco = document.getElementById('marco-curricular').value;
+      const nivel = document.getElementById('nivel-epja').value;
+      const asig = document.getElementById('asignatura').value;
       const selectOA = document.getElementById('select-oa');
       const contadorOAs = document.getElementById('contador-oas');
+
       selectOA.innerHTML = '';
+      contadorOAs.innerText = 'Consultando Supabase...';
 
-      const optLibre = document.createElement('option');
-      optLibre.value = 'CUSTOM';
-      optLibre.innerText = '✍️ [PERSONALIZADO] Redactar o pegar mi propio objetivo...';
-      selectOA.appendChild(optLibre);
+      try {
+        const res = await fetch(`/api/curriculum/admin?action=verified&marco=${marco}&nivel=${nivel}&asignatura=${encodeURIComponent(asig)}`);
+        const data = await res.json();
+        const lista = data.objetivos || [];
 
-      contadorOAs.innerText = 'Consultando verificados...';
-      cargarOATexto();
+        contadorOAs.innerText = `${lista.length} verificados`;
+
+        if (lista.length === 0) {
+          const opt = document.createElement('option');
+          opt.value = '';
+          opt.innerText = '-- Sin objetivos verificados aún en Supabase (Revisar en pestaña Staging) --';
+          selectOA.appendChild(opt);
+        } else {
+          lista.forEach(o => {
+            const opt = document.createElement('option');
+            opt.value = o.texto_literal;
+            opt.innerText = `[${o.tipo}] [${o.codigo_oficial}] ${o.texto_literal.substring(0, 95)}... (Pág. ${o.pagina_oficial})`;
+            selectOA.appendChild(opt);
+          });
+        }
+
+        const optLibre = document.createElement('option');
+        optLibre.value = 'CUSTOM';
+        optLibre.innerText = '✍️ [PERSONALIZADO] Redactar o pegar mi propio objetivo...';
+        selectOA.appendChild(optLibre);
+
+        cargarOATexto();
+
+      } catch (e) {
+        contadorOAs.innerText = 'Error de consulta';
+      }
     }
 
     function cargarOATexto() {
@@ -751,7 +702,6 @@
       document.getElementById('doc-nivel').innerHTML = `<strong>Nivel:</strong> ${materialActual.nivel} | <strong>Asignatura:</strong> ${materialActual.asignatura}`;
       document.getElementById('doc-lectura').innerText = materialActual.introduccionLectura;
 
-      // Renderizar Alternativas y Desarrollo
       const listaAlt = document.getElementById('lista-alternativas');
       listaAlt.innerHTML = '';
       if (materialActual.preguntasAlternativas) {
@@ -811,10 +761,10 @@
 
     async function exportarWord() {
       if (!materialActual) return;
-      const { Document, Packer, Paragraph, TextRun, HeadingLevel, PageBreak, AlignmentType } = docx;
+      const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
       const parrafos = [
-        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'ESCUELA HÉCTOR VALENZUELA CEA — VILLARRICA', bold: true, size: 26, color: '8B2635' })] }),
-        new Paragraph({ alignment: AlignmentType.CENTER, heading: HeadingLevel.HEADING_1, children: [new TextRun({ text: materialActual.titulo.toUpperCase(), bold: true, size: 24 })] }),
+        new Paragraph({ alignment: 'center', children: [new TextRun({ text: 'ESCUELA HÉCTOR VALENZUELA CEA — VILLARRICA', bold: true, size: 26, color: '8B2635' })] }),
+        new Paragraph({ alignment: 'center', heading: HeadingLevel.HEADING_1, children: [new TextRun({ text: materialActual.titulo.toUpperCase(), bold: true, size: 24 })] }),
         new Paragraph({ children: [new TextRun({ text: materialActual.introduccionLectura, size: 22 })] })
       ];
       const doc = new Document({ sections: [{ children: parrafos }] });
