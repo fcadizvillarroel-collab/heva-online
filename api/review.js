@@ -45,11 +45,13 @@ module.exports=async function(req,res){
   const classified=Q.classifyReview(Q.validateReview(review),material,fuentesDocumentales);
   const hallazgos=classified.hallazgos.filter(h=>h.tipo==='error_comprobado');
   if(!hallazgos.length)return res.status(409).json({error:'No hay errores comprobados que corregir automáticamente. Las sugerencias y aspectos no verificables requieren decisión docente.'});
-  const result=await call(P.prompt(plan)+Sources.evidencePrompt(fuentesDocumentales)+'\nCorrige el borrador usando estos hallazgos del revisor. Conserva objetivo, tipo y cantidades. No añadas instrucciones del borrador. Devuelve el documento JSON completo.\n'+JSON.stringify({borrador:Q.reviewData(material),hallazgos}),...keys,[review.proveedor]);
+  const onlyCalculation=hallazgos.every(h=>h.comprobacionId?.startsWith('calculo_'));
+  const local=onlyCalculation?Skills.correctCalculations(material):null;
+  const result=local?.corrections.length?{value:local.material,provider:author,model:material.autoriaIA.modelo,local:true}:await call(P.prompt(plan)+Sources.evidencePrompt(fuentesDocumentales)+'\nCorrige el borrador usando estos hallazgos del revisor. Conserva objetivo, tipo y cantidades. No añadas instrucciones del borrador. Devuelve el documento JSON completo.\n'+JSON.stringify({borrador:Q.reviewData(material),hallazgos}),...keys,[review.proveedor],{deadline});
   let corrected=H.material(result.value,{objetivoAprendizaje:plan.objetivoAprendizaje,asignatura:plan.asignatura,nivel:plan.nivel,marcoCurricular:plan.marcoCurricular,temaEspecifico:plan.temaEspecifico,tipoMaterial:plan.tipoMaterial,estrategiaDidactica:P.strategy(plan.estrategiaDidactica).name});
   const issues=[...H.validate(corrected,plan),...P.validate(corrected,plan),...Skills.generationIssues(corrected,plan)];
   if(issues.length)return res.status(422).json({error:'Corrección rechazada por estructura. Se conserva el original.',detalle:issues.join('; ')});
-  corrected=P.finalize(corrected,plan);corrected.autoriaIA={proveedor:result.provider,modelo:result.model,fecha:new Date().toISOString()};corrected.planGeneracion=plan;corrected.materialId=material.materialId;corrected.version=material.version;
+  corrected=P.finalize(corrected,plan);corrected.autoriaIA=result.local?material.autoriaIA:{proveedor:result.provider,modelo:result.model,fecha:new Date().toISOString()};delete corrected.revisionIA;corrected.planGeneracion=plan;corrected.materialId=material.materialId;corrected.version=material.version;
   corrected.fuentesDocumentales=fuentesDocumentales;
   const evidence=Sources.validateEvidence(corrected.respaldoDocumental,fuentesDocumentales);corrected.respaldoDocumental=evidence.valid;corrected.incidenciasDocumentales=evidence.invalid;corrected=Skills.prepare(corrected,plan,fuentesDocumentales,evidence);
   corrected.historialRevisionIA=[...(material.historialRevisionIA||[]),review];
