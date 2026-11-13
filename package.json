@@ -1,0 +1,24 @@
+{
+  "name": "heva-online",
+  "version": "1.0.0",
+  "description": "Aplicación estática con funciones de Vercel y catálogo curricular en Supabase. Fuente de trabajo: este repositorio. AI Studio permite desarrollar o generar materiales, pero no sincroniza por sí solo con GitHub, Vercel, Supabase ni el Site de ChatGPT.",
+  "scripts": {
+    "test": "node --test tests/*.cjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fcadizvillarroel-collab/heva-online.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/fcadizvillarroel-collab/heva-online/issues"
+  },
+  "homepage": "https://github.com/fcadizvillarroel-collab/heva-online#readme",
+  "dependencies": {
+    "pdf-parse": "2.4.5"
+  },
+  "private": true,
+  "engines": {
+    "node": "22.x"
+  }
+}

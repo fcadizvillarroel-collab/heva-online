@@ -1,4 +1,5 @@
 const {call} = require('./_providers.cjs');
+const Sources=require('../lib/document-sources.cjs');
 const Pedagogy = require('../heva-pedagogy.js');
 const HEVA = require('../heva-core.js');
 // api/generate.js — Motor Multi-IA Suite: ChatGPT / Gemini con Prosa Andragógica y RAG
@@ -149,7 +150,8 @@ Responde ÚNICAMENTE en JSON:
     if (!Object.hasOwn(Pedagogy.contracts, tipoMaterial)) return res.status(400).json({error:'Tipo de material no admitido.'});
     if (!objetivoAprendizaje.trim()) return res.status(400).json({error:'Selecciona un objetivo curricular antes de generar.'});
     const plan = {asignatura,nivel,marcoCurricular,objetivoAprendizaje,temaEspecifico,estrategiaDidactica,instruccionesDocente,textoReferencia,adecuacionesPIE,tipoMaterial,cantAlternativas,cantDesarrollo,cantCasos,incluirTicketSalida};
-    const promptRedactor = Pedagogy.prompt(plan);
+    const fuentesDocumentales=await Sources.retrieve(plan);
+    const promptRedactor = Pedagogy.prompt(plan)+Sources.evidencePrompt(fuentesDocumentales);
     const metadata = {objetivoAprendizaje,asignatura,nivel,marcoCurricular,temaEspecifico,tipoMaterial,estrategiaDidactica:Pedagogy.strategy(estrategiaDidactica).name};
     let author;
     const draft = async prompt => { const r = await call(prompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY); author={proveedor:r.provider,modelo:r.model,fecha:new Date().toISOString()}; return r.value; };
@@ -165,6 +167,9 @@ Responde ÚNICAMENTE en JSON:
     material = Pedagogy.finalize(material,plan);
     material.autoriaIA=author;
     material.planGeneracion=plan;
+    material.fuentesDocumentales=fuentesDocumentales;
+    const evidence=Sources.validateEvidence(material.respaldoDocumental,fuentesDocumentales);
+    material.respaldoDocumental=evidence.valid;material.incidenciasDocumentales=evidence.invalid;
     return res.status(200).json({exito:true,material,revision:{alcance:'Estructura, cantidades y trazabilidad; revisión pedagógica docente pendiente',tipo:tipoMaterial,estrategia:metadata.estrategiaDidactica}});
 
   } catch (error) {

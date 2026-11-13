@@ -54,3 +54,15 @@ En pruebas: alternativa = 1 punto, caso = 2 puntos, desarrollo = 3 puntos. El to
 Los materiales antiguos siguen abriéndose con su formato previo. Los nuevos incluyen `versionPedagogica: 3`, contrato del tipo y trazabilidad completa; guardar o exportar conserva sus campos.
 
 Pruebas: `node --test tests/core.test.cjs tests/pedagogy.test.cjs`.
+
+### Fuentes documentales en línea
+
+Los materiales nuevos recuperan PDF desde un registro cerrado de documentos oficiales (`lib/document-sources.cjs`): el Decreto 257 o las Bases EPJA 2024 según el marco seleccionado y, en Estudios Sociales, una guía de contenido y orientaciones didácticas identificadas con su edición. La consulta también está disponible mediante el botón junto al tema. No envía datos de estudiantes a un buscador ni necesita una API de búsqueda pagada.
+
+El servidor descarga el PDF, limita tamaño y tiempo, extrae texto por página y registra SHA-256, fecha de consulta y fragmentos seleccionados. Conserva una caché de documentos públicos de hasta 15 minutos por instancia. Busca el objetivo literal incluso si continúa en otra página. Si no lo encuentra, no cambia el objetivo docente ni lo declara confirmado. Los errores de una fuente no impiden conservar el material ni se sustituyen por información inventada.
+
+El redactor y el revisor reciben los fragmentos. El servidor comprueba que los IDs y las citas propuestos existan en esos fragmentos. Una cita localizada no garantiza que respalde lógicamente la afirmación; el informe mantiene la validación docente y muestra las limitaciones. Los objetivos curriculares y orientaciones didácticas no certifican hechos históricos. Una fuente no disponible no se utiliza. Las orientaciones 2023–2025 se identifican como históricas, sin afirmar priorización vigente.
+
+Las fuentes y sus versiones se guardan en el JSON e historial del material. La bibliografía se incluye en Word/PowerPoint; citas y respaldos por ítem se reservan a la pauta docente. Para incorporar otra fuente, revisar institución, documento, fecha, licencia y pertinencia antes de añadirla al registro. No se aceptan URL arbitrarias aportadas por el modelo o el cliente.
+
+Validación: `npm test`. Node 22, `pdf-parse` fijado a 2.4.5. La recuperación documental requiere internet y está limitada al registro; no equivale a investigar toda la web ni a certificar vigencia legal.

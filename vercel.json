@@ -1,1 +1,19 @@
-{"functions": {"api/generate.js": {"maxDuration": 60}, "api/curriculum/admin.js": {"maxDuration": 30}, "api/review.js": {"maxDuration": 60}}}
+{
+  "functions": {
+    "api/generate.js": {
+      "maxDuration": 60,
+      "includeFiles": "node_modules/pdf-parse/dist/**"
+    },
+    "api/curriculum/admin.js": {
+      "maxDuration": 30
+    },
+    "api/review.js": {
+      "maxDuration": 60,
+      "includeFiles": "node_modules/pdf-parse/dist/**"
+    },
+    "api/sources.js": {
+      "maxDuration": 60,
+      "includeFiles": "node_modules/pdf-parse/dist/**"
+    }
+  }
+}
