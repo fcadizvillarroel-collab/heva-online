@@ -23,6 +23,7 @@ module.exports = async function handler(req, res) {
     temaEspecifico = '',
     estrategiaDidactica = 'Análisis de contenido disciplinar formativo',
     instruccionesDocente = '',
+    disenoPedagogico = null,
     textoReferencia: referenciaRecibida = '',
     modoReferencia = 'NINGUNA',
     adecuacionesPIE = [],
@@ -153,7 +154,9 @@ Responde ÚNICAMENTE en JSON:
     // Cada material tiene un contrato propio y una estrategia observable en sus tareas.
     if (!Object.hasOwn(Pedagogy.contracts, tipoMaterial)) return res.status(400).json({error:'Tipo de material no admitido.'});
     if (!objetivoAprendizaje.trim()) return res.status(400).json({error:'Selecciona un objetivo curricular antes de generar.'});
-    const plan = {asignatura,nivel,marcoCurricular,objetivoAprendizaje,temaEspecifico,estrategiaDidactica,instruccionesDocente,textoReferencia,modoReferencia,adecuacionesPIE,tipoMaterial,cantAlternativas,cantDesarrollo,cantCasos,incluirTicketSalida};
+    const plan = {asignatura,nivel,marcoCurricular,objetivoAprendizaje,temaEspecifico,estrategiaDidactica,instruccionesDocente,disenoPedagogico,textoReferencia,modoReferencia,adecuacionesPIE,tipoMaterial,cantAlternativas,cantDesarrollo,cantCasos,incluirTicketSalida};
+    const designIssues=require('../heva-design.js').validate(disenoPedagogico,plan);
+    if(designIssues.length)return res.status(400).json({error:designIssues.join('; ')});
     const fuentesDocumentales=await Sources.retrieve(plan);
     const promptRedactor = Pedagogy.prompt(plan)+Sources.evidencePrompt(fuentesDocumentales);
     const metadata = {objetivoAprendizaje,asignatura,nivel,marcoCurricular,temaEspecifico,tipoMaterial,estrategiaDidactica:Pedagogy.strategy(estrategiaDidactica).name};

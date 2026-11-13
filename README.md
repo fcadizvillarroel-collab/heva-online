@@ -88,3 +88,11 @@ La revisión elimina copias del apunte y de metadatos documentales del contexto 
 ### Cobertura documental por disciplina
 
 El registro incorpora 17 referencias públicas adicionales para Lenguaje, Matemática, formación instrumental y Construcciones Metálicas. Selecciona recursos por asignatura, nivel, marco y tema; separa las páginas disciplinares de orientaciones compartidas y no atribuye la especialidad metálica a todos los oficios. La interfaz informa cuántos documentos y fragmentos específicos se recuperaron realmente. Los programas de educación regular son apoyos didácticos y no sustituyen el OA EPJA. Las referencias históricas están identificadas y no acreditan vigencia de normas, tasas, montos o tecnología. No se agregaron documentos marcados como borradores no citables.
+
+### Diseño previo, revisión precisa y control de exportación
+
+El formulario muestra una propuesta editable de contenidos, habilidades, actividades, evidencias y criterios antes de crear el material. Está vinculada al OA y a la estrategia seleccionados; se renueva cuando cambia el encargo y viaja tanto al generador completo como a la recuperación por bloques y la corrección. No consume cuota de IA para preparar la propuesta.
+
+Los hallazgos se separan en errores comprobados mediante controles reproducibles, sugerencias pedagógicas y aspectos no verificables. Un distractor falso o un error deliberado no se trata como afirmación enseñada. Localizar citas acredita su presencia, no la interpretación del revisor. Solo los errores comprobados se envían a corrección automática; las sugerencias quedan para decisión docente.
+
+Antes de Word o PowerPoint se abre un control que comprueba OA, cantidades, opciones A–D, claves, duplicaciones, pauta, rúbricas, puntajes y contrato del material. El desequilibrio A–D y las posibles pistas se presentan como señales de revisión. Los errores estructurales bloquean la descarga; las observaciones y la revisión semántica pendiente se muestran antes de permitir descargar. La vigencia del informe independiente se contrasta con la huella del contenido actual. El control local y las exportaciones funcionan sin IA ni conexión una vez cargados los recursos locales.
