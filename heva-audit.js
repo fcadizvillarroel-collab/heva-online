@@ -1,6 +1,7 @@
 (function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory(require('./heva-core.js'),require('./heva-pedagogy.js'));else root.HEVAAudit=factory(root.HEVA,root.HEVAPedagogy)})(typeof globalThis!=='undefined'?globalThis:this,function(H,P){
 const text=x=>typeof x==='string'&&x.trim().length>0;
 const norm=x=>String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+function readEditable(el){if(!el)return '';const visible=typeof el.checkVisibility==='function'?el.checkVisibility():el.getClientRects?.().length>0;return visible&&typeof el.innerText==='string'?el.innerText:String(el.textContent??el.innerText??'');}
 function snapshot(m){const x={...m};for(const k of ['revisionIA','historialRevisionIA','version','materialId'])delete x[k];return JSON.stringify(x);}
 function inspect(raw){const m=H.material(raw),plan=m.planGeneracion||{},issues=[];const add=(id,tipo,ubicacion,problema,correccion)=>issues.push({id,tipo,ubicacion,problema,correccion,origen:'control_local'});
  for(const field of ['preguntasAlternativas','preguntasDesarrollo','casosEstudio'])m[field]=m[field].map((q,i)=>{if(!q||typeof q!=='object'||Array.isArray(q)){add('item_invalido_'+field+i,'error_comprobado',field,'Un ítem no tiene una estructura válida.','Reconstruir el ítem antes de exportar.');return {}}return q});
@@ -20,6 +21,7 @@ function inspect(raw){const m=H.material(raw),plan=m.planGeneracion||{},issues=[
   const key=options.find(x=>x.letra===q.claveCorrecta),answer=norm(key?.texto);
   if(answer.length>=25&&m.preguntasAlternativas.some((other,j)=>j!==i&&norm(other.enunciado).includes(answer)))add('pista_'+ref,'sugerencia',ref,'El texto de la clave aparece en otro enunciado; podría anticipar la respuesta.','Comprobar la independencia de los ítems. La coincidencia no demuestra una pista por sí sola.');
  });
+ if(!text(m.introduccionLectura)&&m.preguntasAlternativas.some(q=>/segun el (texto|aviso|relato)|de acuerdo (con|al) (el )?(texto|aviso)|texto estimulo/.test(norm(q.enunciado))))add('estimulo_ausente','sugerencia','introduccionLectura','Las preguntas remiten a un texto o aviso, pero no hay lectura visible para analizar.','Incorporar el estímulo neutral o comprobar que toda la información esté en los enunciados.');
  const dist=H.distribution(m);if(m.preguntasAlternativas.length&&!dist.balanced)add('distribucion','sugerencia','preguntasAlternativas','Claves desequilibradas: '+Object.entries(dist.counts).map(([k,v])=>k+'='+v).join(', ')+'.','Reordenar opciones conservando el contenido de la respuesta correcta y su justificación.');
  m.preguntasDesarrollo.forEach((q,i)=>{const ref='DES-'+(i+1);if(!text(q.enunciado)||!text(q.criterioEvaluacion))add('criterio_'+ref,'error_comprobado',ref,'Falta consigna o criterio de corrección.','Completar consigna y criterio observable.');if(m.tipoMaterial==='EVALUACION'&&(!Array.isArray(q.rubrica)||q.rubrica.length!==4||![0,1,2,3].every(n=>q.rubrica.some(r=>r?.puntaje===n&&text(r.descripcion)))))add('rubrica_'+ref,'error_comprobado',ref,'La rúbrica no describe los niveles 0, 1, 2 y 3.','Completar los cuatro niveles sin repetir puntajes.');});
  m.casosEstudio.forEach((q,i)=>{const ref='CASO-'+(i+1);if(!text(q.contextoReal)||!text(q.preguntaReflexion)||!text(q.criterioEvaluacion))add('caso_'+ref,'error_comprobado',ref,'Falta contexto, pregunta o criterio del caso.','Completar información suficiente y criterio docente.');});
@@ -33,4 +35,4 @@ function inspect(raw){const m=H.material(raw),plan=m.planGeneracion||{},issues=[
  add('semantica','no_verificable','revision_docente','El control local no demuestra que haya una sola respuesta conceptualmente correcta ni que las tareas midan el OA.','Revisar pertinencia OA–contenido–habilidad–evaluación, ambigüedad, suficiencia de información y pauta.');
  return{issues,errores:issues.filter(x=>x.tipo==='error_comprobado'),sugerencias:issues.filter(x=>x.tipo==='sugerencia'),noVerificables:issues.filter(x=>x.tipo==='no_verificable'),distribucion:dist,exportable:!issues.some(x=>x.tipo==='error_comprobado'),alcance:'Comprobaciones estructurales y señales de revisión. No certifica corrección conceptual ni calidad pedagógica.'};
 }
-return{inspect,snapshot,norm};});
+return{inspect,snapshot,norm,readEditable};});

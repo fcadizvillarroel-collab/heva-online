@@ -15,7 +15,8 @@ function actualizarDisenoHEVA(force=false){
 }
 function leerDisenoHEVA(){actualizarDisenoHEVA();const p=planFormularioHEVA(),d={objetivoAprendizaje:p.objetivoAprendizaje,estrategiaDidactica:p.estrategiaDidactica};HEVADesign.fields.forEach(k=>d[k]=document.getElementById('design-'+k).value.trim());const issues=HEVADesign.validate(d,p);if(issues.length)throw Error(issues.join('; '));return d;}
 const designPanel=document.createElement('section');designPanel.id='heva-design-panel';designPanel.className='border rounded p-4 bg-amber-50 my-4';document.getElementById('btn-generar').before(designPanel);actualizarDisenoHEVA();
-for(const id of ['asignatura','nivel-epja','marco-curricular','tipo-material','texto-oa','tema-especifico','estrategia-didactica','select-oa'])document.getElementById(id)?.addEventListener('change',()=>setTimeout(()=>actualizarDisenoHEVA(),0));
+for(const id of ['asignatura','nivel-epja','marco-curricular','tipo-material','texto-oa','tema-especifico','estrategia-didactica','select-oa'])document.getElementById(id)?.addEventListener('change',()=>actualizarDisenoHEVA());
+for(const id of ['texto-oa','tema-especifico'])document.getElementById(id)?.addEventListener('input',()=>actualizarDisenoHEVA());
 const designCurriculum=actualizarObjetivosYEstrategias;actualizarObjetivosYEstrategias=async function(...args){await designCurriculum(...args);actualizarDisenoHEVA()};
 const designGenerate=generarMaterialReal;generarMaterialReal=async function(...args){try{leerDisenoHEVA()}catch(e){alert(e.message);return}return designGenerate(...args)};
 
