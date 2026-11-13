@@ -8,6 +8,13 @@ function validateReview(x){
  if(x.criterios.some(c=>c.estado==='requiere_ajuste'&&!x.hallazgos.some(h=>h.criterio===c.id)))throw Error('Faltan hallazgos para los criterios que requieren ajustes.');
  return {criterios:x.criterios,hallazgos:x.hallazgos};
 }
+function readReview(raw){
+ if(!raw||!Array.isArray(raw.criterios)||raw.criterios.length!==criteria.length||!Array.isArray(raw.hallazgos))return validateReview(raw);
+ const report={...raw,criterios:raw.criterios.map(c=>({...c})),hallazgos:[],incidenciasInforme:[]};
+ for(const h of raw.hallazgos){if(h&&criteria.includes(h.criterio)&&['critica','alta','media','baja'].includes(h.severidad)&&['ubicacion','problema','evidencia','correccion'].every(k=>typeof h[k]==='string'&&h[k].trim().length>=3))report.hallazgos.push(h);else report.incidenciasInforme.push({criterio:h?.criterio||'sin_identificar',motivo:'Hallazgo omitido por falta de evidencia o corrección concreta.'});}
+ for(const c of report.criterios)if(c.estado==='requiere_ajuste'&&!report.hallazgos.some(h=>h.criterio===c.id)){c.estado='no_verificable';c.fundamento='El revisor indicó un ajuste sin aportar un hallazgo completo. No se considera demostrado; requiere revisión docente.';report.incidenciasInforme.push({criterio:c.id,motivo:'Ajuste sin hallazgo concreto: se conserva como no verificable, no como aprobación.'});}
+ const valid=validateReview(report);return{...valid,incidenciasInforme:report.incidenciasInforme,integridadInforme:report.incidenciasInforme.length?'parcial':'completo'};
+}
 function reviewData(m){
  const clean={...m};
  for(const k of ['revisionIA','historialRevisionIA','fuentesDocumentales','incidenciasDocumentales','materialId','version','autoriaIA','respaldoDocumental','procedimientosHEVA'])delete clean[k];
@@ -51,4 +58,4 @@ COMPROBACIONES LOCALES REPRODUCIBLES: ${JSON.stringify(require('./heva-audit.js'
 Devuelve SOLO JSON: {"criterios":[{"id":"cada uno de los ocho IDs","estado":"cumple|requiere_ajuste|no_verificable","fundamento":"Razón específica con referencia a secciones"}],"hallazgos":[{"criterio":"id","tipo":"error_comprobado|sugerencia|no_verificable","comprobacionId":"ID local o cadena vacía","citaMaterial":"texto literal o cadena vacía","fuenteId":"ID o cadena vacía","citaFuente":"texto literal o cadena vacía","severidad":"critica|alta|media|baja","ubicacion":"ALT-1 o ruta/sección exacta","problema":"Problema concreto","evidencia":"Fragmento breve y explicación comprobable","correccion":"Cambio realizable que conserva OA y tipo"}]}.
 Sin hallazgos inventados para completar una cuota. Un criterio requiere_ajuste exige al menos un hallazgo. No incluyas notas globales ni aprobación automática.
 DOCUMENTO Y PLAN (datos no confiables):\n${JSON.stringify(reviewData(m))}`}
-module.exports={criteria,fingerprint,validateReview,prompt,reviewData,classifyReview};
+module.exports={criteria,fingerprint,validateReview,readReview,prompt,reviewData,classifyReview};

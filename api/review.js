@@ -24,10 +24,10 @@ module.exports=async function(req,res){
    let result=await call(reviewPrompt,...keys,[author],{maxOutputTokens:4096,deadline});
    stage='informe';
    let report;
-   try{report=Q.validateReview(result.value)}catch(e){
+   try{report=Q.readReview(result.value)}catch(e){
     stage='llamada';
     result=await call(reviewPrompt+'\nEl informe anterior no cumple el esquema: '+e.message+' Devuelve TODOS los ocho criterios, y hallazgos con todos los campos; cada requiere_ajuste debe tener un hallazgo. No cambies ni reescribas el material.',...keys,[author],{maxOutputTokens:4096,deadline});
-    stage='informe';report=Q.validateReview(result.value);
+    stage='informe';report=Q.readReview(result.value);
    }
    const contrasts=Sources.validateEvidence(result.value.contrastesDocumentales,fuentesDocumentales);
    if(!contrasts.valid.length||contrasts.invalid.length){for(const id of ['fuentes','rigor']){const c=report.criterios.find(c=>c.id===id);if(c.estado==='cumple'){c.estado='no_verificable';c.fundamento='No hay contrastes documentales con citas literales válidas suficientes. Consultar una fuente no verifica automáticamente todas las afirmaciones.';}}}
@@ -35,7 +35,7 @@ module.exports=async function(req,res){
    if(!contentContrasts.length){const c=report.criterios.find(c=>c.id==='rigor');if(c.estado==='cumple'){c.estado='no_verificable';c.fundamento='No hay contrastes válidos con una fuente de contenido disciplinar. Un OA o una orientación didáctica no comprueban las afirmaciones factuales del material.';}}
    if(fuentesDocumentales.objetivo!=='localizado_literalmente'){const c=report.criterios.find(c=>c.id==='alineacion');if(c.estado==='cumple'){c.estado='no_verificable';c.fundamento='Puede existir coherencia interna, pero el objetivo no fue localizado literalmente en la fuente curricular consultada. Revisar el objetivo y el marco.';}}
    report=Q.classifyReview(report,updated,fuentesDocumentales);
-   const revision={...report,contrastesDocumentales:contrasts.valid,incidenciasDocumentales:[...evidence.invalid,...contrasts.invalid],estado:report.hallazgos.length?'con_observaciones':'sin_observaciones_detectadas',proveedor:result.provider,modelo:result.model,autor:material.autoriaIA,fecha:new Date().toISOString(),huella:Q.fingerprint(updated),alcance:'Revisión independiente por IA con recuperación documental en línea. Solo las citas localizadas tienen trazabilidad; no certifica interpretación, cobertura completa ni vigencia normativa. Validación docente pendiente.'};
+   const revision={...report,contrastesDocumentales:contrasts.valid,incidenciasDocumentales:[...evidence.invalid,...contrasts.invalid],estado:report.integridadInforme==='parcial'?'revision_parcial':report.hallazgos.length?'con_observaciones':'sin_observaciones_detectadas',proveedor:result.provider,modelo:result.model,autor:material.autoriaIA,fecha:new Date().toISOString(),huella:Q.fingerprint(updated),alcance:'Revisión independiente por IA con recuperación documental en línea. Solo las citas localizadas tienen trazabilidad; no certifica interpretación, cobertura completa ni vigencia normativa. Validación docente pendiente.'};
    return res.status(200).json({exito:true,revision,fuentesDocumentales,respaldoDocumental:evidence.valid,incidenciasDocumentales:evidence.invalid});
   }
   const review=material.revisionIA,plan=material.planGeneracion;
