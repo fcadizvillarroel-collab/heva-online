@@ -68,3 +68,9 @@ Las fuentes y sus versiones se guardan en el JSON e historial del material. La b
 Validación: `npm test`. Node 22, `pdf-parse` fijado a 2.4.5. La recuperación documental requiere internet y está limitada al registro; no equivale a investigar toda la web ni a certificar vigencia legal.
 
 Los ejemplos docentes son opcionales: por defecto no se utiliza ninguno. El selector permite usar un texto solo como referencia de formato, profundidad y estilo, o también como contenido seleccionado. En ambos casos se mantiene el OA y tema elegidos y el ejemplo no adquiere carácter oficial ni verificación factual.
+
+### Enriquecimiento con materiales docentes
+
+El registro incluye orientaciones EPJA de Estudios Sociales, Ciencias Naturales, Inglés y contextos de encierro, orientaciones transversales de evaluación formativa y programas docentes de Historia de 1° y 2° medio regular. Los recursos disciplinares se seleccionan por asignatura y tema; las orientaciones se buscan por su finalidad didáctica. La educación regular aporta actividades, fuentes e indicadores adaptables, sin confirmar ni reemplazar el objetivo EPJA. Las guías de ejemplo del docente siguen siendo opcionales.
+
+El bloque compartido `studentContext` de `heva-pedagogy.js` explicita características generales de los estudiantes, posibles trayectorias interrumpidas, asistencia irregular, apoyos de lectoescritura y restricciones de recursos. El redactor y el revisor lo reciben. No contiene nombres, datos individuales ni diagnósticos; estos no se presuponen. Las adecuaciones seleccionadas por el docente complementan ese contexto.
