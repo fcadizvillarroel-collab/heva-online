@@ -185,6 +185,7 @@ Responde ÚNICAMENTE en JSON:
 
   } catch (error) {
     console.error('Fallo de generación HEVA:',error.code||'ERROR');
+    if(error.code==='AI_RATE_LIMIT')return res.status(503).json({error:'Los proveedores de IA están temporalmente saturados.',detalle:'Espera unos minutos y vuelve a intentar. El material anterior permanece disponible.',codigo:error.code,reintentable:true});
     if(error.code?.startsWith('AI_RESPONSE_'))return res.status(502).json({error:'La IA devolvió una respuesta incompleta o con formato inválido.',detalle:'No se pudo recuperar un documento completo. Se conserva el material anterior y tu selección. Puedes volver a generar.',codigo:error.code,reintentable:true});
     return res.status(500).json({
       error: 'Error de IA',
