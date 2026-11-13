@@ -69,7 +69,8 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
         tryNextModel=[404,429,500,502,503,504].includes(resp.status);errores.push('Gemini: proveedor no disponible ('+resp.status+').');break;
       } catch(e){
         remember(e);errores.push('Gemini: '+(e.code||'conexión no disponible'));
-        if(!e.code?.startsWith('AI_RESPONSE_')){tryNextModel=true;break;}
+        if(e.code?.startsWith('AI_RESPONSE_')){tryNextModel=true;break;}
+        tryNextModel=true;break;
       }
      }
      if(!tryNextModel)break;
@@ -98,6 +99,7 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
         if (resp.ok && data.choices?.[0]?.message?.content) {
           return {value:parseAIJSON(data.choices[0].message.content,data.choices[0].finish_reason),provider:'groq',model:mod};
         }
+        errores.push('Groq ('+mod+'): proveedor no disponible ('+resp.status+').');
       } catch (e) {
         remember(e);
         errores.push(`Groq (${mod}): ${e.message}`);
