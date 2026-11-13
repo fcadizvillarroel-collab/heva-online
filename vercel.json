@@ -2,30 +2,18 @@
   "functions": {
     "api/generate.js": {
       "maxDuration": 60,
-      "includeFiles": [
-        "node_modules/pdf-parse/dist/**",
-        "node_modules/@napi-rs/**",
-        "node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"
-      ]
+      "includeFiles": "node_modules/**"
     },
     "api/curriculum/admin.js": {
       "maxDuration": 30
     },
     "api/review.js": {
       "maxDuration": 60,
-      "includeFiles": [
-        "node_modules/pdf-parse/dist/**",
-        "node_modules/@napi-rs/**",
-        "node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"
-      ]
+      "includeFiles": "node_modules/**"
     },
     "api/sources.js": {
       "maxDuration": 60,
-      "includeFiles": [
-        "node_modules/pdf-parse/dist/**",
-        "node_modules/@napi-rs/**",
-        "node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"
-      ]
+      "includeFiles": "node_modules/**"
     }
   }
 }
