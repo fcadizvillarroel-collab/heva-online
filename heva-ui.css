@@ -33,3 +33,17 @@ main .shadow-sm{box-shadow:0 3px 16px #4b34220b}
 /* Preserve the app's high contrast mode */
 body.alto-contraste{background:#121212!important;color:white!important}
 body.alto-contraste main .bg-white,body.alto-contraste main .bg-stone-100{background:#1e1e1e!important;color:#fff!important}
+
+/* HEVA UX 2: orientation and readability */
+.heva-welcome{display:flex;justify-content:space-between;align-items:center;gap:1.5rem;padding:1.35rem 1.6rem;background:linear-gradient(110deg,#fff9f2,#f6e8dd);border:1px solid #ead7c7;border-radius:18px;box-shadow:0 5px 20px #55341b0a}
+.heva-welcome h2{font-size:clamp(1.3rem,2.5vw,1.8rem);font-weight:800;color:#6e2638;margin:.15rem 0 .35rem}
+.heva-welcome p{font-size:.9rem;color:#594f49;max-width:65ch}
+.heva-eyebrow{font-size:.72rem!important;font-weight:800;letter-spacing:.11em;color:#935a38!important}
+.heva-start{flex-shrink:0;padding:.8rem 1.2rem;background:#832d42;color:#fff;border-radius:12px;font-weight:700;min-height:48px}
+.heva-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem;padding:.85rem;margin:.8rem 0;border-radius:12px;background:#fbf4ed;border:1px solid #eaded0}
+.heva-steps span{display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:#554943;font-weight:600}
+.heva-steps b{display:inline-grid;place-items:center;background:#853147;color:white;width:24px;height:24px;border-radius:50%;flex-shrink:0}
+#panel-crear label{font-size:.78rem!important;letter-spacing:.015em}
+#panel-crear select,#panel-crear textarea{font-size:.875rem!important;line-height:1.45}
+@media(max-width:640px){.heva-welcome{flex-direction:column;align-items:stretch;padding:1rem}.heva-start{width:100%}.heva-steps{grid-template-columns:1fr}}
+@media print{.heva-welcome,.heva-steps{display:none!important}}
