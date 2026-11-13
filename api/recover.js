@@ -20,7 +20,8 @@ module.exports=async(req,res)=>{
    material=require('../heva-studio.js').link(material,plan);return res.status(200).json({exito:true,material});
   }
   const keys=[process.env.ALLOW_PAID_AI==='true'?process.env.OPENAI_API_KEY:'',process.env.GEMINI_API_KEY,process.env.GROQ_API_KEY].map(k=>(k||'').trim());
-  const exclude=fase==='items'?['gemini','groq','openai'].filter(p=>p!==autor.proveedor):[];
+  // Permitir respaldo entre proveedores en bloques: una caída del autor inicial no debe bloquear todo el documento.
+  const exclude=[];
   const prompt=fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts);
   let result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true}),...keys,exclude,{deadline,maxOutputTokens:fase==='base'?10000:5000});
   let issues=R.partIssues(result.value,plan,fase==='items'?batch:null);
@@ -30,5 +31,5 @@ module.exports=async(req,res)=>{
   }
   if(issues.length)return res.status(422).json({error:'El bloque requiere ajustes. Se conservan los anteriores.',detalle:issues.join('; '),reintentable:true});
   return res.status(200).json({exito:true,parte:result.value,autor:{proveedor:result.provider,modelo:result.model,fecha:new Date().toISOString()},bloques:R.batches(plan)});
- }catch(e){return res.status(e.code?503:400).json({error:e.code==='AI_RATE_LIMIT'?'Cuota temporal de IA agotada. El avance queda guardado para continuar.':e.code?'Este bloque no se pudo completar. El avance queda guardado para continuar.':e.message,codigo:e.code,reintentable:!!e.code,reintentarEn:e.retryAfter||0});}
+ }catch(e){console.error('HEVA recovery:',e.code||e.name||'ERROR');const limited=e.code==='AI_RATE_LIMIT',invalid=e.code?.startsWith('AI_RESPONSE_'),unavailable=e.code==='AI_UNAVAILABLE';return res.status(limited?429:invalid||unavailable?503:500).json({error:limited?'Cuota temporal de IA agotada.':invalid?'La IA devolvió un bloque incompleto o inválido.':unavailable?'No hubo respuesta de los proveedores disponibles.':'No se pudo completar este bloque.',detalle:'El avance anterior se conserva. Puedes reintentar el mismo encargo sin comenzar desde cero.',codigo:e.code||'RECOVERY_ERROR',reintentable:true,reintentarEn:e.retryAfter||0});}
 };
