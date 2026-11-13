@@ -10,7 +10,15 @@ function showQuality(){
 }
 async function qualityRequest(action){
  syncEdits();const original=materialActual,snapshot=qualitySnapshot(original);
- const response=await fetch('/api/review',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accion:action,material:original}),signal:AbortSignal.timeout(58000)}),data=await response.json();
+ const payload=JSON.stringify({accion:action,material:original});
+ let response,data;
+ for(let attempt=0;attempt<2;attempt++){
+  response=await fetch('/api/review',{method:'POST',headers:{'Content-Type':'application/json'},body:payload,signal:AbortSignal.timeout(58000)});data=await response.json();
+  if(response.ok||attempt||data.codigo!=='cuota_o_limite'||!(data.reintentarEn>0&&data.reintentarEn<=60))break;
+  qualityMessage=`Esperando ${data.reintentarEn} segundos por la cuota del revisor; se conserva el material…`;showQuality();
+  await new Promise(resolve=>setTimeout(resolve,(data.reintentarEn+1)*1000));
+  syncEdits();if(materialActual!==original||qualitySnapshot(materialActual)!==snapshot)throw Error('El documento cambió durante la espera. Revisa la versión actual.');
+ }
  if(!response.ok){const error=Error(data.codigo==='cuota_o_limite'?'La cuota del revisor independiente está temporalmente agotada. Se conserva el material y puedes retomar la revisión.':data.detalle||data.error||'Revisión pendiente.');error.retryAfter=data.reintentarEn;throw error;}
  syncEdits();if(materialActual!==original||qualitySnapshot(materialActual)!==snapshot)throw Error('El documento cambió durante la revisión. Revisa nuevamente la versión actual.');
  if(action==='revisar'){materialActual.revisionIA=data.revision;if(data.fuentesDocumentales){materialActual.fuentesDocumentales=data.fuentesDocumentales;materialActual.respaldoDocumental=data.respaldoDocumental;materialActual.incidenciasDocumentales=data.incidenciasDocumentales;}}

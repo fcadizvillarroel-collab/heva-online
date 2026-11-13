@@ -5,9 +5,14 @@ function recoverySave(x){try{localStorage.setItem(HEVA_RECOVERY_KEY,JSON.stringi
 async function recuperarMaterialHEVA(plan){
  let checkpoint=recoveryRead(plan)||{planKey:JSON.stringify(plan),parts:[]};
  const message=document.getElementById('dictamen-calidad');
- const request=async body=>{
+ const request=async (body,retry=true)=>{
   const response=await fetch('/api/recover',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan,...body}),signal:AbortSignal.timeout(58000)});
   let data;try{data=await response.json()}catch{throw Error('La conexión se interrumpió. Pulsa Crear material para continuar desde el último bloque guardado.');}
+  if(!response.ok&&retry&&data.codigo==='AI_RATE_LIMIT'&&data.reintentarEn>0&&data.reintentarEn<=60){
+   if(message)message.textContent=`Esperando ${data.reintentarEn} segundos por la cuota de IA; el avance está guardado…`;
+   await new Promise(resolve=>setTimeout(resolve,(data.reintentarEn+1)*1000));
+   return request(body,false);
+  }
   if(!response.ok)throw Error((data.detalle||data.error||'Recuperación pendiente.')+' Pulsa Crear material para continuar con el mismo encargo.');
   return data;
  };

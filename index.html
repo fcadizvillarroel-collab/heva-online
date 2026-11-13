@@ -681,7 +681,7 @@
 
       try {
         let data;
-        if(modo==='GENERADOR_ESTANDAR'&&recoveryRead(payload))data=await recuperarMaterialHEVA(payload);
+        if(modo==='GENERADOR_ESTANDAR'&&(recoveryRead(payload)||payload.cantAlternativas+payload.cantDesarrollo+payload.cantCasos>=8))data=await recuperarMaterialHEVA(payload);
         else{
           let respuesta;
           try{
