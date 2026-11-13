@@ -4,7 +4,7 @@
 function init(){
  const nav=document.querySelector('body > nav');const main=document.querySelector('main');if(!nav||!main)return;
  nav.setAttribute('aria-label','Herramientas HEVA');
- const names={crear:'Crear material',staging:'Revisión curricular',diffit:'Adaptar materiales',remediacion:'Remediación',guardados:'Mis materiales'};
+ const names={crear:'Crear material',revision:'Revisión y fuentes',staging:'Revisión curricular',diffit:'Adaptar materiales',remediacion:'Remediación',guardados:'Mis materiales'};
  nav.querySelectorAll('button[id^="tab-"]').forEach(b=>{const k=b.id.slice(4);b.setAttribute('aria-controls','panel-'+k);b.setAttribute('aria-label',names[k]||b.textContent.trim());});
  function syncTabs(){nav.querySelectorAll('button[id^="tab-"]').forEach(b=>{const panel=document.getElementById('panel-'+b.id.slice(4));const active=!!panel&&!panel.classList.contains('hidden');b.setAttribute('aria-current',active?'page':'false');b.setAttribute('aria-expanded',String(active));});}
  nav.addEventListener('click',()=>setTimeout(syncTabs,0));syncTabs();
@@ -19,29 +19,43 @@ function init(){
  document.querySelectorAll('label').forEach(label=>{if(label.htmlFor)return;const wrapper=label.parentElement;if(!wrapper)return;const control=wrapper.querySelector(':scope > input,:scope > select,:scope > textarea');if(control?.id)label.htmlFor=control.id;});
  document.querySelectorAll('button').forEach(btn=>{if(btn.textContent.trim()==='Borrar todo el historial'){btn.addEventListener('click',e=>{if(!window.confirm('¿Borrar todos los materiales guardados en este navegador? Esta acción no se puede deshacer.')){e.stopImmediatePropagation();e.preventDefault();}},true);}});
  const status=document.createElement('p');status.id='heva-ui-status';status.className='sr-only';status.setAttribute('role','status');status.setAttribute('aria-live','polite');document.body.appendChild(status);
- // La lectura del material es el centro; las auditorías se consultan bajo demanda.
- function foldPanel(el,title,description){
-   if(!el||el.dataset.hevaFolded==='1')return;
-   el.dataset.hevaFolded='1';
-   const details=document.createElement('details');details.className='heva-advanced no-print';
-   const summary=document.createElement('summary');summary.textContent=title;
-   const help=document.createElement('p');help.className='heva-advanced-help';help.textContent=description;
-   el.before(details);details.append(summary,help,el);
+ // Mover los controles de revisión a una pestaña real, sin duplicar datos ni alterar las exportaciones.
+ const review=document.getElementById('revision-contenido');
+ const sections=[
+  ['heva-quality-panel','Revisión independiente entre IA'],
+  ['material-sources-panel','Fuentes y páginas de esta versión'],
+  ['heva-export-control','Control de calidad'],
+  ['heva-procedures-panel','Procedimientos pedagógicos'],
+  ['consultar-fuentes','Consultar fuentes oficiales en línea']
+ ];
+ function moveReview(){
+   if(!review)return;
+   sections.forEach(([id,title])=>{
+     let el=document.getElementById(id);
+     if(id==='consultar-fuentes')el=el?.closest('section');
+     if(!el||el.closest('#revision-contenido'))return;
+     const old=el.parentElement;
+     // Deshacer envoltorios plegables antiguos para no dejar títulos vacíos.
+     review.appendChild(el);
+     if(old?.matches('details.heva-advanced')&&!old.querySelector(':scope > section,:scope > div'))old.remove();
+     if(id!=='material-sources-panel'&&!el.matches('details')){
+       const wrap=document.createElement('details');wrap.className='heva-advanced';wrap.open=id==='heva-quality-panel';
+       const summary=document.createElement('summary');summary.textContent=title;
+       el.before(wrap);wrap.append(summary,el);
+     }
+   });
  }
- function organize(){
-   const paper=document.getElementById('hoja-material');if(!paper)return;
-   foldPanel(document.getElementById('heva-quality-panel'),'Revisión independiente de IA','Opcional: comprueba y propone correcciones. No reemplaza la revisión docente.');
-   foldPanel(document.getElementById('heva-export-control'),'Control de calidad','Consulta incidencias y equilibrio de alternativas sin ocultar el material.');
-   foldPanel(document.getElementById('heva-procedures-panel'),'Procedimientos pedagógicos','Información técnica sobre los controles aplicados.');
-   foldPanel(document.getElementById('material-sources-panel'),'Fuentes y referencias','Consulta la trazabilidad documental cuando la necesites.');
-   foldPanel(document.querySelector('#consultar-fuentes')?.closest('section'),'Consultar fuentes oficiales · opcional','Busca documentos y páginas del objetivo seleccionado. La generación ya realiza su propia consulta documental.');
-   const workshop=document.getElementById('studio-panel');
-   foldPanel(workshop,'Taller de materiales · opcional','Sirve para adaptar una sección, crear lectura acompañada o recuperar contenidos para estudiantes con baja asistencia. Si solo necesitas generar y exportar, puedes omitirlo.'));
+ moveReview();
+ let queued=false;
+ const observerReview=new MutationObserver(()=>{if(queued)return;queued=true;queueMicrotask(()=>{queued=false;moveReview()})});
+ observerReview.observe(document.getElementById('panel-crear'),{childList:true,subtree:true});
+ // El taller es una función avanzada de edición, no parte de la lectura principal.
+ const studio=document.getElementById('studio-panel');
+ if(studio&&!studio.closest('details.heva-advanced')){
+   const wrap=document.createElement('details');wrap.className='heva-advanced no-print';
+   const summary=document.createElement('summary');summary.textContent='Taller de materiales · opcional';
+   studio.before(wrap);wrap.append(summary,studio);
  }
- organize();
- let pending=false;
- const bodyObserver=new MutationObserver(()=>{if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;organize()})});
- bodyObserver.observe(document.getElementById('panel-crear'),{childList:true,subtree:true});
  const observer=new MutationObserver(()=>syncTabs());nav.querySelectorAll('button[id^="tab-"]').forEach(b=>{const p=document.getElementById('panel-'+b.id.slice(4));if(p)observer.observe(p,{attributes:true,attributeFilter:['class']});});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
