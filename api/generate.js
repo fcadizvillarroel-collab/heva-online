@@ -13,6 +13,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Utilice POST.' });
 
+  const generationDeadline=Date.now()+55000;
   const {
     modoHerramienta = 'GENERADOR_ESTANDAR', // 'GENERADOR_ESTANDAR', 'DIFERENCIADOR_DIFFIT', 'REMEDIACION_ESCOLAR', 'REGENERAR_PREGUNTA'
     asignatura = 'Estudios Sociales',
@@ -157,7 +158,7 @@ Responde ÚNICAMENTE en JSON:
     const promptRedactor = Pedagogy.prompt(plan)+Sources.evidencePrompt(fuentesDocumentales);
     const metadata = {objetivoAprendizaje,asignatura,nivel,marcoCurricular,temaEspecifico,tipoMaterial,estrategiaDidactica:Pedagogy.strategy(estrategiaDidactica).name};
     let author;
-    const draft = async prompt => { const r = await call(prompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY); author={proveedor:r.provider,modelo:r.model,fecha:new Date().toISOString()}; return r.value; };
+    const draft = async prompt => { const r = await call(prompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY,[],{deadline:generationDeadline}); author={proveedor:r.provider,modelo:r.model,fecha:new Date().toISOString()}; return r.value; };
     const normalize = raw => HEVA.material(raw,metadata);
     const check = m => [...HEVA.validate(m,{cantAlternativas,cantDesarrollo,cantCasos}),...Pedagogy.validate(m,plan)];
     let material = normalize(await draft(promptRedactor));
@@ -176,7 +177,8 @@ Responde ÚNICAMENTE en JSON:
     return res.status(200).json({exito:true,material,revision:{alcance:'Estructura, cantidades y trazabilidad; revisión pedagógica docente pendiente',tipo:tipoMaterial,estrategia:metadata.estrategiaDidactica}});
 
   } catch (error) {
-    console.error('Error en proceso:', error);
+    console.error('Fallo de generación HEVA:',error.code||'ERROR');
+    if(error.code?.startsWith('AI_RESPONSE_'))return res.status(502).json({error:'La IA devolvió una respuesta incompleta o con formato inválido.',detalle:'No se pudo recuperar un documento completo. Se conserva el material anterior y tu selección. Puedes volver a generar.',codigo:error.code,reintentable:true});
     return res.status(500).json({
       error: 'Error de IA',
       detalle: String(error.message).replace(/(key=)[^&\s]+/gi,'$1[oculta]')

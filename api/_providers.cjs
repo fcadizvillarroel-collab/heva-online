@@ -1,6 +1,9 @@
-async function call(prompt, openAiKey, geminiKey, groqKey, exclude = []) {
+const {parseAIJSON}=require('./_ai-json.cjs');
+async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options = {}) {
   let errores = [];
-  const deadline=Date.now()+48000;
+  const deadline=Math.min(Date.now()+48000,options.deadline||Infinity);
+  const responseErrors=[];
+  const remember=e=>{if(e?.code?.startsWith('AI_RESPONSE_'))responseErrors.push(e.code);};
 
   // 1. ChatGPT (OpenAI - si está configurado)
   if (openAiKey && !exclude.includes('openai')) {
@@ -24,11 +27,12 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = []) {
 
       const data = await resp.json();
       if (resp.ok && data.choices?.[0]?.message?.content) {
-        return {value:JSON.parse(data.choices[0].message.content),provider:'openai',model:'gpt-4o-mini'};
+        return {value:parseAIJSON(data.choices[0].message.content,data.choices[0].finish_reason),provider:'openai',model:'gpt-4o-mini'};
       } else {
         errores.push(`ChatGPT: ${data.error?.message || resp.statusText}`);
       }
     } catch (e) {
+      remember(e);
       errores.push(`ChatGPT: ${e.message}`);
     }
   }
@@ -37,30 +41,34 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = []) {
   if (geminiKey && !exclude.includes('gemini')) {
     const modelosGemini = [(process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite').trim()];
     for (const mod of modelosGemini) {
+     for(let attempt=0;attempt<2&&deadline-Date.now()>1500;attempt++){
       try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${mod}:generateContent?key=${geminiKey}`;
         const resp = await fetch(url, {
           method: 'POST', signal: AbortSignal.timeout(Math.max(1,Math.min(20000,deadline-Date.now()))),
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
+            contents: [{ parts: [{ text: prompt+(attempt?'\nREINTENTO: entrega el documento COMPLETO como un solo objeto JSON válido, sin comas finales, comentarios ni texto fuera del JSON. Conserva objetivo, secciones y cantidades solicitadas.':'') }] }],
             generationConfig: {
-              temperature: 0.5,
+              temperature: 0.3,
+              maxOutputTokens: 16384,
               responseMimeType: 'application/json'
             }
           })
         });
 
         const data = await resp.json();
-        if (resp.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
-          const texto = data.candidates[0].content.parts[0].text;
-          return {value:limpiarYParsearJSON(texto),provider:'gemini',model:mod};
-        } else {
-          errores.push(`Gemini (${mod}): ${data.error?.message || resp.statusText}`);
+        const candidate=data.candidates?.[0];
+        if(resp.ok&&candidate?.content?.parts){
+          const texto=candidate.content.parts.filter(p=>typeof p.text==='string'&&!p.thought).map(p=>p.text).join('');
+          return {value:parseAIJSON(texto,candidate.finishReason),provider:'gemini',model:mod};
         }
-      } catch (e) {
-        errores.push(`Gemini (${mod}) red: ${e.message}`);
+        errores.push('Gemini: proveedor no disponible ('+resp.status+').');break;
+      } catch(e){
+        remember(e);errores.push('Gemini: '+(e.code||'conexión no disponible'));
+        if(!e.code?.startsWith('AI_RESPONSE_'))break;
       }
+     }
     }
   }
 
@@ -82,20 +90,18 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = []) {
 
         const data = await resp.json();
         if (resp.ok && data.choices?.[0]?.message?.content) {
-          return {value:JSON.parse(data.choices[0].message.content),provider:'groq',model:mod};
+          return {value:parseAIJSON(data.choices[0].message.content,data.choices[0].finish_reason),provider:'groq',model:mod};
         }
       } catch (e) {
+        remember(e);
         errores.push(`Groq (${mod}): ${e.message}`);
       }
     }
   }
 
-  throw new Error(errores.join(' | ') || 'Fallo general de conexión.');
-}
-
-function limpiarYParsearJSON(texto) {
-  const limpio = texto.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
-  return JSON.parse(limpio);
+  const error=new Error(responseErrors.length?'La IA no logró devolver un documento completo y válido.':'No se pudo obtener respuesta de los proveedores habilitados.');
+  error.code=responseErrors.includes('AI_RESPONSE_INCOMPLETE')?'AI_RESPONSE_INCOMPLETE':responseErrors.length?'AI_RESPONSE_INVALID':'AI_UNAVAILABLE';
+  throw error;
 }
 
 module.exports={call};
