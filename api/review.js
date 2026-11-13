@@ -15,6 +15,10 @@ module.exports=async function(req,res){
    const clean={...material};delete clean.revisionIA;delete clean.historialRevisionIA;
    const result=await call(Q.prompt(clean),...keys,[author]);
    const report=Q.validateReview(result.value);
+   // Una afirmación del modelo no sustituye una fuente documental aportada.
+   if(!material.planGeneracion?.textoReferencia?.trim()){
+    for(const id of ['fuentes','rigor']){const c=report.criterios.find(c=>c.id===id);if(c.estado==='cumple'){c.estado='no_verificable';c.fundamento='No se aportó texto documental para contrastar la exactitud factual o normativa. La revisión de coherencia interna no certifica hechos ni vigencia curricular.';}}
+   }
    const revision={...report,estado:report.hallazgos.length?'con_observaciones':'sin_observaciones_detectadas',proveedor:result.provider,modelo:result.model,autor:material.autoriaIA,fecha:new Date().toISOString(),huella:Q.fingerprint(material),alcance:'Revisión independiente por IA, sin búsqueda web ni certificación factual. Validación docente pendiente.'};
    return res.status(200).json({exito:true,revision});
   }
