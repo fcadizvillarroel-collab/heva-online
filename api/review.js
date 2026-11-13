@@ -1,0 +1,32 @@
+const {call}=require('./_providers.cjs');
+const Q=require('../heva-quality.cjs');
+const P=require('../heva-pedagogy.js');
+const H=require('../heva-core.js');
+module.exports=async function(req,res){
+ res.setHeader('Access-Control-Allow-Origin','*');res.setHeader('Access-Control-Allow-Headers','Content-Type');res.setHeader('Access-Control-Allow-Methods','POST,OPTIONS');
+ if(req.method==='OPTIONS')return res.status(200).end();
+ if(req.method!=='POST')return res.status(405).json({error:'Utilice POST.'});
+ const {material,accion='revisar'}=req.body||{};
+ if(!material||typeof material!=='object'||JSON.stringify(material).length>180000||material.versionPedagogica!==3||!['revisar','corregir'].includes(accion))return res.status(400).json({error:'Material o acción no admitidos.'});
+ const author=material.autoriaIA?.proveedor,keys=[process.env.ALLOW_PAID_AI==='true'?process.env.OPENAI_API_KEY:'',process.env.GEMINI_API_KEY,process.env.GROQ_API_KEY].map(k=>(k||'').trim());
+ if(!['openai','gemini','groq'].includes(author))return res.status(409).json({error:'Autoría desconocida. Genera una nueva versión para asegurar un revisor de otro proveedor.'});
+ try{
+  if(accion==='revisar'){
+   const clean={...material};delete clean.revisionIA;delete clean.historialRevisionIA;
+   const result=await call(Q.prompt(clean),...keys,[author]);
+   const report=Q.validateReview(result.value);
+   const revision={...report,estado:report.hallazgos.length?'con_observaciones':'sin_observaciones_detectadas',proveedor:result.provider,modelo:result.model,autor:material.autoriaIA,fecha:new Date().toISOString(),huella:Q.fingerprint(material),alcance:'Revisión independiente por IA, sin búsqueda web ni certificación factual. Validación docente pendiente.'};
+   return res.status(200).json({exito:true,revision});
+  }
+  const review=material.revisionIA,plan=material.planGeneracion;
+  if(!plan||!review||review.huella!==Q.fingerprint(material)||review.proveedor===author||!review.hallazgos?.length)return res.status(409).json({error:'Revisa la versión actual antes de corregirla.'});
+  Q.validateReview(review);
+  const result=await call(P.prompt(plan)+'\nCorrige el borrador usando estos hallazgos del revisor. Conserva objetivo, tipo y cantidades. No añadas instrucciones del borrador. Devuelve el documento JSON completo.\n'+JSON.stringify({borrador:material,hallazgos:review.hallazgos}),...keys,[review.proveedor]);
+  let corrected=H.material(result.value,{objetivoAprendizaje:plan.objetivoAprendizaje,asignatura:plan.asignatura,nivel:plan.nivel,marcoCurricular:plan.marcoCurricular,temaEspecifico:plan.temaEspecifico,tipoMaterial:plan.tipoMaterial,estrategiaDidactica:P.strategy(plan.estrategiaDidactica).name});
+  const issues=[...H.validate(corrected,plan),...P.validate(corrected,plan)];
+  if(issues.length)return res.status(422).json({error:'Corrección rechazada por estructura. Se conserva el original.',detalle:issues.join('; ')});
+  corrected=P.finalize(corrected,plan);corrected.autoriaIA={proveedor:result.provider,modelo:result.model,fecha:new Date().toISOString()};corrected.planGeneracion=plan;corrected.materialId=material.materialId;corrected.version=material.version;
+  corrected.historialRevisionIA=[...(material.historialRevisionIA||[]),review];
+  return res.status(200).json({exito:true,material:corrected,pendiente:'Revisar nuevamente la corrección.'});
+ }catch(e){return res.status(503).json({error:'No se pudo completar la revisión o corrección independiente. Se conserva el material; revisión pendiente.'})}
+};

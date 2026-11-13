@@ -1,3 +1,4 @@
+const {call} = require('./_providers.cjs');
 const Pedagogy = require('../heva-pedagogy.js');
 const HEVA = require('../heva-core.js');
 // api/generate.js — Motor Multi-IA Suite: ChatGPT / Gemini con Prosa Andragógica y RAG
@@ -150,16 +151,20 @@ Responde ÚNICAMENTE en JSON:
     const plan = {asignatura,nivel,marcoCurricular,objetivoAprendizaje,temaEspecifico,estrategiaDidactica,instruccionesDocente,textoReferencia,adecuacionesPIE,tipoMaterial,cantAlternativas,cantDesarrollo,cantCasos,incluirTicketSalida};
     const promptRedactor = Pedagogy.prompt(plan);
     const metadata = {objetivoAprendizaje,asignatura,nivel,marcoCurricular,temaEspecifico,tipoMaterial,estrategiaDidactica:Pedagogy.strategy(estrategiaDidactica).name};
+    let author;
+    const draft = async prompt => { const r = await call(prompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY); author={proveedor:r.provider,modelo:r.model,fecha:new Date().toISOString()}; return r.value; };
     const normalize = raw => HEVA.material(raw,metadata);
     const check = m => [...HEVA.validate(m,{cantAlternativas,cantDesarrollo,cantCasos}),...Pedagogy.validate(m,plan)];
-    let material = normalize(await ejecutarLlamadaIAPriorizada(promptRedactor,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY));
+    let material = normalize(await draft(promptRedactor));
     let issues = check(material);
     if (issues.length) {
-      material = normalize(await ejecutarLlamadaIAPriorizada(promptRedactor+'\nCORRIGE LA RESPUESTA COMPLETA. Se detectaron estas incidencias: '+issues.join('; '),OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY));
+      material = normalize(await draft(promptRedactor+'\nCORRIGE LA RESPUESTA COMPLETA. Se detectaron estas incidencias: '+issues.join('; ')));
       issues = check(material);
     }
     if (issues.length) return res.status(422).json({error:'El material no cumple la estructura pedagógica solicitada. Se conserva el documento anterior.',detalle:issues.join('; '),borrador:material});
     material = Pedagogy.finalize(material,plan);
+    material.autoriaIA=author;
+    material.planGeneracion=plan;
     return res.status(200).json({exito:true,material,revision:{alcance:'Estructura, cantidades y trazabilidad; revisión pedagógica docente pendiente',tipo:tipoMaterial,estrategia:metadata.estrategiaDidactica}});
 
   } catch (error) {
@@ -171,101 +176,5 @@ Responde ÚNICAMENTE en JSON:
   }
 };
 
-async function ejecutarLlamadaIAPriorizada(prompt, openAiKey, geminiKey, groqKey) {
-  let errores = [];
 
-  // 1. ChatGPT (OpenAI - si está configurado)
-  if (openAiKey) {
-    try {
-      const resp = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openAiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { role: 'system', content: 'Eres un diseñador pedagógico senior para el sistema escolar chileno EPJA. Escribe con prosa andragógica de alta calidad, empática e intelectualmente desafiante para adultos. Responde estrictamente en formato JSON válido.' },
-            { role: 'user', content: prompt }
-          ],
-          response_format: { type: 'json_object' },
-          temperature: 0.5
-        })
-      });
-
-      const data = await resp.json();
-      if (resp.ok && data.choices?.[0]?.message?.content) {
-        return JSON.parse(data.choices[0].message.content);
-      } else {
-        errores.push(`ChatGPT: ${data.error?.message || resp.statusText}`);
-      }
-    } catch (e) {
-      errores.push(`ChatGPT: ${e.message}`);
-    }
-  }
-
-  // 2. Google Gemini (Motor Principal Gratuito)
-  if (geminiKey) {
-    const modelosGemini = [(process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite').trim()];
-    for (const mod of modelosGemini) {
-      try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${mod}:generateContent?key=${geminiKey}`;
-        const resp = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              temperature: 0.5,
-              responseMimeType: 'application/json'
-            }
-          })
-        });
-
-        const data = await resp.json();
-        if (resp.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
-          const texto = data.candidates[0].content.parts[0].text;
-          return limpiarYParsearJSON(texto);
-        } else {
-          errores.push(`Gemini (${mod}): ${data.error?.message || resp.statusText}`);
-        }
-      } catch (e) {
-        errores.push(`Gemini (${mod}) red: ${e.message}`);
-      }
-    }
-  }
-
-  // 3. Groq (Respaldo)
-  if (groqKey) {
-    const modelosGroq = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'llama-3.1-8b-instant'];
-    for (const mod of modelosGroq) {
-      try {
-        const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${groqKey}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: mod,
-            messages: [{ role: 'system', content: 'Responde exclusivamente con JSON válido.' }, { role: 'user', content: prompt }],
-            response_format: { type: 'json_object' },
-            temperature: 0.4
-          })
-        });
-
-        const data = await resp.json();
-        if (resp.ok && data.choices?.[0]?.message?.content) {
-          return JSON.parse(data.choices[0].message.content);
-        }
-      } catch (e) {
-        errores.push(`Groq (${mod}): ${e.message}`);
-      }
-    }
-  }
-
-  throw new Error(errores.join(' | ') || 'Fallo general de conexión.');
-}
-
-function limpiarYParsearJSON(texto) {
-  const limpio = texto.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
-  return JSON.parse(limpio);
-}
+async function ejecutarLlamadaIAPriorizada(...args){return (await call(...args)).value;}
