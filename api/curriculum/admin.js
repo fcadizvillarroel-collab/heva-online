@@ -40,9 +40,19 @@ module.exports = async function handler(req, res) {
     // Las operaciones de revisión exigen sesión válida y rol de administrador.
     const token = (req.headers.authorization || '').replace(/^Bearer /i, '');
     if (!token) return res.status(401).json({error:'Inicia sesión como administrador curricular para revisar o modificar objetivos.'});
+    // Supabase es la autoridad de validación. Nunca aceptar JWT por decodificarlo localmente.
     const auth = await fetch(`${SUPABASE_URL}/auth/v1/user`, {headers:{apikey:SERVICE_KEY, Authorization:`Bearer ${token}`}});
-    const user = await auth.json();
-    if (!auth.ok || !user.id) return res.status(401).json({error:'Sesión inválida'});
+    const user = await auth.json().catch(()=>({}));
+    if (!auth.ok || !user.id) {
+      const message = String(user.msg || user.message || user.error_description || user.error || '');
+      const future = /issued at future|issued in the future|not yet valid|immature/i.test(message);
+      return res.status(401).json({
+        error: future ? 'La sesión tiene una fecha de emisión inválida.' : 'Sesión inválida o vencida.',
+        codigo: future ? 'AUTH_CLOCK_SKEW' : 'AUTH_SESSION_INVALID',
+        detalle: future ? 'Cierra sesión e inicia nuevamente. Si persiste, comprueba la hora automática del dispositivo y la configuración horaria del servicio de autenticación.' : 'Vuelve a iniciar sesión para continuar.',
+        reautenticar: true
+      });
+    }
     const roles = await fetch(`${SUPABASE_URL}/rest/v1/heva_perfiles?usuario=eq.${encodeURIComponent(user.id)}&rol=eq.administrador&select=usuario`, {headers:headersSupabase});
     const permissions = await roles.json();
     if (!roles.ok || !permissions.length) return res.status(403).json({error:'Se requiere rol administrador curricular en heva_perfiles.'});
@@ -162,7 +172,7 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Acción no soportada.' });
 
   } catch (error) {
-    console.error('Error admin Supabase:', error);
-    return res.status(500).json({ error: 'Error interno', detalle: error.message });
+    console.error('Error admin Supabase:', error?.name || 'ERROR');
+    return res.status(502).json({ error: 'No se pudo completar la operación curricular.', detalle: 'Intenta nuevamente. Si persiste, revisa los registros del servidor.' });
   }
 };
