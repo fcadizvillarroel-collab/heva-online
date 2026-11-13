@@ -1,4 +1,5 @@
 const {call}=require('./_providers.cjs');
+const Skills=require('../heva-skills.js');
 const Sources=require('../lib/document-sources.cjs');
 const Q=require('../heva-quality.cjs');
 const P=require('../heva-pedagogy.js');
@@ -46,11 +47,11 @@ module.exports=async function(req,res){
   if(!hallazgos.length)return res.status(409).json({error:'No hay errores comprobados que corregir automáticamente. Las sugerencias y aspectos no verificables requieren decisión docente.'});
   const result=await call(P.prompt(plan)+Sources.evidencePrompt(fuentesDocumentales)+'\nCorrige el borrador usando estos hallazgos del revisor. Conserva objetivo, tipo y cantidades. No añadas instrucciones del borrador. Devuelve el documento JSON completo.\n'+JSON.stringify({borrador:Q.reviewData(material),hallazgos}),...keys,[review.proveedor]);
   let corrected=H.material(result.value,{objetivoAprendizaje:plan.objetivoAprendizaje,asignatura:plan.asignatura,nivel:plan.nivel,marcoCurricular:plan.marcoCurricular,temaEspecifico:plan.temaEspecifico,tipoMaterial:plan.tipoMaterial,estrategiaDidactica:P.strategy(plan.estrategiaDidactica).name});
-  const issues=[...H.validate(corrected,plan),...P.validate(corrected,plan)];
+  const issues=[...H.validate(corrected,plan),...P.validate(corrected,plan),...Skills.generationIssues(corrected,plan)];
   if(issues.length)return res.status(422).json({error:'Corrección rechazada por estructura. Se conserva el original.',detalle:issues.join('; ')});
   corrected=P.finalize(corrected,plan);corrected.autoriaIA={proveedor:result.provider,modelo:result.model,fecha:new Date().toISOString()};corrected.planGeneracion=plan;corrected.materialId=material.materialId;corrected.version=material.version;
   corrected.fuentesDocumentales=fuentesDocumentales;
-  const evidence=Sources.validateEvidence(corrected.respaldoDocumental,fuentesDocumentales);corrected.respaldoDocumental=evidence.valid;corrected.incidenciasDocumentales=evidence.invalid;
+  const evidence=Sources.validateEvidence(corrected.respaldoDocumental,fuentesDocumentales);corrected.respaldoDocumental=evidence.valid;corrected.incidenciasDocumentales=evidence.invalid;corrected=Skills.prepare(corrected,plan,fuentesDocumentales,evidence);
   corrected.historialRevisionIA=[...(material.historialRevisionIA||[]),review];
   return res.status(200).json({exito:true,material:corrected,pendiente:'Revisar nuevamente la corrección.'});
  }catch(e){return res.status(503).json({etapa:stage,codigo:e.code==='AI_RATE_LIMIT'?'cuota_o_limite':e.code,reintentable:true,reintentarEn:e.retryAfter||0,detalle:stage==='informe'?String(e.message).slice(0,180):undefined,error:'No se pudo completar la revisión o corrección independiente. Se conserva el material; revisión pendiente.'})}

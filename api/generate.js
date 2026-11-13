@@ -1,4 +1,5 @@
 const {call} = require('./_providers.cjs');
+const Skills=require('../heva-skills.js');
 const Sources=require('../lib/document-sources.cjs');
 const Pedagogy = require('../heva-pedagogy.js');
 const HEVA = require('../heva-core.js');
@@ -163,7 +164,7 @@ Responde ÚNICAMENTE en JSON:
     let author;
     const draft = async prompt => { const r = await call(prompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY,[],{deadline:generationDeadline}); author={proveedor:r.provider,modelo:r.model,fecha:new Date().toISOString()}; return r.value; };
     const normalize = raw => HEVA.material(raw,metadata);
-    const check = m => [...HEVA.validate(m,{cantAlternativas,cantDesarrollo,cantCasos}),...Pedagogy.validate(m,plan)];
+    const check = m => [...HEVA.validate(m,{cantAlternativas,cantDesarrollo,cantCasos}),...Pedagogy.validate(m,plan),...Skills.generationIssues(m,plan)];
     let material = normalize(await draft(promptRedactor));
     let issues = check(material);
     if (issues.length) {
@@ -177,6 +178,7 @@ Responde ÚNICAMENTE en JSON:
     material.fuentesDocumentales=fuentesDocumentales;
     const evidence=Sources.validateEvidence(material.respaldoDocumental,fuentesDocumentales);
     material.respaldoDocumental=evidence.valid;material.incidenciasDocumentales=evidence.invalid;
+    material=Skills.prepare(material,plan,fuentesDocumentales,evidence);
     return res.status(200).json({exito:true,material,revision:{alcance:'Estructura, cantidades y trazabilidad; revisión pedagógica docente pendiente',tipo:tipoMaterial,estrategia:metadata.estrategiaDidactica}});
 
   } catch (error) {

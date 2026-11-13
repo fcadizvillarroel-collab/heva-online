@@ -1,3 +1,4 @@
+const Skills=require('../heva-skills.js');
 const {call}=require('./_providers.cjs'),R=require('../lib/recovery.cjs'),S=require('../lib/document-sources.cjs'),P=require('../heva-pedagogy.js'),H=require('../heva-core.js');
 module.exports=async(req,res)=>{
  res.setHeader('Access-Control-Allow-Origin','*');res.setHeader('Access-Control-Allow-Headers','Content-Type');res.setHeader('Access-Control-Allow-Methods','POST,OPTIONS');
@@ -13,9 +14,9 @@ module.exports=async(req,res)=>{
   if(fase==='finalizar'){
    const metadata={objetivoAprendizaje:plan.objetivoAprendizaje,asignatura:plan.asignatura,nivel:plan.nivel,marcoCurricular:plan.marcoCurricular,temaEspecifico:plan.temaEspecifico,tipoMaterial:plan.tipoMaterial,estrategiaDidactica:P.strategy(plan.estrategiaDidactica).name};
    let material=H.material(R.merge(base,parts,plan),metadata),issues=R.validate(material,plan);
-   if(issues.length)return res.status(422).json({error:'Los bloques requieren corrección. Se conserva el material anterior.',detalle:issues.join('; ')});
+   if(issues.length)return res.status(422).json({error:'Los bloques requieren corrección. Se conserva el material anterior.',detalle:issues.join('; '),reparacion:R.repair(base,parts,plan),reintentable:true});
    material=P.finalize(material,plan);material.autoriaIA=autor;material.planGeneracion=plan;material.fuentesDocumentales=fuentesDocumentales;
-   const evidence=S.validateEvidence(material.respaldoDocumental,fuentesDocumentales);material.respaldoDocumental=evidence.valid;material.incidenciasDocumentales=evidence.invalid;
+   const evidence=S.validateEvidence(material.respaldoDocumental,fuentesDocumentales);material.respaldoDocumental=evidence.valid;material.incidenciasDocumentales=evidence.invalid;material=Skills.prepare(material,plan,fuentesDocumentales,evidence);
    return res.status(200).json({exito:true,material});
   }
   const keys=[process.env.ALLOW_PAID_AI==='true'?process.env.OPENAI_API_KEY:'',process.env.GEMINI_API_KEY,process.env.GROQ_API_KEY].map(k=>(k||'').trim());

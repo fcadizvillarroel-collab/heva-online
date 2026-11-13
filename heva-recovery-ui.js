@@ -2,7 +2,7 @@
 const HEVA_RECOVERY_KEY='heva-recuperacion-v1';
 function recoveryRead(plan){try{const x=JSON.parse(localStorage.getItem(HEVA_RECOVERY_KEY));return x?.planKey===JSON.stringify(plan)?x:null}catch{return null}}
 function recoverySave(x){try{localStorage.setItem(HEVA_RECOVERY_KEY,JSON.stringify(x))}catch{}}
-async function recuperarMaterialHEVA(plan){
+async function recuperarMaterialHEVA(plan,allowRepair=true){
  let checkpoint=recoveryRead(plan)||{planKey:JSON.stringify(plan),parts:[]};
  const message=document.getElementById('dictamen-calidad');
  const request=async (body,retry=true)=>{
@@ -13,6 +13,7 @@ async function recuperarMaterialHEVA(plan){
    await new Promise(resolve=>setTimeout(resolve,(data.reintentarEn+1)*1000));
    return request(body,false);
   }
+  if(!response.ok&&body.fase==='finalizar'&&data.reparacion)return data;
   if(!response.ok)throw Error((data.detalle||data.error||'Recuperación pendiente.')+' Pulsa Crear material para continuar con el mismo encargo.');
   return data;
  };
@@ -24,6 +25,11 @@ async function recuperarMaterialHEVA(plan){
  }
  if(message)message.textContent='Comprobando objetivo, cantidades, casos y estructura…';
  const result=await request({fase:'finalizar',base:checkpoint.base,parts:checkpoint.parts,autor:checkpoint.autor});
+ if(result.reparacion){
+  if(!allowRepair)throw Error('El material aún requiere corrección. El avance se conserva para retomarlo.');
+  if(result.reparacion.base){checkpoint={planKey:JSON.stringify(plan),parts:[]}}else checkpoint.parts=checkpoint.parts.slice(0,result.reparacion.desde);
+  recoverySave(checkpoint);return recuperarMaterialHEVA(plan,false);
+ }
  try{localStorage.removeItem(HEVA_RECOVERY_KEY)}catch{}
  return result;
 }
