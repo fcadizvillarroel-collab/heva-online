@@ -23,7 +23,7 @@ async function qualityRequest(action){
  if(!response.ok){const error=Error(data.codigo==='cuota_o_limite'?'La cuota del revisor independiente está temporalmente agotada. Se conserva el material y puedes retomar la revisión.':data.detalle||data.error||'Revisión pendiente.');error.retryAfter=data.reintentarEn;throw error;}
  syncEdits();if(materialActual!==original||qualitySnapshot(materialActual)!==snapshot)throw Error('El documento cambió durante la revisión. Revisa nuevamente la versión actual.');
  if(action==='revisar'){materialActual.revisionIA=data.revision;if(data.fuentesDocumentales){materialActual.fuentesDocumentales=data.fuentesDocumentales;materialActual.respaldoDocumental=data.respaldoDocumental;materialActual.incidenciasDocumentales=data.incidenciasDocumentales;}}
- else{guardarEnHistorial(false);materialActual=data.material;}
+ else{guardarEnHistorial(false);materialActual=data.material;renderizarDocumentoEnPantalla();}
  guardarEnHistorial(false);renderizarDocumentoEnPantalla();return data;
 }
 async function runVerifiedCorrection(){

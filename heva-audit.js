@@ -22,6 +22,9 @@ function inspect(raw){const m=H.material(raw),plan=m.planGeneracion||{},issues=[
   const Calc=typeof module==='object'&&module.exports?require('./heva-calculation.js'):globalThis.HEVACalculation;
   const math=/matemat/.test(norm(m.asignatura||m.planGeneracion?.asignatura))?Calc?.proof(q):null;
   if(math&&math.claveEsperada!==q.claveCorrecta)add('calculo_'+ref,'error_comprobado',ref,'La clave no coincide con el cálculo: '+math.explicacion,'Usar la opción '+math.claveEsperada+' y revisar su justificación. '+math.alcance);
+  const declared=String(q.justificacion||'').match(/(?:respuesta correcta es|(?:alternativa|opci[oó]n))\s+([ABCD])(?:\s+(?:es (?:la )?correcta|corresponde al valor correcto|coincide con el c[aá]lculo))?/i);
+  if(math&&declared&&declared[1].toUpperCase()!==math.claveEsperada)add('calculo_pauta_'+ref,'error_comprobado',ref,'La pauta nombra una letra incompatible con el cálculo: '+math.explicacion,'Ajustar clave y justificación a la opción '+math.claveEsperada+'.');
+
   if(answer.length>=25&&m.preguntasAlternativas.some((other,j)=>j!==i&&norm(other.enunciado).includes(answer)))add('pista_'+ref,'sugerencia',ref,'El texto de la clave aparece en otro enunciado; podría anticipar la respuesta.','Comprobar la independencia de los ítems. La coincidencia no demuestra una pista por sí sola.');
  });
  if(!text(m.introduccionLectura)&&m.preguntasAlternativas.some(q=>/segun el (texto|aviso|relato)|de acuerdo (con|al) (el )?(texto|aviso)|texto estimulo/.test(norm(q.enunciado))))add('estimulo_ausente','sugerencia','introduccionLectura','Las preguntas remiten a un texto o aviso, pero no hay lectura visible para analizar.','Incorporar el estímulo neutral o comprobar que toda la información esté en los enunciados.');
