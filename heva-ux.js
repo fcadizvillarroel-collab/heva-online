@@ -31,11 +31,11 @@ function init(){
  function organize(){
    const paper=document.getElementById('hoja-material');if(!paper)return;
    foldPanel(document.getElementById('heva-quality-panel'),'Revisión independiente de IA','Opcional: comprueba y propone correcciones. No reemplaza la revisión docente.');
-   foldPanel(document.getElementById('heva-audit-panel'),'Control de calidad','Consulta incidencias y equilibrio de alternativas sin ocultar el material.');
-   foldPanel(document.getElementById('heva-skills-panel'),'Procedimientos pedagógicos','Información técnica sobre los controles aplicados.');
-   foldPanel(document.getElementById('heva-sources-panel'),'Fuentes y referencias','Consulta la trazabilidad documental cuando la necesites.');
-   const sections=Array.from(document.querySelectorAll('#panel-crear section, #panel-crear aside, #panel-crear div')).filter(e=>e.id&&/studio-(panel|workshop|editor)/.test(e.id));
-   sections.forEach(el=>foldPanel(el,'Taller de materiales · opcional','Sirve para adaptar una sección, crear lectura acompañada o recuperar contenidos para estudiantes con baja asistencia. Si solo necesitas generar y exportar, puedes omitirlo.'));
+   foldPanel(document.getElementById('heva-export-control'),'Control de calidad','Consulta incidencias y equilibrio de alternativas sin ocultar el material.');
+   foldPanel(document.getElementById('heva-procedures-panel'),'Procedimientos pedagógicos','Información técnica sobre los controles aplicados.');
+   foldPanel(document.getElementById('material-sources-panel'),'Fuentes y referencias','Consulta la trazabilidad documental cuando la necesites.');
+   const workshop=document.getElementById('studio-panel');
+   foldPanel(workshop,'Taller de materiales · opcional','Sirve para adaptar una sección, crear lectura acompañada o recuperar contenidos para estudiantes con baja asistencia. Si solo necesitas generar y exportar, puedes omitirlo.'));
  }
  organize();
  let pending=false;
