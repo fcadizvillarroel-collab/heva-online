@@ -180,10 +180,17 @@
         <!-- 7. TRANSFORMADOR BRISK: Apunte propio del docente -->
         <div class="border rounded p-2.5 bg-sky-50/50 border-sky-200 space-y-1">
           <label class="block text-xs font-bold uppercase text-sky-900 flex items-center justify-between">
-            <span>Transformar Apunte Propio (Estilo Brisk)</span>
+            <span>Material de ejemplo opcional</span>
             <span class="text-[10px] text-sky-600 font-normal">Opcional</span>
           </label>
-          <textarea id="texto-referencia" rows="2" class="w-full border rounded p-1.5 text-xs bg-white text-stone-700" placeholder="Pega aquí tu apunte o noticia para que la IA evalúe EXCLUSIVAMENTE sobre él..."></textarea>
+          <label for="modo-referencia" class="block text-xs">Uso del ejemplo</label>
+          <select id="modo-referencia" class="w-full border rounded p-1.5 text-xs" onchange="document.getElementById('texto-referencia').disabled=this.value==='NINGUNA'">
+            <option value="NINGUNA">No usar material de ejemplo</option>
+            <option value="ESTILO">Solo formato, profundidad y estilo docente</option>
+            <option value="CONTENIDO">Usar también el contenido que seleccione</option>
+          </select>
+          <p class="text-xs">Los ejemplos no sustituyen el currículum ni son fuentes verificadas.</p>
+          <textarea disabled id="texto-referencia" rows="2" class="w-full border rounded p-1.5 text-xs bg-white text-stone-700" placeholder="Selecciona un uso y pega aquí el ejemplo que quieras utilizar."></textarea>
         </div>
 
         <!-- 8. ADECUACIONES PIE -->
@@ -663,7 +670,8 @@
         objetivoAprendizaje: document.getElementById('texto-oa').value,
         temaEspecifico: document.getElementById('tema-especifico').value,
         estrategiaDidactica: document.getElementById('estrategia-didactica').value,
-        textoReferencia: document.getElementById('texto-referencia').value,
+        modoReferencia: document.getElementById('modo-referencia').value,
+        textoReferencia: document.getElementById('modo-referencia').value==='NINGUNA'?'':document.getElementById('texto-referencia').value,
         tipoMaterial: document.getElementById('tipo-material').value,
         cantAlternativas: parseInt(document.getElementById('cant-alternativas').value) || 0,
         cantDesarrollo: parseInt(document.getElementById('cant-desarrollo').value) || 0,

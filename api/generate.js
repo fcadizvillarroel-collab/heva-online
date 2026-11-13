@@ -22,7 +22,8 @@ module.exports = async function handler(req, res) {
     temaEspecifico = '',
     estrategiaDidactica = 'Análisis de contenido disciplinar formativo',
     instruccionesDocente = '',
-    textoReferencia = '',
+    textoReferencia: referenciaRecibida = '',
+    modoReferencia = 'NINGUNA',
     adecuacionesPIE = [],
     tipoMaterial = 'GUIA',
     cantAlternativas = 6,
@@ -32,6 +33,8 @@ module.exports = async function handler(req, res) {
     preguntaARegenerar = null
   } = req.body || {};
 
+  if(!['NINGUNA','ESTILO','CONTENIDO'].includes(modoReferencia)||typeof referenciaRecibida!=='string'||referenciaRecibida.length>60000)return res.status(400).json({error:'Referencia opcional inválida.'});
+  const textoReferencia=modoReferencia==='NINGUNA'?'':referenciaRecibida;
   for (const [name,value,max] of [['cantAlternativas',cantAlternativas,20],['cantDesarrollo',cantDesarrollo,10],['cantCasos',cantCasos,4]]) {
     if (!Number.isInteger(value) || value < 0 || value > max) return res.status(400).json({error:`${name} debe estar entre 0 y ${max}`});
   }
@@ -149,7 +152,7 @@ Responde ÚNICAMENTE en JSON:
     // Cada material tiene un contrato propio y una estrategia observable en sus tareas.
     if (!Object.hasOwn(Pedagogy.contracts, tipoMaterial)) return res.status(400).json({error:'Tipo de material no admitido.'});
     if (!objetivoAprendizaje.trim()) return res.status(400).json({error:'Selecciona un objetivo curricular antes de generar.'});
-    const plan = {asignatura,nivel,marcoCurricular,objetivoAprendizaje,temaEspecifico,estrategiaDidactica,instruccionesDocente,textoReferencia,adecuacionesPIE,tipoMaterial,cantAlternativas,cantDesarrollo,cantCasos,incluirTicketSalida};
+    const plan = {asignatura,nivel,marcoCurricular,objetivoAprendizaje,temaEspecifico,estrategiaDidactica,instruccionesDocente,textoReferencia,modoReferencia,adecuacionesPIE,tipoMaterial,cantAlternativas,cantDesarrollo,cantCasos,incluirTicketSalida};
     const fuentesDocumentales=await Sources.retrieve(plan);
     const promptRedactor = Pedagogy.prompt(plan)+Sources.evidencePrompt(fuentesDocumentales);
     const metadata = {objetivoAprendizaje,asignatura,nivel,marcoCurricular,temaEspecifico,tipoMaterial,estrategiaDidactica:Pedagogy.strategy(estrategiaDidactica).name};
