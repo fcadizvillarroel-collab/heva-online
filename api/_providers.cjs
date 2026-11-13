@@ -69,7 +69,10 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
         tryNextModel=[404,429,500,502,503,504].includes(resp.status);errores.push('Gemini: proveedor no disponible ('+resp.status+').');break;
       } catch(e){
         remember(e);errores.push('Gemini: '+(e.code||'conexión no disponible'));
-        if(e.code?.startsWith('AI_RESPONSE_')){tryNextModel=true;break;}
+        if(e.code?.startsWith('AI_RESPONSE_')){
+          if(attempt===0 && deadline-Date.now()>4000)continue;
+          tryNextModel=true;break;
+        }
         tryNextModel=true;break;
       }
      }
