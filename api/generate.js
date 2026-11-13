@@ -1,3 +1,4 @@
+const HEVA = require('../heva-core.js');
 // api/generate.js — Motor Multi-IA Suite: ChatGPT / Gemini con Prosa Andragógica y RAG
 
 module.exports = async function handler(req, res) {
@@ -28,14 +29,18 @@ module.exports = async function handler(req, res) {
     preguntaARegenerar = null
   } = req.body || {};
 
-  const OPENAI_API_KEY = (process.env.OPENAI_API_KEY || '').trim();
+  for (const [name,value,max] of [['cantAlternativas',cantAlternativas,20],['cantDesarrollo',cantDesarrollo,10],['cantCasos',cantCasos,4]]) {
+    if (!Number.isInteger(value) || value < 0 || value > max) return res.status(400).json({error:`${name} debe estar entre 0 y ${max}`});
+  }
+  if (typeof objetivoAprendizaje !== 'string' || typeof textoReferencia !== 'string' || textoReferencia.length > 60000) return res.status(400).json({error:'Objetivo o texto de referencia inválido o demasiado extenso.'});
+  const OPENAI_API_KEY = process.env.ALLOW_PAID_AI === 'true' ? (process.env.OPENAI_API_KEY || '').trim() : '';
   const GEMINI_API_KEY = (process.env.GEMINI_API_KEY || '').trim();
   const GROQ_API_KEY = (process.env.GROQ_API_KEY || '').trim();
 
   if (!OPENAI_API_KEY && !GEMINI_API_KEY && !GROQ_API_KEY) {
     return res.status(400).json({
-      error: 'Claves no detectadas',
-      detalle: 'Configura OPENAI_API_KEY o GEMINI_API_KEY en las Environment Variables de Vercel.'
+      error: 'No hay proveedor habilitado',
+      detalle: 'Configura GEMINI_API_KEY o GROQ_API_KEY en Vercel. OpenAI requiere ALLOW_PAID_AI=true explícito. El uso gratuito depende de la cuota y facturación del proveedor.'
     });
   }
 
@@ -176,6 +181,8 @@ ${reglaEnfoque}
 ${reglaPIE}
 
 REQUISITOS OBLIGATORIOS:
+0. Tipo de material: ${tipoMaterial}. Si es PRESENTACION, agrega un array "diapositivas" de 8 a 12 objetos {"titulo":"...", "contenido":["idea explicada", "ejemplo o actividad"]}; incluye inicio con objetivo, explicación progresiva, ejemplo guiado, ejercicio y cierre. Si es PLANIFICACION, organiza la lectura como inicio/desarrollo/cierre de 90 minutos. No mezcles temas de Historia ajenos al tema solicitado.
+0b. No incluyas claves ni rúbricas docentes dentro del texto de preguntas, lecturas, casos o diapositivas para estudiantes. Los criterios son orientativos y no atribuyas exigencias de notas o porcentajes a un decreto sin verificarlo.
 1. Exactamente ${cantAlternativas} preguntas de selección múltiple (A, B, C, D) con claves desordenadas al azar (prohibido patrones A, B, C, D).
 2. Exactamente ${cantDesarrollo} preguntas de desarrollo con rúbrica según Decreto 67.
 3. ${cantCasos} situaciones de lectura o análisis contextualizadas.
@@ -223,7 +230,14 @@ Responde ÚNICAMENTE en JSON válido:
 }
 `;
 
-    const material = await ejecutarLlamadaIAPriorizada(promptRedactor, OPENAI_API_KEY, GEMINI_API_KEY, GROQ_API_KEY);
+    if (!objetivoAprendizaje.trim()) return res.status(400).json({error:'Selecciona un objetivo curricular antes de generar.'});
+    let material = HEVA.material(await ejecutarLlamadaIAPriorizada(promptRedactor, OPENAI_API_KEY, GEMINI_API_KEY, GROQ_API_KEY), {objetivoAprendizaje, asignatura, nivel, marcoCurricular, temaEspecifico, tipoMaterial});
+    let issues = HEVA.validate(material, {cantAlternativas, cantDesarrollo, cantCasos});
+    if (issues.length) {
+      material = HEVA.material(await ejecutarLlamadaIAPriorizada(promptRedactor + '\nCORRIGE ESTOS ERRORES ESTRUCTURALES EN LA NUEVA RESPUESTA: '+issues.join('; '), OPENAI_API_KEY, GEMINI_API_KEY, GROQ_API_KEY), {objetivoAprendizaje, asignatura, nivel, marcoCurricular, temaEspecifico, tipoMaterial});
+      issues = HEVA.validate(material, {cantAlternativas, cantDesarrollo, cantCasos});
+    }
+    if (issues.length) return res.status(422).json({error:'La IA devolvió un material incompleto. No se sustituyó el documento anterior.',detalle:issues.join('; ')});
 
     return res.status(200).json({
       exito: true,
@@ -234,7 +248,7 @@ Responde ÚNICAMENTE en JSON válido:
     console.error('Error en proceso:', error);
     return res.status(500).json({
       error: 'Error de IA',
-      detalle: error.message
+      detalle: String(error.message).replace(/(key=)[^&\s]+/gi,'$1[oculta]')
     });
   }
 };
@@ -275,7 +289,7 @@ async function ejecutarLlamadaIAPriorizada(prompt, openAiKey, geminiKey, groqKey
 
   // 2. Google Gemini (Motor Principal Gratuito)
   if (geminiKey) {
-    const modelosGemini = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash'];
+    const modelosGemini = [(process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite').trim()];
     for (const mod of modelosGemini) {
       try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${mod}:generateContent?key=${geminiKey}`;

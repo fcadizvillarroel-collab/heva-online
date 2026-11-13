@@ -1,0 +1,4 @@
+docx 9.6.1 · MIT · index.iife.js
+pptxgenjs 4.0.1 · MIT · pptxgen.bundle.js (incluye JSZip)
+Tailwind Play CDN · MIT · copia descargada de https://cdn.tailwindcss.com el 12-11-2026
+Bibliotecas incluidas localmente para exportaciones sin CDN.

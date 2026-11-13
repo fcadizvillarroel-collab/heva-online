@@ -1,7 +1,7 @@
 // api/curriculum/admin.js — Conexión Nativa a Supabase con columnas reales del CSV
 
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Credentials', 'false');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -28,8 +28,27 @@ module.exports = async function handler(req, res) {
   };
 
   try {
+    // La ruta docente debe resolverse ANTES de la ruta general GET.
+    if (req.method === 'GET' && action === 'verified') {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/curriculo_publicado?select=*,curriculo_staging(etapa,formacion,referencia_comprobada)&vigente=eq.true&limit=1000&order=aprobado_at.desc`, { headers: headersSupabase });
+      const rows = await response.json();
+      if (!response.ok) throw new Error(rows.message || 'No fue posible consultar el catálogo');
+      const HEVA = require('../../heva-core.js');
+      const objetivos = HEVA.catalog(rows, req.query);
+      return res.status(200).json({total: objetivos.length, objetivos});
+    }
+    // Las operaciones de revisión exigen sesión válida y rol de administrador.
+    const token = (req.headers.authorization || '').replace(/^Bearer /i, '');
+    if (!token) return res.status(401).json({error:'Inicia sesión como administrador curricular para revisar o modificar objetivos.'});
+    const auth = await fetch(`${SUPABASE_URL}/auth/v1/user`, {headers:{apikey:SERVICE_KEY, Authorization:`Bearer ${token}`}});
+    const user = await auth.json();
+    if (!auth.ok || !user.id) return res.status(401).json({error:'Sesión inválida'});
+    const roles = await fetch(`${SUPABASE_URL}/rest/v1/heva_perfiles?usuario=eq.${encodeURIComponent(user.id)}&rol=eq.administrador&select=usuario`, {headers:headersSupabase});
+    const permissions = await roles.json();
+    if (!roles.ok || !permissions.length) return res.status(403).json({error:'Se requiere rol administrador curricular en heva_perfiles.'});
+
     // 1. LISTAR LOS 407 REGISTROS DE STAGING CON FILTROS
-    if (req.method === 'GET' || action === 'list') {
+    if (req.method === 'GET' && action === 'list') {
       const { estado } = req.query;
       let url = `${SUPABASE_URL}/rest/v1/curriculo_staging?select=*&order=created_at.desc&limit=450`;
       
@@ -47,6 +66,7 @@ module.exports = async function handler(req, res) {
     // 2. APROBAR OBJETIVO Y PUBLICAR EN CATÁLOGO DOCENTE
     if (req.method === 'POST' && action === 'approve') {
       const { stagingId, comprobadoDocumentalmente, notas } = req.body || {};
+      if (!comprobadoDocumentalmente) return res.status(400).json({error:'Debe cotejar la referencia documental antes de publicar.'});
       if (!stagingId) return res.status(400).json({ error: 'stagingId requerido.' });
 
       // Obtener el registro de staging
@@ -137,19 +157,6 @@ module.exports = async function handler(req, res) {
         })
       });
       return res.status(200).json({ exito: true });
-    }
-
-    // 4. CONSULTA DOCENTE DE OBJETIVOS PUBLICADOS Y VERIFICADOS
-    if (action === 'verified') {
-      const { marco, nivel, asignatura } = req.query;
-      let url = `${SUPABASE_URL}/rest/v1/curriculo_publicado?select=*&vigente=eq.true`;
-      if (marco) url += `&marco=eq.${marco}`;
-      if (nivel) url += `&nivel=eq.${nivel}`;
-      if (asignatura) url += `&asignatura=eq.${encodeURIComponent(asignatura)}`;
-
-      const rVerif = await fetch(url, { headers: headersSupabase });
-      const objetivos = await rVerif.json();
-      return res.status(200).json({ total: objetivos.length, objetivos: objetivos || [] });
     }
 
     return res.status(400).json({ error: 'Acción no soportada.' });

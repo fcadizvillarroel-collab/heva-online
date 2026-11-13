@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HEVA Online — Suite Curricular EPJA</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+  <script src="/vendor/tailwind.js"></script>
+  <script src="/vendor/docx.js"></script>
+  <script src="/vendor/pptxgen.js"></script>
   <style>
     :root { --font-base: 16px; }
     body { font-size: var(--font-base); background-color: #FDFBF7; color: #2D3748; font-family: system-ui, -apple-system, sans-serif; }
@@ -33,7 +33,7 @@
     <div class="flex items-center gap-2 text-xs">
       <span class="bg-black/25 px-3 py-1 rounded text-rose-100 font-medium flex items-center gap-1.5">
         <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
-        Supabase Conectado (407 Registros)
+        Catálogo curricular HEVA · conexión comprobada al consultar
       </span>
     </div>
   </header>
@@ -127,8 +127,8 @@
           <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Tipo de Material</label>
           <select id="tipo-material" class="w-full border rounded p-2 text-sm bg-white font-medium">
             <option value="GUIA">Guía de Aprendizaje Formativa</option>
-            <option value="EVALUACION">Evaluación / Prueba Sumativa (Dec. 67)</option>
-            <option value="PLANIFICACION">Planificación de Clase (90 min DUA)</option>
+            <option value="EVALUACION">Evaluación / Prueba Sumativa</option>
+            <option value="PRESENTACION">Presentación / PowerPoint</option><option value="ACCESIBLE">Versión accesible / lectura acompañada</option><option value="PLANIFICACION">Planificación de Clase (90 min DUA)</option>
             <option value="TALLER">Taller Práctico / Módulo T-P</option>
           </select>
         </div>
@@ -210,7 +210,7 @@
 
         <div>
           <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Tema Específico de la Clase</label>
-          <input type="text" id="tema-especifico" class="w-full border rounded p-2 text-sm" value="La Segunda Guerra Mundial: causas y consecuencias" />
+          <input type="text" id="tema-especifico" class="w-full border rounded p-2 text-sm" placeholder="Escribe un solo tema para esta clase" />
         </div>
 
         <div class="border-t pt-3 space-y-3">
@@ -278,11 +278,11 @@
 
           <div class="grid grid-cols-2 md:grid-cols-3 gap-2 border p-3 rounded text-xs bg-stone-50">
             <div><strong>Estudiante:</strong> _______________________</div>
-            <div><strong>RUN:</strong> _______________</div>
+            <div><strong>Código:</strong> _______________</div>
             <div><strong>Fecha:</strong> _______________</div>
             <div id="doc-nivel"><strong>Nivel:</strong> III NIVEL BÁSICO</div>
-            <div><strong>Exigencia:</strong> 60% (Dec. 67)</div>
-            <div id="doc-puntaje"><strong>Puntaje:</strong> ___ / 16 pts</div>
+            <div><strong>Exigencia:</strong> 60% (configuración docente)</div>
+            <div id="doc-puntaje"><strong>Puntaje:</strong> Definir con pauta docente</div>
           </div>
 
           <!-- I. Lectura -->
@@ -352,7 +352,7 @@
 
             <div class="border rounded p-3 bg-white space-y-2">
               <h5 class="font-bold text-stone-800 text-xs flex justify-between">
-                <span>Tabla de Conversión Puntaje a Nota (Exigencia 60% — Decreto 67)</span>
+                <span>Tabla de Conversión Puntaje a Nota (Exigencia 60% — configuración docente)</span>
                 <span id="label-corte-nota" class="text-[#8B2635]">Puntaje de Aprobación (4.0): -- pts</span>
               </h5>
               <div id="tabla-escala-notas" class="grid grid-cols-4 sm:grid-cols-8 gap-1 text-[11px] font-mono text-center max-h-40 overflow-y-auto"></div>
@@ -434,6 +434,7 @@
       try {
         const res = await fetch(`/api/curriculum/admin?action=list&estado=${estado}`);
         const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Acceso restringido a administración curricular');
         itemsStaging = data.items || [];
         contador.innerText = `${itemsStaging.length} registros cargados desde Supabase (${estado})`;
 
@@ -666,7 +667,8 @@
         tipoMaterial: document.getElementById('tipo-material').value,
         cantAlternativas: parseInt(document.getElementById('cant-alternativas').value) || 0,
         cantDesarrollo: parseInt(document.getElementById('cant-desarrollo').value) || 0,
-        cantCasos: parseInt(document.getElementById('cant-casos').value) || 0
+        cantCasos: parseInt(document.getElementById('cant-casos').value) || 0,
+        adecuacionesPIE: [...document.querySelectorAll('input[id^="pie-"]:checked')].map(x=>x.parentElement.textContent.trim())
       };
 
       try {
@@ -684,7 +686,7 @@
         materialActual.asignatura = payload.asignatura;
 
         renderizarDocumentoEnPantalla();
-        document.getElementById('dictamen-calidad').innerText = 'Dictamen: APROBADO CON RIGOR CURRICULAR (100/100)';
+        document.getElementById('dictamen-calidad').innerText = 'Revisión estructural completada · validación docente pendiente';
 
       } catch (err) {
         errorBox.classList.remove('hidden');
@@ -786,5 +788,5 @@
       pptx.writeFile({ fileName: 'presentacion.pptx' });
     }
   </script>
-</body>
+<script src="/heva-core.js"></script><script src="/heva-office.js"></script><script src="/heva-ui.js"></script></body>
 </html>
