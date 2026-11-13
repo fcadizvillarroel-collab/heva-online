@@ -7,6 +7,7 @@ function section(m,id){const s=sections(m).find(x=>x.id===id);if(!s)throw Error(
 function patch(m,id,proposal){const s=section(m,id);if(!proposal||!Object.hasOwn(proposal,'contenido'))throw Error('La propuesta no contiene la sección editada.');const content=proposal.contenido;
  if(s.kind==='texto'&&typeof content!=='string')throw Error('Se esperaba un texto para esta sección.');
  if(s.kind==='objeto'&&(!content||Array.isArray(content)||typeof content!=='object'))throw Error('Se esperaba una actividad completa.');
+ if(s.kind==='objeto'&&/\?/.test(s.value.enunciado||'')&&!/\?/.test(content.enunciado||'')&&!/\b(calcula|determine|determina|selecciona|identifica|explica|responde|justifica|resuelve)\b/i.test(content.enunciado||''))throw Error('La edición eliminó la pregunta o consigna. Se conserva el original.');
  const next=clone(m);let value=clone(content);
  if(s.kind==='objeto'){if(Object.hasOwn(s.value,'numero'))value.numero=s.value.numero;if(Object.hasOwn(s.value,'id'))value.id=s.value.id;}
  if(s.index==null)next[s.key]=value;else next[s.key][s.index]=value;

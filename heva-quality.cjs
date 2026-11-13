@@ -9,8 +9,10 @@ function validateReview(x){
  return {criterios:x.criterios,hallazgos:x.hallazgos};
 }
 function readReview(raw){
- if(!raw||!Array.isArray(raw.criterios)||raw.criterios.length!==criteria.length||!Array.isArray(raw.hallazgos))return validateReview(raw);
+ if(!raw||!Array.isArray(raw.criterios)||!raw.criterios.length||raw.criterios.length>24||!Array.isArray(raw.hallazgos)||raw.hallazgos.length>40)return validateReview(raw);
  const report={...raw,criterios:raw.criterios.map(c=>({...c})),hallazgos:[],incidenciasInforme:[]};
+ report.criterios=criteria.map(id=>{const matches=raw.criterios.filter(c=>c&&c.id===id);const c=matches[0];if(matches.length===1&&['cumple','requiere_ajuste','no_verificable'].includes(c.estado)&&typeof c.fundamento==='string'&&c.fundamento.trim().length>=12)return{...c};report.incidenciasInforme.push({criterio:id,motivo:'Criterio ausente, repetido o inválido; no se presume aprobación.'});return{id,estado:'no_verificable',fundamento:'El revisor no entregó un criterio íntegro y válido. Este aspecto queda pendiente de revisión docente.'}});
+ for(const c of raw.criterios)if(!c||!criteria.includes(c.id))report.incidenciasInforme.push({criterio:'sin_identificar',motivo:'Identificador de criterio no reconocido; no se atribuye a otro criterio.'});
  for(const h of raw.hallazgos){if(h&&criteria.includes(h.criterio)&&['critica','alta','media','baja'].includes(h.severidad)&&['ubicacion','problema','evidencia','correccion'].every(k=>typeof h[k]==='string'&&h[k].trim().length>=3))report.hallazgos.push(h);else report.incidenciasInforme.push({criterio:h?.criterio||'sin_identificar',motivo:'Hallazgo omitido por falta de evidencia o corrección concreta.'});}
  for(const c of report.criterios)if(c.estado==='requiere_ajuste'&&!report.hallazgos.some(h=>h.criterio===c.id)){c.estado='no_verificable';c.fundamento='El revisor indicó un ajuste sin aportar un hallazgo completo. No se considera demostrado; requiere revisión docente.';report.incidenciasInforme.push({criterio:c.id,motivo:'Ajuste sin hallazgo concreto: se conserva como no verificable, no como aprobación.'});}
  const valid=validateReview(report);return{...valid,incidenciasInforme:report.incidenciasInforme,integridadInforme:report.incidenciasInforme.length?'parcial':'completo'};
@@ -18,7 +20,7 @@ function readReview(raw){
 function reviewData(m){
  const clean={...m};
  for(const k of ['revisionIA','historialRevisionIA','fuentesDocumentales','incidenciasDocumentales','materialId','version','autoriaIA','respaldoDocumental','procedimientosHEVA'])delete clean[k];
- if(clean.planGeneracion){clean.planGeneracion={...clean.planGeneracion};delete clean.planGeneracion.textoReferencia;delete clean.planGeneracion.objetivoAprendizaje;delete clean.planGeneracion.adecuacionesPIE;}
+ if(clean.planGeneracion){clean.planGeneracion={...clean.planGeneracion};delete clean.planGeneracion.textoReferencia;delete clean.planGeneracion.documentosBase;delete clean.planGeneracion.objetivoAprendizaje;delete clean.planGeneracion.adecuacionesPIE;}
  return clean;
 }
 function classifyReview(report,material,bundle){
