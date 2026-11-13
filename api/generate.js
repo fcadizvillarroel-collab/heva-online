@@ -155,7 +155,8 @@ Responde ÚNICAMENTE en JSON:
     // Cada material tiene un contrato propio y una estrategia observable en sus tareas.
     if (!Object.hasOwn(Pedagogy.contracts, tipoMaterial)) return res.status(400).json({error:'Tipo de material no admitido.'});
     if (!objetivoAprendizaje.trim()) return res.status(400).json({error:'Selecciona un objetivo curricular antes de generar.'});
-    const plan = {asignatura,nivel,marcoCurricular,objetivoAprendizaje,temaEspecifico,estrategiaDidactica,instruccionesDocente,disenoPedagogico,textoReferencia,modoReferencia,adecuacionesPIE,tipoMaterial,cantAlternativas,cantDesarrollo,cantCasos,incluirTicketSalida};
+    const plan = {...Object.fromEntries(["documentosBase","plantillaVisual","derivacion"].filter(k=>req.body[k]!=null).map(k=>[k,req.body[k]])),asignatura,nivel,marcoCurricular,objetivoAprendizaje,temaEspecifico,estrategiaDidactica,instruccionesDocente,disenoPedagogico,textoReferencia,modoReferencia,adecuacionesPIE,tipoMaterial,cantAlternativas,cantDesarrollo,cantCasos,incluirTicketSalida};
+    const extraIssues=require('../heva-studio.js').validateExtras(plan);if(extraIssues.length)return res.status(400).json({error:extraIssues.join('; ')});
     const designIssues=require('../heva-design.js').validate(disenoPedagogico,plan);
     if(designIssues.length)return res.status(400).json({error:designIssues.join('; ')});
     const fuentesDocumentales=await Sources.retrieve(plan);
@@ -179,6 +180,7 @@ Responde ÚNICAMENTE en JSON:
     const evidence=Sources.validateEvidence(material.respaldoDocumental,fuentesDocumentales);
     material.respaldoDocumental=evidence.valid;material.incidenciasDocumentales=evidence.invalid;
     material=Skills.prepare(material,plan,fuentesDocumentales,evidence);
+    material=require('../heva-studio.js').link(material,plan);
     return res.status(200).json({exito:true,material,revision:{alcance:'Estructura, cantidades y trazabilidad; revisión pedagógica docente pendiente',tipo:tipoMaterial,estrategia:metadata.estrategiaDidactica}});
 
   } catch (error) {

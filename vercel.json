@@ -18,6 +18,10 @@
     "api/recover.js": {
       "maxDuration": 60,
       "includeFiles": "node_modules/**"
+    },
+    "api/studio.js": {
+      "maxDuration": 60,
+      "includeFiles": "node_modules/**"
     }
   }
 }
