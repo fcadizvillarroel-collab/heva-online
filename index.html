@@ -680,14 +680,22 @@
       };
 
       try {
-        const respuesta = await fetch('/api/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await respuesta.json();
-        if (!respuesta.ok) throw new Error(data.detalle || data.error || 'Error en servidor.');
+        let data;
+        if(modo==='GENERADOR_ESTANDAR'&&recoveryRead(payload))data=await recuperarMaterialHEVA(payload);
+        else{
+          let respuesta;
+          try{
+            respuesta=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(58000)});
+            data=await respuesta.json();
+          }catch(error){
+            if(modo!=='GENERADOR_ESTANDAR')throw error;
+            data=await recuperarMaterialHEVA(payload);respuesta=null;
+          }
+          if(respuesta&&!respuesta.ok){
+            if(modo==='GENERADOR_ESTANDAR'&&(respuesta.status===422||data.reintentable||respuesta.status>=500))data=await recuperarMaterialHEVA(payload);
+            else throw new Error(data.detalle||data.error||'Error en servidor.');
+          }
+        }
 
         materialActual = data.material;
         materialActual.nivel = payload.nivel;
@@ -796,5 +804,5 @@
       pptx.writeFile({ fileName: 'presentacion.pptx' });
     }
   </script>
-<script src="/heva-pedagogy.js"></script><script src="/heva-core.js"></script><script src="/heva-office.js"></script><script src="/heva-ui.js"></script><script src="/heva-pedagogy-ui.js"></script><script src="/heva-quality-ui.js"></script><script src="/heva-sources-ui.js"></script></body>
+<script src="/heva-pedagogy.js"></script><script src="/heva-core.js"></script><script src="/heva-office.js"></script><script src="/heva-ui.js"></script><script src="/heva-pedagogy-ui.js"></script><script src="/heva-recovery-ui.js"></script><script src="/heva-quality-ui.js"></script><script src="/heva-sources-ui.js"></script></body>
 </html>

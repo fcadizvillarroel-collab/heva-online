@@ -14,6 +14,10 @@
     "api/sources.js": {
       "maxDuration": 60,
       "includeFiles": "node_modules/**"
+    },
+    "api/recover.js": {
+      "maxDuration": 60,
+      "includeFiles": "node_modules/**"
     }
   }
 }

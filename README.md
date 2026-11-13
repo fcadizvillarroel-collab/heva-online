@@ -78,3 +78,13 @@ El bloque compartido `studentContext` de `heva-pedagogy.js` explicita caracterí
 ### Recuperación de respuestas de IA
 
 El lector reúne las partes de texto de Gemini y omite las partes marcadas como pensamiento. Comprueba el motivo de finalización y rechaza respuestas cortadas. Puede retirar comas finales fuera de cadenas, sin cambiar el contenido ni completar campos ausentes. Ante JSON inválido o truncado, Gemini recibe un único reintento con el encargo completo; luego siguen disponibles los proveedores alternativos habilitados. El plazo de la generación se comparte entre intentos para evitar reintentos ilimitados. Los fallos persistentes devuelven un código de respuesta recuperable y un mensaje claro; el visor conserva el documento anterior y la selección.
+
+### Recuperación de generación y revisión (13 noviembre 2026)
+
+Si falla la generación completa, Chrome recupera la base y los ítems en bloques (hasta cuatro alternativas, dos desarrollos o un caso por petición). Cada bloque debe superar validación antes de guardarse; el ensamblado final comprueba el contrato, las cantidades y la trazabilidad antes de sustituir el documento visible. Los avances se guardan localmente por encargo exacto y se retoman con Crear material. La recuperación mantiene el proveedor autor, para que la revisión siga siendo de otro proveedor. No se cierran respuestas JSON truncadas ni se inventan tareas para completarlas.
+
+La revisión elimina copias del apunte y de metadatos documentales del contexto del revisor, conserva el contenido pedagógico completo y reintenta informes inválidos una vez. Las llamadas Groq tienen un presupuesto explícito de salida y razonamiento bajo en GPT-OSS. Los errores 429 se identifican como cuota temporal y conservan el material y el informe disponible. Las cuotas externas siguen pudiendo impedir una revisión independiente; nunca se simula su aprobación.
+
+### Cobertura documental por disciplina
+
+El registro incorpora 17 referencias públicas adicionales para Lenguaje, Matemática, formación instrumental y Construcciones Metálicas. Selecciona recursos por asignatura, nivel, marco y tema; separa las páginas disciplinares de orientaciones compartidas y no atribuye la especialidad metálica a todos los oficios. La interfaz informa cuántos documentos y fragmentos específicos se recuperaron realmente. Los programas de educación regular son apoyos didácticos y no sustituyen el OA EPJA. Las referencias históricas están identificadas y no acreditan vigencia de normas, tasas, montos o tecnología. No se agregaron documentos marcados como borradores no citables.

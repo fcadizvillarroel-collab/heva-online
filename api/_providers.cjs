@@ -3,6 +3,8 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
   let errores = [];
   const deadline=Math.min(Date.now()+48000,options.deadline||Infinity);
   const responseErrors=[];
+  let rateLimited=false,retryAfter=0;
+  const track=resp=>{if(resp.status===429){rateLimited=true;const seconds=Number(resp.headers?.get?.('retry-after'));if(Number.isFinite(seconds))retryAfter=Math.max(retryAfter,Math.min(3600,Math.ceil(seconds)));}};
   const remember=e=>{if(e?.code?.startsWith('AI_RESPONSE_'))responseErrors.push(e.code);};
 
   // 1. ChatGPT (OpenAI - si está configurado)
@@ -25,7 +27,7 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
         })
       });
 
-      const data = await resp.json();
+      track(resp);const data = await resp.json();
       if (resp.ok && data.choices?.[0]?.message?.content) {
         return {value:parseAIJSON(data.choices[0].message.content,data.choices[0].finish_reason),provider:'openai',model:'gpt-4o-mini'};
       } else {
@@ -51,13 +53,13 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
             contents: [{ parts: [{ text: prompt+(attempt?'\nREINTENTO: entrega el documento COMPLETO como un solo objeto JSON válido, sin comas finales, comentarios ni texto fuera del JSON. Conserva objetivo, secciones y cantidades solicitadas.':'') }] }],
             generationConfig: {
               temperature: 0.3,
-              maxOutputTokens: 16384,
+              maxOutputTokens: options.maxOutputTokens || 16384,
               responseMimeType: 'application/json'
             }
           })
         });
 
-        const data = await resp.json();
+        track(resp);const data = await resp.json();
         const candidate=data.candidates?.[0];
         if(resp.ok&&candidate?.content?.parts){
           const texto=candidate.content.parts.filter(p=>typeof p.text==='string'&&!p.thought).map(p=>p.text).join('');
@@ -84,11 +86,13 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
             model: mod,
             messages: [{ role: 'system', content: 'Responde exclusivamente con JSON válido.' }, { role: 'user', content: prompt }],
             response_format: { type: 'json_object' },
+            max_completion_tokens: options.maxOutputTokens || 8192,
+            ...(mod.startsWith('openai/gpt-oss')?{reasoning_effort:'low'}:{}),
             temperature: 0.4
           })
         });
 
-        const data = await resp.json();
+        track(resp);const data = await resp.json();
         if (resp.ok && data.choices?.[0]?.message?.content) {
           return {value:parseAIJSON(data.choices[0].message.content,data.choices[0].finish_reason),provider:'groq',model:mod};
         }
@@ -100,7 +104,8 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
   }
 
   const error=new Error(responseErrors.length?'La IA no logró devolver un documento completo y válido.':'No se pudo obtener respuesta de los proveedores habilitados.');
-  error.code=responseErrors.includes('AI_RESPONSE_INCOMPLETE')?'AI_RESPONSE_INCOMPLETE':responseErrors.length?'AI_RESPONSE_INVALID':'AI_UNAVAILABLE';
+  error.retryAfter=retryAfter;
+  error.code=rateLimited&&!responseErrors.length?'AI_RATE_LIMIT':responseErrors.includes('AI_RESPONSE_INCOMPLETE')?'AI_RESPONSE_INCOMPLETE':responseErrors.length?'AI_RESPONSE_INVALID':'AI_UNAVAILABLE';
   throw error;
 }
 
