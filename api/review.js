@@ -17,7 +17,7 @@ module.exports=async function(req,res){
    const fuentesDocumentales=await Sources.retrieve(material.planGeneracion||material);
    const evidence=Sources.validateEvidence(material.respaldoDocumental,fuentesDocumentales);
    const updated={...material,fuentesDocumentales,respaldoDocumental:evidence.valid,incidenciasDocumentales:evidence.invalid};
-   const clean={...updated};delete clean.revisionIA;delete clean.historialRevisionIA;
+   const clean={...updated};delete clean.revisionIA;delete clean.historialRevisionIA;delete clean.fuentesDocumentales;
    stage='llamada';
    const result=await call(Q.prompt(clean)+Sources.evidencePrompt(fuentesDocumentales)+'\nAdemás de criterios y hallazgos, devuelve contrastesDocumentales:[{seccion,afirmacion,fuenteId,cita}]. Registra afirmaciones concretas contrastadas con los fragmentos, no una aprobación global. Si una afirmación no está cubierta, criterio rigor=no_verificable. Las orientaciones y el OA no prueban hechos históricos.',...keys,[author]);
    stage='informe';
@@ -42,5 +42,5 @@ module.exports=async function(req,res){
   const evidence=Sources.validateEvidence(corrected.respaldoDocumental,fuentesDocumentales);corrected.respaldoDocumental=evidence.valid;corrected.incidenciasDocumentales=evidence.invalid;
   corrected.historialRevisionIA=[...(material.historialRevisionIA||[]),review];
   return res.status(200).json({exito:true,material:corrected,pendiente:'Revisar nuevamente la corrección.'});
- }catch(e){return res.status(503).json({etapa:stage,detalle:stage==='informe'?String(e.message).slice(0,180):undefined,error:'No se pudo completar la revisión o corrección independiente. Se conserva el material; revisión pendiente.'})}
+ }catch(e){return res.status(503).json({etapa:stage,codigo:stage==='llamada'&&/429|rate.limit|tokens per|quota|TPM|too large/i.test(String(e.message))?'cuota_o_limite':undefined,detalle:stage==='informe'?String(e.message).slice(0,180):undefined,error:'No se pudo completar la revisión o corrección independiente. Se conserva el material; revisión pendiente.'})}
 };
