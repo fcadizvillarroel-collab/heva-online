@@ -19,6 +19,9 @@ function inspect(raw){const m=H.material(raw),plan=m.planGeneracion||{},issues=[
   if(/\b(no|excepto|incorrecta|falsa)\b/.test(norm(q.enunciado)))add('negacion_'+ref,'sugerencia',ref,'La consigna usa negación; comprobar que sea clara.','Resaltar la negación o reformular sin alterar la habilidad.');
   const n=norm(q.enunciado);if(n&&repeated.has(n))add('repetida_'+ref,'error_comprobado',ref,'El enunciado repite literalmente '+repeated.get(n)+'.','Crear una pregunta diferente.');else if(n)repeated.set(n,ref);
   const key=options.find(x=>x.letra===q.claveCorrecta),answer=norm(key?.texto);
+  const Calc=typeof module==='object'&&module.exports?require('./heva-calculation.js'):globalThis.HEVACalculation;
+  const math=/matemat/.test(norm(m.asignatura||m.planGeneracion?.asignatura))?Calc?.proof(q):null;
+  if(math&&math.claveEsperada!==q.claveCorrecta)add('calculo_'+ref,'error_comprobado',ref,'La clave no coincide con el cálculo: '+math.explicacion,'Usar la opción '+math.claveEsperada+' y revisar su justificación. '+math.alcance);
   if(answer.length>=25&&m.preguntasAlternativas.some((other,j)=>j!==i&&norm(other.enunciado).includes(answer)))add('pista_'+ref,'sugerencia',ref,'El texto de la clave aparece en otro enunciado; podría anticipar la respuesta.','Comprobar la independencia de los ítems. La coincidencia no demuestra una pista por sí sola.');
  });
  if(!text(m.introduccionLectura)&&m.preguntasAlternativas.some(q=>/segun el (texto|aviso|relato)|de acuerdo (con|al) (el )?(texto|aviso)|texto estimulo/.test(norm(q.enunciado))))add('estimulo_ausente','sugerencia','introduccionLectura','Las preguntas remiten a un texto o aviso, pero no hay lectura visible para analizar.','Incorporar el estímulo neutral o comprobar que toda la información esté en los enunciados.');
