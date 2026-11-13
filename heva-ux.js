@@ -34,6 +34,7 @@ function init(){
    foldPanel(document.getElementById('heva-export-control'),'Control de calidad','Consulta incidencias y equilibrio de alternativas sin ocultar el material.');
    foldPanel(document.getElementById('heva-procedures-panel'),'Procedimientos pedagógicos','Información técnica sobre los controles aplicados.');
    foldPanel(document.getElementById('material-sources-panel'),'Fuentes y referencias','Consulta la trazabilidad documental cuando la necesites.');
+   foldPanel(document.querySelector('#consultar-fuentes')?.closest('section'),'Consultar fuentes oficiales · opcional','Busca documentos y páginas del objetivo seleccionado. La generación ya realiza su propia consulta documental.');
    const workshop=document.getElementById('studio-panel');
    foldPanel(workshop,'Taller de materiales · opcional','Sirve para adaptar una sección, crear lectura acompañada o recuperar contenidos para estudiantes con baja asistencia. Si solo necesitas generar y exportar, puedes omitirlo.'));
  }
