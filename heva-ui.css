@@ -1,0 +1,35 @@
+/* HEVA · mejora visual progresiva, sin modificar la lógica */
+:root{--heva-wine:#832d42;--heva-wine-dark:#632033;--heva-cream:#faf6f0;--heva-ink:#292d35;--heva-line:#e7ddd4;--heva-focus:#d79b36}
+html{scroll-behavior:smooth}body{background:var(--heva-cream);color:var(--heva-ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+body>header{background:linear-gradient(115deg,#76253b,#a44e4d)!important;padding:1.15rem clamp(1rem,3vw,2.5rem)!important}
+body>header h1{font-size:clamp(1.1rem,2vw,1.55rem);line-height:1.3}
+body>nav{position:sticky;top:0;z-index:30;gap:.4rem!important;padding-inline:clamp(.6rem,2vw,2rem)!important;box-shadow:0 4px 14px #3423190a;scrollbar-width:thin}
+body>nav button{min-height:48px;padding:12px 16px!important;border-radius:10px 10px 0 0;transition:background .2s,color .2s;white-space:nowrap}
+body>nav button:hover{background:#f9eee9}
+main{max-width:1400px!important}
+main>div:not(.hidden){scroll-margin-top:80px}
+main .bg-white{border-color:var(--heva-line);box-shadow:0 4px 20px #4b34220a}
+main .rounded-lg{border-radius:14px}
+main h2{line-height:1.35;font-size:clamp(1.12rem,1.6vw,1.45rem)}
+main h3{line-height:1.4}
+button,select,input,textarea{font:inherit}
+button{transition:filter .18s,transform .18s,box-shadow .18s}
+button:not(:disabled){cursor:pointer}
+button:not(:disabled):hover{filter:brightness(.97)}
+button:not(:disabled):active{transform:translateY(1px)}
+button:disabled{opacity:.55;cursor:not-allowed}
+input:not([type=checkbox]):not([type=radio]),select,textarea{min-height:42px;max-width:100%;border-radius:9px;border-color:#d8ccc1}
+textarea{min-height:95px}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,[contenteditable=true]:focus-visible{outline:3px solid var(--heva-focus)!important;outline-offset:2px}
+label{line-height:1.5}
+main button{min-height:36px}
+main .bg-stone-100{background:#f5eee6}
+main .shadow-sm{box-shadow:0 3px 16px #4b34220b}
+#panel-staging,#panel-crear,#panel-diffit,#panel-remediacion,#panel-guardados{animation:heva-enter .2s ease-out}
+@keyframes heva-enter{from{opacity:.5;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:768px){body>header{align-items:flex-start!important}body>nav{gap:0!important}body>nav button{font-size:.83rem;padding:11px 12px!important}main{padding:12px!important}main .p-6{padding:1rem!important}main .p-5{padding:1rem!important}main .gap-6{gap:1rem!important}main input,main select,main textarea{font-size:16px}main .overflow-x-auto{scrollbar-width:thin}main .grid{min-width:0}main .flex{min-width:0}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+@media print{body>nav{display:none!important}body{background:#fff!important}main .bg-white{box-shadow:none!important}}
+/* Preserve the app's high contrast mode */
+body.alto-contraste{background:#121212!important;color:white!important}
+body.alto-contraste main .bg-white,body.alto-contraste main .bg-stone-100{background:#1e1e1e!important;color:#fff!important}
