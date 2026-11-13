@@ -31,3 +31,26 @@ No se cambiaron tablas ni políticas en Supabase. La inspección detectó RLS de
 Abre una vez con internet para preparar caché. Puedes recuperar/editar materiales ya guardados, consultar la copia curricular y exportar. Generación IA y cambios en Supabase requieren conexión. Un navegador nuevo no comparte datos: importa tu respaldo. El Site de ChatGPT añade descarga HTML completa sin conexión.
 
 Consulta PROMPT_AI_STUDIO.md para continuar el desarrollo sin perder estas correcciones.
+
+## Tipos de material y estrategia pedagógica (versión 3)
+
+El motor ya no utiliza una plantilla común para todos los materiales:
+
+| Tipo | Estructura propia |
+| --- | --- |
+| Guía | Activación, explicación, glosario, ejemplo razonado, práctica con apoyo, transferencia autónoma y cierre. |
+| Prueba | Instrucciones de aplicación, estímulos, tareas independientes, puntajes y rúbrica. No incluye modelamiento ni soluciones en el ejemplar estudiante. |
+| Presentación | 8–12 diapositivas con funciones de explicación, modelamiento, aplicación y cierre; notas docentes separadas. |
+| Planificación | Inicio, desarrollo y cierre con acciones diferenciadas, evidencia, ajustes y tiempos que suman 90 minutos. |
+| Taller | Desafío aplicado, producto, recursos, procedimiento y cotejo de desempeño pertinente a la asignatura. |
+| Accesible | Guía con segmentación, vocabulario, apoyos concretos y modo de respuesta, conservando el objetivo. |
+
+`heva-pedagogy.js` concentra contratos, catálogo de seis estrategias, reglas de generación, validación y secciones de exportación. Cada estrategia tiene habilidad, operaciones diferentes para enseñanza/evaluación, evidencia y devolución. La trazabilidad relaciona cada tarea real con habilidad, evidencia y criterio. El visor y Word/PPT usan las mismas secciones y mantienen la pauta fuera del ejemplar estudiante por defecto.
+
+Las referencias IES, AERO y EEF son orientaciones generales sobre modelamiento, práctica guiada y autorregulación. La aplicación a EPJA es una adaptación didáctica; no se presenta como un estudio específico del contexto penitenciario ni como búsqueda automática de evidencia. Se conserva revisión pedagógica docente pendiente.
+
+En pruebas: alternativa = 1 punto, caso = 2 puntos, desarrollo = 3 puntos. El total se calcula con los ítems reales. La rúbrica de desarrollo contiene niveles 0–3. No se infiere una exigencia o nota obligatoria desde un decreto.
+
+Los materiales antiguos siguen abriéndose con su formato previo. Los nuevos incluyen `versionPedagogica: 3`, contrato del tipo y trazabilidad completa; guardar o exportar conserva sus campos.
+
+Pruebas: `node --test tests/core.test.cjs tests/pedagogy.test.cjs`.

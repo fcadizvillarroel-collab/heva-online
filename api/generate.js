@@ -1,3 +1,4 @@
+const Pedagogy = require('../heva-pedagogy.js');
 const HEVA = require('../heva-core.js');
 // api/generate.js — Motor Multi-IA Suite: ChatGPT / Gemini con Prosa Andragógica y RAG
 
@@ -143,106 +144,23 @@ Responde ÚNICAMENTE en JSON:
       return res.status(200).json({ exito: true, materialRemediacion: materialRemed });
     }
 
-    // CASO 4: GENERADOR CURRICULAR COMPLETO Y TRANSFORMADOR BRISK
-    const esMateriaLaboral = asignatura.includes('Inserción') || asignatura.includes('Empleabilidad') || asignatura.includes('Construcciones') || asignatura.includes('Oficio');
-    
-    let reglaEnfoque = `
-RIGOR DISCIPLINAR ESTRICTO:
-- La asignatura es "${asignatura}". Desarrolla en profundidad el tema: "${temaEspecifico}" y el Objetivo: "${objetivoAprendizaje}".
-- Estrategia Didáctica Obligatoria: "${estrategiaDidactica}".
-`;
-
-    if (textoReferencia && textoReferencia.trim().length > 25) {
-      reglaEnfoque += `
-CANDADO RAG DE TRANSFORMACIÓN (ESTILO BRISK TEACHING):
-El docente aportó este material base obligatorio:
-"""${textoReferencia.trim()}"""
-Debes basar la lectura y las preguntas EXCLUSIVAMENTE en este contenido. Prohibido inventar datos ajenos.
-`;
-    } else if (!esMateriaLaboral) {
-      reglaEnfoque += `
-- PROHIBIDO FORZAR TEMAS DE CONTRATOS O LEYES LABORALES. Trata los contenidos con rigor académico propio de la materia (histórico, científico, matemático o literario).
-`;
-    }
-
-    if (instruccionesDocente && instruccionesDocente.trim().length > 5) {
-      reglaEnfoque += `\nINSTRUCCIONES Y TONO DEL DOCENTE:\n${instruccionesDocente.trim()}\n`;
-    }
-
-    const reglaPIE = adecuacionesPIE.length > 0
-      ? `ADECUACIONES PIE (DECRETO 83/2015):\n- ${adecuacionesPIE.join('\n- ')}\nAdapta la redacción a lectura clara sin infantilizar.`
-      : 'Enfoque andragógico respetuoso.';
-
-    const promptRedactor = `
-Eres un profesor de excelencia en la Escuela Héctor Valenzuela CEA de Villarrica, Chile.
-Redacta un material pedagógico completo, formal, motivador y con prosa rica y atractiva para adultos.
-Nivel: ${nivel} | Asignatura: ${asignatura} | Marco: ${marcoCurricular}
-${reglaEnfoque}
-${reglaPIE}
-
-REQUISITOS OBLIGATORIOS:
-0. Tipo de material: ${tipoMaterial}. Si es PRESENTACION, agrega un array "diapositivas" de 8 a 12 objetos {"titulo":"...", "contenido":["idea explicada", "ejemplo o actividad"]}; incluye inicio con objetivo, explicación progresiva, ejemplo guiado, ejercicio y cierre. Si es PLANIFICACION, organiza la lectura como inicio/desarrollo/cierre de 90 minutos. No mezcles temas de Historia ajenos al tema solicitado.
-0b. No incluyas claves ni rúbricas docentes dentro del texto de preguntas, lecturas, casos o diapositivas para estudiantes. Los criterios son orientativos y no atribuyas exigencias de notas o porcentajes a un decreto sin verificarlo.
-1. Exactamente ${cantAlternativas} preguntas de selección múltiple (A, B, C, D) con claves desordenadas al azar (prohibido patrones A, B, C, D).
-2. Exactamente ${cantDesarrollo} preguntas de desarrollo con rúbrica según Decreto 67.
-3. ${cantCasos} situaciones de lectura o análisis contextualizadas.
-4. ${tipoMaterial === 'TALLER' ? 'Incluye una "listaCotejoTP" con 4 a 5 indicadores técnicos y de seguridad observables.' : ''}
-5. ${incluirTicketSalida ? 'Incluye un "ticketSalida" con 2 preguntas breves de metacognición/cierre.' : ''}
-
-Responde ÚNICAMENTE en JSON válido:
-{
-  "titulo": "Título formal del material",
-  "introduccionLectura": "Texto de lectura completo, bien redactado y formativo (mínimo 280 palabras)",
-  "casosEstudio": [
-    { "id": 1, "titulo": "...", "contextoReal": "...", "preguntaReflexion": "..." }
-  ],
-  "preguntasAlternativas": [
-    {
-      "numero": 1,
-      "enunciado": "...",
-      "alternativas": [
-        { "letra": "A", "texto": "..." },
-        { "letra": "B", "texto": "..." },
-        { "letra": "C", "texto": "..." },
-        { "letra": "D", "texto": "..." }
-      ],
-      "claveCorrecta": "C",
-      "habilidad": "Localizar",
-      "justificacion": "..."
-    }
-  ],
-  "preguntasDesarrollo": [
-    {
-      "numero": 1,
-      "enunciado": "...",
-      "habilidad": "Reflexionar",
-      "criterioEvaluacion": "Logrado (3 pts): ..., Medianamente Logrado (2 pts): ..., Por Lograr (1 pto): ..."
-    }
-  ],
-  "listaCotejoTP": [
-    { "criterio": "Seguridad y EPP", "indicador": "Aplica normas de protección personal en taller..." },
-    { "criterio": "Precisión Técnica", "indicador": "Ejecuta uniones y medidas según tolerancia..." }
-  ],
-  "ticketSalida": {
-    "pregunta1": "¿Cuál es la idea central comprendida en la sesión?",
-    "pregunta2": "¿Cómo aplicarías este conocimiento en tu vida o entorno?"
-  }
-}
-`;
-
+    // Cada material tiene un contrato propio y una estrategia observable en sus tareas.
+    if (!Object.hasOwn(Pedagogy.contracts, tipoMaterial)) return res.status(400).json({error:'Tipo de material no admitido.'});
     if (!objetivoAprendizaje.trim()) return res.status(400).json({error:'Selecciona un objetivo curricular antes de generar.'});
-    let material = HEVA.material(await ejecutarLlamadaIAPriorizada(promptRedactor, OPENAI_API_KEY, GEMINI_API_KEY, GROQ_API_KEY), {objetivoAprendizaje, asignatura, nivel, marcoCurricular, temaEspecifico, tipoMaterial});
-    let issues = HEVA.validate(material, {cantAlternativas, cantDesarrollo, cantCasos});
+    const plan = {asignatura,nivel,marcoCurricular,objetivoAprendizaje,temaEspecifico,estrategiaDidactica,instruccionesDocente,textoReferencia,adecuacionesPIE,tipoMaterial,cantAlternativas,cantDesarrollo,cantCasos,incluirTicketSalida};
+    const promptRedactor = Pedagogy.prompt(plan);
+    const metadata = {objetivoAprendizaje,asignatura,nivel,marcoCurricular,temaEspecifico,tipoMaterial,estrategiaDidactica:Pedagogy.strategy(estrategiaDidactica).name};
+    const normalize = raw => HEVA.material(raw,metadata);
+    const check = m => [...HEVA.validate(m,{cantAlternativas,cantDesarrollo,cantCasos}),...Pedagogy.validate(m,plan)];
+    let material = normalize(await ejecutarLlamadaIAPriorizada(promptRedactor,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY));
+    let issues = check(material);
     if (issues.length) {
-      material = HEVA.material(await ejecutarLlamadaIAPriorizada(promptRedactor + '\nCORRIGE ESTOS ERRORES ESTRUCTURALES EN LA NUEVA RESPUESTA: '+issues.join('; '), OPENAI_API_KEY, GEMINI_API_KEY, GROQ_API_KEY), {objetivoAprendizaje, asignatura, nivel, marcoCurricular, temaEspecifico, tipoMaterial});
-      issues = HEVA.validate(material, {cantAlternativas, cantDesarrollo, cantCasos});
+      material = normalize(await ejecutarLlamadaIAPriorizada(promptRedactor+'\nCORRIGE LA RESPUESTA COMPLETA. Se detectaron estas incidencias: '+issues.join('; '),OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY));
+      issues = check(material);
     }
-    if (issues.length) return res.status(422).json({error:'La IA devolvió un material incompleto. No se sustituyó el documento anterior.',detalle:issues.join('; ')});
-
-    return res.status(200).json({
-      exito: true,
-      material: material
-    });
+    if (issues.length) return res.status(422).json({error:'El material no cumple la estructura pedagógica solicitada. Se conserva el documento anterior.',detalle:issues.join('; ')});
+    material = Pedagogy.finalize(material,plan);
+    return res.status(200).json({exito:true,material,revision:{alcance:'Estructura, cantidades y trazabilidad; revisión pedagógica docente pendiente',tipo:tipoMaterial,estrategia:metadata.estrategiaDidactica}});
 
   } catch (error) {
     console.error('Error en proceso:', error);
