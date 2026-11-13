@@ -21,10 +21,10 @@ module.exports=async(req,res)=>{
   const keys=[process.env.ALLOW_PAID_AI==='true'?process.env.OPENAI_API_KEY:'',process.env.GEMINI_API_KEY,process.env.GROQ_API_KEY].map(k=>(k||'').trim());
   const exclude=fase==='items'?['gemini','groq','openai'].filter(p=>p!==autor.proveedor):[];
   const prompt=fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts);
-  let result=await call(prompt+S.evidencePrompt(fuentesDocumentales),...keys,exclude,{deadline,maxOutputTokens:fase==='base'?10000:5000});
+  let result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true}),...keys,exclude,{deadline,maxOutputTokens:fase==='base'?10000:5000});
   let issues=R.partIssues(result.value,plan,fase==='items'?batch:null);
   if(issues.length&&deadline-Date.now()>5000){
-   result=await call(prompt+S.evidencePrompt(fuentesDocumentales)+'\nCORRIGE este bloque completo: '+issues.join('; '),...keys,exclude,{deadline,maxOutputTokens:fase==='base'?10000:5000});
+   result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true})+'\nCORRIGE este bloque completo: '+issues.join('; '),...keys,exclude,{deadline,maxOutputTokens:fase==='base'?10000:5000});
    issues=R.partIssues(result.value,plan,fase==='items'?batch:null);
   }
   if(issues.length)return res.status(422).json({error:'El bloque requiere ajustes. Se conservan los anteriores.',detalle:issues.join('; '),reintentable:true});
