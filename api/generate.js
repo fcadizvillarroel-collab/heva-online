@@ -158,7 +158,7 @@ Responde ÚNICAMENTE en JSON:
       material = normalize(await ejecutarLlamadaIAPriorizada(promptRedactor+'\nCORRIGE LA RESPUESTA COMPLETA. Se detectaron estas incidencias: '+issues.join('; '),OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY));
       issues = check(material);
     }
-    if (issues.length) return res.status(422).json({error:'El material no cumple la estructura pedagógica solicitada. Se conserva el documento anterior.',detalle:issues.join('; ')});
+    if (issues.length) return res.status(422).json({error:'El material no cumple la estructura pedagógica solicitada. Se conserva el documento anterior.',detalle:issues.join('; '),borrador:material});
     material = Pedagogy.finalize(material,plan);
     return res.status(200).json({exito:true,material,revision:{alcance:'Estructura, cantidades y trazabilidad; revisión pedagógica docente pendiente',tipo:tipoMaterial,estrategia:metadata.estrategiaDidactica}});
 
