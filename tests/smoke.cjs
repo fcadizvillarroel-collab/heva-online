@@ -69,6 +69,7 @@ for(const subject of subjects)for(const material of materials)for(const strategy
  assert(design.prompt(plan).includes('EJECUCIÓN OBLIGATORIA'),'Strategy must be included in the AI prompt');
 }
 const caseBatch={tipo:'casos',inicio:0,cantidad:1,field:'casosEstudio'};
+assert.equal(typeof recovery.normalizePart,'function','Recovery must export case normalization for API');
 const normalizedCase=recovery.normalizePart({casos:[{titulo:'Decisión laboral',contexto:'Dos opciones de empleo',pregunta:'¿Cuál elegirías y por qué?',habilidad:'Comparar',criterio:'Justifica con datos'}],trazabilidadEstrategia:[{referencia:'CASO-1',habilidad:'Comparar',evidencia:'Decisión',criterio:'Justificación'}]},caseBatch);
 assert.equal(normalizedCase.casosEstudio.length,1);
 assert.equal(normalizedCase.casosEstudio[0].contextoReal,'Dos opciones de empleo');
