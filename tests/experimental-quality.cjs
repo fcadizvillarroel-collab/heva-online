@@ -1,0 +1,12 @@
+'use strict';
+const assert=require('node:assert/strict');
+const test=require('node:test');
+const A=require('../experimental/quality-audit.cjs');
+const I=require('../experimental/integration.js');
+const base={objetivoAprendizaje:'OA ejemplo',temaEspecifico:'Comprensión lectora',preguntasAlternativas:[],preguntasDesarrollo:[],casosEstudio:[],trazabilidadEstrategia:[]};
+test('sin respuestas faltantes ni errores de cantidad',()=>{const x=A.inspect(base,{objetivoAprendizaje:'OA ejemplo',temaEspecifico:'Comprensión lectora',cantAlternativas:0,cantDesarrollo:0,cantCasos:0});assert.equal(x.errores.length,0)});
+test('detecta preguntas de desarrollo ausentes',()=>{const x=A.inspect(base,{objetivoAprendizaje:'OA ejemplo',cantDesarrollo:2});assert(x.errores.some(y=>y.code==='COUNT_MISMATCH'))});
+test('detecta enunciados repetidos',()=>{const x=A.inspect({...base,preguntasDesarrollo:[{enunciado:'Analiza y explica las principales causas del conflicto social en este contexto concreto'},{enunciado:'Analiza y explica las principales causas del conflicto social en este contexto concreto'}]});assert(x.advertencias.some(y=>y.code==='POSSIBLE_DUPLICATE'))});
+test('reconoce descuadre entre estrategias y cantidades',()=>{const x=A.inspect(base,{objetivoAprendizaje:'OA ejemplo',cantAlternativas:2,cantDesarrollo:0,cantCasos:0,planIntegrado:{slots:[{alternativas:1,desarrollo:0,lecturas:0}]}});assert(x.errores.some(y=>y.code==='STRATEGY_TOTALS'))});
+test('planificador no duplica actividades ni añade casos extras',()=>{const x=I.plan({strategies:[{id:'lectura',quantity:2}],counts:{alternativas:4,desarrollo:2,lecturas:1},mode:'auto'});assert.equal(x.extraCases,0);assert.equal(I.validate(x).ok,true);assert.equal(x.slots.length,2)});
+test('auditoría no afirma verificación semántica automática',()=>{assert.match(A.inspect(base).alcance,/no verifica hechos/)});
