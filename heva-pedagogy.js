@@ -52,6 +52,21 @@ function normalizeStrategyPlan(m,p){
  for(const [key,names] of Object.entries(aliases))if(!normalized[key]){const value=names.map(n=>plan[n]).find(x=>typeof x==='string'&&x.trim());if(value)normalized[key]=value;}
  return {...m,planEstrategia:normalized};
 }
+// Respect the explicit teacher-requested counts even when the model copies
+// additional example items from an earlier schema. Never fabricate missing items.
+function enforceRequestedCounts(raw,p){
+ if(!raw||typeof raw!=='object'||Array.isArray(raw))return raw;
+ const out={...raw},allowed=new Set(),rules=[['preguntasAlternativas','cantAlternativas','ALT'],['preguntasDesarrollo','cantDesarrollo','DES'],['casosEstudio','cantCasos','CASO']];
+ for(const [field,key,prefix] of rules){
+  const count=p[key];if(!Number.isInteger(count)||count<0)continue;
+  const items=Array.isArray(out[field])?out[field]:[];
+  if(items.length>count)out[field]=items.slice(0,count);
+  for(let i=1;i<=Math.min(items.length,count);i++)allowed.add(prefix+'-'+i);
+ }
+ const original=Array.isArray(out.trazabilidadEstrategia)?out.trazabilidadEstrategia:[];
+ out.trazabilidadEstrategia=original.filter(t=>!(/^(ALT|DES|CASO)-\\d+$/.test(String(t?.referencia||'')))||allowed.has(t.referencia));
+ return out;
+}
 const nonempty=s=>typeof s==='string'&&s.trim().length>0,arr=x=>Array.isArray(x)&&x.length>0;
 function validate(m,p){m=normalizeStrategyPlan(m,p);let errors=[],t=p.tipoMaterial||'GUIA',s=strategy(p.estrategiaDidactica),plan=m.planEstrategia;
 if(!nonempty(m.instruccionesEstudiante))errors.push('Faltan instrucciones propias del material');
@@ -75,4 +90,4 @@ const bibliografia=array(m.fuentesDocumentales?.documents).filter(d=>d&&d.status
 if(bibliografia.length)push('Fuentes consultadas',Array.from(new Set(bibliografia)).join('\\n'));
 // Las fuentes permanecen en el panel de revisión documental, no en el material exportado.
 if(teacher){if(m.procedimientosHEVA)push('Registro pedagógico de la versión',`Perfil: ${m.procedimientosHEVA.perfil.nombre} · v${m.procedimientosHEVA.perfil.version}\nOA y marco: ${m.procedimientosHEVA.curriculo.objetivoAprendizaje} · ${m.procedimientosHEVA.curriculo.marcoCurricular}\nTareas vinculadas: ${m.procedimientosHEVA.curriculo.referencias.join(', ')}\nLa vinculación es estructural. Revisión independiente y pertinencia semántica se consultan en HEVA; este registro no las certifica.`);array(m.respaldoDocumental).forEach(c=>push('Respaldo documental propuesto · '+c.seccion,`${c.afirmacion}\nCita localizada: “${c.cita}”\n${c.fuenteId} · PDF p. ${c.page} · ${c.url}\nInterpretación y pertinencia pendientes de revisión docente.`));push('PAUTA DOCENTE · USO EXCLUSIVO','Los siguientes criterios, soluciones y decisiones didácticas no forman parte del ejemplar del estudiante.');let s=m.planEstrategia||{};push('Estrategia pedagógica · '+(m.estrategiaDidactica||''),`Habilidad: ${s.habilidadCentral||''}\nAplicación: ${s.aplicacionConcreta||''}\nEvidencia: ${s.evidenciaEsperada||''}\nDevolución: ${s.retroalimentacionDocente||''}`);push('Tabla de especificaciones / trazabilidad',array(m.trazabilidadEstrategia).map(x=>`${x.referencia} · ${x.habilidad} · Evidencia: ${x.evidencia} · Criterio: ${x.criterio}`).join('\n'));array(m.casosEstudio).forEach((x,i)=>push('Criterio caso '+(i+1),x.criterioEvaluacion||array(m.trazabilidadEstrategia).find(t=>t.referencia==='CASO-'+(i+1))?.criterio||'Criterio docente por completar.',x.criterioEvaluacion?`casosEstudio.${i}.criterioEvaluacion`:undefined));array(m.preguntasAlternativas).forEach((x,i)=>push('Clave '+(i+1)+' · '+x.claveCorrecta,x.justificacion||'Justificación docente por completar y revisar.',x.justificacion?`preguntasAlternativas.${i}.justificacion`:undefined));array(m.preguntasDesarrollo).forEach((x,i)=>push('Criterio desarrollo '+(i+1),x.criterioEvaluacion+'\n'+array(x.rubrica).map(r=>`${r.puntaje} puntos: ${r.descripcion}`).join('\n')));array(m.diapositivas).forEach((x,i)=>push('Notas docentes · diapositiva '+(i+1),x.notasDocente));}return a}
-return{studentContext,strategies,contracts,sources,strategy,contract,refs,referencePrompt,schema,prompt,normalizeStrategyPlan,validate,finalize,blocks};});
+return{studentContext,strategies,contracts,sources,strategy,contract,refs,referencePrompt,schema,prompt,normalizeStrategyPlan,enforceRequestedCounts,validate,finalize,blocks};});
