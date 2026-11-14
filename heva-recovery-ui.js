@@ -1,6 +1,6 @@
 /* Recupera respuestas largas por bloques; el documento visible solo cambia tras validación final. */
 const HEVA_RECOVERY_KEY='heva-recuperacion-v1';
-function recoveryRead(plan){try{const x=JSON.parse(localStorage.getItem(HEVA_RECOVERY_KEY));return x?.planKey===JSON.stringify(plan)?x:null}catch{return null}}
+function recoveryRead(plan){try{const x=JSON.parse(localStorage.getItem(HEVA_RECOVERY_KEY));if(x?.planKey!==JSON.stringify(plan))return null;if(x.base&&(!Array.isArray(x.parts)||!Array.isArray(x.bloques)))return null;if(Array.isArray(x.bloques)&&x.parts.length>x.bloques.length)return null;return x}catch{return null}}
 function recoverySave(x){try{localStorage.setItem(HEVA_RECOVERY_KEY,JSON.stringify(x))}catch{}}
 async function recuperarMaterialHEVA(plan,allowRepair=true){
  let checkpoint=recoveryRead(plan)||{planKey:JSON.stringify(plan),parts:[]};
