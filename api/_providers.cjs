@@ -82,7 +82,7 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
 
   // 3. Groq (Respaldo)
   if (groqKey && !exclude.includes('groq')) {
-    const modelosGroq = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'llama-3.1-8b-instant'];
+    const modelosGroq = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b', 'llama-3.1-8b-instant'];
     for (const mod of modelosGroq) {
       try {
         const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
