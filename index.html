@@ -823,5 +823,34 @@ function refresh(){if($('lab-strategies').dataset.subject!==family()){render();r
 window.hevaExperimentalPlan=function(){if(!$('lab-enabled').checked)return null;if(!choices().length)throw Error('Activaste estrategias integradas, pero no seleccionaste ninguna. Marca únicamente las estrategias que deseas utilizar o desactiva el módulo.');const oa=$('texto-oa').value.trim(),topic=$('tema-especifico').value.trim();if(!oa||!topic)throw Error('Selecciona un objetivo y escribe el tema antes de generar.');const strategies=choices(),c=counts();if(c.alternativas>20||c.desarrollo>10||c.lecturas>4)throw Error('Las cantidades exceden los límites del generador estable.');const manual={};if($('lab-mode').value==='manual')for(const input of document.querySelectorAll('[data-lab-slot]')){const id=input.dataset.labSlot;manual[id]??={};manual[id][input.dataset.labKind]=Number(input.value)}const p=window.HEVAIntegration.plan({strategies,counts:c,mode:$('lab-mode').value,manual});const audit=window.HEVAIntegration.validate(p);if(!audit.ok)throw Error(audit.errors.join('; '));return p};
 $('asignatura').addEventListener('change',render);$('marco-curricular').addEventListener('change',()=>setTimeout(render,0));$('nivel-epja').addEventListener('change',()=>setTimeout(render,0));$('integrated-lab').addEventListener('toggle',()=>{if($('integrated-lab').open)refresh()});$('lab-mode').addEventListener('change',refresh);for(const id of ['cant-alternativas','cant-desarrollo','cant-casos'])$(id).addEventListener('change',refresh);render();
 })();
+</script><script>
+(function(){
+'use strict';
+const type=document.getElementById('tipo-material'),strategy=document.getElementById('estrategia-didactica');
+const strategyBox=strategy?.parentElement,counts=document.getElementById('cant-alternativas')?.closest('.grid');
+if(!type||!strategyBox||!counts)return;
+const strategyLabel=strategyBox.querySelector('label span')||strategyBox.querySelector('label');
+const countsHeading=counts.previousElementSibling;
+const descriptions={
+ EVALUACION:'Instrumentos de evaluación: selecciona las cantidades de alternativas, desarrollo y situaciones de lectura/análisis. La estrategia pedagógica principal sigue disponible como orientación de la prueba. Verdadero/falso y otros instrumentos requieren implementación propia antes de habilitarse.',
+ GUIA:'Estrategias de enseñanza y práctica guiada. Las cantidades inferiores corresponden a actividades que puedes incorporar a la guía.',
+ PRESENTACION:'Estrategias de explicación, modelado y aplicación. Las cantidades inferiores corresponden a actividades dentro de la presentación.',
+ TALLER:'Estrategias prácticas y de aplicación. Las cantidades inferiores corresponden a actividades del taller.',
+ ACCESIBLE:'Estrategias didácticas con apoyos de acceso, sin cambiar el objetivo curricular.',
+ PLANIFICACION:'Estrategias para organizar las actividades de aprendizaje de la clase.'
+};
+const note=document.createElement('p');note.id='heva-context-material';note.className='text-xs mt-2 text-stone-600';strategyBox.append(note);
+function refresh(){
+ const selected=type.value,exam=selected==='EVALUACION';
+ if(strategyLabel)strategyLabel.textContent=exam?'Estrategia pedagógica de la evaluación':'Estrategia pedagógica de enseñanza';
+ if(countsHeading&&/PREGUNTAS|CASOS|ACTIVIDADES/i.test(countsHeading.textContent))countsHeading.textContent=exam?'INSTRUMENTOS DE EVALUACIÓN · CANTIDADES':'PREGUNTAS Y ACTIVIDADES DE APRENDIZAJE';
+ note.textContent=descriptions[selected]||'Selecciona una estrategia adecuada al material.';
+ const caseLabel=document.getElementById('cant-casos')?.previousElementSibling;
+ if(caseLabel)caseLabel.textContent=exam?'Situaciones de lectura / análisis (con pregunta):':'Situaciones de lectura / análisis:';
+ const lab=document.getElementById('integrated-lab');
+ if(lab){const summary=lab.querySelector('summary');if(summary)summary.textContent=exam?'Estrategias combinadas para la evaluación · opcional':'Estrategias integradas de enseñanza · opcional';}
+}
+type.addEventListener('change',refresh);refresh();
+})();
 </script><script src="/experimental/heva-unified-ui.js"></script></body>
 </html>
