@@ -197,27 +197,21 @@
           <textarea disabled id="texto-referencia" rows="2" class="w-full border rounded p-1.5 text-xs bg-white text-stone-700" placeholder="Selecciona un uso y pega aquí el ejemplo que quieras utilizar."></textarea>
         </div>
 
-        <!-- 8. ADECUACIONES PIE -->
-        <div class="border rounded p-3 bg-stone-50 space-y-2 border-stone-300">
-          <label class="block text-xs font-bold uppercase text-[#8B2635] flex items-center justify-between">
-            <span>Adecuaciones PIE (Decreto 83/2015)</span>
-            <span class="text-[10px] text-stone-500 font-normal">Opcional</span>
-          </label>
-          <div class="space-y-1.5 text-xs text-stone-700">
-            <label class="flex items-center gap-2">
-              <input type="checkbox" id="pie-lectura-facil" class="rounded text-[#8B2635]" />
-              <span>Lectura Fácil (oraciones breves, vocabulario directo)</span>
-            </label>
-            <label class="flex items-center gap-2">
-              <input type="checkbox" id="pie-apoyos-visuales" class="rounded text-[#8B2635]" />
-              <span>Apoyos gráficos, glosario técnico y desglose paso a paso</span>
-            </label>
-            <label class="flex items-center gap-2">
-              <input type="checkbox" id="pie-graduacion" class="rounded text-[#8B2635]" />
-              <span>Graduación de complejidad (habilidades funcionales)</span>
-            </label>
+        <!-- 8. APOYOS DE ACCESO Y DIFERENCIACIÓN: UNA SOLA SECCIÓN OPCIONAL -->
+        <details id="heva-access-details" class="rounded-xl border border-stone-300 bg-orange-50 p-3">
+          <summary class="cursor-pointer text-xs font-bold uppercase text-[#8B2635]">Adecuaciones, lectura acompañada y diferenciación · opcional</summary>
+          <p class="text-xs text-stone-600 my-3">Los apoyos de acceso se aplican al material elegido sin cambiar su objetivo. Para una guía específicamente diseñada para lectura acompañada, selecciona «Versión accesible / lectura acompañada» en Tipo de material.</p>
+          <div class="space-y-2 text-xs text-stone-700">
+            <label class="flex items-start gap-2"><input type="checkbox" id="pie-lectura-facil" class="rounded text-[#8B2635] mt-0.5"/><span>Lectura accesible: oraciones claras, vocabulario explicado y segmentación del texto</span></label>
+            <label class="flex items-start gap-2"><input type="checkbox" id="pie-apoyos-visuales" class="rounded text-[#8B2635] mt-0.5"/><span>Apoyos visuales o descriptivos, glosario y procedimientos paso a paso</span></label>
+            <label class="flex items-start gap-2"><input type="checkbox" id="pie-graduacion" class="rounded text-[#8B2635] mt-0.5"/><span>Diferenciación: actividades graduadas y apoyos que se retiran progresivamente</span></label>
           </div>
-        </div>
+          <div class="mt-3 border-t border-stone-200 pt-3">
+            <p class="font-bold text-xs text-[#8B2635]">Lectura acompañada y recuperación</p>
+            <p class="text-xs text-stone-600 mt-1">Puedes combinar estos apoyos con «Profundidad y contextualización» en Diseño pedagógico. Para un plan de remediación, selecciona el objetivo y describe las dificultades observadas en Indicaciones docentes, sin incluir datos personales.</p>
+            <button type="button" onclick="document.getElementById('tipo-material').value='ACCESIBLE';document.getElementById('tipo-material').dispatchEvent(new Event('change',{bubbles:true}));" class="mt-2 border border-amber-400 rounded px-3 py-2 text-xs font-bold bg-white">Usar formato de lectura acompañada</button>
+          </div>
+        </details>
 
         <div>
           <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Tema Específico de la Clase</label>
@@ -418,7 +412,7 @@
     }
 
     function cambiarHerramienta(h) {
-      ['crear', 'revision', 'staging', 'diffit', 'remediacion', 'guardados'].forEach(t => {
+      ['crear', 'revision', 'staging', 'guardados'].forEach(t => {
         const p = document.getElementById('panel-' + t);
         const b = document.getElementById('tab-' + t);
         if (p) p.classList.add('hidden');
