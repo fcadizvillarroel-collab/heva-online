@@ -18,7 +18,7 @@ async function recuperarMaterialHEVA(plan,allowRepair=true){
    return request({...body,corregirFormato:true},false);
   }
   if(!response.ok&&body.fase==='finalizar'&&data.reparacion)return data;
-  if(!response.ok)throw Error((data.detalle||data.error||'Recuperación pendiente.')+' Pulsa Crear material para continuar con el mismo encargo.');
+  if(!response.ok)throw Error((data.detalle||data.error||'Recuperación pendiente.')+(data.codigo?' ['+data.codigo+']':'')+(data.reintentable===false?' Revisa los parámetros del encargo antes de generar nuevamente.':data.codigo==='TYPE_ERROR'?' No se recomienda repetir la misma solicitud hasta corregir el error del servidor.':' Pulsa Crear material para continuar con el mismo encargo.'));
   return data;
  };
  if(!checkpoint.base){if(message)message.textContent='Recuperando la lectura y la estructura del material…';const data=await request({fase:'base'});checkpoint={...checkpoint,base:data.parte,autor:data.autor,bloques:data.bloques};recoverySave(checkpoint);}
