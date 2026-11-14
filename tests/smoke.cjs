@@ -73,6 +73,10 @@ const normalizedCase=recovery.normalizePart({casos:[{titulo:'Decisión laboral',
 assert.equal(normalizedCase.casosEstudio.length,1);
 assert.equal(normalizedCase.casosEstudio[0].contextoReal,'Dos opciones de empleo');
 assert.equal(recovery.partIssues(normalizedCase,{...p,cantCasos:1,cantAlternativas:0,cantDesarrollo:0,estrategiaDidactica:'CASOS'},caseBatch).length,0);
+const providerSource=fs.readFileSync(path.join(root,'api/_providers.cjs'),'utf8');
+const recoverySource=fs.readFileSync(path.join(root,'api/recover.js'),'utf8');
+assert(!providerSource.includes("e?.code?.startsWith("),'Provider must guard non-string error codes');
+assert(!recoverySource.includes("e.code?.startsWith("),'Recovery must guard non-string error codes');
 const review=require('../heva-quality.cjs');
 assert.equal(typeof review.readReview,'function');
 assert.equal(typeof review.fingerprint,'function');
