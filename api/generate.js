@@ -170,7 +170,7 @@ Responde ÚNICAMENTE en JSON:
     let material = normalize(await draft(promptRedactor));
     let issues = check(material);
     if (issues.length) {
-      material = normalize(await draft(promptRedactor+'\nCORRIGE LA RESPUESTA COMPLETA. Se detectaron estas incidencias: '+issues.join('; ')));
+      const missingRefs=Pedagogy.missingTaskTraces(material);\n      material = normalize(await draft(promptRedactor+'\nCORRIGE LA RESPUESTA COMPLETA. Se detectaron estas incidencias: '+issues.join('; ')+(missingRefs.length?'\\nTRAZABILIDAD OBLIGATORIA: agrega exactamente una entrada con habilidad, evidencia y criterio específicos para cada referencia real que falta: '+missingRefs.join(', ')+'. No inventes actividades ni referencias.':'') ));
       issues = check(material);
     }
     if (issues.length) return res.status(422).json({error:'El material no cumple la estructura pedagógica solicitada. Se conserva el documento anterior.',detalle:issues.join('; '),borrador:material});
