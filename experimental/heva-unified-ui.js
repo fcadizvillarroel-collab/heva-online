@@ -52,16 +52,29 @@ const summary=$('lab-summary');if(summary)summary.setAttribute('data-enabled',St
 enabled.addEventListener('change',update);update();
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&lab.open){lab.open=false;desc.focus()}});
 const mapping={fuentes:'FUENTES',modelado:'MODELADO',casos:'CASOS',lectura:'LECTURA',problemas:'PROBLEMAS',errores:'ERRORES'};
+const reverse=Object.fromEntries(Object.entries(mapping).map(([a,b])=>[b,a]));
+function primaryId(){const value=(legacy.value+' '+legacy.options[legacy.selectedIndex]?.text).toUpperCase();return Object.entries(mapping).find(([id,code])=>value.includes(code)||value.includes(({FUENTES:'FUENTE',MODELADO:'MODELAD',CASOS:'CASO',LECTURA:'LECTURA',PROBLEMAS:'PROBLEMA',ERRORES:'ERROR'})[code]))?.[0]||null}
+function syncPrimary(){
+const id=primaryId();const active=enabled.checked;
+for(const check of document.querySelectorAll('#lab-strategies input[data-strategy]')){
+const card=check.closest('div.border-b');const isPrimary=active&&id===check.dataset.strategy;
+if(isPrimary){check.checked=false;check.disabled=true;if(card)card.style.display='none'}
+else{check.disabled=false;if(card)card.style.display=''}
+}
+const notice=$('lab-primary-notice');if(notice)notice.textContent=active?'Estrategia principal incluida automáticamente: '+legacy.options[legacy.selectedIndex]?.text+'. No aparece duplicada en las combinadas.':'Activa el modo combinado para agregar estrategias complementarias.';
+}
+const primaryNotice=document.createElement('p');primaryNotice.id='lab-primary-notice';primaryNotice.className='text-xs text-stone-600 bg-white rounded p-2 mt-2';$('lab-strategies').before(primaryNotice);
+legacy.addEventListener('change',syncPrimary);enabled.addEventListener('change',syncPrimary);
+const observer=new MutationObserver(()=>syncPrimary());observer.observe($('lab-strategies'),{childList:true});
+syncPrimary();
+
 const original=window.hevaExperimentalPlan;
 if(typeof original==='function')window.hevaExperimentalPlan=function(){
 const plan=original();
 if(!plan)return null;
-const first=plan.slots[0]?.strategy;
-const target=mapping[first]||'CASOS';
-const options=[...legacy.options];
-const found=options.find(o=>o.value===target)||options.find(o=>(o.value+' '+o.text).toUpperCase().includes(target));
-if(found){legacy.value=found.value;legacy.dispatchEvent(new Event('change',{bubbles:true}))}
-return plan;
+const primary=primaryId();
+if(primary&&plan.slots.some(s=>s.strategy===primary))throw Error('La estrategia principal ya está incluida; quita la repetición en las combinadas.');
+return {...plan,primaryStrategy:legacy.value,subject:$('asignatura').value,objective:$('texto-oa').value,topic:$('tema-especifico').value};
 };
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
