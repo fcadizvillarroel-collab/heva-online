@@ -218,6 +218,16 @@
           </div>
         </div>
 
+        <details id="integrated-lab" class="rounded-xl border-2 border-amber-400 bg-amber-50 p-3 mt-3">
+          <summary class="cursor-pointer font-bold text-sm text-[#8B2635]">🧪 HEVA Experimental · Estrategias integradas (opcional)</summary>
+          <p class="text-xs mt-2">Usa automáticamente la asignatura, el nivel, el objetivo y el tema elegidos arriba. No necesitas repetirlos. Si no activas este módulo, HEVA mantiene su comportamiento habitual.</p>
+          <label class="block text-xs font-bold mt-3"><input id="lab-enabled" type="checkbox" class="mr-2">Activar estrategias integradas para esta generación</label>
+          <div id="lab-strategies" class="mt-3"></div>
+          <label class="block text-xs font-bold mt-3" for="lab-mode">Distribución de preguntas</label>
+          <select id="lab-mode" class="w-full border rounded p-2 text-xs"><option value="auto">Automática</option><option value="manual">Manual por actividad</option></select>
+          <div id="lab-manual" class="mt-2"></div>
+          <div id="lab-summary" class="text-xs bg-white rounded p-2 mt-3" aria-live="polite">Selecciona estrategias y cantidades.</div>
+        </details>
         <button onclick="generarMaterialReal('GENERADOR_ESTANDAR')" id="btn-generar" class="w-full py-3 bg-[#8B2635] hover:bg-[#701E2A] text-white font-bold rounded shadow transition flex items-center justify-center gap-2">
           <span>Generar con Inteligencia Artificial</span>
         </button>
@@ -646,6 +656,7 @@
         if(typeof window.HEVADesign==='undefined' && typeof leerDisenoHEVA==='function') {
           try { await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/heva-design.js?v=20261113fix2';script.onload=()=>window.HEVADesign?resolve():reject(new Error('No se pudo inicializar HEVA Design'));script.onerror=()=>reject(new Error('No se pudo cargar HEVA Design'));document.head.appendChild(script)}); } catch(e) { console.warn('Diseño opcional no disponible; se generará sin él.',e); }
         }
+      const planIntegrado = window.hevaExperimentalPlan ? window.hevaExperimentalPlan() : null;
       const payload = {
         modoHerramienta: modo,
         ...(typeof studioGenerationExtras==='function'?studioGenerationExtras():{}),
@@ -656,6 +667,7 @@
         objetivoAprendizaje: document.getElementById('texto-oa').value,
         temaEspecifico: document.getElementById('tema-especifico').value,
         estrategiaDidactica: document.getElementById('estrategia-didactica').value,
+        planIntegrado,
         modoReferencia: document.getElementById('modo-referencia').value,
         textoReferencia: document.getElementById('modo-referencia').value==='NINGUNA'?'':document.getElementById('texto-referencia').value,
         tipoMaterial: document.getElementById('tipo-material').value,
@@ -687,6 +699,15 @@
         materialActual.asignatura = payload.asignatura;
 
         renderizarDocumentoEnPantalla();
+        const audit=data.material?.auditoriaExperimental;
+        if(audit){
+          let el=document.getElementById('heva-experimental-audit');
+          if(!el){el=document.createElement('details');el.id='heva-experimental-audit';el.className='border rounded-lg p-3 bg-amber-50 text-xs mt-2';document.getElementById('barra-calidad')?.after(el)}
+          el.replaceChildren();
+          const title=document.createElement('summary');title.className='cursor-pointer font-bold';title.textContent='Auditoría experimental: '+audit.errores.length+' errores estructurales y '+audit.advertencias.length+' advertencias';el.append(title);
+          const description=document.createElement('p');description.className='mt-2';description.textContent=audit.alcance;el.append(description);
+          for(const finding of [...audit.errores,...audit.advertencias].slice(0,20)){const item=document.createElement('p');item.className='mt-2';item.textContent=finding.location+': '+finding.detail;el.append(item)}
+        }
         document.getElementById('dictamen-calidad').innerText = 'Revisión estructural completada · validación docente pendiente';
 
       } catch (err) {
@@ -789,5 +810,18 @@
       pptx.writeFile({ fileName: 'presentacion.pptx' });
     }
   </script>
-<script src="/heva-didactics.js"></script><script src="/heva-design.js?v=20261113fix2"></script><script src="/heva-pedagogy.js"></script><script src="/heva-core.js"></script><script src="/heva-calculation.js"></script><script src="/heva-audit.js"></script><script src="/heva-skills.js"></script><script src="/heva-studio.js"></script><script src="/heva-templates.js"></script><script src="/heva-office.js"></script><script src="/heva-ui.js"></script><script src="/heva-pedagogy-ui.js"></script><script src="/heva-recovery-ui.js?v=20261114diag"></script><script src="/heva-quality-ui.js"></script><script src="/heva-sources-ui.js"></script><script src="/heva-workflow-ui.js?v=20261114separate"></script><script src="/heva-skills-ui.js"></script><script src="/heva-studio-ui.js?v=20261114sidebar3"></script><script src="/heva-ux.js"></script><script src="/heva-interactive.js"></script><script src="/heva-ai-diagrams.js?v=20261114visual2"></script></body>
+<script src="/heva-didactics.js"></script><script src="/heva-design.js?v=20261113fix2"></script><script src="/heva-pedagogy.js"></script><script src="/heva-core.js"></script><script src="/heva-calculation.js"></script><script src="/heva-audit.js"></script><script src="/heva-skills.js"></script><script src="/heva-studio.js"></script><script src="/heva-templates.js"></script><script src="/heva-office.js"></script><script src="/heva-ui.js"></script><script src="/heva-pedagogy-ui.js"></script><script src="/heva-recovery-ui.js?v=20261114diag"></script><script src="/heva-quality-ui.js"></script><script src="/heva-sources-ui.js"></script><script src="/heva-workflow-ui.js?v=20261114separate"></script><script src="/heva-skills-ui.js"></script><script src="/heva-studio-ui.js?v=20261114sidebar3"></script><script src="/heva-ux.js"></script><script src="/heva-interactive.js"></script><script src="/heva-ai-diagrams.js?v=20261114visual2"></script><script src="/experimental/strategy-lab.js"></script><script src="/experimental/integration.js"></script><script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const subjectMap=[[/historia|social/i,'sociales'],[/matem/i,'matematica'],[/lengua|comunicaci/i,'lenguaje'],[/ciencia|biolog|fisic|quimic/i,'ciencias'],[/ingl/i,'ingles'],[/metal/i,'tp_metal'],[/conviv/i,'convivencia'],[/laboral|trabajo/i,'laboral'],[/emprend/i,'emprendimiento'],[/financ/i,'financiera'],[/consum/i,'consumo'],[/tecnolog|digital/i,'digital'],[/oficio/i,'oficios']];
+function family(){const select=$('asignatura');const name=(select.value||select.options[select.selectedIndex]?.text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();return subjectMap.find(([re])=>re.test(name))?.[1]||'oficios'}
+function choices(){return [...document.querySelectorAll('#lab-strategies input[data-strategy]:checked')].map(e=>({id:e.dataset.strategy,quantity:Number($('lab-count-'+e.dataset.strategy).value)}))}
+function render(){const root=$('lab-strategies');root.replaceChildren();root.dataset.subject=family();const items=window.HEVAStrategyLab.items(family());for(const scope of ['Transversal','Disciplinar']){const details=document.createElement('details');details.className='border rounded bg-white mt-2 p-2';details.open=scope==='Transversal';const summary=document.createElement('summary');summary.className='cursor-pointer font-bold text-xs';summary.textContent=scope==='Transversal'?'Estrategias generales':'Estrategias de la asignatura';details.append(summary);for(const item of items.filter(i=>i.scope===scope)){const card=document.createElement('div');card.className='border-b py-2';const label=document.createElement('label');label.className='text-xs font-semibold block';const check=document.createElement('input');check.type='checkbox';check.dataset.strategy=item.id;check.checked=item.id==='casos';check.className='mr-2';label.append(check,document.createTextNode(item.name));card.append(label);const description=document.createElement('small');description.className='block text-stone-500';description.textContent=item.purpose;card.append(description);const qtyLabel=document.createElement('label');qtyLabel.className='block text-xs mt-1';qtyLabel.textContent='Cantidad de actividades';const qty=document.createElement('input');qty.type='number';qty.id='lab-count-'+item.id;qty.min='1';qty.max='12';qty.value=item.id==='casos'?'2':'1';qty.className='block border rounded p-1 w-24';qty.disabled=!check.checked;qtyLabel.append(qty);card.append(qtyLabel);check.addEventListener('change',()=>{qty.disabled=!check.checked;refresh()});qty.addEventListener('change',refresh);details.append(card)}root.append(details)}refresh()}
+function counts(){return{alternativas:Number($('cant-alternativas').value),desarrollo:Number($('cant-desarrollo').value),lecturas:Number($('cant-casos').value)}}
+function refresh(){if($('lab-strategies').dataset.subject!==family()){render();return}const root=$('lab-manual');root.replaceChildren();if($('lab-mode').value==='manual'){for(const s of choices())for(let n=1;n<=Math.min(12,Math.max(0,s.quantity));n++){const row=document.createElement('div');row.className='border rounded p-2 mt-2 bg-white';const title=document.createElement('strong');title.className='block text-xs';title.textContent=s.id+' · Actividad '+n;row.append(title);for(const [key,label]of [['alternativas','Alternativas'],['desarrollo','Desarrollo'],['lecturas','Lectura/análisis']]){const l=document.createElement('label');l.className='text-xs inline-block mr-2 mt-2';l.textContent=label+' ';const input=document.createElement('input');input.type='number';input.min='0';input.max='20';input.value='0';input.dataset.labSlot=s.id+'-'+n;input.dataset.labKind=key;input.className='w-16 border rounded p-1';l.append(input);row.append(l)}root.append(row)}}$('lab-summary').textContent=choices().length+' estrategias seleccionadas · '+choices().reduce((a,x)=>a+(Number.isFinite(x.quantity)?x.quantity:0),0)+' actividades. Las preguntas se toman de los controles existentes.'}
+window.hevaExperimentalPlan=function(){if(!$('lab-enabled').checked)return null;const oa=$('texto-oa').value.trim(),topic=$('tema-especifico').value.trim();if(!oa||!topic)throw Error('Selecciona un objetivo y escribe el tema antes de generar.');const strategies=choices(),c=counts();if(c.alternativas>20||c.desarrollo>10||c.lecturas>4)throw Error('Las cantidades exceden los límites del generador estable.');const manual={};if($('lab-mode').value==='manual')for(const input of document.querySelectorAll('[data-lab-slot]')){const id=input.dataset.labSlot;manual[id]??={};manual[id][input.dataset.labKind]=Number(input.value)}const p=window.HEVAIntegration.plan({strategies,counts:c,mode:$('lab-mode').value,manual});const audit=window.HEVAIntegration.validate(p);if(!audit.ok)throw Error(audit.errors.join('; '));return p};
+$('asignatura').addEventListener('change',render);$('marco-curricular').addEventListener('change',()=>setTimeout(render,0));$('nivel-epja').addEventListener('change',()=>setTimeout(render,0));$('integrated-lab').addEventListener('toggle',()=>{if($('integrated-lab').open)refresh()});$('lab-mode').addEventListener('change',refresh);for(const id of ['cant-alternativas','cant-desarrollo','cant-casos'])$(id).addEventListener('change',refresh);render();
+})();
+</script><script src="/experimental/heva-unified-ui.js"></script></body>
 </html>

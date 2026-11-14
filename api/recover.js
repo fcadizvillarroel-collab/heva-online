@@ -17,14 +17,15 @@ module.exports=async(req,res)=>{
    if(issues.length)return res.status(422).json({error:'Los bloques requieren corrección. Se conserva el material anterior.',detalle:issues.join('; '),reparacion:R.repair(base,parts,plan),reintentable:true});
    material=P.finalize(material,plan);material.autoriaIA=autor;material.planGeneracion=plan;material.fuentesDocumentales=fuentesDocumentales;
    const evidence=S.validateEvidence(material.respaldoDocumental,fuentesDocumentales);material.respaldoDocumental=evidence.valid;material.incidenciasDocumentales=evidence.invalid;material=Skills.prepare(material,plan,fuentesDocumentales,evidence);
-   material=require('../heva-studio.js').link(material,plan);return res.status(200).json({exito:true,material});
+   material=require('../heva-studio.js').link(material,plan);material.auditoriaExperimental=require('../experimental/quality-audit.cjs').inspect(material,plan);return res.status(200).json({exito:true,material});
   }
   const keys=[process.env.ALLOW_PAID_AI==='true'?process.env.OPENAI_API_KEY:'',process.env.GEMINI_API_KEY,process.env.GROQ_API_KEY].map(k=>(k||'').trim());
   // Permitir respaldo entre proveedores en bloques: una caída del autor inicial no debe bloquear todo el documento.
   const exclude=[];
   const strictFormat=corregirFormato&&fase==='items'&&batch?.tipo==='alternativas'?'\\nFORMATO ESTRICTO DE REPARACIÓN: responde únicamente JSON válido con preguntasAlternativas. Cada pregunta incluye enunciado, alternativas como ARRAY de exactamente cuatro objetos {letra,texto} en orden A,B,C,D, claveCorrecta como UNA LETRA A/B/C/D, justificacion y trazabilidadEstrategia. No uses opciones, respuestaCorrecta, índices numéricos ni claves explicadas en frases. No inventes una clave sin comprobar cuál opción es verdadera.':'';
   const caseRepair=corregirFormato&&fase==='items'&&batch?.tipo==='casos'?'\\nREPARACIÓN OBLIGATORIA: devuelve un objeto JSON con casosEstudio como arreglo de exactamente '+batch.cantidad+' casos completos y trazabilidadEstrategia con referencia CASO-'+(batch.inicio+1)+'. Cada caso requiere id, titulo, contextoReal, preguntaReflexion, habilidad, criterioEvaluacion. El caso debe ejecutar la estrategia '+P.strategy(plan.estrategiaDidactica).name+'. No devuelvas un arreglo vacío ni reemplaces el caso por una explicación.':'';
-  const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+strictFormat+caseRepair;
+  const developmentRepair=fase==='items'&&batch?.tipo==='desarrollo'?'\\nBLOQUE DE DESARROLLO OBLIGATORIO: devuelve exclusivamente JSON con preguntasDesarrollo como ARRAY de exactamente '+batch.cantidad+' objetos, con numero y enunciado completos. Incluye trazabilidadEstrategia como ARRAY con referencia DES-'+(batch.inicio+1)+' y cada pregunta consecutiva, habilidad, evidencia y criterio. Para evaluación incluye rubrica con cuatro niveles 0,1,2,3 y descripcion en cada nivel. No sustituyas desarrollo por alternativas ni devuelvas un arreglo vacío.':'';
+  const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+strictFormat+caseRepair+developmentRepair;
   let result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true}),...keys,exclude,{deadline,maxOutputTokens:fase==='base'?10000:5000});
   if(fase==='items')result.value=R.normalizePart(result.value,batch);
   let issues=R.partIssues(result.value,plan,fase==='items'?batch:null);
