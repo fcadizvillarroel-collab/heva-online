@@ -5,7 +5,7 @@ module.exports=async(req,res)=>{
  if(req.method==='OPTIONS')return res.status(200).end();if(req.method!=='POST')return res.status(405).json({error:'Utilice POST.'});
  const deadline=Date.now()+55000;
  try{
-  const {fase,plan:input,base,parts=[],batch,autor}=req.body||{};
+  const {fase,plan:input,base,parts=[],batch,autor,corregirFormato=false}=req.body||{};
   if(JSON.stringify(req.body||{}).length>250000)return res.status(413).json({error:'Documento demasiado extenso.'});
   const plan=R.planOf(input);
   if(!['base','items','finalizar'].includes(fase))return res.status(400).json({error:'Fase no admitida.'});
@@ -22,7 +22,8 @@ module.exports=async(req,res)=>{
   const keys=[process.env.ALLOW_PAID_AI==='true'?process.env.OPENAI_API_KEY:'',process.env.GEMINI_API_KEY,process.env.GROQ_API_KEY].map(k=>(k||'').trim());
   // Permitir respaldo entre proveedores en bloques: una caída del autor inicial no debe bloquear todo el documento.
   const exclude=[];
-  const prompt=fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts);
+  const strictFormat=corregirFormato&&fase==='items'&&batch?.tipo==='alternativas'?'\\nFORMATO ESTRICTO DE REPARACIÓN: responde únicamente JSON válido con preguntasAlternativas. Cada pregunta incluye enunciado, alternativas como ARRAY de exactamente cuatro objetos {letra,texto} en orden A,B,C,D, claveCorrecta como UNA LETRA A/B/C/D, justificacion y trazabilidadEstrategia. No uses opciones, respuestaCorrecta, índices numéricos ni claves explicadas en frases. No inventes una clave sin comprobar cuál opción es verdadera.':'';
+  const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+strictFormat;
   let result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true}),...keys,exclude,{deadline,maxOutputTokens:fase==='base'?10000:5000});
   let issues=R.partIssues(result.value,plan,fase==='items'?batch:null);
   if(issues.length&&deadline-Date.now()>5000){
