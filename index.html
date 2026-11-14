@@ -814,5 +814,5 @@ function refresh(){const root=$('lab-manual');root.replaceChildren();if($('lab-m
 window.hevaExperimentalPlan=function(){if(!$('lab-enabled').checked)return null;const oa=$('texto-oa').value.trim(),topic=$('tema-especifico').value.trim();if(!oa||!topic)throw Error('Selecciona un objetivo y escribe el tema antes de generar.');const strategies=choices(),c=counts();if(c.alternativas>20||c.desarrollo>10||c.lecturas>4)throw Error('Las cantidades exceden los límites del generador estable.');const manual={};if($('lab-mode').value==='manual')for(const input of document.querySelectorAll('[data-lab-slot]')){const id=input.dataset.labSlot;manual[id]??={};manual[id][input.dataset.labKind]=Number(input.value)}const p=window.HEVAIntegration.plan({strategies,counts:c,mode:$('lab-mode').value,manual});const audit=window.HEVAIntegration.validate(p);if(!audit.ok)throw Error(audit.errors.join('; '));return p};
 $('asignatura').addEventListener('change',render);$('lab-mode').addEventListener('change',refresh);for(const id of ['cant-alternativas','cant-desarrollo','cant-casos'])$(id).addEventListener('change',refresh);render();
 })();
-</script></body>
+</script><script src="/experimental/heva-unified-ui.js"></script></body>
 </html>
