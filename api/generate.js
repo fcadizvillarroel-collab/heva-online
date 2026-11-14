@@ -165,7 +165,17 @@ Responde ÚNICAMENTE en JSON:
     const metadata = {objetivoAprendizaje,asignatura,nivel,marcoCurricular,temaEspecifico,tipoMaterial,estrategiaDidactica:Pedagogy.strategy(estrategiaDidactica).name};
     let author;
     const draft = async prompt => { const r = await call(prompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY,[],{deadline:generationDeadline}); author={proveedor:r.provider,modelo:r.model,fecha:new Date().toISOString()}; return r.value; };
-    const normalize = raw => HEVA.material(Pedagogy.normalizeTaskTraces(Pedagogy.enforceRequestedCounts(Pedagogy.normalizeStrategyPlan(raw,plan),plan)),metadata);
+    const normalize = raw => {
+      const normalized=Pedagogy.normalizeStrategyPlan(raw,plan);
+      const counted=Pedagogy.enforceRequestedCounts(normalized,plan);
+      const traced=Pedagogy.normalizeTaskTraces(counted);
+      const m=HEVA.material(traced,metadata);
+      // Final defensive boundary: never return surplus items when the teacher
+      // requested zero, regardless of model output or intermediary defaults.
+      for(const [field,count] of [['preguntasAlternativas',cantAlternativas],['preguntasDesarrollo',cantDesarrollo],['casosEstudio',cantCasos]])m[field]=m[field].slice(0,count);
+      m.trazabilidadEstrategia=Pedagogy.normalizeTaskTraces(m).trazabilidadEstrategia;
+      return m;
+    };
     const check = m => [...HEVA.validate(m,{cantAlternativas,cantDesarrollo,cantCasos}),...Pedagogy.validate(m,plan),...Skills.generationIssues(m,plan)];
     let material = normalize(await draft(promptRedactor));
     let issues = check(material);
