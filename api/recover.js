@@ -23,11 +23,14 @@ module.exports=async(req,res)=>{
   // Permitir respaldo entre proveedores en bloques: una caída del autor inicial no debe bloquear todo el documento.
   const exclude=[];
   const strictFormat=corregirFormato&&fase==='items'&&batch?.tipo==='alternativas'?'\\nFORMATO ESTRICTO DE REPARACIÓN: responde únicamente JSON válido con preguntasAlternativas. Cada pregunta incluye enunciado, alternativas como ARRAY de exactamente cuatro objetos {letra,texto} en orden A,B,C,D, claveCorrecta como UNA LETRA A/B/C/D, justificacion y trazabilidadEstrategia. No uses opciones, respuestaCorrecta, índices numéricos ni claves explicadas en frases. No inventes una clave sin comprobar cuál opción es verdadera.':'';
-  const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+strictFormat;
+  const caseRepair=corregirFormato&&fase==='items'&&batch?.tipo==='casos'?'\\nREPARACIÓN OBLIGATORIA: devuelve un objeto JSON con casosEstudio como arreglo de exactamente '+batch.cantidad+' casos completos y trazabilidadEstrategia con referencia CASO-'+(batch.inicio+1)+'. Cada caso requiere id, titulo, contextoReal, preguntaReflexion, habilidad, criterioEvaluacion. El caso debe ejecutar la estrategia '+P.strategy(plan.estrategiaDidactica).name+'. No devuelvas un arreglo vacío ni reemplaces el caso por una explicación.':'';
+  const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+strictFormat+caseRepair;
   let result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true}),...keys,exclude,{deadline,maxOutputTokens:fase==='base'?10000:5000});
+  if(fase==='items')result.value=R.normalizePart(result.value,batch);
   let issues=R.partIssues(result.value,plan,fase==='items'?batch:null);
   if(issues.length&&deadline-Date.now()>5000){
    result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true})+'\nCORRIGE este bloque completo: '+issues.join('; '),...keys,exclude,{deadline,maxOutputTokens:fase==='base'?10000:5000});
+   if(fase==='items')result.value=R.normalizePart(result.value,batch);
    issues=R.partIssues(result.value,plan,fase==='items'?batch:null);
   }
   if(issues.length)return res.status(422).json({error:'El bloque requiere ajustes. Se conservan los anteriores.',detalle:issues.join('; '),reintentable:true});
