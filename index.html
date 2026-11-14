@@ -699,6 +699,15 @@
         materialActual.asignatura = payload.asignatura;
 
         renderizarDocumentoEnPantalla();
+        const audit=data.material?.auditoriaExperimental;
+        if(audit){
+          let el=document.getElementById('heva-experimental-audit');
+          if(!el){el=document.createElement('details');el.id='heva-experimental-audit';el.className='border rounded-lg p-3 bg-amber-50 text-xs mt-2';document.getElementById('barra-calidad')?.after(el)}
+          el.replaceChildren();
+          const title=document.createElement('summary');title.className='cursor-pointer font-bold';title.textContent='Auditoría experimental: '+audit.errores.length+' errores estructurales y '+audit.advertencias.length+' advertencias';el.append(title);
+          const description=document.createElement('p');description.className='mt-2';description.textContent=audit.alcance;el.append(description);
+          for(const finding of [...audit.errores,...audit.advertencias].slice(0,20)){const item=document.createElement('p');item.className='mt-2';item.textContent=finding.location+': '+finding.detail;el.append(item)}
+        }
         document.getElementById('dictamen-calidad').innerText = 'Revisión estructural completada · validación docente pendiente';
 
       } catch (err) {
