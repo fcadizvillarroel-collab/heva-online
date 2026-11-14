@@ -5,7 +5,7 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
   const responseErrors=[];
   let rateLimited=false,retryAfter=0;const providerStatus=[];
   const track=(resp,provider)=>{if(!resp.ok)providerStatus.push({proveedor:provider,estadoHTTP:resp.status});if(resp.status===429){rateLimited=true;const seconds=Number(resp.headers?.get?.('retry-after'));if(Number.isFinite(seconds))retryAfter=Math.max(retryAfter,Math.min(3600,Math.ceil(seconds)));}};
-  const remember=e=>{if(e?.code?.startsWith('AI_RESPONSE_'))responseErrors.push(e.code);};
+  const remember=e=>{if(String(e?.code||'').startsWith('AI_RESPONSE_'))responseErrors.push(e.code);};
 
   // 1. ChatGPT (OpenAI - si está configurado)
   if (openAiKey && !exclude.includes('openai')) {
@@ -69,7 +69,7 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
         tryNextModel=[404,429,500,502,503,504].includes(resp.status);errores.push('Gemini: proveedor no disponible ('+resp.status+').');break;
       } catch(e){
         remember(e);errores.push('Gemini: '+(e.code||'conexión no disponible'));
-        if(e.code?.startsWith('AI_RESPONSE_')){
+        if(String(e?.code||'').startsWith('AI_RESPONSE_')){
           if(attempt===0 && deadline-Date.now()>4000)continue;
           tryNextModel=true;break;
         }
