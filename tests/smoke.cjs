@@ -57,6 +57,22 @@ assert(recovery.batches(p).length>0);
 assert.throws(()=>recovery.planOf({...p,objetivoAprendizaje:''}));
 assert.throws(()=>recovery.planOf({...p,documentosBase:Array.from({length:5},(_,i)=>({id:String(i),titulo:'Fuente',texto:'Contenido'}))}));
 assert.throws(()=>recovery.planOf({...p,disenoPedagogico:{objetivoAprendizaje:'Otro OA'}}));
+// Matriz: 6 estrategias × 6 materiales × perfiles de asignaturas EPJA.
+const didactics=require('../heva-didactics.js');
+const subjects=['Lenguaje y Comunicación','Matemática','Estudios Sociales','Ciencias Naturales','Inglés','Convivencia Social','Inserción Laboral','Construcciones Metálicas','Tecnología','Educación Financiera','Emprendimiento','Formación en Oficios'];
+const materials=['GUIA','EVALUACION','PRESENTACION','PLANIFICACION','TALLER','ACCESIBLE'];
+for(const subject of subjects)for(const material of materials)for(const strategy of pedagogy.strategies){
+ const plan={...p,asignatura:subject,tipoMaterial:material,estrategiaDidactica:strategy.id};
+ const instructions=design.strategyExecution(plan);
+ assert(instructions.includes(strategy.name),'Strategy absent from instructions: '+strategy.id);
+ assert(instructions.includes(didactics.profile(subject).name),'Subject absent from strategy instructions: '+subject);
+ assert(design.prompt(plan).includes('EJECUCIÓN OBLIGATORIA'),'Strategy must be included in the AI prompt');
+}
+const caseBatch={tipo:'casos',inicio:0,cantidad:1,field:'casosEstudio'};
+const normalizedCase=recovery.normalizePart({casos:[{titulo:'Decisión laboral',contexto:'Dos opciones de empleo',pregunta:'¿Cuál elegirías y por qué?',habilidad:'Comparar',criterio:'Justifica con datos'}],trazabilidadEstrategia:[{referencia:'CASO-1',habilidad:'Comparar',evidencia:'Decisión',criterio:'Justificación'}]},caseBatch);
+assert.equal(normalizedCase.casosEstudio.length,1);
+assert.equal(normalizedCase.casosEstudio[0].contextoReal,'Dos opciones de empleo');
+assert.equal(recovery.partIssues(normalizedCase,{...p,cantCasos:1,cantAlternativas:0,cantDesarrollo:0,estrategiaDidactica:'CASOS'},caseBatch).length,0);
 const review=require('../heva-quality.cjs');
 assert.equal(typeof review.readReview,'function');
 assert.equal(typeof review.fingerprint,'function');
