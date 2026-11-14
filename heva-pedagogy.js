@@ -64,7 +64,7 @@ function enforceRequestedCounts(raw,p){
   for(let i=1;i<=Math.min(items.length,count);i++)allowed.add(prefix+'-'+i);
  }
  const original=Array.isArray(out.trazabilidadEstrategia)?out.trazabilidadEstrategia:[];
- out.trazabilidadEstrategia=original.filter(t=>!(/^(ALT|DES|CASO)-\\d+$/.test(String(t?.referencia||'')))||allowed.has(t.referencia));
+ out.trazabilidadEstrategia=original.filter(t=>!(/^(ALT|DES|CASO)-\d+$/.test(String(t?.referencia||'')))||allowed.has(t.referencia));
  return out;
 }
 const nonempty=s=>typeof s==='string'&&s.trim().length>0,arr=x=>Array.isArray(x)&&x.length>0;
