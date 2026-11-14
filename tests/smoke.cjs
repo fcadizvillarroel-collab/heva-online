@@ -35,6 +35,10 @@ const choice=core.material({preguntasAlternativas:[{enunciado:'¿Cuál?',alterna
 assert.deepEqual(choice.preguntasAlternativas[0].alternativas.map(a=>a.letra),['A','B','C','D']);
 assert.equal(choice.preguntasAlternativas[0].claveCorrecta,'C');
 assert(!core.validate(choice,{cantAlternativas:1}).some(x=>x.includes('clave inválidas')));
+const aliases=core.material({preguntasAlternativas:[{enunciado:'¿Cuál?',opciones:['A) Uno','B) Dos','C) Tres','D) Cuatro'],correctAnswer:'Letra D'}]});
+assert.deepEqual(aliases.preguntasAlternativas[0].alternativas.map(x=>x.texto),['Uno','Dos','Tres','Cuatro']);
+assert.equal(aliases.preguntasAlternativas[0].claveCorrecta,'D');
+assert(!core.validate(aliases,{cantAlternativas:1}).some(x=>x.includes('clave inválidas')));
 const bad=core.material({preguntasAlternativas:[{enunciado:'¿Cuál?',alternativas:['Uno','Dos','Tres','Cuatro']}]});
 assert(core.validate(bad,{cantAlternativas:1}).some(x=>x.includes('clave inválidas')),'Never guess a missing answer key');
 const ordered=pedagogy.blocks({tipoMaterial:'GUIA',titulo:'Guía',objetivoAprendizaje:'Comprender',introduccionLectura:'Lectura',glosario:[{termino:'Concepto',definicion:'Definición'}],cierreReflexivo:'Reflexión',ticketSalida:{pregunta:'Salida'}},false);
