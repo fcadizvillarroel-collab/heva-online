@@ -14,6 +14,10 @@ let checked=0;
 for(const file of walk(root)){const source=fs.readFileSync(path.join(root,file),'utf8');new vm.Script(source,{filename:file});checked++;}
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const studio=fs.readFileSync(path.join(root,'heva-studio-ui.js'),'utf8');
+assert(!studio.includes('Taller de materiales · editar, adaptar y comparar'),'Legacy duplicate panel must be removed');
+assert(!studio.includes('id="studio-material-theme"'),'Visual template selector should not be duplicated');
+assert(studio.includes('function mountHistoryCompare()'),'Version comparison should live with history');
+assert(studio.includes('function backupDocuments()'),'Reference backups must remain available');
 assert(!html.includes('Material de ejemplo opcional'),'The duplicate reference section must not return');
 assert(!html.includes('id="modo-referencia"'),'Reference controls must have one owner');
 for(const id of ['modo-referencia','texto-referencia','studio-reference-slot','studio-theme','studio-doc-list']){
