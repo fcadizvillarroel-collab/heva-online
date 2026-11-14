@@ -7,7 +7,19 @@ const general=[
 ['casos','Estudio de casos','Decidir y justificar ante una situación','caso','Contexto completo, problema, alternativas de decisión y justificación'],
 ['lectura','Lectura y comprensión crítica','Comprender e interpretar un texto','texto','Lectura completa, preguntas literales, inferenciales y críticas'],
 ['problemas','Resolución de problemas','Seleccionar procedimientos y verificar resultados','problema','Problema con datos suficientes, estrategia de solución y comprobación'],
-['errores','Detección y corrección de errores','Detectar, explicar y corregir','error','Respuesta incorrecta concreta, explicación del fallo y corrección']
+['errores','Detección y corrección de errores','Detectar, explicar y corregir','error','Respuesta incorrecta concreta, explicación del fallo y corrección'],
+['preguntas','Preguntas de aplicación','Aplicar conocimientos a situaciones nuevas','problema','Consigna contextualizada, respuesta argumentada y criterio de logro'],
+['comparacion','Comparación de situaciones','Reconocer semejanzas, diferencias y justificar','comparacion','Dos situaciones completas, criterios de comparación y conclusión'],
+['organizadores','Organizadores gráficos','Jerarquizar y relacionar conceptos','modelo','Conceptos, relaciones explicadas y organizador realizable en papel'],
+['secuencia','Secuenciación de procesos','Ordenar etapas y justificar relaciones','modelo','Etapas desordenadas, criterios de orden y explicación de la secuencia'],
+['debate','Debate fundamentado','Argumentar y contrastar perspectivas','debate','Posturas fundamentadas, evidencia y síntesis respetuosa'],
+['roles','Simulación de roles','Aplicar decisiones en una situación simulada','dialogo','Roles, contexto, decisiones y pauta de observación'],
+['proyecto','Aprendizaje basado en proyectos','Planificar un producto y evaluar su calidad','proyecto','Problema, producto, etapas, recursos y criterios de evaluación'],
+['autoevaluacion','Autoevaluación guiada','Revisar el propio desempeño con criterios','comparacion','Pauta clara, evidencias del trabajo y acciones de mejora'],
+['coevaluacion','Coevaluación con pauta','Dar retroalimentación basada en evidencias','dialogo','Producto compartido, criterios observables y sugerencias respetuosas'],
+['diagnostico','Diagnóstico de conocimientos previos','Identificar saberes y dificultades iniciales','problema','Preguntas breves y tarea de diagnóstico sin calificación sumativa'],
+['estaciones','Estaciones de aprendizaje','Resolver tareas variadas por etapas','proyecto','Estaciones con consignas diferenciadas y síntesis final'],
+['transferencia','Desafío de transferencia','Aplicar lo aprendido en otro contexto','problema','Nueva situación, solución justificada y reflexión sobre transferencia']
 ];
 const families={
 sociales:[['multicausalidad','Análisis multicausal','Explicar factores y consecuencias','causas','Situación histórica o social, causas de distinta naturaleza y explicación de relaciones'],['cronologia','Cambios y continuidades','Comparar períodos','comparacion','Dos períodos contextualizados, cambios, permanencias y conclusión'],['cartografia','Interpretación territorial','Analizar relaciones espaciales','mapa','Mapa descrito o datos territoriales, localización e interpretación'],['controversia','Controversia histórica','Argumentar desde perspectivas contrastadas','debate','Dos posiciones fundamentadas, evidencia y argumento propio'],['historiaoral','Historia oral','Analizar testimonios con cautela','testimonio','Testimonio contextualizado, perspectiva, límites y contraste']],
