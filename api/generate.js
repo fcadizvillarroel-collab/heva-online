@@ -165,7 +165,7 @@ Responde ÚNICAMENTE en JSON:
     const metadata = {objetivoAprendizaje,asignatura,nivel,marcoCurricular,temaEspecifico,tipoMaterial,estrategiaDidactica:Pedagogy.strategy(estrategiaDidactica).name};
     let author;
     const draft = async prompt => { const r = await call(prompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY,[],{deadline:generationDeadline}); author={proveedor:r.provider,modelo:r.model,fecha:new Date().toISOString()}; return r.value; };
-    const normalize = raw => HEVA.material(Pedagogy.normalizeStrategyPlan(raw,plan),metadata);
+    const normalize = raw => HEVA.material(Pedagogy.enforceRequestedCounts(Pedagogy.normalizeStrategyPlan(raw,plan),plan),metadata);
     const check = m => [...HEVA.validate(m,{cantAlternativas,cantDesarrollo,cantCasos}),...Pedagogy.validate(m,plan),...Skills.generationIssues(m,plan)];
     let material = normalize(await draft(promptRedactor));
     let issues = check(material);
