@@ -7,10 +7,10 @@ module.exports=async(req,res)=>{
  try{
   const {fase,plan:input,base,parts=[],batch,autor,corregirFormato=false}=req.body||{};
   if(JSON.stringify(req.body||{}).length>250000)return res.status(413).json({error:'Documento demasiado extenso.'});
-  const plan=R.planOf(input);
+  let plan;try{plan=R.planOf(input)}catch(e){return res.status(400).json({error:'El encargo contiene parámetros inválidos.',detalle:e.message,codigo:'PLAN_INVALIDO',reintentable:false})}
   if(!['base','items','finalizar'].includes(fase))return res.status(400).json({error:'Fase no admitida.'});
   if(fase!=='base'&&(!base||!['gemini','groq','openai'].includes(autor?.proveedor)))return res.status(400).json({error:'Falta el documento base o su autoría.'});
-  const fuentesDocumentales=await S.retrieve(plan);
+  let fuentesDocumentales;try{fuentesDocumentales=await S.retrieve(plan)}catch(e){console.error('HEVA document sources:',e.stack||e);fuentesDocumentales=[];}
   if(fase==='finalizar'){
    const metadata={objetivoAprendizaje:plan.objetivoAprendizaje,asignatura:plan.asignatura,nivel:plan.nivel,marcoCurricular:plan.marcoCurricular,temaEspecifico:plan.temaEspecifico,tipoMaterial:plan.tipoMaterial,estrategiaDidactica:P.strategy(plan.estrategiaDidactica).name};
    let material=H.material(R.merge(base,parts,plan),metadata),issues=R.validate(material,plan);
@@ -32,5 +32,5 @@ module.exports=async(req,res)=>{
   }
   if(issues.length)return res.status(422).json({error:'El bloque requiere ajustes. Se conservan los anteriores.',detalle:issues.join('; '),reintentable:true});
   return res.status(200).json({exito:true,parte:result.value,autor:{proveedor:result.provider,modelo:result.model,fecha:new Date().toISOString()},bloques:R.batches(plan)});
- }catch(e){console.error('HEVA recovery:',e.code||e.name||'ERROR');const limited=e.code==='AI_RATE_LIMIT',invalid=e.code?.startsWith('AI_RESPONSE_'),unavailable=e.code==='AI_UNAVAILABLE';return res.status(limited?429:invalid||unavailable?503:500).json({error:limited?'Cuota temporal de IA agotada.':invalid?'La IA devolvió un bloque incompleto o inválido.':unavailable?'No hubo respuesta de los proveedores disponibles.':'No se pudo completar este bloque.',detalle:'El avance anterior se conserva. Puedes reintentar el mismo encargo sin comenzar desde cero.',codigo:e.code||'RECOVERY_ERROR',reintentable:true,reintentarEn:e.retryAfter||0});}
+ }catch(e){console.error('HEVA recovery:',e.stack||e);const limited=e.code==='AI_RATE_LIMIT',invalid=e.code?.startsWith('AI_RESPONSE_'),unavailable=e.code==='AI_UNAVAILABLE';return res.status(limited?429:invalid||unavailable?503:500).json({error:limited?'Cuota temporal de IA agotada.':invalid?'La IA devolvió un bloque incompleto o inválido.':unavailable?'No hubo respuesta de los proveedores disponibles.':'No se pudo completar este bloque.',detalle:invalid?'La IA devolvió contenido incompleto; el avance se mantiene.':unavailable?'Los proveedores de IA no respondieron. Revisa su disponibilidad y vuelve a intentar.':limited?'El proveedor alcanzó su cuota temporal.':e instanceof TypeError?'Error interno al procesar el material. Código TYPE_ERROR; se requiere revisar el registro del servidor.':(e.message||'El avance anterior se conserva.'),codigo:e.code||(e instanceof TypeError?'TYPE_ERROR':'RECOVERY_ERROR'),reintentable:true,reintentarEn:e.retryAfter||0});}
 };
