@@ -6,8 +6,8 @@ async function recuperarMaterialHEVA(plan,allowRepair=true){
  let checkpoint=recoveryRead(plan)||{planKey:JSON.stringify(plan),parts:[]};
  const message=document.getElementById('dictamen-calidad');
  const request=async (body,retry=true)=>{
-  const response=await fetch('/api/recover',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan,...body}),signal:AbortSignal.timeout(58000)});
-  let data;try{data=await response.json()}catch{throw Error('La conexión se interrumpió. Pulsa Crear material para continuar desde el último bloque guardado.');}
+  let response;try{response=await fetch('/api/recover',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan,...body}),signal:AbortSignal.timeout(58000)});}catch(err){throw Error('La solicitud de '+body.fase+' no llegó a completarse ('+(err.name==='TimeoutError'?'tiempo agotado':'red interrumpida')+'). El avance guardado se conserva. Reintenta Crear material.');}
+  let data;try{data=await response.json()}catch{const type=response.headers.get('content-type')||'';throw Error('El servidor respondió HTTP '+response.status+' sin JSON válido durante '+body.fase+'. '+(response.status===504||response.status===502?'Probable límite de tiempo o error de función. ':'')+'El avance guardado se conserva.');}
   if(!response.ok&&retry&&data.codigo==='AI_RATE_LIMIT'&&data.reintentarEn>0&&data.reintentarEn<=60){
    if(message)message.textContent=`Esperando ${data.reintentarEn} segundos por la cuota de IA; el avance está guardado…`;
    await new Promise(resolve=>setTimeout(resolve,(data.reintentarEn+1)*1000));
