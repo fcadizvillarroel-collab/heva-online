@@ -35,4 +35,14 @@ const p={asignatura:'Estudios Sociales',nivel:'III NIVEL BÁSICO',marcoCurricula
 assert.equal(recovery.planOf(p).objetivoAprendizaje,p.objetivoAprendizaje);
 assert(recovery.batches(p).length>0);
 assert.throws(()=>recovery.planOf({...p,objetivoAprendizaje:''}));
+assert.throws(()=>recovery.planOf({...p,documentosBase:Array.from({length:5},(_,i)=>({id:String(i),titulo:'Fuente',texto:'Contenido'}))}));
+assert.throws(()=>recovery.planOf({...p,disenoPedagogico:{objetivoAprendizaje:'Otro OA'}}));
+const review=require('../heva-quality.cjs');
+assert.equal(typeof review.readReview,'function');
+assert.equal(typeof review.fingerprint,'function');
+for(const endpoint of ['api/generate.js','api/recover.js','api/review.js','api/diagram.js']){
+ const code=fs.readFileSync(path.join(root,endpoint),'utf8');
+ assert(code.includes('require('),'Endpoint missing dependencies: '+endpoint);
+}
+
 console.log('HEVA smoke checks passed; '+checked+' JavaScript files parsed.');
