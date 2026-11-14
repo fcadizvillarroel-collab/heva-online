@@ -7,20 +7,22 @@ function catalog(rows,f={}){let seen=new Set;return rows.filter(o=>{const k=(o.c
 function normalizeChoice(q){
  if(!q||typeof q!=='object')return q;
  const out={...q},letters=['A','B','C','D'];
- let a=out.alternativas;
- if(a&&typeof a==='object'&&!Array.isArray(a)&&letters.every(k=>typeof a[k]==='string'))a=letters.map(letra=>({letra,texto:a[letra]}));
+ let a=out.alternativas??out.opciones??out.respuestas;
+ if(a&&typeof a==='object'&&!Array.isArray(a)&&letters.every(k=>a[k]!=null))a=letters.map(letra=>({letra,texto:a[letra]}));
  if(Array.isArray(a)&&a.length===4){
   a=a.map((v,i)=>{
-   if(typeof v==='string')return{letra:letters[i],texto:v};
+   if(typeof v==='string')return{letra:letters[i],texto:v.replace(/^\\s*[A-D][).:]\\s*/i,'').trim()};
    if(!v||typeof v!=='object')return v;
-   const raw=String(v.letra??v.opcion??v.id??'').trim().toUpperCase().replace(/[).:\s]/g,'');
-   return {...v,letra:letters.includes(raw)?raw:(!raw?letters[i]:raw),texto:v.texto??v.contenido??v.descripcion??v.valor};
+   const raw=String(v.letra??v.opcion??v.id??'').trim().toUpperCase().replace(/[).:\\s]/g,'');
+   const value=v.texto??v.contenido??v.descripcion??v.valor??v.text??v.label;
+   return {...v,letra:letters.includes(raw)?raw:(!raw?letters[i]:raw),texto:typeof value==='string'?value.replace(/^\\s*[A-D][).:]\\s*/i,'').trim():value};
   });
  }
  out.alternativas=a;
- const raw=String(out.claveCorrecta??out.respuestaCorrecta??out.respuesta_correcta??'').trim().toUpperCase();
- const key=raw.match(/^(?:OPCI[ÓO]N\s*)?([ABCD])(?:[).:]|$)/);
- if(key)out.claveCorrecta=key[1];
+ const raw=String(out.claveCorrecta??out.respuestaCorrecta??out.respuesta_correcta??out.correcta??out.correctAnswer??out.correct_option??out.clave??'').trim().toUpperCase();
+ const match=raw.match(/^(?:OPCI[ÓO]N\\s*|ALTERNATIVA\\s*|LETRA\\s*)?([ABCD])(?:[).:]|$)/);
+ if(match)out.claveCorrecta=match[1];
+ else if(/^\\s*[0-3]\\s*$/.test(raw)&&a?.length===4)out.claveCorrecta=letters[Number(raw)];
  return out;
 }
 function material(raw={},meta={}){const m={...raw,...meta};m.titulo=String(m.titulo||'Material sin título');for(let k of ['preguntasAlternativas','preguntasDesarrollo','casosEstudio','diapositivas','listaCotejoTP','glosario','actividadesGuiadas','planClase','procedimientoTaller','trazabilidadEstrategia','recursos','apoyosAcceso'])if(!Array.isArray(m[k]))m[k]=[];m.introduccionLectura=String(m.introduccionLectura||'');m.preguntasAlternativas=m.preguntasAlternativas.map(normalizeChoice);return m}
