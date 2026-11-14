@@ -658,6 +658,10 @@
 
       paso.innerText = 'Consultando ChatGPT / Gemini con candado literal inmutable...';
 
+      try {
+        if(typeof window.HEVADesign==='undefined' && typeof leerDisenoHEVA==='function') {
+          await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/heva-design.js?v=20261113fix';script.onload=()=>window.HEVADesign?resolve():reject(new Error('No se pudo inicializar HEVA Design'));script.onerror=()=>reject(new Error('No se pudo cargar HEVA Design. Recarga la página.'));document.head.appendChild(script)});
+        }
       const payload = {
         modoHerramienta: modo,
         ...(typeof studioGenerationExtras==='function'?studioGenerationExtras():{}),
@@ -677,7 +681,6 @@
         adecuacionesPIE: [...document.querySelectorAll('input[id^="pie-"]:checked')].map(x=>x.parentElement.textContent.trim())
       };
 
-      try {
         let data;
         if(modo==='GENERADOR_ESTANDAR'&&(recoveryRead(payload)||payload.cantAlternativas+payload.cantDesarrollo+payload.cantCasos>=8))data=await recuperarMaterialHEVA(payload);
         else{
@@ -802,5 +805,5 @@
       pptx.writeFile({ fileName: 'presentacion.pptx' });
     }
   </script>
-<script src="/heva-didactics.js"></script><script src="/heva-design.js"></script><script src="/heva-pedagogy.js"></script><script src="/heva-core.js"></script><script src="/heva-calculation.js"></script><script src="/heva-audit.js"></script><script src="/heva-skills.js"></script><script src="/heva-studio.js"></script><script src="/heva-templates.js"></script><script src="/heva-office.js"></script><script src="/heva-ui.js"></script><script src="/heva-pedagogy-ui.js"></script><script src="/heva-recovery-ui.js"></script><script src="/heva-quality-ui.js"></script><script src="/heva-sources-ui.js"></script><script src="/heva-workflow-ui.js"></script><script src="/heva-skills-ui.js"></script><script src="/heva-studio-ui.js"></script><script src="/heva-ux.js"></script><script src="/heva-interactive.js"></script><script src="/heva-diagrams.js"></script><script src="/heva-ai-diagrams.js"></script></body>
+<script src="/heva-didactics.js"></script><script src="/heva-design.js?v=20261113fix"></script><script src="/heva-pedagogy.js"></script><script src="/heva-core.js"></script><script src="/heva-calculation.js"></script><script src="/heva-audit.js"></script><script src="/heva-skills.js"></script><script src="/heva-studio.js"></script><script src="/heva-templates.js"></script><script src="/heva-office.js"></script><script src="/heva-ui.js"></script><script src="/heva-pedagogy-ui.js"></script><script src="/heva-recovery-ui.js"></script><script src="/heva-quality-ui.js"></script><script src="/heva-sources-ui.js"></script><script src="/heva-workflow-ui.js"></script><script src="/heva-skills-ui.js"></script><script src="/heva-studio-ui.js"></script><script src="/heva-ux.js"></script><script src="/heva-interactive.js"></script><script src="/heva-diagrams.js"></script><script src="/heva-ai-diagrams.js"></script></body>
 </html>
