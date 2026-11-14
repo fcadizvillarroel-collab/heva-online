@@ -13,6 +13,10 @@ async function recuperarMaterialHEVA(plan,allowRepair=true){
    await new Promise(resolve=>setTimeout(resolve,(data.reintentarEn+1)*1000));
    return request(body,false);
   }
+  if(!response.ok&&retry&&body.fase==='items'&&response.status===422&&typeof data.detalle==='string'&&/Alternativas o clave inválidas/.test(data.detalle)){
+   if(message)message.textContent='La IA entregó alternativas en un formato incorrecto. Corrigiendo automáticamente el bloque sin perder avances…';
+   return request({...body,corregirFormato:true},false);
+  }
   if(!response.ok&&body.fase==='finalizar'&&data.reparacion)return data;
   if(!response.ok)throw Error((data.detalle||data.error||'Recuperación pendiente.')+' Pulsa Crear material para continuar con el mismo encargo.');
   return data;
