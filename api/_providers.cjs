@@ -71,7 +71,9 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
         remember(e);errores.push('Gemini: '+(e.code||'conexión no disponible'));
         if(String(e?.code||'').startsWith('AI_RESPONSE_')){
           if(attempt===0 && deadline-Date.now()>4000)continue;
-          tryNextModel=true;break;
+          // A malformed but successful response must not trigger a different model;
+          // retry the same model once, then use the independent provider.
+          tryNextModel=false;break;
         }
         tryNextModel=true;break;
       }
