@@ -46,7 +46,7 @@ function normalizeStrategyPlan(m,p){
  if(!plan||typeof plan!=='object'||Array.isArray(plan))return m;
  const selected=strategy(p.estrategiaDidactica);
  const claimed=String(plan.id??plan.estrategiaId??plan.estrategia??plan.nombre??'').trim();
- const normalizedId=claimed&&(claimed===selected.id||claimed===selected.name||strategy(claimed).id===selected.id)?selected.id:claimed;
+ const normalizedId=claimed&&(claimed===selected.id||claimed===selected.name||strategies.some(x=>x.id===selected.id&&x.match.test(norm(claimed))))?selected.id:claimed;
  const aliases={habilidadCentral:['habilidadCentral','habilidad','habilidadPrincipal'],aplicacionConcreta:['aplicacionConcreta','aplicacion','implementacion'],evidenciaEsperada:['evidenciaEsperada','evidencia','productoEsperado'],retroalimentacionDocente:['retroalimentacionDocente','retroalimentacion','feedbackDocente']};
  const normalized={...plan,id:normalizedId};
  for(const [key,names] of Object.entries(aliases))if(!normalized[key]){const value=names.map(n=>plan[n]).find(x=>typeof x==='string'&&x.trim());if(value)normalized[key]=value;}
