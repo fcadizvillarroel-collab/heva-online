@@ -660,12 +660,12 @@
 
       try {
         if(typeof window.HEVADesign==='undefined' && typeof leerDisenoHEVA==='function') {
-          await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/heva-design.js?v=20261113fix';script.onload=()=>window.HEVADesign?resolve():reject(new Error('No se pudo inicializar HEVA Design'));script.onerror=()=>reject(new Error('No se pudo cargar HEVA Design. Recarga la página.'));document.head.appendChild(script)});
+          try { await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/heva-design.js?v=20261113fix2';script.onload=()=>window.HEVADesign?resolve():reject(new Error('No se pudo inicializar HEVA Design'));script.onerror=()=>reject(new Error('No se pudo cargar HEVA Design'));document.head.appendChild(script)}); } catch(e) { console.warn('Diseño opcional no disponible; se generará sin él.',e); }
         }
       const payload = {
         modoHerramienta: modo,
         ...(typeof studioGenerationExtras==='function'?studioGenerationExtras():{}),
-        disenoPedagogico: typeof leerDisenoHEVA==='function'?leerDisenoHEVA():null,
+        disenoPedagogico: (typeof window.HEVADesign!=='undefined' && typeof leerDisenoHEVA==='function') ? leerDisenoHEVA() : null,
         asignatura: document.getElementById('asignatura').value,
         nivel: document.getElementById('nivel-epja').options[document.getElementById('nivel-epja').selectedIndex].text,
         marcoCurricular: document.getElementById('marco-curricular').options[document.getElementById('marco-curricular').selectedIndex].text,
@@ -805,5 +805,5 @@
       pptx.writeFile({ fileName: 'presentacion.pptx' });
     }
   </script>
-<script src="/heva-didactics.js"></script><script src="/heva-design.js?v=20261113fix"></script><script src="/heva-pedagogy.js"></script><script src="/heva-core.js"></script><script src="/heva-calculation.js"></script><script src="/heva-audit.js"></script><script src="/heva-skills.js"></script><script src="/heva-studio.js"></script><script src="/heva-templates.js"></script><script src="/heva-office.js"></script><script src="/heva-ui.js"></script><script src="/heva-pedagogy-ui.js"></script><script src="/heva-recovery-ui.js"></script><script src="/heva-quality-ui.js"></script><script src="/heva-sources-ui.js"></script><script src="/heva-workflow-ui.js"></script><script src="/heva-skills-ui.js"></script><script src="/heva-studio-ui.js"></script><script src="/heva-ux.js"></script><script src="/heva-interactive.js"></script><script src="/heva-diagrams.js"></script><script src="/heva-ai-diagrams.js"></script></body>
+<script src="/heva-didactics.js"></script><script src="/heva-design.js?v=20261113fix2"></script><script src="/heva-pedagogy.js"></script><script src="/heva-core.js"></script><script src="/heva-calculation.js"></script><script src="/heva-audit.js"></script><script src="/heva-skills.js"></script><script src="/heva-studio.js"></script><script src="/heva-templates.js"></script><script src="/heva-office.js"></script><script src="/heva-ui.js"></script><script src="/heva-pedagogy-ui.js"></script><script src="/heva-recovery-ui.js"></script><script src="/heva-quality-ui.js"></script><script src="/heva-sources-ui.js"></script><script src="/heva-workflow-ui.js"></script><script src="/heva-skills-ui.js"></script><script src="/heva-studio-ui.js"></script><script src="/heva-ux.js"></script><script src="/heva-interactive.js"></script><script src="/heva-diagrams.js"></script><script src="/heva-ai-diagrams.js"></script></body>
 </html>
