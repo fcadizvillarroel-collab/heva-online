@@ -714,7 +714,7 @@
       };
 
         const resumenHEVA=[
-          'Confirma tu encargo HEVA:',
+          'Encargo enviado a HEVA:',
           'Asignatura: '+payload.asignatura,
           'Nivel: '+payload.nivel,
           'Marco curricular: '+payload.marcoCurricular,
@@ -726,9 +726,12 @@
           'Alternativas: '+payload.cantAlternativas,
           'Desarrollo: '+payload.cantDesarrollo,
           'Situaciones de lectura/análisis: '+payload.cantCasos,
+          ...Object.entries(payload.instrumentosEvaluacion||{}).map(([k,n])=>(window.HEVAAssessment?.types[k]?.label||k)+': '+n),
+          'Noticias reales: '+(payload.usarNoticias?'Consultar canales disponibles':'Desactivadas'),
+          'Noticia didáctica simulada: '+(payload.noticiaDidacticaModo||'AUTO'),
           'Adecuaciones: '+(payload.adecuacionesPIE.join(', ')||'Ninguna')
         ].join('\n');
-        if(!window.confirm(resumenHEVA))throw new Error('Generación cancelada. No se enviaron solicitudes al servidor.');
+        let resumenPanel=document.getElementById('heva-encargo-enviado');if(!resumenPanel){resumenPanel=document.createElement('details');resumenPanel.id='heva-encargo-enviado';resumenPanel.className='no-print border rounded p-3 my-3 bg-stone-50';document.getElementById('btn-generar').before(resumenPanel);}resumenPanel.replaceChildren();const resumenTitulo=document.createElement('summary');resumenTitulo.textContent='Ver el encargo enviado a la IA';const resumenTexto=document.createElement('pre');resumenTexto.className='text-xs whitespace-pre-wrap';resumenTexto.textContent=resumenHEVA;resumenPanel.append(resumenTitulo,resumenTexto);
 
         let data;
         if(modo==='GENERADOR_ESTANDAR'&&payload.tipoMaterial!=='PRESENTACION'&&(recoveryRead(payload)||payload.cantAlternativas+payload.cantDesarrollo+payload.cantCasos+Object.values(payload.instrumentosEvaluacion||{}).reduce((a,n)=>a+n,0)>=8))data=await recuperarMaterialHEVA(payload);
@@ -870,7 +873,7 @@
       pptx.writeFile({ fileName: 'presentacion.pptx' });
     }
   </script>
-<script src="/heva-assessment.js?v=20261115-formatos"></script><script src="/heva-didactics.js?v=20261115-evaluacion5"></script><script src="/heva-design.js?v=20261113fix2"></script><script src="/heva-pedagogy.js"></script><script src="/heva-core.js"></script><script src="/heva-calculation.js"></script><script src="/heva-audit.js"></script><script src="/heva-skills.js"></script><script src="/heva-studio.js"></script><script src="/heva-templates.js"></script><script src="/heva-office.js?v=20261115-evaluacion5"></script><script src="/heva-ui.js?v=20261115-evaluacion5"></script><script src="/heva-pedagogy-ui.js"></script><script src="/heva-recovery-ui.js?v=20261114diag"></script><script src="/heva-quality-ui.js"></script><script src="/heva-sources-ui.js?v=20261115-evaluacion5"></script><script src="/heva-workflow-ui.js?v=20261114separate"></script><script src="/heva-skills-ui.js"></script><script src="/heva-studio-ui.js?v=20261114sidebar3"></script><script src="/heva-ux.js"></script><script src="/heva-interactive.js"></script><script src="/heva-ai-diagrams.js?v=20261114visual2"></script><script src="/experimental/strategy-lab.js"></script><script src="/experimental/integration.js"></script><script src="/experimental/strategy-delivery.js"></script><script>
+<script src="/heva-assessment.js?v=20261115-formatos"></script><script src="/heva-didactics.js?v=20261115-evaluacion6"></script><script src="/heva-design.js?v=20261113fix2"></script><script src="/heva-pedagogy.js"></script><script src="/heva-core.js"></script><script src="/heva-calculation.js"></script><script src="/heva-audit.js"></script><script src="/heva-skills.js"></script><script src="/heva-studio.js"></script><script src="/heva-templates.js"></script><script src="/heva-office.js?v=20261115-evaluacion6"></script><script src="/heva-ui.js?v=20261115-evaluacion6"></script><script src="/heva-pedagogy-ui.js"></script><script src="/heva-recovery-ui.js?v=20261114diag"></script><script src="/heva-quality-ui.js"></script><script src="/heva-sources-ui.js?v=20261115-evaluacion6"></script><script src="/heva-workflow-ui.js?v=20261114separate"></script><script src="/heva-skills-ui.js"></script><script src="/heva-studio-ui.js?v=20261114sidebar3"></script><script src="/heva-ux.js"></script><script src="/heva-interactive.js"></script><script src="/heva-ai-diagrams.js?v=20261114visual2"></script><script src="/experimental/strategy-lab.js"></script><script src="/experimental/integration.js"></script><script src="/experimental/strategy-delivery.js"></script><script>
 (function(){
 'use strict';
 const $=id=>document.getElementById(id);
