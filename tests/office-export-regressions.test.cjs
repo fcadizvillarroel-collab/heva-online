@@ -11,7 +11,7 @@ test('balance visual prompt is identified',()=>{const result=office().auditExpor
 
 function renderDeck(material){
  const slides=[];
- class Deck{constructor(){this.ShapeType={rect:'rect',line:'line',roundRect:'roundRect'}}addSlide(){const slide={texts:[],addText(t){this.texts.push(String(t))},addShape(){},addNotes(){}};slides.push(slide);return slide}async writeFile(){}}
+ class Deck{constructor(){this.ShapeType={rect:'rect',line:'line',roundRect:'roundRect'}}addSlide(){const slide={texts:[],addText(t){this.texts.push(String(t))},addShape(){},addNotes(n){this.notes=n}};slides.push(slide);return slide}async writeFile(){}}
  const context={HEVA:{material:m=>m,blocks:m=>m.blocks||[]},HEVATemplates:{layout:()=>({theme:{main:'8B2635',accent:'C77638',background:'FFF7ED',ink:'302723'}})},PptxGenJS:Deck};
  vm.runInNewContext(code,context);
  return context.HEVAOffice.powerpoint(material).then(()=>slides);
@@ -27,4 +27,10 @@ test('PowerPoint preserves fifth card and fifth process step',async()=>{
 test('Convivencia Social is not classified as history',()=>{
  const audit=require('../experimental/subject-audit.cjs');
  assert.equal(audit.inspectAll({asignatura:'Convivencia Social'}).disciplina,'instrumental');
+});
+
+test('presentation exports teacher notes and real news provenance',async()=>{
+ const slides=await renderDeck({titulo:'Clima',tipoMaterial:'PRESENTACION',diapositivas:[{titulo:'Evidencia',contenido:['Datos para analizar'],notasDocente:'Explicación y retroalimentación del docente'}],fuentesDocumentales:{noticias:{items:[{title:'Una noticia',publisher:'Noticias ONU',publishedAt:'2026-11-13T12:00:00Z',url:'https://news.un.org/es/story/123'}]}}});
+ assert.ok(slides.some(s=>s.notes==='Explicación y retroalimentación del docente'));
+ assert.ok(slides.some(s=>s.texts.join(' ').includes('Noticias ONU · 2026-11-13')));
 });

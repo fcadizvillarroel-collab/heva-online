@@ -3,7 +3,7 @@
 const S=HEVAStudio,E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));let pending=null,busy=false;
 function docs(){try{return JSON.parse(localStorage.getItem('heva_documentos_v1')||'[]')}catch{return[]}}
 function selected(){return docs().filter(d=>document.getElementById('studio-doc-'+d.id)?.checked)}
-window.studioGenerationExtras=()=>({documentosBase:selected(),plantillaVisual:localStorage.getItem('heva_plantilla')||'calida'});
+window.studioGenerationExtras=()=>({usarNoticias:document.getElementById('heva-usar-noticias')?.checked===true,documentosBase:selected(),plantillaVisual:localStorage.getItem('heva_plantilla')||'calida'});
 function status(t){const el=document.getElementById('studio-status');if(el)el.textContent=t}
 function fingerprint(){return JSON.stringify(materialActual)}
 function backupDocuments(){HEVAOffice.download(new Blob([JSON.stringify({schema:'heva-documentos-v1',documentos:docs()},null,2)],{type:'application/json'}),'HEVA_documentos_base.json')}

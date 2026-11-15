@@ -147,7 +147,7 @@ async function powerpoint(m,teacher=false){
  const isPresentation=String(material.tipoMaterial||m.tipoMaterial||'').toUpperCase()==='PRESENTACION'&&Array.isArray(material.diapositivas)&&material.diapositivas.length>0;
  let sections=[];
  if(isPresentation){
-  sections=material.diapositivas.map((d,i)=>({title:d.titulo||'Diapositiva '+(i+1),text:slideText(d.contenido),kind:'slide'}));
+  sections=material.diapositivas.map((d,i)=>({title:d.titulo||'Diapositiva '+(i+1),text:slideText(d.contenido),kind:'slide',notes:d.notasDocente||''}));
  }else{
   let blocks=[];HEVA.blocks(material,teacher).forEach(item=>{let prev=blocks.at(-1);if(item.kind==='option'&&prev?.group===item.group)prev.text+='\n'+item.title+' '+item.text;else blocks.push({...item})});
   sections=blocks.map(item=>({title:item.title,text:slideText(item.text),kind:item.kind||'section'}));
@@ -158,6 +158,8 @@ async function powerpoint(m,teacher=false){
   const maxChars=isQuestion?1500:850;
   return chunksOf(section.text,maxChars,isQuestion?12:5).map((lines,part)=>({...section,lines,title:section.title+(part?' · continuación':'')}));
  });
+ const news=material.fuentesDocumentales?.noticias?.items||[];
+ if(isPresentation&&news.length)pages.push({title:'Fuentes de noticias consultadas',kind:'sources',lines:news.map(n=>n.publisher+' · '+String(n.publishedAt||'').slice(0,10)+' · '+n.title+'\n'+n.url)});
  const total=pages.length+1;
  let cover=addChrome(ppt,theme,'Portada',1,total);
  cover.addShape(ppt.ShapeType.rect,{x:.75,y:1.15,w:11.85,h:4.95,line:{color:theme.main,transparency:100},fill:{color:theme.main}});
@@ -165,7 +167,7 @@ async function powerpoint(m,teacher=false){
  cover.addText(String(material.titulo||'Presentación educativa'),{x:1.08,y:1.95,w:10.7,h:2.15,fontFace:'Aptos Display',fontSize:38,bold:true,color:'FFFFFF',margin:0,breakLine:false,valign:'mid',fit:'shrink'});
  cover.addText([material.asignatura,material.nivel,material.temaEspecifico].filter(Boolean).join('  ·  '),{x:1.1,y:4.55,w:10.6,h:.75,fontSize:18,color:'FFF0E0',margin:0,fit:'shrink'});
  cover.addText('HEVA VISUAL · MOTOR 2026.11',{x:1.1,y:5.57,w:5.8,h:.26,fontSize:10,color:'FFFFFF',margin:0});
- pages.forEach((page,i)=>{const slide=addChrome(ppt,theme,page.kind,i+2,total);if(visual.large){const originalAddText=slide.addText.bind(slide);slide.addText=(text,options)=>originalAddText(text,{...options,fontSize:Math.max(26,options.fontSize||26)});}addContent(ppt,theme,slide,page.title,page.lines,page.kind,i)});
+ pages.forEach((page,i)=>{const slide=addChrome(ppt,theme,page.kind,i+2,total);if(visual.large){const originalAddText=slide.addText.bind(slide);slide.addText=(text,options)=>originalAddText(text,{...options,fontSize:Math.max(26,options.fontSize||26)});}addContent(ppt,theme,slide,page.title,page.lines,page.kind,i);if(page.notes&&typeof slide.addNotes==='function')slide.addNotes(page.notes)});
  await ppt.writeFile({fileName:safeName(material.titulo)+(teacher?'_docente':'_estudiante')+'.pptx'});return ppt;
 }
 
