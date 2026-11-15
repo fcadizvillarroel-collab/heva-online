@@ -115,3 +115,13 @@ test('recovery base repairs incomplete strategy metadata without discarding slid
  assert.match(source,/planEstrategia:fixed\.value\.planEstrategia/);
  assert.match(source,/if\(next\.length<issues\.length\)/);
 });
+
+test('PowerPoint visual engine provides native semantic diagrams',()=>{
+ const source=fs.readFileSync(path.join(__dirname,'../heva-office.js'),'utf8');
+ assert.match(source,/function drawSemanticVisual/);
+ assert.match(source,/function visualKind/);
+ assert.match(source,/kind==='equation'/);
+ assert.match(source,/kind==='chronology'/);
+ assert.match(source,/kind==='process'/);
+ assert.match(source,/if\(drawSemanticVisual\(ppt,theme,slide,title,lines\)\)return/);
+});
