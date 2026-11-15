@@ -1,7 +1,7 @@
 /* HEVA Experimental: deterministic integrated activity/question planning. No API calls. */
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.HEVAIntegration=api})(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
-const max={alternativas:30,desarrollo:20,lecturas:12};
+const max={alternativas:20,desarrollo:10,lecturas:4};
 function plan(input){
 const strategies=input.strategies||[],counts=input.counts||{},mode=input.mode||'auto',manual=input.manual||{};
 if(!['auto','manual'].includes(mode))throw Error('Modo inválido');
