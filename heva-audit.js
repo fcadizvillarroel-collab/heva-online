@@ -8,6 +8,12 @@ function inspect(raw){const m=H.material(raw),plan=m.planGeneracion||{},issues=[
  if(!text(m.objetivoAprendizaje))add('oa_ausente','error_comprobado','objetivoAprendizaje','El documento no tiene objetivo.','Vincular el objetivo seleccionado.');
  if(plan.objetivoAprendizaje&&m.objetivoAprendizaje!==plan.objetivoAprendizaje)add('oa_distinto','error_comprobado','objetivoAprendizaje','El OA del documento difiere del encargo.','Restituir el objetivo literal o generar un nuevo encargo.');
  for(const [field,key]of [['preguntasAlternativas','cantAlternativas'],['preguntasDesarrollo','cantDesarrollo'],['casosEstudio','cantCasos']])if(Number.isInteger(plan[key])&&m[field].length!==plan[key])add('cantidad_'+field,'error_comprobado',field,`Se solicitaron ${plan[key]} y hay ${m[field].length}.`,'Completar o ajustar explícitamente el encargo.');
+ const paragraphs=new Map();
+ for(const block of P.blocks(m,false)){
+  if(block.kind==='option'||/fuentes|noticias.*rss|vocabulario|objetivo curricular/i.test(block.title))continue;
+  for(const paragraph of String(block.text||'').split(/\n+/)){const n=norm(paragraph);if(n.length<160||n.split(' ').length<25)continue;const locations=paragraphs.get(n)||new Set();locations.add(block.path||block.title);paragraphs.set(n,locations);}
+ }
+ let duplicateIndex=0;for(const locations of paragraphs.values())if(locations.size>=3)add('texto_triplicado_'+duplicateIndex++,'error_comprobado',[...locations].join(', '),'El mismo párrafo extenso aparece en tres o más apartados.','Conservar la lectura una sola vez y referenciarla; usar situaciones diferentes en ejemplo guiado y aplicación autónoma.');
  const repeated=new Map();
  m.preguntasAlternativas.forEach((q,i)=>{const ref='ALT-'+(i+1),options=Array.isArray(q.alternativas)?q.alternativas.map(x=>x&&typeof x==='object'?x:{}):[],labels=options.map(x=>x.letra);
   if(!text(q.enunciado))add('consigna_'+ref,'error_comprobado',ref,'Falta el enunciado.','Completar una consigna suficiente.');

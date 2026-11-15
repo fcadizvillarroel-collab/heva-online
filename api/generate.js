@@ -163,7 +163,7 @@ Responde ÚNICAMENTE en JSON:
     // Cada material tiene un contrato propio y una estrategia observable en sus tareas.
     if (!Object.hasOwn(Pedagogy.contracts, tipoMaterial)) return res.status(400).json({error:'Tipo de material no admitido.'});
     if (!objetivoAprendizaje.trim()) return res.status(400).json({error:'Selecciona un objetivo curricular antes de generar.'});
-    const plan = {...Object.fromEntries(["documentosBase","plantillaVisual","derivacion","usarNoticias"].filter(k=>req.body[k]!=null).map(k=>[k,req.body[k]])),asignatura,nivel,marcoCurricular,objetivoAprendizaje,temaEspecifico,estrategiaDidactica,instruccionesDocente,disenoPedagogico,planIntegrado,textoReferencia,modoReferencia,adecuacionesPIE,tipoMaterial,...cantidadesEfectivas,incluirTicketSalida};
+    const plan = {...Object.fromEntries(["documentosBase","plantillaVisual","derivacion","usarNoticias","noticiaDidacticaModo"].filter(k=>req.body[k]!=null).map(k=>[k,req.body[k]])),asignatura,nivel,marcoCurricular,objetivoAprendizaje,temaEspecifico,estrategiaDidactica,instruccionesDocente,disenoPedagogico,planIntegrado,textoReferencia,modoReferencia,adecuacionesPIE,tipoMaterial,...cantidadesEfectivas,incluirTicketSalida};
     const extraIssues=require('../heva-studio.js').validateExtras(plan);if(extraIssues.length)return res.status(400).json({error:extraIssues.join('; ')});
     const designIssues=require('../heva-design.js').validate(disenoPedagogico,plan);
     if(designIssues.length)return res.status(400).json({error:designIssues.join('; ')});

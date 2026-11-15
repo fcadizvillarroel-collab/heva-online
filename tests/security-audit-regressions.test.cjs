@@ -102,8 +102,8 @@ test('strategy metadata can be repaired without inventing evidence',()=>{
 test('PowerPoint assets use a versioned URL and prompts require complete classroom stimuli',()=>{
  const ui=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
  const api=fs.readFileSync(path.join(__dirname,'../api/generate.js'),'utf8');
- assert.match(ui,/heva-office\.js\?v=20261115-materiales3/);
- assert.match(ui,/heva-ui\.js\?v=20261115-materiales3/);
+ assert.match(ui,/heva-office\.js\?v=20261115-noticias-estrategias4/);
+ assert.match(ui,/heva-ui\.js\?v=20261115-noticias-estrategias4/);
  assert.match(api,/AUTOSUFICIENCIA/);
  assert.match(api,/COHERENCIA DISCIPLINAR/);
 });

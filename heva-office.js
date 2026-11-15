@@ -152,6 +152,7 @@ async function powerpoint(m,teacher=false){
   let blocks=[];HEVA.blocks(material,teacher).forEach(item=>{let prev=blocks.at(-1);if(item.kind==='option'&&prev?.group===item.group)prev.text+='\n'+item.title+' '+item.text;else blocks.push({...item})});
   sections=blocks.map(item=>({title:item.title,text:slideText(item.text),kind:item.kind||'section'}));
  }
+ const story=root.HEVAPedagogy?.newsText(material);if(isPresentation&&story)sections.unshift({title:'Noticia didáctica · SIMULADA',text:story,kind:'resource'});
  const pages=sections.flatMap((section,index)=>{
   // Keep a complete multiple-choice question and its alternatives together.
   const isQuestion=/selección múltiple|alternativa|pregunta\s*\d+/i.test(section.title);

@@ -46,7 +46,7 @@ body:has(#integrated-lab[open]){overflow:hidden}
 function update(){
 const active=enabled.checked;
 strategy.querySelector('label')?.classList.toggle('opacity-60',active);
-note.textContent=active?'Modo combinado activo: HEVA toma las estrategias del panel lateral. La estrategia principal sigue como referencia para compatibilidad con el generador.':'Modo habitual: se usa la estrategia principal. Activa el laboratorio para combinar varias.';
+note.textContent=active?'Modo combinado activo: HEVA toma las estrategias del panel lateral. La estrategia principal también se exige; el informe del resultado mostrará qué tareas se vinculan a cada estrategia.':'Modo habitual: se usa la estrategia principal. Activa el laboratorio para combinar varias.';
 const summary=$('lab-summary');if(summary)summary.setAttribute('data-enabled',String(active));
 }
 enabled.addEventListener('change',update);update();
@@ -71,7 +71,7 @@ syncPrimary();
 const original=window.hevaExperimentalPlan;
 if(typeof original==='function')window.hevaExperimentalPlan=function(){
 const plan=original();
-if(!plan)return null;
+if(!plan){if([...document.querySelectorAll('#lab-strategies input[data-strategy]:checked')].length)throw Error('Marcaste estrategias complementarias, pero el módulo está desactivado. Activa “Estrategias integradas” para aplicarlas.');return null;}
 const primary=primaryId();
 if(primary&&plan.slots.some(s=>s.strategy===primary))throw Error('La estrategia principal ya está incluida; quita la repetición en las combinadas.');
 return {...plan,primaryStrategy:legacy.value,subject:$('asignatura').value,objective:$('texto-oa').value,topic:$('tema-especifico').value};
