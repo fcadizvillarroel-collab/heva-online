@@ -6,7 +6,7 @@ async function protect(req,res){
  // Piloto sin cuentas: cuota compartida opcional; no equivale a 10 usuarios identificados.
  if(process.env.HEVA_AI_REQUIRE_AUTH!=='true'){
   if(process.env.HEVA_PILOT_SHARED_QUOTA!=='true')return true;
-  const url=(process.env.SUPABASE_URL||'').replace(/\\/$/,'');
+  const url=(process.env.SUPABASE_URL||'').replace(/\/$/,'');
   const key=(process.env.SUPABASE_SERVICE_ROLE_KEY||'').trim();
   if(!url||!key){res.status(503).json({error:'La cuota del piloto no está configurada.'});return false}
   try{
