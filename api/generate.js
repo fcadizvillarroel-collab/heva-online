@@ -161,7 +161,8 @@ Responde ÚNICAMENTE en JSON:
     const designIssues=require('../heva-design.js').validate(disenoPedagogico,plan);
     if(designIssues.length)return res.status(400).json({error:designIssues.join('; ')});
     const fuentesDocumentales=await Sources.retrieve(plan);
-    const promptRedactor = Pedagogy.prompt(plan)+Sources.evidencePrompt(fuentesDocumentales);
+    const presentationGuidance=tipoMaterial==='PRESENTACION'?'\nMODO PRESENTACIÓN: genera 8 a 12 diapositivas completas en una respuesta JSON. Incluye objetivos, explicación progresiva, ejemplo modelado, actividades de aplicación y cierre. Cada diapositiva requiere título, función, contenido desarrollado y notas docentes. Crea una trazabilidadEstrategia con una referencia DIAPO-1, DIAPO-2, etc. para CADA diapositiva real, con habilidad, evidencia observable y criterio específicos. Incluye además las referencias de otras tareas reales si existen; no inventes referencias ni agregues preguntas por encima de las cantidades solicitadas.':'';
+    const promptRedactor = Pedagogy.prompt(plan)+presentationGuidance+Sources.evidencePrompt(fuentesDocumentales);
     const metadata = {objetivoAprendizaje,asignatura,nivel,marcoCurricular,temaEspecifico,tipoMaterial,estrategiaDidactica:Pedagogy.strategy(estrategiaDidactica).name};
     let author;
     const draft = async prompt => { const r = await call(prompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY,[],{deadline:generationDeadline}); author={proveedor:r.provider,modelo:r.model,fecha:new Date().toISOString()}; return r.value; };
