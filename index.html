@@ -731,7 +731,7 @@
         if(!window.confirm(resumenHEVA))throw new Error('Generación cancelada. No se enviaron solicitudes al servidor.');
 
         let data;
-        if(modo==='GENERADOR_ESTANDAR'&&payload.tipoMaterial!=='PRESENTACION'&&(recoveryRead(payload)||payload.cantAlternativas+payload.cantDesarrollo+payload.cantCasos>=8))data=await recuperarMaterialHEVA(payload);
+        if(modo==='GENERADOR_ESTANDAR'&&payload.tipoMaterial!=='PRESENTACION'&&(recoveryRead(payload)||payload.cantAlternativas+payload.cantDesarrollo+payload.cantCasos+Object.values(payload.instrumentosEvaluacion||{}).reduce((a,n)=>a+n,0)>=8))data=await recuperarMaterialHEVA(payload);
         else{
           let respuesta;
           try{
@@ -870,7 +870,7 @@
       pptx.writeFile({ fileName: 'presentacion.pptx' });
     }
   </script>
-<script src="/heva-didactics.js?v=20261115-noticias-estrategias4"></script><script src="/heva-design.js?v=20261113fix2"></script><script src="/heva-pedagogy.js"></script><script src="/heva-core.js"></script><script src="/heva-calculation.js"></script><script src="/heva-audit.js"></script><script src="/heva-skills.js"></script><script src="/heva-studio.js"></script><script src="/heva-templates.js"></script><script src="/heva-office.js?v=20261115-noticias-estrategias4"></script><script src="/heva-ui.js?v=20261115-noticias-estrategias4"></script><script src="/heva-pedagogy-ui.js"></script><script src="/heva-recovery-ui.js?v=20261114diag"></script><script src="/heva-quality-ui.js"></script><script src="/heva-sources-ui.js?v=20261115-noticias-estrategias4"></script><script src="/heva-workflow-ui.js?v=20261114separate"></script><script src="/heva-skills-ui.js"></script><script src="/heva-studio-ui.js?v=20261114sidebar3"></script><script src="/heva-ux.js"></script><script src="/heva-interactive.js"></script><script src="/heva-ai-diagrams.js?v=20261114visual2"></script><script src="/experimental/strategy-lab.js"></script><script src="/experimental/integration.js"></script><script src="/experimental/strategy-delivery.js"></script><script>
+<script src="/heva-assessment.js?v=20261115-formatos"></script><script src="/heva-didactics.js?v=20261115-evaluacion5"></script><script src="/heva-design.js?v=20261113fix2"></script><script src="/heva-pedagogy.js"></script><script src="/heva-core.js"></script><script src="/heva-calculation.js"></script><script src="/heva-audit.js"></script><script src="/heva-skills.js"></script><script src="/heva-studio.js"></script><script src="/heva-templates.js"></script><script src="/heva-office.js?v=20261115-evaluacion5"></script><script src="/heva-ui.js?v=20261115-evaluacion5"></script><script src="/heva-pedagogy-ui.js"></script><script src="/heva-recovery-ui.js?v=20261114diag"></script><script src="/heva-quality-ui.js"></script><script src="/heva-sources-ui.js?v=20261115-evaluacion5"></script><script src="/heva-workflow-ui.js?v=20261114separate"></script><script src="/heva-skills-ui.js"></script><script src="/heva-studio-ui.js?v=20261114sidebar3"></script><script src="/heva-ux.js"></script><script src="/heva-interactive.js"></script><script src="/heva-ai-diagrams.js?v=20261114visual2"></script><script src="/experimental/strategy-lab.js"></script><script src="/experimental/integration.js"></script><script src="/experimental/strategy-delivery.js"></script><script>
 (function(){
 'use strict';
 const $=id=>document.getElementById(id);
@@ -892,7 +892,7 @@ if(!type||!strategyBox||!counts)return;
 const strategyLabel=strategyBox.querySelector('label span')||strategyBox.querySelector('label');
 const countsHeading=counts.previousElementSibling;
 const descriptions={
- EVALUACION:'Instrumentos de evaluación: selecciona las cantidades de alternativas, desarrollo y situaciones de lectura/análisis. La estrategia pedagógica principal sigue disponible como orientación de la prueba. Verdadero/falso y otros instrumentos requieren implementación propia antes de habilitarse.',
+ EVALUACION:'Instrumentos de evaluación: selecciona las cantidades de alternativas, desarrollo y situaciones de lectura/análisis. La estrategia pedagógica principal sigue disponible como orientación de la prueba. Selecciona los formatos y cantidades en el panel de evaluación.',
  GUIA:'Estrategias de enseñanza y práctica guiada. Las cantidades inferiores corresponden a actividades que puedes incorporar a la guía.',
  PRESENTACION:'Estrategias de explicación, modelado y aplicación. Las cantidades inferiores corresponden a actividades dentro de la presentación.',
  TALLER:'Estrategias prácticas y de aplicación. Las cantidades inferiores corresponden a actividades del taller.',
@@ -912,5 +912,5 @@ function refresh(){
 }
 type.addEventListener('change',refresh);refresh();
 })();
-</script><script src="/experimental/heva-unified-ui.js"></script><script src="/heva-strategy-delivery-ui.js?v=20261115-verificacion"></script></body>
+</script><script src="/experimental/heva-unified-ui.js"></script><script src="/heva-strategy-delivery-ui.js?v=20261115-verificacion"></script><script src="/heva-assessment-ui.js?v=20261115-formatos"></script></body>
 </html>

@@ -12,12 +12,13 @@ async function word(m,teacher=false){
  children.push(new Paragraph({text:material.titulo||'Material educativo',heading:HeadingLevel.TITLE,spacing:{after:220},keepNext:true}));
  children.push(line([material.asignatura,material.nivel,material.temaEspecifico].filter(Boolean).join(' · '),{color:main,after:260}));
  for(const block of blocks){
+  if(block.path==='titulo'||(block===blocks[0]&&block.title===material.titulo))continue;
   if(block.kind==='option'){children.push(line(block.title+' '+block.text,{after:115}));continue;}
   children.push(new Paragraph({text:block.title,heading:HeadingLevel.HEADING_2,spacing:{before:220,after:110},keepNext:true}));
   for(const paragraph of String(block.text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean)){
    children.push(line(paragraph,{after:140}));
   }
-  if(/actividad|ejercicio|desarrollo|caso\s*\d|analiza y responde|aplicación autónoma/i.test(block.title)&&!teacher){
+  if(!teacher&&/preguntaReflexion$|actividadesGuiadas\.\d+\.consigna$|actividadAutonoma\.consigna$/.test(block.path||'')){
    for(let j=0;j<3;j++)children.push(line('___________________________________________________________________',{size:19,color:'9A9A9A',after:155}));
   }
  }
