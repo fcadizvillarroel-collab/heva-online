@@ -46,3 +46,15 @@ test('quota guard fails closed when enabled and quotas are unavailable',()=>{
  assert.match(sql,/pg_advisory_xact_lock/);
  assert.match(sql,/REVOKE ALL ON FUNCTION[\s\S]+FROM PUBLIC,anon,authenticated/);
 });
+
+test('pilot remains login-free and supports an optional shared request ceiling',()=>{
+ const guard=fs.readFileSync(path.join(__dirname,'../api/_ai-access.cjs'),'utf8');
+ const sql=fs.readFileSync(path.join(__dirname,'../docs/HEVA_PILOTO_SIN_LOGIN_CUOTA_PENDIENTE.sql'),'utf8');
+ assert.match(guard,/HEVA_AI_REQUIRE_AUTH/);
+ assert.match(guard,/HEVA_PILOT_SHARED_QUOTA/);
+ assert.match(guard,/HEVA_PILOT_DAILY_REQUESTS/);
+ assert.match(guard,/rpc\/heva_consumir_cuota_piloto/);
+ assert.match(sql,/ON CONFLICT\(fecha\) DO UPDATE/);
+ assert.match(sql,/ALTER TABLE public.heva_piloto_consumo ENABLE ROW LEVEL SECURITY/);
+ assert.match(sql,/GRANT EXECUTE ON FUNCTION public.heva_consumir_cuota_piloto\(integer\) TO service_role/);
+});
