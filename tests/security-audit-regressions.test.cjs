@@ -2,7 +2,7 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 test('base recovery preserves non-question strategy references',()=>{
  const source=fs.readFileSync(path.join(__dirname,'../lib/recovery.cjs'),'utf8');
  assert.match(source,/trazabilidadEstrategia:\(Array\.isArray\(m\.trazabilidadEstrategia\)/);
- assert.match(source,/!\/\^\(ALT\|DES\|CASO\)-\\d\+\$\//);
+ assert.ok(source.includes(String.raw`! /^(ALT|DES|CASO)-\\d+$/.test`.replace('! /','!/').replace('\\\\d','\\d')));
 });
 test('curriculum admin rejects invalid IDs and checks PATCH outcomes',()=>{
  const source=fs.readFileSync(path.join(__dirname,'../api/curriculum/admin.js'),'utf8');
