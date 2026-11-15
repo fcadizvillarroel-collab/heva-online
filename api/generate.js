@@ -46,7 +46,7 @@ module.exports = async function handler(req, res) {
     : {cantAlternativas,cantDesarrollo,cantCasos};
   if(!['NINGUNA','ESTILO','CONTENIDO'].includes(modoReferencia)||typeof referenciaRecibida!=='string'||referenciaRecibida.length>60000)return res.status(400).json({error:'Referencia opcional inválida.'});
   const textoReferencia=modoReferencia==='NINGUNA'?'':referenciaRecibida;
-  for (const [name,value,max] of [['cantAlternativas',cantAlternativas,20],['cantDesarrollo',cantDesarrollo,10],['cantCasos',cantCasos,4]]) {
+  for (const [name,value,max] of [['cantAlternativas',cantAlternativas,30],['cantDesarrollo',cantDesarrollo,30],['cantCasos',cantCasos,30]]) {
     if (!Number.isInteger(value) || value < 0 || value > max) return res.status(400).json({error:`${name} debe estar entre 0 y ${max}`});
   }
   if (typeof objetivoAprendizaje !== 'string' || typeof textoReferencia !== 'string' || textoReferencia.length > 60000) return res.status(400).json({error:'Objetivo o texto de referencia inválido o demasiado extenso.'});

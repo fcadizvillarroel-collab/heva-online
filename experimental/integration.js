@@ -1,14 +1,14 @@
 /* HEVA Experimental: deterministic integrated activity/question planning. No API calls. */
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.HEVAIntegration=api})(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
-const max={alternativas:20,desarrollo:10,lecturas:4};
+const max={alternativas:30,desarrollo:30,lecturas:30};
 function plan(input){
 const strategies=input.strategies||[],counts=input.counts||{},mode=input.mode||'auto',manual=input.manual||{};
 if(!['auto','manual'].includes(mode))throw Error('Modo inválido');
 if(!strategies.length||strategies.length>8)throw Error('Selecciona entre una y ocho estrategias');
 const ids=new Set();let total=0;
-for(const s of strategies){if(!s.id||ids.has(s.id))throw Error('Estrategia duplicada o sin identificador');ids.add(s.id);if(!Number.isInteger(s.quantity)||s.quantity<1||s.quantity>12)throw Error('Cantidad de actividades inválida');total+=s.quantity}
-if(total>35)throw Error('Máximo 35 actividades');
+for(const s of strategies){if(!s.id||ids.has(s.id))throw Error('Estrategia duplicada o sin identificador');ids.add(s.id);if(!Number.isInteger(s.quantity)||s.quantity<1||s.quantity>30)throw Error('Cantidad de actividades inválida');total+=s.quantity}
+
 for(const k of Object.keys(max))if(!Number.isInteger(counts[k])||counts[k]<0||counts[k]>max[k])throw Error('Cantidad inválida: '+k);
 const slots=[];for(const s of strategies)for(let i=1;i<=s.quantity;i++)slots.push({id:s.id+'-'+i,strategy:s.id,number:i,alternativas:0,desarrollo:0,lecturas:0});
 const affinity=(kind,k)=>k==='lecturas'?(/fuente|lectura|texto|caso|testimonio|documento|historia|argument|cartograf|debate|controvers|cronolog|multicaus|tresp/.test(kind)?4:1):k==='alternativas'?(/caso|fuente|lectura|error|problema|dato|compar|diagnost|fall|multicaus|graf|mapa/.test(kind)?3:1):(/modelo|caso|problema|argument|debate|proyecto|fuente|indag|escrit|error|multicaus/.test(kind)?3:1);

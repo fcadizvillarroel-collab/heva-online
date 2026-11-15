@@ -7,9 +7,10 @@ const assessment=()=>typeof module==='object'&&module.exports?require('../heva-a
 function validatePlan(p){
  const integrated=p.planIntegrado;if(integrated==null)return [];
  const slots=integrated.slots,issues=[];
- if(!Array.isArray(slots)||!slots.length||slots.length>35)return ['Plan integrado sin actividades válidas (1–35).'];
+ if(!Array.isArray(slots)||!slots.length||slots.length>240)return ['Plan integrado sin actividades válidas (1–240).'];
  const allowed=new Set(Lab.items(p.asignatura).map(x=>x.id)),ids=new Set(),totals={alternativas:0,desarrollo:0,lecturas:0};
- for(const s of slots){if(!s||!allowed.has(s.strategy)||typeof s.id!=='string'||!/^[-a-z0-9]+-\d+$/.test(s.id)||!s.id.startsWith(s.strategy+'-')||ids.has(s.id)){issues.push('Estrategia integrada ajena a la asignatura, duplicada o sin ID válido.');continue}ids.add(s.id);for(const k of Object.keys(totals)){if(!Number.isInteger(s[k])||s[k]<0||s[k]>20)issues.push('Cantidad inválida en '+s.id);else totals[k]+=s[k]}}
+ for(const s of slots){if(!s||!allowed.has(s.strategy)||typeof s.id!=='string'||!/^[-a-z0-9]+-\d+$/.test(s.id)||!s.id.startsWith(s.strategy+'-')||ids.has(s.id)){issues.push('Estrategia integrada ajena a la asignatura, duplicada o sin ID válido.');continue}ids.add(s.id);for(const k of Object.keys(totals)){if(!Number.isInteger(s[k])||s[k]<0||s[k]>30)issues.push('Cantidad inválida en '+s.id);else totals[k]+=s[k]}}
+ for(const strategy of allowed)if(slots.filter(s=>s?.strategy===strategy).length>30)issues.push('Máximo 30 actividades por estrategia.');
  for(const [k,key]of [['alternativas','cantAlternativas'],['desarrollo','cantDesarrollo'],['lecturas','cantCasos']])if(totals[k]!==p[key])issues.push('La distribución integrada de '+k+' no coincide con el total solicitado.');
  if(p.tipoMaterial==='PRESENTACION'&&slots.length>8)issues.push('Una presentación admite hasta ocho actividades integradas para conservar explicación y cierre.');
  if(p.tipoMaterial==='EVALUACION'&&requirements(p).some(r=>!r.refs.length))issues.push('Hay una actividad integrada que no tiene ítems asignados: distribuye más preguntas o reduce actividades.');
