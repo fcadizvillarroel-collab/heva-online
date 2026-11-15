@@ -62,6 +62,29 @@ function inspectAll(material,plan={}){
   if(area==='ciencias'&&/experimento|laboratorio|pr[aá]ctica experimental/i.test(all)&&!/seguridad|precauci[oó]n|protecci[oó]n/i.test(all))incidencias.push({tipo:'seguridad',referencia:ref,detalle:'Revisar las medidas de seguridad para la actividad experimental.'});
   if(area==='tecnico'&&/soldadura|corte|esmeril|m[aá]quina/i.test(all)&&!/epp|protecci[oó]n|seguridad|riesgo/i.test(all))incidencias.push({tipo:'seguridad',referencia:ref,detalle:'Actividad técnica sin indicación visible de prevención de riesgos.'});
  });
- return {asignatura,disciplina:area,aplica:true,estado:incidencias.length?'requiere_revision':'revision_docente_pendiente',incidencias,verificaciones,alcance:'Auditoría heurística interdisciplinaria. No certifica OA, exactitud factual, idioma, seguridad ni calidad visual final; requiere validación de fuentes y revisión docente.'};
+ const prompts=[...(material?.preguntasAlternativas||[]).map((q,i)=>({ref:'ALT-'+(i+1),text:String(q?.enunciado||'')})),...(material?.preguntasDesarrollo||[]).map((q,i)=>({ref:'DES-'+(i+1),text:String(q?.enunciado||'')}))];
+ const full=[...slides.map(d=>String(d?.titulo||'')+' '+(Array.isArray(d?.contenido)?d.contenido.join(' '):String(d?.contenido||''))),...prompts.map(p=>p.text)].join(' ');
+ const has=(re)=>re.test(full);
+ const recommend=(reference,detail)=>incidencias.push({tipo:'revision_especializada',referencia:reference,detalle:detail});
+ if(area==='matematica'&&has(/\b(?:x|y)\s*[+\-=]|\d+\s*[xy]\b/i)&&!has(/comprob|verific|reemplaz|sustitu/i))recommend('MAT-COMPROBACION','Se utilizan ecuaciones sin comprobación visible de resultados.');
+ if(area==='sociales'&&has(/fuente hist[oó]rica|documento hist[oó]rico|testimonio/i)&&!has(/autor|fecha|procedencia|contexto/i))recommend('SOC-FUENTES','El análisis de fuentes necesita autoría, fecha o contexto identificable.');
+ if(area==='lenguaje'&&has(/comprensi[oó]n lectora|lee el texto|seg[uú]n el texto/i)&&!has(/lectura:|texto:|noticia:|fragmento:|p[aá]rrafo 1/i))recommend('LEN-ESTIMULO','Comprobar que el texto íntegro esté incluido en el material.');
+ if(area==='ingles'&&has(/translate|traduc|vocabulary|vocabulario/i)&&!has(/example|ejemplo|dialogue|di[aá]logo/i))recommend('ING-MODELO','La tarea lingüística no muestra un ejemplo o diálogo contextualizado.');
+ if(area==='instrumental'&&has(/conflicto|contrato|derecho laboral|emprendimiento/i)&&!has(/caso|situaci[oó]n|decisi[oó]n|simulaci[oó]n/i))recommend('INS-APLICACION','El contenido práctico debería incluir una situación de aplicación o decisión.');
+ if(area==='ciencias'&&has(/experimento|hip[oó]tesis|laboratorio/i)&&!has(/registro|observaci[oó]n|resultado|evidencia/i))recommend('CIE-EVIDENCIA','La actividad experimental no indica cómo registrar o interpretar resultados.');
+ for(const p of prompts)if(/(?:gr[aá]fico|imagen|mapa|tabla|texto adjunto|siguiente texto)/i.test(p.text)&&!has(/(?:datos de la tabla|tabla:|gr[aá]fico:|mapa:|texto:|imagen:)/i))recommend(p.ref,'La pregunta remite a un recurso visual o textual que debe comprobarse en el archivo final.');
+ const checks={
+  matematica:['Exactitud de operaciones y procedimientos','Representaciones y unidades','Comprobación y contextualización'],
+  sociales:['Precisión histórica y geográfica','Multicausalidad y perspectivas','Fuentes y cronología'],
+  lenguaje:['Textos completos y pertinentes','Inferencias y comprensión','Producción y retroalimentación'],
+  ciencias:['Exactitud científica','Variables, evidencia y seguridad','Esquemas y aplicación'],
+  ingles:['Exactitud lingüística','Progresión y modelado','Comprensión y producción'],
+  tecnico:['Seguridad y procedimientos','Instrumentos y estándares técnicos','Evidencia de desempeño'],
+  instrumental:['Situaciones reales','Toma de decisiones','Transferencia a la vida cotidiana'],
+  general:['Exactitud disciplinar','Actividades y ejemplos','Evidencia de aprendizaje']
+ };
+ const criterios=checks[area]||checks.general;
+ const alcanceProfundo={objetivo:objetivo?'Declarado; alineación semántica pendiente':'Ausente',criterios,validacion:'pendiente_revision_independiente_y_docente',exportacion:'pendiente_inspeccion_archivo_final'};
+ return {asignatura,disciplina:area,criterios,alcanceProfundo,aplica:true,estado:incidencias.length?'requiere_revision':'revision_docente_pendiente',incidencias,verificaciones,alcance:'Auditoría heurística interdisciplinaria. No certifica OA, exactitud factual, idioma, seguridad ni calidad visual final; requiere validación de fuentes y revisión docente.'};
 }
 module.exports={inspect,evaluateSimple,mathSubject,inspectAll,discipline};
