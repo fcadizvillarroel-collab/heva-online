@@ -58,3 +58,13 @@ test('pilot remains login-free and supports an optional shared request ceiling',
  assert.match(sql,/ALTER TABLE public.heva_piloto_consumo ENABLE ROW LEVEL SECURITY/);
  assert.match(sql,/GRANT EXECUTE ON FUNCTION public.heva_consumir_cuota_piloto\(integer\) TO service_role/);
 });
+
+test('PowerPoint mode does not inherit assessment multiple-choice counts',()=>{
+ const api=fs.readFileSync(path.join(__dirname,'../api/generate.js'),'utf8');
+ const ui=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+ assert.match(api,/const cantidadesEfectivas=tipoMaterial==='PRESENTACION'/);
+ assert.match(api,/HEVA\.validate\(m,cantidadesEfectivas\)/);
+ assert.match(api,/\.\.\.cantidadesEfectivas,incluirTicketSalida/);
+ assert.match(ui,/const esPresentacionHEVA=.*==='PRESENTACION'/);
+ assert.match(ui,/\? \{cantAlternativas:0,cantDesarrollo:0,cantCasos:0\}/);
+});
