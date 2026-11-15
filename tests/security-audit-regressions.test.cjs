@@ -30,3 +30,19 @@ test('database hardening proposal removes permissive policies and table grants',
  assert.match(sql,/ALTER TABLE public.curriculo_publicado ENABLE ROW LEVEL SECURITY/);
  assert.match(sql,/REVOKE ALL PRIVILEGES ON TABLE public.heva_perfiles FROM anon, authenticated/);
 });
+
+test('all five AI endpoints require the shared access guard',()=>{
+ for(const file of ['generate','review','recover','studio','diagram']){
+  const source=fs.readFileSync(path.join(__dirname,'../api/'+file+'.js'),'utf8');
+  assert.match(source,/require\('\.\/_ai-access\.cjs'\)\.protect\(req,res\)/,file);
+ }
+});
+test('quota guard fails closed when enabled and quotas are unavailable',()=>{
+ const source=fs.readFileSync(path.join(__dirname,'../api/_ai-access.cjs'),'utf8');
+ const sql=fs.readFileSync(path.join(__dirname,'../docs/HEVA_CUOTA_IA_PENDIENTE.sql'),'utf8');
+ assert.match(source,/HEVA_AI_REQUIRE_AUTH/);
+ assert.match(source,/rest\/v1\/rpc\/heva_consumir_cuota_ia/);
+ assert.match(source,/status\(503\)/);
+ assert.match(sql,/pg_advisory_xact_lock/);
+ assert.match(sql,/REVOKE ALL ON FUNCTION[\s\S]+FROM PUBLIC,anon,authenticated/);
+});
