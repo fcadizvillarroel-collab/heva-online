@@ -5,7 +5,7 @@ module.exports=async(req,res)=>{
  if(req.method==='OPTIONS')return res.status(200).end();if(req.method!=='POST')return res.status(405).json({error:'Utilice POST.'});
  const deadline=Date.now()+55000;
  try{
-  const {fase,plan:input,base,parts=[],batch,autor,borradorBloque,corregirFormato=false}=req.body||{};
+  const {fase,plan:input,base,parts=[],batch,autor,borradorBloque,correcciones=[],corregirFormato=false}=req.body||{};
   if(JSON.stringify(req.body||{}).length>250000)return res.status(413).json({error:'Documento demasiado extenso.'});
   let plan;try{plan=R.planOf(input)}catch(e){return res.status(400).json({error:'El encargo contiene parámetros inválidos.',detalle:e.message,codigo:'PLAN_INVALIDO',reintentable:false})}
   if(!['base','items','finalizar'].includes(fase))return res.status(400).json({error:'Fase no admitida.'});
@@ -20,7 +20,7 @@ module.exports=async(req,res)=>{
    // Apply the same count and trace boundary used by /api/generate.
    material=P.normalizeTaskTraces(P.enforceRequestedCounts(material,plan));
    let issues=R.validate(material,plan);
-   if(issues.length)return res.status(422).json({error:'Los bloques requieren corrección. Se conserva el material anterior.',detalle:issues.join('; '),reparacion:R.repair(base,parts,plan),reintentable:true});
+   if(issues.length)return res.status(422).json({error:'Los bloques requieren corrección. Se conserva el material anterior.',detalle:issues.join('; '),reparacion:R.repair(base,parts,plan,issues),reintentable:true});
    material=P.finalize(material,plan);material.autoriaIA=autor;material.planGeneracion=plan;material.fuentesDocumentales=fuentesDocumentales;
    const evidence=S.validateEvidence(material.respaldoDocumental,fuentesDocumentales);material.respaldoDocumental=evidence.valid;material.incidenciasDocumentales=evidence.invalid;material=Skills.prepare(material,plan,fuentesDocumentales,evidence);
    material=require('../heva-studio.js').link(material,plan);material.auditoriaExperimental=require('../experimental/quality-audit.cjs').inspect(material,plan);material.auditoriaDisciplinar=require('../experimental/subject-audit.cjs').inspectAll(material,plan);return res.status(200).json({exito:true,material});
@@ -32,7 +32,8 @@ module.exports=async(req,res)=>{
   const caseRepair=corregirFormato&&fase==='items'&&batch?.tipo==='casos'?'\nREPARACIÓN OBLIGATORIA: devuelve un objeto JSON con casosEstudio como arreglo de exactamente '+batch.cantidad+' casos completos y trazabilidadEstrategia con referencia CASO-'+(batch.inicio+1)+'. Cada caso requiere id, titulo, contextoReal, preguntaReflexion, habilidad, criterioEvaluacion. El caso debe ejecutar la estrategia '+P.strategy(plan.estrategiaDidactica).name+'. No devuelvas un arreglo vacío ni reemplaces el caso por una explicación.':'';
   const developmentRepair=fase==='items'&&batch?.tipo==='desarrollo'?'\nBLOQUE DE DESARROLLO OBLIGATORIO: devuelve exclusivamente JSON con preguntasDesarrollo como ARRAY de exactamente '+batch.cantidad+' objetos, con numero y enunciado completos. Incluye trazabilidadEstrategia como ARRAY con referencia DES-'+(batch.inicio+1)+' y cada pregunta consecutiva, habilidad, evidencia y criterio. Para evaluación incluye rubrica con cuatro niveles 0,1,2,3 y descripcion en cada nivel. No sustituyas desarrollo por alternativas ni devuelvas un arreglo vacío.':'';
   const strategyRepair=fase==='base'?'\nPLAN DE ESTRATEGIA OBLIGATORIO: incluye planEstrategia como objeto JSON con id exacto de la estrategia seleccionada, habilidadCentral, aplicacionConcreta, evidenciaEsperada y retroalimentacionDocente. Cada uno de los cuatro textos debe ser específico del objetivo y del material, no un marcador ni un texto genérico. Estrategia seleccionada: '+JSON.stringify(P.strategy(plan.estrategiaDidactica))+'. El plan debe explicar cómo se ejecutará realmente la estrategia en las tareas.':'';
-  const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+strictFormat+caseRepair+developmentRepair+strategyRepair;
+  const correctionContext=Array.isArray(correcciones)&&correcciones.length?'\nCORRECCIONES OBLIGATORIAS DEL CONTROL FINAL (datos): '+JSON.stringify(correcciones).slice(0,6000):'';
+  const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+strictFormat+caseRepair+developmentRepair+strategyRepair+correctionContext;
   let result;
   if(fase==='items'&&borradorBloque){
    const preserved=R.normalizePart(borradorBloque,batch),pending=R.partIssues(preserved,plan,batch);
