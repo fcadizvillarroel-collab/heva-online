@@ -36,8 +36,8 @@ function classifySlide(title,lines,index){
 function visualKind(title,lines){
  const t=String(title).toLowerCase(),body=lines.join(' ');
  if(/línea de tiempo|cronología|etapas históricas|periodización/.test(t))return 'chronology';
- if(/resoluci[oó]n|despej|comprobaci[oó]n|modelamiento/.test(t)&&/\d\s*[a-zA-Z]|[a-zA-Z]\s*[+=]|=\s*\d/.test(body))return 'equation';
- if(/procedimiento|pasos|secuencia|modelamiento|proceso/.test(t)&&/(?:paso\s*\d|etapa\s*\d)/i.test(body))return 'process';
+ if(/resoluci[oó]n|despej|comprobaci[oó]n|modelamiento|análisis de fuente/.test(t)&&/[xX]\s*[+=\-]|(?:\d+)\s*[xX]/.test(body))return 'equation';
+ if(/procedimiento|pasos|secuencia|síntesis del proceso|proceso de resolución/.test(t)&&/(?:paso\s*\d|^\s*\d+\.)/im.test(body))return 'process';
  return null;
 }
 function drawSemanticVisual(ppt,theme,slide,title,lines){
@@ -46,21 +46,21 @@ function drawSemanticVisual(ppt,theme,slide,title,lines){
  const shape=(x,y,w,h,c)=>slide.addShape(ppt.ShapeType.roundRect,{x,y,w,h,rectRadius:.12,line:{color:c,transparency:100},fill:{color:c}});
  if(kind==='equation'){
   const source=lines.join(' ');
-  const eq=[...source.matchAll(/(?:\d[\d.,]*\s*\(?\s*[xX]\s*\)?(?:\s*[+\-*/]\s*\d[\d.,]*)?\s*=\s*\d[\d.,]*|[xX]\s*[+\-*/]\s*\d[\d.,]*\s*=\s*\d[\d.,]*)/g)].map(x=>x[0]);
-  const unique=[...new Set(eq)].slice(0,3);
-  if(!unique.length)return false;
+  const matches=[...source.matchAll(/(?:\d[\d.,]*\s*[xX]|[xX])\s*(?:[+\-]\s*\d[\d.,]*)?\s*=\s*(?:\d[\d.,]*\s*(?:[+\-]\s*\d[\d.,]*)?|\d[\d.,]*\s*\/\s*\d[\d.,]*)/g)].map(x=>x[0]);
+  const equations=[...new Set(matches)].slice(0,4);
+  if(!equations.length)return false;
   tx(title,.8,.83,11.7,.9,31,theme.main,true);
-  shape(.85,2.05,11.62,1.25,theme.main);tx(unique[0],1.2,2.2,10.9,.85,34,'FFFFFF',true);
-  const steps=lines.filter(x=>/paso|restar|dividir|sustitu|reemplaz|comprob|resultado|por lo tanto|ecuaci[oó]n/i.test(x)).slice(0,3);
-  const show=steps.length?steps:lines.filter(x=>!x.includes(unique[0])).slice(0,3);
-  const n=Math.max(1,show.length),w=(11.6-(n-1)*.18)/n;
-  show.forEach((line,i)=>{const x=.86+i*(w+.18);shape(x,3.66,w,2.55,i%2?'F1E7DB':'FFFFFF');tx('PASO '+(i+1),x+.22,3.9,w-.44,.38,14,theme.main,true);tx(line,x+.22,4.38,w-.44,1.45,Math.min(20,n===3?17:20));});
+  shape(.85,2.02,11.62,1.15,theme.main);tx(equations[0],1.18,2.16,10.9,.8,33,'FFFFFF',true);
+  const other=equations.slice(1),steps=other.length?other:lines.filter(x=>/paso|restar|dividir|simplificar|despejar|resultado|comprob/i.test(x)).slice(0,3);
+  const n=Math.max(1,steps.length),w=(11.6-(n-1)*.18)/n;
+  steps.forEach((line,i)=>{const x=.86+i*(w+.18);shape(x,3.56,w,2.7,i%2?'F1E7DB':'FFFFFF');tx('TRANSFORMACIÓN '+(i+1),x+.18,3.82,w-.36,.38,13,theme.main,true);tx(line,x+.2,4.42,w-.4,1.32,n>2?19:23);});
   return true;
  }
  if(kind==='process'||kind==='chronology'){
+  const items=lines.slice(0,4);if(!items.length)return false;
   tx(title,.8,.83,11.7,.9,31,theme.main,true);
-  const items=lines.slice(0,4),n=items.length,w=(11.6-(n-1)*.16)/n;
-  items.forEach((line,i)=>{const x=.86+i*(w+.16);shape(x,2.35,w,3.65,i%2?'F1E7DB':'FFFFFF');shape(x+.22,2.68,.68,.68,theme.main);tx(String(i+1),x+.28,2.74,.54,.5,21,'FFFFFF',true);tx(line,x+.23,3.58,w-.46,1.98,n>=4?17:20);if(i<n-1)tx('→',x+w-.03,3.13,.3,.35,17,theme.accent,true)});
+  const n=items.length,w=(11.6-(n-1)*.16)/n;
+  items.forEach((line,i)=>{const x=.86+i*(w+.16);shape(x,2.35,w,3.65,i%2?'F1E7DB':'FFFFFF');shape(x+.22,2.68,.68,.68,theme.main);tx(String(i+1),x+.28,2.74,.54,.5,21,'FFFFFF',true);tx(line.replace(/^\s*\d+[.)]\s*/,''),x+.23,3.58,w-.46,1.98,n>=4?17:20);if(i<n-1)tx('→',x+w-.03,3.13,.3,.35,17,theme.accent,true)});
   return true;
  }
  return false;
