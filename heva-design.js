@@ -18,7 +18,7 @@ function strategyExecution(p){
  GUIA:'Haz visible la estrategia en el ejemploGuiado, las actividadesGuiadas y la actividadAutonoma. No basta mencionarla en planEstrategia.',
  ACCESIBLE:'Haz visible la estrategia en el ejemploGuiado, actividadesGuiadas y actividadAutonoma con apoyos de acceso, manteniendo el OA.',
  EVALUACION:'Evalúa la estrategia mediante ítems independientes y estímulos completos; no agregues modelamiento, activación ni soluciones en la versión del estudiante.',
- PRESENTACION:'Distribuye la estrategia entre diapositivas de explicación, modelamiento y aplicación, con notasDocente que indiquen qué hará el estudiante.',
+ PRESENTACION:'Primero enseña los contenidos del OA en al menos seis diapositivas explicativas. Después modela y aplica la estrategia principal y las integradas sobre esa materia. En notasDocente vincula cada tarea con contenido, desempeño del OA, estrategia, evidencia y criterio. Las preguntas y estrategias no sustituyen las explicaciones.',
  PLANIFICACION:'Describe acciones docentes y estudiantiles de la estrategia en Inicio, Desarrollo y Cierre; asigna evidencia observable y tiempos reales.',
  TALLER:'Concreta la estrategia en desafioTaller, procedimientoTaller y listaCotejoTP; debe existir producto observable y criterios de desempeño.'
  };
