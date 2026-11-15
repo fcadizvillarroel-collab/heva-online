@@ -85,3 +85,16 @@ test('PowerPoint layouts vary by pedagogical purpose',()=>{
  assert.match(source,/function classifySlide/);
  assert.match(source,/addContent\(ppt,theme,slide,page.title,page.lines,page.kind,i\)/);
 });
+
+test('strategy metadata can be repaired without inventing evidence',()=>{
+ const pedagogy=require('../heva-pedagogy.js');
+ const p={estrategiaDidactica:'Análisis de fuentes y evidencias'};
+ const normalized=pedagogy.normalizeStrategyPlan({planEstrategia:{habilidad:'Interpretar fuentes históricas',aplicacion:'Analizar dos fuentes',evidencia:'Comparación argumentada',retroalimentacion:'Revisar evidencias y argumentos'}},p);
+ assert.equal(normalized.planEstrategia.id,pedagogy.strategy(p.estrategiaDidactica).id);
+ assert.equal(normalized.planEstrategia.habilidadCentral,'Interpretar fuentes históricas');
+ assert.equal(normalized.planEstrategia.aplicacionConcreta,'Analizar dos fuentes');
+ assert.equal(normalized.planEstrategia.evidenciaEsperada,'Comparación argumentada');
+ assert.equal(normalized.planEstrategia.retroalimentacionDocente,'Revisar evidencias y argumentos');
+ const missing=pedagogy.normalizeStrategyPlan({planEstrategia:{}},p);
+ assert.equal(missing.planEstrategia.habilidadCentral,undefined);
+});
