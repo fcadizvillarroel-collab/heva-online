@@ -107,3 +107,11 @@ test('PowerPoint assets use a versioned URL and prompts require complete classro
  assert.match(api,/AUTOSUFICIENCIA/);
  assert.match(api,/COHERENCIA DISCIPLINAR/);
 });
+
+test('recovery base repairs incomplete strategy metadata without discarding slides',()=>{
+ const source=fs.readFileSync(path.join(__dirname,'../api/recover.js'),'utf8');
+ assert.match(source,/fase==='base'&&issues\.some/);
+ assert.match(source,/STRATEGY_PLAN_INCOMPLETE/);
+ assert.match(source,/planEstrategia:fixed\.value\.planEstrategia/);
+ assert.match(source,/if\(next\.length<issues\.length\)/);
+});
