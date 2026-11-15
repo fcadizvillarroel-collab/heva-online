@@ -27,6 +27,15 @@ module.exports = async function handler(req, res) {
     'Prefer': 'return=representation'
   };
 
+  const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const validId=id=>typeof id==='string'&&uuid.test(id);
+  const write=async(url,method,body)=>{
+    const response=await fetch(url,{method,headers:headersSupabase,body:JSON.stringify(body)});
+    const data=await response.json().catch(()=>null);
+    if(!response.ok)throw new Error('Error Supabase al guardar operación curricular');
+    if(method==='PATCH'&&(!Array.isArray(data)||data.length!==1))throw new Error('La actualización curricular no afectó exactamente un registro');
+    return data;
+  };
   try {
     // La ruta docente debe resolverse ANTES de la ruta general GET.
     if (req.method === 'GET' && action === 'verified') {
@@ -63,7 +72,8 @@ module.exports = async function handler(req, res) {
       let url = `${SUPABASE_URL}/rest/v1/curriculo_staging?select=*&order=created_at.desc&limit=450`;
       
       if (estado) {
-        url += `&estado=eq.${estado}`;
+        if(typeof estado!=='string'||!/^[A-Z_]{1,30}$/.test(estado))return res.status(400).json({error:'Filtro estado inválido.'});
+        url += `&estado=eq.${encodeURIComponent(estado)}`;
       }
 
       const resp = await fetch(url, { headers: headersSupabase });
@@ -77,11 +87,12 @@ module.exports = async function handler(req, res) {
     if (req.method === 'POST' && action === 'approve') {
       const { stagingId, comprobadoDocumentalmente, notas } = req.body || {};
       if (!comprobadoDocumentalmente) return res.status(400).json({error:'Debe cotejar la referencia documental antes de publicar.'});
-      if (!stagingId) return res.status(400).json({ error: 'stagingId requerido.' });
+      if (!validId(stagingId)) return res.status(400).json({ error: 'stagingId debe ser un UUID válido.' });
 
       // Obtener el registro de staging
-      const rItem = await fetch(`${SUPABASE_URL}/rest/v1/curriculo_staging?id=eq.${stagingId}&select=*`, { headers: headersSupabase });
+      const rItem = await fetch(`${SUPABASE_URL}/rest/v1/curriculo_staging?id=eq.${encodeURIComponent(stagingId)}&select=*`, { headers: headersSupabase });
       const lista = await rItem.json();
+      if(!rItem.ok||!Array.isArray(lista))throw new Error('No fue posible consultar staging');
       const item = lista[0];
 
       if (!item) return res.status(404).json({ error: 'Registro no encontrado en Supabase.' });
@@ -111,61 +122,31 @@ module.exports = async function handler(req, res) {
       const publicado = await rPub.json();
       if (!rPub.ok) throw new Error(publicado.message || 'Fallo al publicar objetivo');
 
-      // Actualizar estado en Staging
-      await fetch(`${SUPABASE_URL}/rest/v1/curriculo_staging?id=eq.${stagingId}`, {
-        method: 'PATCH',
-        headers: headersSupabase,
-        body: JSON.stringify({
-          estado: 'APROBADO',
-          referencia_comprobada: Boolean(comprobadoDocumentalmente),
-          notas_revision: notas,
-          revisado_at: new Date().toISOString()
-        })
+      // Operación provisional no atómica: comprobar cada escritura; la migración RPC
+      // transaccional propuesta debe reemplazar esta secuencia antes de uso crítico.
+      await write(`${SUPABASE_URL}/rest/v1/curriculo_staging?id=eq.${encodeURIComponent(stagingId)}`,'PATCH',{
+        estado:'APROBADO',referencia_comprobada:Boolean(comprobadoDocumentalmente),
+        notas_revision:notas,revisado_at:new Date().toISOString()
       });
-
-      // Auditoría
-      await fetch(`${SUPABASE_URL}/rest/v1/curriculo_auditoria`, {
-        method: 'POST',
-        headers: headersSupabase,
-        body: JSON.stringify({
-          staging_id: stagingId,
-          accion: 'APROBACION_Y_PUBLICACION',
-          estado_anterior: item.estado,
-          estado_nuevo: 'APROBADO',
-          cambios_json: { notas, comprobadoDocumentalmente }
-        })
+      await write(`${SUPABASE_URL}/rest/v1/curriculo_auditoria`,'POST',{
+        staging_id:stagingId,accion:'APROBACION_Y_PUBLICACION',estado_anterior:item.estado,
+        estado_nuevo:'APROBADO',cambios_json:{notas,comprobadoDocumentalmente}
       });
-
       return res.status(200).json({ exito: true, publicado });
     }
 
     // 3. RECHAZAR O CORREGIR
     if (req.method === 'POST' && action === 'reject') {
       const { stagingId, motivo } = req.body || {};
-      await fetch(`${SUPABASE_URL}/rest/v1/curriculo_staging?id=eq.${stagingId}`, {
-        method: 'PATCH',
-        headers: headersSupabase,
-        body: JSON.stringify({
-          estado: 'RECHAZADO',
-          notas_revision: motivo,
-          revisado_at: new Date().toISOString()
-        })
-      });
+      if(!validId(stagingId))return res.status(400).json({error:'stagingId debe ser un UUID válido.'});
+      await write(`${SUPABASE_URL}/rest/v1/curriculo_staging?id=eq.${encodeURIComponent(stagingId)}`,'PATCH',{estado:'RECHAZADO',notas_revision:motivo,revisado_at:new Date().toISOString()});
       return res.status(200).json({ exito: true });
     }
 
     if (req.method === 'POST' && action === 'correct') {
       const { stagingId, textoCorregido, notas } = req.body || {};
-      await fetch(`${SUPABASE_URL}/rest/v1/curriculo_staging?id=eq.${stagingId}`, {
-        method: 'PATCH',
-        headers: headersSupabase,
-        body: JSON.stringify({
-          texto: textoCorregido.trim(),
-          estado: 'CORREGIDO',
-          notas_revision: notas,
-          revisado_at: new Date().toISOString()
-        })
-      });
+      if(!validId(stagingId)||typeof textoCorregido!=='string'||!textoCorregido.trim())return res.status(400).json({error:'Identificador o texto corregido inválido.'});
+      await write(`${SUPABASE_URL}/rest/v1/curriculo_staging?id=eq.${encodeURIComponent(stagingId)}`,'PATCH',{texto:textoCorregido.trim(),estado:'CORREGIDO',notas_revision:notas,revisado_at:new Date().toISOString()});
       return res.status(200).json({ exito: true });
     }
 
