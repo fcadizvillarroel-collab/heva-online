@@ -722,6 +722,9 @@
           }
         }
 
+        if(!data||data.exito!==true||!data.material||typeof data.material!=='object'){
+          throw new Error(data?.detalle||data?.error||'El servidor no entregó un material completo; no se habilitarán descargas vacías.');
+        }
         materialActual = data.material;
         materialActual.nivel = payload.nivel;
         materialActual.asignatura = payload.asignatura;
@@ -740,7 +743,11 @@
 
       } catch (err) {
         errorBox.classList.remove('hidden');
-        mensajeError.innerText = err.message;
+        mensajeError.innerText = 'No se generó el material: '+err.message+'. Word y PowerPoint permanecerán deshabilitados hasta recibir contenido válido.';
+        if(!materialActual){
+          ['btn-docx','btn-pptx','btn-guardar-doc'].forEach(id=>{const button=document.getElementById(id);if(button)button.disabled=true;});
+          document.getElementById('dictamen-calidad').innerText='SIN MATERIAL GENERADO · Revisar error de IA';
+        }
       } finally {
         box.classList.add('hidden');
         btn.disabled = false;
