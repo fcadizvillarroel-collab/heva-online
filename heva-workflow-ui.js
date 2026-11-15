@@ -33,7 +33,15 @@ async function informeExportacionHEVA(){
  }
  report.exportable=!report.errores.length;return report;
 }
-function mostrarControlHEVA(){let panel=document.getElementById('heva-export-control');if(!panel){panel=document.createElement('section');panel.id='heva-export-control';panel.className='no-print border rounded p-4 my-4 bg-white';document.getElementById('hoja-material').before(panel)}if(!materialActual){panel.hidden=true;return}panel.hidden=false;const report=HEVAAudit.inspect(materialActual);panel.innerHTML=`<h3 class="font-bold text-[#8B2635]">Control de calidad antes de exportar</h3>${auditHTMLHEVA(report)}<button type="button" class="border rounded px-3 py-2 text-xs mt-3" id="audit-open">Revisar antes de descargar</button>`;panel.querySelector('button').onclick=()=>prepararExportacionHEVA(null);}
+function equilibrarClavesHEVA(){
+ if(!materialActual)return;syncEdits();const next=JSON.parse(JSON.stringify(materialActual)),result=HEVASkills.balanceKeys(next);
+ if(result.status!=='equilibrado'){alert('No se pueden reordenar automáticamente estas preguntas sin cambiar su significado. '+(result.motivo||'Revisa las opciones y sus claves.')+(result.blockedRefs?.length?' Ítems: '+result.blockedRefs.join(', '):''));return;}
+ if(!result.changed){mostrarControlHEVA();return;}
+ guardarEnHistorial(false);if(next.revisionIA)next.historialRevisionIA=[...(next.historialRevisionIA||[]),next.revisionIA];delete next.revisionIA;delete next.auditoriaExperimental;
+ next.edicionesLocales=[...(next.edicionesLocales||[]),{tipo:'equilibrio_claves',fecha:new Date().toISOString(),preguntasReordenadas:result.changed,distribucion:result.counts}];if(next.procedimientosHEVA?.evaluacion)next.procedimientosHEVA.evaluacion.equilibrio=result;
+ materialActual=next;renderizarDocumentoEnPantalla();guardarEnHistorial(false);
+}
+function mostrarControlHEVA(){let panel=document.getElementById('heva-export-control');if(!panel){panel=document.createElement('section');panel.id='heva-export-control';panel.className='no-print border rounded p-4 my-4 bg-white';document.getElementById('hoja-material').before(panel)}if(!materialActual){panel.hidden=true;return}panel.hidden=false;const report=HEVAAudit.inspect(materialActual);panel.innerHTML=`<h3 class="font-bold text-[#8B2635]">Control de calidad antes de exportar</h3>${auditHTMLHEVA(report)}<button type="button" class="border rounded px-3 py-2 text-xs mt-3" id="audit-open">Revisar antes de descargar</button>`;panel.querySelector('button').onclick=()=>prepararExportacionHEVA(null);if(!report.distribucion.balanced){const balance=document.createElement('button');balance.type='button';balance.textContent='Equilibrar claves A–D conservando las respuestas';balance.className='border rounded px-3 py-2 text-xs mt-3 ml-2 font-bold';balance.onclick=equilibrarClavesHEVA;panel.append(balance);}}
 async function prepararExportacionHEVA(format){
  if(!materialActual)return;
  try{
