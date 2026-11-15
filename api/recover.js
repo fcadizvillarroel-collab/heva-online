@@ -13,7 +13,12 @@ module.exports=async(req,res)=>{
   let fuentesDocumentales;try{fuentesDocumentales=await S.retrieve(plan)}catch(e){console.error('HEVA document sources:',e.stack||e);fuentesDocumentales=[];}
   if(fase==='finalizar'){
    const metadata={objetivoAprendizaje:plan.objetivoAprendizaje,asignatura:plan.asignatura,nivel:plan.nivel,marcoCurricular:plan.marcoCurricular,temaEspecifico:plan.temaEspecifico,tipoMaterial:plan.tipoMaterial,estrategiaDidactica:P.strategy(plan.estrategiaDidactica).name};
-   let material=H.material(P.normalizeStrategyPlan(R.merge(base,parts,plan),plan),metadata),issues=R.validate(material,plan);
+   const assembled=P.normalizeStrategyPlan(R.merge(base,parts,plan),plan);
+   const counted=P.enforceRequestedCounts(assembled,plan);
+   let material=H.material(P.normalizeTaskTraces(counted),metadata);
+   // Apply the same count and trace boundary used by /api/generate.
+   material=P.normalizeTaskTraces(P.enforceRequestedCounts(material,plan));
+   let issues=R.validate(material,plan);
    if(issues.length)return res.status(422).json({error:'Los bloques requieren corrección. Se conserva el material anterior.',detalle:issues.join('; '),reparacion:R.repair(base,parts,plan),reintentable:true});
    material=P.finalize(material,plan);material.autoriaIA=autor;material.planGeneracion=plan;material.fuentesDocumentales=fuentesDocumentales;
    const evidence=S.validateEvidence(material.respaldoDocumental,fuentesDocumentales);material.respaldoDocumental=evidence.valid;material.incidenciasDocumentales=evidence.invalid;material=Skills.prepare(material,plan,fuentesDocumentales,evidence);
