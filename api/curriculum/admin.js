@@ -97,6 +97,17 @@ module.exports = async function handler(req, res) {
 
       if (!item) return res.status(404).json({ error: 'Registro no encontrado en Supabase.' });
 
+      // Activar únicamente después de desplegar y probar la RPC transaccional.
+      if(process.env.HEVA_CURRICULUM_ATOMIC_RPC==='true'){
+        const response=await fetch(`${SUPABASE_URL}/rest/v1/rpc/heva_aprobar_objetivo`,{
+          method:'POST',headers:headersSupabase,
+          body:JSON.stringify({p_staging_id:stagingId,p_comprobado:true,p_notas:typeof notas==='string'?notas:'',p_usuario:user.id})
+        });
+        const publicado=await response.json().catch(()=>null);
+        if(!response.ok||!publicado?.id)throw new Error('La aprobación transaccional no se completó');
+        return res.status(200).json({exito:true,publicado,atomico:true});
+      }
+      // Ruta histórica provisional: no es atómica. Mantener desactivada al habilitar RPC.
       // Publicar en curriculo_publicado con las columnas reales
       const pubPayload = {
         staging_id: item.id,
