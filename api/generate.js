@@ -197,6 +197,22 @@ Responde ÚNICAMENTE en JSON:
       material = normalize(await draft(promptRedactor+'\nCORRIGE LA RESPUESTA COMPLETA. Se detectaron estas incidencias: '+issues.join('; ')+(missingRefs.length?'\nTRAZABILIDAD OBLIGATORIA: agrega exactamente una entrada con habilidad, evidencia y criterio específicos para cada referencia real que falta: '+missingRefs.join(', ')+'. No inventes actividades ni referencias.':'')+strategyRepair ));
       issues = check(material);
     }
+    // A complete slide deck must not be discarded solely because the model
+    // omitted the strategy metadata. Request only that metadata, and validate
+    // it before merging; never synthesize evidence or silently pass validation.
+    if(issues.some(x=>x.includes('La estrategia seleccionada no está desarrollada'))&&Date.now()<generationDeadline-6500){
+      try{
+        const selected=Pedagogy.strategy(estrategiaDidactica);
+        const summary=(material.diapositivas||[]).map((d,i)=>({numero:i+1,titulo:d.titulo,contenido:String(Array.isArray(d.contenido)?d.contenido.join(' '):d.contenido||'').slice(0,420)}));
+        const repairPrompt='Devuelve SOLO un objeto JSON con planEstrategia. Estrategia obligatoria: '+selected.id+' ('+selected.name+'). Objetivo: '+objetivoAprendizaje+'. Tema: '+temaEspecifico+'. Diapositivas existentes: '+JSON.stringify(summary)+'. Completa los cuatro campos habilidadCentral, aplicacionConcreta, evidenciaEsperada, retroalimentacionDocente con textos específicos y verificables respecto de las diapositivas; no inventes actividades. Forma: {"planEstrategia":{"id":"'+selected.id+'","habilidadCentral":"...","aplicacionConcreta":"...","evidenciaEsperada":"...","retroalimentacionDocente":"..."}}';
+        const response=await draft(repairPrompt);
+        if(response?.planEstrategia&&typeof response.planEstrategia==='object'){
+          const candidate=normalize({...material,planEstrategia:response.planEstrategia});
+          const candidateIssues=check(candidate);
+          if(candidateIssues.length<issues.length){material=candidate;issues=candidateIssues;}
+        }
+      }catch(error){console.warn('Reparación puntual de estrategia no disponible:',error.code||'ERROR');}
+    }
     if (issues.length) return res.status(422).json({error:'El material no cumple la estructura pedagógica solicitada. Se conserva el documento anterior.',detalle:issues.join('; '),borrador:material});
     material = Pedagogy.finalize(material,plan);
     material.autoriaIA=author;
