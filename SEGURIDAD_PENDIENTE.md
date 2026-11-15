@@ -22,3 +22,14 @@
 - `service_role` omite RLS; validar autorización y entradas en las API.
 - La aprobación curricular actual sigue siendo una secuencia de operaciones HTTP, no una transacción atómica. Una RPC transaccional exige diseñar y probar su esquema antes de reemplazarla.
 - Las rutas de IA requieren una política de autenticación y cuota compatible con el piloto docente antes de abrir acceso público.
+
+## Protección de llamadas a IA (experimental)
+Se añadió `api/_ai-access.cjs` a generate/review/recover/studio/diagram. **No está activado** por defecto para no bloquear el piloto sin interfaz de inicio de sesión.
+- Primero desplegar y probar `docs/HEVA_CUOTA_IA_PENDIENTE.sql` en Supabase de ensayo.
+- Integrar inicio de sesión docente y enviar `Authorization: Bearer <access_token>` desde cada cliente de IA. No guardar credenciales de servicio en navegador.
+- Configurar `HEVA_AI_REQUIRE_AUTH=true` únicamente después de verificar el flujo completo.
+- `HEVA_AI_DAILY_LIMIT` controla el máximo diario por usuario (valor predeterminado 20, máximo 100); se cuenta cada llamada de IA, incluidas fases de recuperación.
+- Si la RPC falla o la sesión no es válida, se rechaza la solicitud sin llamar al proveedor.
+- Revisar controles adicionales de Vercel (firewall, protección del despliegue, límites por IP). La autenticación es opcional hasta completar el piloto.
+- La aprobación curricular atómica requiere desplegar y probar `docs/HEVA_APROBACION_ATOMICA_PENDIENTE.sql` y después activar `HEVA_CURRICULUM_ATOMIC_RPC=true`.
+- No activar estas variables ni ejecutar migraciones directamente en producción sin respaldo y pruebas de integración.
