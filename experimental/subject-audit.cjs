@@ -72,6 +72,33 @@ function inspectAll(material,plan={}){
  if(area==='ingles'&&has(/translate|traduc|vocabulary|vocabulario/i)&&!has(/example|ejemplo|dialogue|di[aá]logo/i))recommend('ING-MODELO','La tarea lingüística no muestra un ejemplo o diálogo contextualizado.');
  if(area==='instrumental'&&has(/conflicto|contrato|derecho laboral|emprendimiento/i)&&!has(/caso|situaci[oó]n|decisi[oó]n|simulaci[oó]n/i))recommend('INS-APLICACION','El contenido práctico debería incluir una situación de aplicación o decisión.');
  if(area==='ciencias'&&has(/experimento|hip[oó]tesis|laboratorio/i)&&!has(/registro|observaci[oó]n|resultado|evidencia/i))recommend('CIE-EVIDENCIA','La actividad experimental no indica cómo registrar o interpretar resultados.');
+ // Subject-specific checks inspect actual source fields, not only slide titles.
+ const reading=String(material?.introduccionLectura||'');
+ const cases=Array.isArray(material?.casosEstudio)?material.casosEstudio:[];
+ const activities=Array.isArray(material?.actividadesGuiadas)?material.actividadesGuiadas:[];
+ const allText=[full,reading,...cases.map(c=>[c.contextoReal,c.preguntaReflexion].join(' ')),...activities.map(a=>JSON.stringify(a))].join(' ');
+ if(area==='ingles'){
+  if(/traduc|translate|vocabulario|vocabulary|reading|lectura|dialogue|di[aá]logo/i.test(allText)&&!/\\b(?:the|is|are|have|has|can|will|do|does|my|your|work|job|hello|good|what|where|when|why|how)\\b/i.test(allText))
+   recommend('ING-IDIOMA','No se identifican ejemplos evidentes en inglés; revisar que haya input lingüístico auténtico y adecuado al nivel.');
+  if(/listen|listening|escucha|audio/i.test(allText)&&!/transcripci[oó]n|script|guion|audio disponible|grabaci[oó]n/i.test(allText))
+   recommend('ING-AUDIO','Se propone comprensión auditiva sin transcripción ni recurso de audio identificado.');
+ }
+ if(area==='lenguaje'){
+  if(/infiere|inferencia|comprensi[oó]n|idea principal|seg[uú]n el texto/i.test(allText)&&reading.trim().length<160&&!/texto:|noticia:|lectura:|fragmento:/i.test(full))
+   recommend('LEN-LECTURA','No se identifica una lectura suficientemente desarrollada para sostener las preguntas.');
+  if(/escribe|redacta|produce un texto|argumenta/i.test(allText)&&!/criterio|pauta|rúbrica|coherencia|retroalimentaci[oó]n/i.test(allText))
+   recommend('LEN-ESCRITURA','La producción escrita requiere criterios explícitos o una pauta de revisión.');
+ }
+ if(area==='ciencias'){
+  if(/experimento|hip[oó]tesis|investigaci[oó]n|laboratorio/i.test(allText)&&!/variable|control|comparaci[oó]n/i.test(allText))
+   recommend('CIE-VARIABLES','La indagación no explicita variables o condiciones de comparación.');
+  if(/gr[aá]fico|tabla de datos|resultados experimentales/i.test(allText)&&!/unidad|medida|observaci[oó]n|dato/i.test(allText))
+   recommend('CIE-DATOS','Revisar unidades y datos que permitan interpretar la evidencia.');
+ }
+ if(area==='sociales'&&/analiza la fuente|seg[uú]n la fuente|documento hist[oó]rico/i.test(allText)&&!/autor|fecha|procedencia|fuente:/i.test(allText))
+  recommend('SOC-CONTEXTO','Falta contexto identificable para analizar la fuente histórica.');
+ if(area==='instrumental'&&/contrato|ley|derecho laboral|normativa/i.test(allText)&&!/chile|ley n|c[oó]digo del trabajo|fuente|vigencia/i.test(allText))
+  recommend('INS-NORMA','Revisar jurisdicción, fuente y vigencia de la norma citada.');
  for(const p of prompts)if(/(?:gr[aá]fico|imagen|mapa|tabla|texto adjunto|siguiente texto)/i.test(p.text)&&!has(/(?:datos de la tabla|tabla:|gr[aá]fico:|mapa:|texto:|imagen:)/i))recommend(p.ref,'La pregunta remite a un recurso visual o textual que debe comprobarse en el archivo final.');
  const checks={
   matematica:['Exactitud de operaciones y procedimientos','Representaciones y unidades','Comprobación y contextualización'],
