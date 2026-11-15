@@ -9,6 +9,7 @@ module.exports=async(req,res)=>{
   const {material,tipo='conceptual'}=req.body||{};
   if(!types.includes(tipo))return res.status(400).json({error:'Tipo de diagrama no válido.'});
   if(!material||typeof material!=='object'||JSON.stringify(material).length>90000)return res.status(400).json({error:'Material ausente o demasiado extenso.'});
+  if(!(await require('./_ai-access.cjs').protect(req,res)))return;
   const title=safe(material.titulo),topic=safe(material.temaEspecifico),objective=safe(material.objetivoAprendizaje);
   const sections=[...(material.diapositivas||[]).map(x=>({titulo:safe(x.titulo),contenido:safe(Array.isArray(x.contenido)?x.contenido.join(' '):x.contenido)})),...(material.actividadesGuiadas||[]).map(x=>({titulo:safe(x.titulo||x.nombre),contenido:safe(x.descripcion||x.instrucciones)}))].slice(0,16);
   const pedagogical={activacion:safe(material.activacion),instrucciones:safe(material.instruccionesEstudiante),ejemplo:safe(material.ejemploGuiado?.situacion),lectura:safe(material.introduccionLectura),glosario:(material.glosario||[]).slice(0,12).map(x=>({termino:safe(x.termino||x.concepto),definicion:safe(x.definicion)})),casos:(material.casosEstudio||[]).slice(0,4).map(x=>({contexto:safe(x.contextoReal),pregunta:safe(x.preguntaReflexion)}))};
