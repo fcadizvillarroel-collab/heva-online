@@ -9,6 +9,10 @@ async function recuperarMaterialHEVA(plan,allowRepair=true){
  const request=async (body,retry=true)=>{
   let response;try{response=await fetch('/api/recover',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan,...body}),signal:AbortSignal.timeout(58000)});}catch(err){throw Error('La solicitud de '+body.fase+' no llegó a completarse ('+(err.name==='TimeoutError'?'tiempo agotado':'red interrumpida')+'). El avance guardado se conserva. Reintenta Crear material.');}
   let data;try{data=await response.json()}catch{const type=response.headers.get('content-type')||'';throw Error('El servidor respondió HTTP '+response.status+' sin JSON válido durante '+body.fase+'. '+(response.status===504||response.status===502?'Probable límite de tiempo o error de función. ':'')+'El avance guardado se conserva.');}
+  if(!response.ok&&body.fase==='items'&&data.codigo==='ITEM_TRACES_INCOMPLETE'&&data.borradorBloque){
+   checkpoint.pendingPart={tipo:body.batch.tipo,inicio:body.batch.inicio,parte:data.borradorBloque};recoverySave(checkpoint);
+   if(retry){if(message)message.textContent='Las preguntas están guardadas. Completando solo la trazabilidad, sin regenerarlas…';return request({...body,borradorBloque:data.borradorBloque},false);}
+  }
   if(!response.ok&&retry&&data.codigo==='AI_RATE_LIMIT'&&data.reintentarEn>0&&data.reintentarEn<=60){
    if(message)message.textContent=`Esperando ${data.reintentarEn} segundos por la cuota de IA; el avance está guardado…`;
    await new Promise(resolve=>setTimeout(resolve,(data.reintentarEn+1)*1000));
@@ -29,8 +33,9 @@ async function recuperarMaterialHEVA(plan,allowRepair=true){
  if(!checkpoint.base){if(message)message.textContent='Recuperando la lectura y la estructura del material…';const data=await request({fase:'base'});checkpoint={...checkpoint,base:data.parte,autor:data.autor,bloques:data.bloques};recoverySave(checkpoint);}
  for(let i=checkpoint.parts.length;i<checkpoint.bloques.length;i++){
   if(message)message.textContent=`Completando actividades: bloque ${i+1} de ${checkpoint.bloques.length}…`;
-  const data=await request({fase:'items',base:checkpoint.base,autor:checkpoint.autor,parts:checkpoint.parts,batch:checkpoint.bloques[i]});
-  checkpoint.parts.push(data.parte);recoverySave(checkpoint);
+  const currentBatch=checkpoint.bloques[i],pending=checkpoint.pendingPart;
+  const data=await request({fase:'items',base:checkpoint.base,autor:checkpoint.autor,parts:checkpoint.parts,batch:currentBatch,...(pending?.tipo===currentBatch.tipo&&pending?.inicio===currentBatch.inicio?{borradorBloque:pending.parte}:{})});
+  delete checkpoint.pendingPart;checkpoint.parts.push(data.parte);recoverySave(checkpoint);
  }
  if(message)message.textContent='Comprobando objetivo, cantidades, casos y estructura…';
  const result=await request({fase:'finalizar',base:checkpoint.base,parts:checkpoint.parts,autor:checkpoint.autor});

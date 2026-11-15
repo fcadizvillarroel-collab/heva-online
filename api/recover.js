@@ -5,7 +5,7 @@ module.exports=async(req,res)=>{
  if(req.method==='OPTIONS')return res.status(200).end();if(req.method!=='POST')return res.status(405).json({error:'Utilice POST.'});
  const deadline=Date.now()+55000;
  try{
-  const {fase,plan:input,base,parts=[],batch,autor,corregirFormato=false}=req.body||{};
+  const {fase,plan:input,base,parts=[],batch,autor,borradorBloque,corregirFormato=false}=req.body||{};
   if(JSON.stringify(req.body||{}).length>250000)return res.status(413).json({error:'Documento demasiado extenso.'});
   let plan;try{plan=R.planOf(input)}catch(e){return res.status(400).json({error:'El encargo contiene parámetros inválidos.',detalle:e.message,codigo:'PLAN_INVALIDO',reintentable:false})}
   if(!['base','items','finalizar'].includes(fase))return res.status(400).json({error:'Fase no admitida.'});
@@ -33,14 +33,27 @@ module.exports=async(req,res)=>{
   const developmentRepair=fase==='items'&&batch?.tipo==='desarrollo'?'\nBLOQUE DE DESARROLLO OBLIGATORIO: devuelve exclusivamente JSON con preguntasDesarrollo como ARRAY de exactamente '+batch.cantidad+' objetos, con numero y enunciado completos. Incluye trazabilidadEstrategia como ARRAY con referencia DES-'+(batch.inicio+1)+' y cada pregunta consecutiva, habilidad, evidencia y criterio. Para evaluación incluye rubrica con cuatro niveles 0,1,2,3 y descripcion en cada nivel. No sustituyas desarrollo por alternativas ni devuelvas un arreglo vacío.':'';
   const strategyRepair=fase==='base'?'\nPLAN DE ESTRATEGIA OBLIGATORIO: incluye planEstrategia como objeto JSON con id exacto de la estrategia seleccionada, habilidadCentral, aplicacionConcreta, evidenciaEsperada y retroalimentacionDocente. Cada uno de los cuatro textos debe ser específico del objetivo y del material, no un marcador ni un texto genérico. Estrategia seleccionada: '+JSON.stringify(P.strategy(plan.estrategiaDidactica))+'. El plan debe explicar cómo se ejecutará realmente la estrategia en las tareas.':'';
   const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+strictFormat+caseRepair+developmentRepair+strategyRepair;
-  let result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true}),...keys,exclude,{deadline,maxOutputTokens:fase==='base'?10000:batch?.formato?8000:5000});
+  let result;
+  if(fase==='items'&&borradorBloque){
+   const preserved=R.normalizePart(borradorBloque,batch),pending=R.partIssues(preserved,plan,batch);
+   if(pending.length&&!R.traceIssuesOnly(pending))return res.status(400).json({error:'El borrador no puede repararse solo con trazabilidad.',detalle:pending.join('; '),reintentable:false});
+   result={value:preserved,provider:autor.proveedor,model:autor.modelo};
+  }else result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true}),...keys,exclude,{deadline,maxOutputTokens:fase==='base'?10000:batch?.formato?8000:5000});
   if(fase==='items')result.value=R.normalizePart(result.value,batch);
   let issues=R.partIssues(result.value,plan,fase==='items'?batch:null);
-  if(issues.length&&deadline-Date.now()>5000){
+  if(issues.length&&!R.traceIssuesOnly(issues)&&deadline-Date.now()>5000){
    result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true})+'\nCORRIGE este bloque completo: '+issues.join('; '),...keys,exclude,{deadline,maxOutputTokens:fase==='base'?10000:batch?.formato?8000:5000});
    if(fase==='items')result.value=R.normalizePart(result.value,batch);
    issues=R.partIssues(result.value,plan,fase==='items'?batch:null);
   }
+  if(fase==='items'&&R.traceIssuesOnly(issues)&&deadline-Date.now()>5500){
+   try{
+    const fixed=await call(R.traceRepairPrompt(plan,result.value,batch),...keys,exclude,{deadline,maxOutputTokens:2600});
+    const candidate=R.mergeTraceRepair(result.value,fixed.value,plan,batch),candidateIssues=R.partIssues(candidate,plan,batch);
+    if(candidateIssues.length<issues.length){result.value=candidate;issues=candidateIssues;}
+   }catch(error){console.warn('HEVA trace repair pending:',error.code||'TRACE_REPAIR_ERROR');}
+  }
+  if(fase==='items'&&R.traceIssuesOnly(issues))return res.status(422).json({error:'Las preguntas están conservadas; falta completar su trazabilidad pedagógica.',detalle:issues.join('; '),codigo:'ITEM_TRACES_INCOMPLETE',borradorBloque:result.value,reintentable:true});
   // Repair strategy metadata separately instead of regenerating and losing a
   // complete base. This is the endpoint used by "Crear material" recovery.
   if(fase==='base'&&issues.some(x=>x.includes('La estrategia seleccionada no está desarrollada'))&&deadline-Date.now()>6500){

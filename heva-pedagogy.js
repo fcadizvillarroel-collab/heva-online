@@ -79,18 +79,21 @@ function enforceRequestedCounts(raw,p){
 }
 // Match trace references against tasks that actually survived count normalization.
 // Do not synthesize pedagogical evidence for missing traces.
+function normalizeTraceEntry(x){
+ if(!x||typeof x!=='object'||Array.isArray(x))return null;
+ let reference=String(x.referencia??x.ref??x.idTarea??'').trim().toUpperCase().replace(/[ _]+/g,'-');
+ const aliases=[[/^(?:ALTERNATIVA|PREGUNTA-ALTERNATIVA)-?(\d+)$/,'ALT-$1'],[/^(?:DESARROLLO|PREGUNTA-DESARROLLO)-?(\d+)$/,'DES-$1'],[/^(?:CASO-ESTUDIO|CASO)-?(\d+)$/,'CASO-$1'],[/^(?:V\/F|VOF|VF|VERDADERO-?(?:O-?)?FALSO)-?(\d+)$/,'VF-$1'],[/^(?:PAREADO|PAREADOS|PAR)-?(\d+)$/,'PAR-$1'],[/^(?:COMPRENSION|COMPRENSIÓN|LECTURA|LECT)-?(\d+)$/,'LECT-$1'],[/^(?:EJERCICIO|EJERCICIOS|EJE)-?(\d+)$/,'EJE-$1'],[/^(?:IDENTIFICACION|IDENTIFICACIÓN|IDENTIFICAR|IDEN)-?(\d+)$/,'IDEN-$1']];
+ for(const [rx,replacement]of aliases)if(rx.test(reference)){reference=reference.replace(rx,replacement);break;}
+ return {...x,referencia:reference,habilidad:x.habilidad??x.habilidadEvaluada??x.habilidadCentral,evidencia:x.evidencia??x.productoEsperado??x.evidenciaEsperada,criterio:x.criterio??x.criterioEvaluacion??x.criterioLogro};
+}
+function readTaskTraces(raw){return ['trazabilidadEstrategia','trazabilidad','trazabilidad_estrategia'].flatMap(k=>Array.isArray(raw?.[k])?raw[k]:[]).map(normalizeTraceEntry).filter(Boolean);}
 function normalizeTaskTraces(raw){
  if(!raw||typeof raw!=='object'||Array.isArray(raw))return raw;
- const expected=new Set(refs(raw));
- const traces=Array.isArray(raw.trazabilidadEstrategia)?raw.trazabilidadEstrategia:[];
- const normalized=traces.map(x=>{
-  if(!x||typeof x!=='object')return null;
-  let reference=String(x.referencia??x.ref??'').trim().toUpperCase().replace(/\s+/g,'-');
-  reference=reference.replace(/^(ALTERNATIVA|PREGUNTA-ALTERNATIVA)-?(\d+)$/,'ALT-$2').replace(/^(DESARROLLO|PREGUNTA-DESARROLLO)-?(\d+)$/,'DES-$2').replace(/^(CASO-ESTUDIO|CASO)-?(\d+)$/,'CASO-$2');
-  return {...x,referencia:reference,habilidad:x.habilidad??x.habilidadEvaluada,evidencia:x.evidencia??x.productoEsperado,criterio:x.criterio??x.criterioEvaluacion};
- }).filter(x=>x&&expected.has(x.referencia));
+ const expected=new Set(refs(raw)),seen=new Set();
+ const normalized=readTaskTraces(raw).filter(x=>{if(!expected.has(x.referencia)||seen.has(x.referencia))return false;seen.add(x.referencia);return true;});
  return {...raw,trazabilidadEstrategia:normalized};
 }
+
 function missingTaskTraces(raw){
  const expected=refs(raw);
  const trace=Array.isArray(raw?.trazabilidadEstrategia)?raw.trazabilidadEstrategia:[];
@@ -123,4 +126,4 @@ if(bibliografia.length)push('Fuentes consultadas',Array.from(new Set(bibliografi
 const noticias=array(m.fuentesDocumentales?.noticias?.items).map(n=>n.publisher+' · '+String(n.publishedAt||'').slice(0,10)+' · '+n.title+' · '+n.url);if(noticias.length)push('Noticias · resúmenes RSS consultados',noticias.join('\n'));
 // Las fuentes permanecen en el panel de revisión documental, no en el material exportado.
 if(teacher){const examBlocks=assessment()?.blocks(m,true)||[];a.push(...examBlocks.slice((assessment()?.blocks(m,false)||[]).length));if(m.procedimientosHEVA)push('Registro pedagógico de la versión',`Perfil: ${m.procedimientosHEVA.perfil.nombre} · v${m.procedimientosHEVA.perfil.version}\nOA y marco: ${m.procedimientosHEVA.curriculo.objetivoAprendizaje} · ${m.procedimientosHEVA.curriculo.marcoCurricular}\nTareas vinculadas: ${m.procedimientosHEVA.curriculo.referencias.join(', ')}\nLa vinculación es estructural. Revisión independiente y pertinencia semántica se consultan en HEVA; este registro no las certifica.`);array(m.respaldoDocumental).forEach(c=>push('Respaldo documental propuesto · '+c.seccion,`${c.afirmacion}\nCita localizada: “${c.cita}”\n${c.fuenteId} · PDF p. ${c.page} · ${c.url}\nInterpretación y pertinencia pendientes de revisión docente.`));push('PAUTA DOCENTE · USO EXCLUSIVO','Los siguientes criterios, soluciones y decisiones didácticas no forman parte del ejemplar del estudiante.');let s=m.planEstrategia||{};push('Estrategia pedagógica · '+(m.estrategiaDidactica||''),`Habilidad: ${s.habilidadCentral||''}\nAplicación: ${s.aplicacionConcreta||''}\nEvidencia: ${s.evidenciaEsperada||''}\nDevolución: ${s.retroalimentacionDocente||''}`);push('Tabla de especificaciones / trazabilidad',array(m.trazabilidadEstrategia).map(x=>`${x.referencia} · ${x.habilidad} · Evidencia: ${x.evidencia} · Criterio: ${x.criterio}`).join('\n'));array(m.casosEstudio).forEach((x,i)=>push('Criterio caso '+(i+1),x.criterioEvaluacion||array(m.trazabilidadEstrategia).find(t=>t.referencia==='CASO-'+(i+1))?.criterio||'Criterio docente por completar.',x.criterioEvaluacion?`casosEstudio.${i}.criterioEvaluacion`:undefined));array(m.preguntasAlternativas).forEach((x,i)=>push('Clave '+(i+1)+' · '+x.claveCorrecta,x.justificacion||'Justificación docente por completar y revisar.',x.justificacion?`preguntasAlternativas.${i}.justificacion`:undefined));array(m.preguntasDesarrollo).forEach((x,i)=>push('Criterio desarrollo '+(i+1),x.criterioEvaluacion+'\n'+array(x.rubrica).map(r=>`${r.puntaje} puntos: ${r.descripcion}`).join('\n')));array(m.diapositivas).forEach((x,i)=>push('Notas docentes · diapositiva '+(i+1),x.notasDocente));}return a}
-return{newsMode,newsPrompt,newsText,studentContext,strategies,contracts,sources,strategy,contract,refs,referencePrompt,schema,prompt,normalizeStrategyPlan,enforceRequestedCounts,normalizeTaskTraces,missingTaskTraces,validate,finalize,blocks};});
+return{newsMode,newsPrompt,newsText,studentContext,strategies,contracts,sources,strategy,contract,refs,normalizeTraceEntry,readTaskTraces,referencePrompt,schema,prompt,normalizeStrategyPlan,enforceRequestedCounts,normalizeTaskTraces,missingTaskTraces,validate,finalize,blocks};});
