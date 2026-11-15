@@ -4,12 +4,12 @@ function download(blob,name){let a=document.createElement('a'),url=URL.createObj
 async function word(m,teacher=false){if(!root.docx)throw Error('No se cargó el exportador Word local. Recarga la página.');let visual=root.HEVATemplates.layout(m);let {Document,Packer,Paragraph,TextRun,HeadingLevel}=root.docx;let blocks=HEVA.blocks(HEVA.material(m),teacher);let children=[new Paragraph({children:[new TextRun({text:'ESCUELA HÉCTOR VALENZUELA · EPJA',bold:true,color:visual.theme.main})]})];blocks.forEach((b,i)=>{if(b.kind==='option'){children.push(new Paragraph({children:[new TextRun({text:b.title+' '+b.text,size:visual.wordSize})],spacing:{after:90}}));return}children.push(new Paragraph({heading:i===0?HeadingLevel.TITLE:HeadingLevel.HEADING_1,text:b.title}));b.text.split('\n').forEach(l=>children.push(new Paragraph({children:[new TextRun({text:l,size:visual.wordSize})],spacing:{after:140}})))});let blob=await Packer.toBlob(new Document({sections:[{properties:{},children}]}));download(blob,safeName(m.titulo)+(teacher?'_docente':'_estudiante')+'.docx');return blob}
 function wrap(text,max=66){let out=[],line='';String(text).split('\n').forEach(par=>{par.split(/\s+/).forEach(w=>{if((line+' '+w).length>max){if(line)out.push(line);line=w}else line+=(line?' ':'')+w});out.push(line);line=''});return out}
 function slideText(value){return (Array.isArray(value)?value.join('\n'):String(value??'')).replace(/\r/g,'').trim()}
-function chunksOf(value,maxChars=620,maxItems=4){
+function chunksOf(value,maxChars=850,maxItems=5){
  const raw=slideText(value);
  // Keep each author-written paragraph or labelled item intact. Splitting at
  // arbitrary character boundaries destroys mathematical and historical meaning.
  const paragraphs=raw.split(/\n+/).map(x=>x.trim()).filter(Boolean);
- const items=paragraphs.flatMap(p=>p.split(/(?=\b(?:Paso\s+\d+|Método\s+[A-Z]|Pregunta\s+\d+|Ejemplo\s*\d*|Consigna|Criterio de éxito)\s*[:.])/i).map(x=>x.trim()).filter(Boolean));
+ const items=paragraphs; // Never break a mathematical step, question, or instruction mid-paragraph.
  const pages=[];let page=[],length=0;
  for(const item of items){if(page.length&&(page.length>=maxItems||length+item.length>maxChars)){pages.push(page);page=[];length=0}page.push(item);length+=item.length;}
  if(page.length)pages.push(page);
@@ -27,6 +27,7 @@ function addChrome(ppt,theme,section,num,total){
 }
 function classifySlide(title,lines,index){
  const t=title.toLowerCase();
+ if(/selección múltiple|alternativa|opción\s+[a-d]/i.test(t))return 'question';
  if(/actividad|ejercicio|desafío|reflexión|pregunta|aplicación|debate|práctica|ticket de salida/.test(t))return 'activity';
  if(/comparación|comparar|diferencias|versus|ventajas y desventajas/.test(t))return 'compare';
  if(/cronología|línea de tiempo|etapas|proceso histórico|evolución/.test(t))return 'timeline';
@@ -71,7 +72,10 @@ function addContent(ppt,theme,slide,title,lines,section,index=0){
  const text=(value,x,y,w,h,size,color,bold=false,extra={})=>slide.addText(String(value),{x,y,w,h,fontFace:bold?'Aptos Display':'Aptos',fontSize:size,color,bold,margin:0,breakLine:false,valign:'mid',fit:'shrink',...extra});
  const clean=lines.map(x=>x.replace(/^[-•]\s*/,'').trim()).filter(Boolean);
  text(title.slice(0,125),.78,.85,11.75,1.08,title.length>65?27:33,theme.main,true);
- if(kind==='activity'){
+ if(kind==='question'){
+  rect(.8,2.12,11.73,4.45,'FFFFFF');rect(.8,2.12,.13,4.45,theme.accent);
+  text(clean.join('\n\n'),1.25,2.45,10.8,3.78,21,theme.ink,false,{valign:'top'});
+ }else if(kind==='activity'){
   rect(.8,2.12,11.73,4.45,theme.main);rect(1.18,2.5,1.15,.09,theme.accent);
   text('ACTIVIDAD DE APLICACIÓN',1.18,2.73,10.6,.38,16,'FFE2BE',true);
   text(clean.join('\n\n'),1.18,3.3,10.7,2.82,23,'FFFFFF',false,{valign:'top'});
@@ -116,7 +120,12 @@ async function powerpoint(m,teacher=false){
   let blocks=[];HEVA.blocks(material,teacher).forEach(item=>{let prev=blocks.at(-1);if(item.kind==='option'&&prev?.group===item.group)prev.text+='\n'+item.title+' '+item.text;else blocks.push({...item})});
   sections=blocks.map(item=>({title:item.title,text:slideText(item.text),kind:item.kind||'section'}));
  }
- const pages=sections.flatMap((section,index)=>chunksOf(section.text).map((lines,part)=>({...section,lines,title:section.title+(part?' · continuación':'')})));
+ const pages=sections.flatMap((section,index)=>{
+  // Keep a complete multiple-choice question and its alternatives together.
+  const isQuestion=/selección múltiple|alternativa|pregunta\s*\d+/i.test(section.title);
+  const maxChars=isQuestion?1500:850;
+  return chunksOf(section.text,maxChars,isQuestion?12:5).map((lines,part)=>({...section,lines,title:section.title+(part?' · continuación':'')}));
+ });
  const total=pages.length+1;
  let cover=addChrome(ppt,theme,'Portada',1,total);
  cover.addShape(ppt.ShapeType.rect,{x:.75,y:1.15,w:11.85,h:4.95,line:{color:theme.main,transparency:100},fill:{color:theme.main}});
@@ -128,4 +137,14 @@ async function powerpoint(m,teacher=false){
  await ppt.writeFile({fileName:safeName(material.titulo)+(teacher?'_docente':'_estudiante')+'.pptx'});return ppt;
 }
 
-root.HEVAOffice={word,powerpoint,download};})(typeof globalThis!=='undefined'?globalThis:this);
+function auditExport(m,teacher=false){
+ const material=HEVA.material(m),blocks=HEVA.blocks(material,teacher),issues=[];
+ const text=blocks.map(b=>String(b.text||'')).join('\n');
+ const slides=blocks.reduce((n,b)=>n+chunksOf(b.text,/selección múltiple/i.test(b.title)?1500:850,5).length,1);
+ if(slides>35)issues.push({level:'warning',code:'PPT_EXTENSO',detail:'La conversión podría producir '+slides+' diapositivas. Revise la necesidad de cada sección; no se recorta contenido.'});
+ if(/(?:Paso\s*\d+\s*:\s*Paso\s*\d+)/i.test(text))issues.push({level:'warning',code:'PASO_REPETIDO',detail:'Se detectó una etiqueta de paso duplicada en el contenido original.'});
+ if(/(?:imagin(?:e|ar)|visualic(?:e|ar))\s+(?:una\s+)?balanza/i.test(text))issues.push({level:'info',code:'BALANZA_VISUAL',detail:'Conviene acompañar la metáfora de la balanza con un diagrama.'});
+ if(/evaluaci[oó]n|prueba/i.test(material.tipoMaterial||'')&&!/puntaje|puntos/i.test(text))issues.push({level:'warning',code:'SIN_PUNTAJE',detail:'No se identificó un puntaje explícito en la evaluación.'});
+ return {estimatedSlides:slides,issues,wordAndPowerpointShareContent:true};
+}
+root.HEVAOffice={word,powerpoint,download,auditExport};})(typeof globalThis!=='undefined'?globalThis:this);
