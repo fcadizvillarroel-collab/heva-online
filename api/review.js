@@ -10,6 +10,7 @@ module.exports=async function(req,res){
  if(req.method!=='POST')return res.status(405).json({error:'Utilice POST.'});
  const {material,accion='revisar'}=req.body||{};
  if(!material||typeof material!=='object'||JSON.stringify(material).length>180000||material.versionPedagogica!==3||!['revisar','corregir'].includes(accion))return res.status(400).json({error:'Material o acción no admitidos.'});
+  if(!(await require('./_ai-access.cjs').protect(req,res)))return;
  const author=material.autoriaIA?.proveedor,keys=[process.env.ALLOW_PAID_AI==='true'?process.env.OPENAI_API_KEY:'',process.env.GEMINI_API_KEY,process.env.GROQ_API_KEY].map(k=>(k||'').trim());
  if(!['openai','gemini','groq'].includes(author))return res.status(409).json({error:'Autoría desconocida. Genera una nueva versión para asegurar un revisor de otro proveedor.'});
  let stage='fuentes';const deadline=Date.now()+55000;
