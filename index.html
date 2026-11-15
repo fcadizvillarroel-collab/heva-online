@@ -701,18 +701,18 @@
         if(!window.confirm(resumenHEVA))throw new Error('Generación cancelada. No se enviaron solicitudes al servidor.');
 
         let data;
-        if(modo==='GENERADOR_ESTANDAR'&&(recoveryRead(payload)||payload.cantAlternativas+payload.cantDesarrollo+payload.cantCasos>=8))data=await recuperarMaterialHEVA(payload);
+        if(modo==='GENERADOR_ESTANDAR'&&payload.tipoMaterial!=='PRESENTACION'&&(recoveryRead(payload)||payload.cantAlternativas+payload.cantDesarrollo+payload.cantCasos>=8))data=await recuperarMaterialHEVA(payload);
         else{
           let respuesta;
           try{
             respuesta=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(58000)});
             data=await respuesta.json();
           }catch(error){
-            if(modo!=='GENERADOR_ESTANDAR')throw error;
+            if(modo!=='GENERADOR_ESTANDAR'||payload.tipoMaterial==='PRESENTACION')throw new Error('No se pudo completar la presentación en una sola generación. No se ha reemplazado el documento anterior. '+(error?.message||'Reintenta cuando el proveedor esté disponible.'));
             data=await recuperarMaterialHEVA(payload);respuesta=null;
           }
           if(respuesta&&!respuesta.ok){
-            if(modo==='GENERADOR_ESTANDAR'&&(respuesta.status===422||data.reintentable||respuesta.status>=500))data=await recuperarMaterialHEVA(payload);
+            if(modo==='GENERADOR_ESTANDAR'&&payload.tipoMaterial!=='PRESENTACION'&&(respuesta.status===422||data.reintentable||respuesta.status>=500))data=await recuperarMaterialHEVA(payload);
             else throw new Error(data.detalle||data.error||'Error en servidor.');
           }
         }
