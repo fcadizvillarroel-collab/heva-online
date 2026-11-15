@@ -41,6 +41,22 @@ module.exports=async(req,res)=>{
    if(fase==='items')result.value=R.normalizePart(result.value,batch);
    issues=R.partIssues(result.value,plan,fase==='items'?batch:null);
   }
+  // Repair strategy metadata separately instead of regenerating and losing a
+  // complete base. This is the endpoint used by "Crear material" recovery.
+  if(fase==='base'&&issues.some(x=>x.includes('La estrategia seleccionada no está desarrollada'))&&deadline-Date.now()>6500){
+   try{
+    const selected=P.strategy(plan.estrategiaDidactica);
+    const baseDraft=result.value;
+    const tasks=[...(baseDraft.diapositivas||[]).map((d,i)=>({ref:'DIAPO-'+(i+1),titulo:d.titulo,contenido:d.contenido})),...(baseDraft.actividadesGuiadas||[]).map((d,i)=>({ref:'GUIADA-'+(i+1),consigna:d.consigna}))].slice(0,14);
+    const repair='Devuelve SOLO JSON con planEstrategia, sin otras claves. Estrategia id '+selected.id+'; nombre '+selected.name+'. Objetivo '+plan.objetivoAprendizaje+'. Tema '+plan.temaEspecifico+'. Tareas reales '+JSON.stringify(tasks).slice(0,6500)+'. Completa id, habilidadCentral, aplicacionConcreta, evidenciaEsperada y retroalimentacionDocente con textos específicos, sin inventar tareas ni resultados. Forma {"planEstrategia":{"id":"'+selected.id+'","habilidadCentral":"...","aplicacionConcreta":"...","evidenciaEsperada":"...","retroalimentacionDocente":"..."}}';
+    const fixed=await call(repair,...keys,exclude,{deadline,maxOutputTokens:900});
+    if(fixed.value?.planEstrategia&&typeof fixed.value.planEstrategia==='object'){
+      const candidate=P.normalizeStrategyPlan({...baseDraft,planEstrategia:fixed.value.planEstrategia},plan);
+      const next=R.partIssues(candidate,plan,null);
+      if(next.length<issues.length){result.value=candidate;issues=next;}
+    }
+   }catch(error){console.warn('HEVA strategy-only repair failed',error.code||'ERROR');}
+  }
   if(issues.length)return res.status(422).json({error:'El bloque requiere ajustes. Se conservan los anteriores.',detalle:issues.join('; '),codigo:fase==='base'&&issues.some(x=>x.includes('La trazabilidad de estrategia no cubre'))?'BASE_TRACES_INCOMPLETE':fase==='base'&&issues.some(x=>x.includes('La estrategia seleccionada no está desarrollada'))?'STRATEGY_PLAN_INCOMPLETE':'BLOCK_INVALID',reintentable:true});
   return res.status(200).json({exito:true,parte:result.value,autor:{proveedor:result.provider,modelo:result.model,fecha:new Date().toISOString()},bloques:R.batches(plan)});
  }catch(e){console.error('HEVA recovery:',e.stack||e);const limited=e.code==='AI_RATE_LIMIT',invalid=String(e?.code||'').startsWith('AI_RESPONSE_'),unavailable=e.code==='AI_UNAVAILABLE';return res.status(limited?429:invalid||unavailable?503:500).json({error:limited?'Cuota temporal de IA agotada.':invalid?'La IA devolvió un bloque incompleto o inválido.':unavailable?'No hubo respuesta de los proveedores disponibles.':'No se pudo completar este bloque.',detalle:invalid?'La IA devolvió contenido incompleto; el avance se mantiene.':unavailable?'Los proveedores de IA no respondieron. Revisa su disponibilidad y vuelve a intentar.':limited?'El proveedor alcanzó su cuota temporal.':e instanceof TypeError?'Error interno al procesar el material. Código TYPE_ERROR; se requiere revisar el registro del servidor.':(e.message||'El avance anterior se conserva.'),codigo:e.code||(e instanceof TypeError?'TYPE_ERROR':'RECOVERY_ERROR'),reintentable:true,reintentarEn:e.retryAfter||0});}
