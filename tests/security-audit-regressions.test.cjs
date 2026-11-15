@@ -68,3 +68,13 @@ test('PowerPoint mode does not inherit assessment multiple-choice counts',()=>{
  assert.match(ui,/const esPresentacionHEVA=.*==='PRESENTACION'/);
  assert.match(ui,/\? \{cantAlternativas:0,cantDesarrollo:0,cantCasos:0\}/);
 });
+
+test('PowerPoint exporter uses native slides and a warm 16:9 layout',()=>{
+ const source=fs.readFileSync(path.join(__dirname,'../heva-office.js'),'utf8');
+ assert.match(source,/ppt\.layout='LAYOUT_WIDE'/);
+ assert.match(source,/material\.diapositivas\.map/);
+ assert.match(source,/const pages=sections\.flatMap/);
+ assert.match(source,/function addChrome/);
+ assert.match(source,/function addContent/);
+ assert.match(source,/fit:'shrink'/);
+});
