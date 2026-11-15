@@ -14,6 +14,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Utilice POST.' });
 
+  if(!(await require('./_ai-access.cjs').protect(req,res)))return;
   const generationDeadline=Date.now()+55000;
   const {
     modoHerramienta = 'GENERADOR_ESTANDAR', // 'GENERADOR_ESTANDAR', 'DIFERENCIADOR_DIFFIT', 'REMEDIACION_ESCOLAR', 'REGENERAR_PREGUNTA'
