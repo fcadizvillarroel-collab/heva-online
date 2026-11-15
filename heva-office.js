@@ -90,6 +90,12 @@ function drawSemanticVisual(ppt,theme,slide,title,lines){
  }
  return false;
 }
+function drawBalance(ppt,theme,slide){
+ const line=(x,y,w,h,width=2)=>slide.addShape(ppt.ShapeType.line,{x,y,w,h,line:{color:theme.main,width}});
+ line(6.6,3.1,0,2.2,3);line(4.1,3.3,5,0,3);line(5.15,3.3,0,1.0);line(8.05,3.3,0,1.0);
+ line(4.3,4.35,1.7,0);line(7.2,4.35,1.7,0);line(5.75,5.35,1.7,0,3);
+ slide.addText('MISMA OPERACIÓN EN AMBOS LADOS',{x:3.1,y:5.63,w:7,h:.45,fontSize:18,bold:true,color:theme.main,align:'center',margin:0});
+}
 function addContent(ppt,theme,slide,title,lines,section,index=0){
  if(drawSemanticVisual(ppt,theme,slide,title,lines))return;
  const kind=classifySlide(title,lines,index),rect=(x,y,w,h,color)=>slide.addShape(ppt.ShapeType.rect,{x,y,w,h,line:{color,transparency:100},fill:{color}});
@@ -128,7 +134,7 @@ function addContent(ppt,theme,slide,title,lines,section,index=0){
   text(clean.join('\n\n'),5.46,2.52,6.7,3.55,22,theme.ink,false,{valign:'top'});
  }else{
   rect(.8,2.13,11.73,4.4,'FFFFFF');rect(.8,2.13,.13,4.4,theme.accent);
-  text(clean.join('\n\n'),1.3,2.48,10.65,3.65,23,theme.ink,false,{valign:'top'});
+  if(/balanza/i.test(title)&&clean.join(' ').length<180){drawBalance(ppt,theme,slide);text(clean.join('\n\n'),1.3,2.38,10.65,.7,20,theme.ink,false,{valign:'top'});}else{  text(clean.join('\n\n'),1.3,2.48,10.65,3.65,23,theme.ink,false,{valign:'top'});}
  }
 }
 async function powerpoint(m,teacher=false){
