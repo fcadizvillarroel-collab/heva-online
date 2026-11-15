@@ -86,6 +86,7 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
   if (groqKey && !exclude.includes('groq')) {
     const modelosGroq = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b', 'llama-3.1-8b-instant'];
     for (const mod of modelosGroq) {
+      if(deadline-Date.now()<=1500)break;
       try {
         const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
           method: 'POST', signal: AbortSignal.timeout(Math.max(1,Math.min(20000,deadline-Date.now()))),
