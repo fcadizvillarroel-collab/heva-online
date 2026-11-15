@@ -33,3 +33,10 @@ Se añadió `api/_ai-access.cjs` a generate/review/recover/studio/diagram. **No 
 - Revisar controles adicionales de Vercel (firewall, protección del despliegue, límites por IP). La autenticación es opcional hasta completar el piloto.
 - La aprobación curricular atómica requiere desplegar y probar `docs/HEVA_APROBACION_ATOMICA_PENDIENTE.sql` y después activar `HEVA_CURRICULUM_ATOMIC_RPC=true`.
 - No activar estas variables ni ejecutar migraciones directamente en producción sin respaldo y pruebas de integración.
+
+## Decisión de piloto — noviembre de 2026
+Por ahora HEVA se utiliza **sin inicio de sesión ni cuentas docentes**. Se mantiene `HEVA_AI_REQUIRE_AUTH` sin activar. Se propone un grupo de hasta **10 docentes invitados**, pero el software sin identificación **no puede garantizar diez personas o sesiones simultáneas**. Para limitar realmente el acceso al grupo, usar protección de acceso en Vercel o una red institucional; no confundir la cuota con control de identidad.
+
+Se añadió la cuota **compartida** opcional `HEVA_PILOT_SHARED_QUOTA=true`, que requiere ejecutar y verificar antes `docs/HEVA_PILOTO_SIN_LOGIN_CUOTA_PENDIENTE.sql`. `HEVA_PILOT_DAILY_REQUESTS` define el máximo de llamadas diarias compartidas (predeterminado 100); cada llamada de generación, revisión, recuperación o diagrama puede consumir una unidad. **No activarla sin la función SQL**, pues fallaría en modo seguro (503).
+
+No se ha ejecutado SQL ni cambiado variables de Vercel; estos pasos requieren prueba de integración antes de activarse.
