@@ -223,7 +223,7 @@ Responde ÚNICAMENTE en JSON:
     material=Skills.prepare(material,plan,fuentesDocumentales,evidence);
     material=require('../heva-studio.js').link(material,plan);
     material.auditoriaExperimental=require('../experimental/quality-audit.cjs').inspect(material,plan);
-    material.auditoriaDisciplinar=require('../experimental/subject-audit.cjs').inspect(material,plan);
+    material.auditoriaDisciplinar=require('../experimental/subject-audit.cjs').inspectAll(material,plan);
     return res.status(200).json({exito:true,material,revision:{alcance:'Estructura, cantidades y trazabilidad; revisión pedagógica docente pendiente',tipo:tipoMaterial,estrategia:metadata.estrategiaDidactica}});
 
   } catch (error) {
