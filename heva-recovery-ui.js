@@ -14,8 +14,8 @@ async function recuperarMaterialHEVA(plan,allowRepair=true){
    await new Promise(resolve=>setTimeout(resolve,(data.reintentarEn+1)*1000));
    return request(body,false);
   }
-  if(!response.ok&&retry&&body.fase==='base'&&response.status===422&&data.codigo==='STRATEGY_PLAN_INCOMPLETE'){
-   if(message)message.textContent='La estrategia necesita mayor desarrollo pedagógico. Solicitando una nueva versión del bloque base…';
+  if(!response.ok&&retry&&body.fase==='base'&&response.status===422&&['STRATEGY_PLAN_INCOMPLETE','BASE_TRACES_INCOMPLETE'].includes(data.codigo)){
+   if(message)message.textContent='El bloque base necesita completar su estrategia o las referencias de las diapositivas. Solicitando corrección…';
    return request({...body,corregirFormato:true},false);
   }
   if(!response.ok&&retry&&body.fase==='items'&&response.status===422&&typeof data.detalle==='string'&&(/Alternativas o clave inválidas/.test(data.detalle)||(body.batch?.tipo==='casos'&&/casosEstudio:|Falta trazabilidad de CASO|Caso incompleto|estrategia Estudio de casos|estrategia Detección de errores/.test(data.detalle))||(body.batch?.tipo==='desarrollo'&&/preguntasDesarrollo:|Falta trazabilidad de DES|Rúbrica incompleta/.test(data.detalle)))){
