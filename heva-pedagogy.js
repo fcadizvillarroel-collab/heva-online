@@ -46,8 +46,11 @@ function normalizeStrategyPlan(m,p){
  if(!plan||typeof plan!=='object'||Array.isArray(plan))return m;
  const selected=strategy(p.estrategiaDidactica);
  const claimed=String(plan.id??plan.estrategiaId??plan.estrategia??plan.nombre??'').trim();
- const normalizedId=claimed&&(claimed===selected.id||claimed===selected.name||strategies.some(x=>x.id===selected.id&&x.match.test(norm(claimed))))?selected.id:claimed;
- const aliases={habilidadCentral:['habilidadCentral','habilidad','habilidadPrincipal'],aplicacionConcreta:['aplicacionConcreta','aplicacion','implementacion'],evidenciaEsperada:['evidenciaEsperada','evidencia','productoEsperado'],retroalimentacionDocente:['retroalimentacionDocente','retroalimentacion','feedbackDocente']};
+ // Some providers omit the strategy ID or return its display label. Only
+ // normalize an omitted/equivalent ID; never override a conflicting strategy.
+ const equivalent=claimed&&(norm(claimed).trim()===norm(selected.id).trim()||norm(claimed).trim()===norm(selected.name).trim()||selected.match.test(norm(claimed)));
+ const normalizedId=!claimed||equivalent?selected.id:claimed;
+ const aliases={habilidadCentral:['habilidadCentral','habilidad','habilidadPrincipal','habilidadDesarrollada'],aplicacionConcreta:['aplicacionConcreta','aplicacion','implementacion','actividad','aplicacionEnClase'],evidenciaEsperada:['evidenciaEsperada','evidencia','productoEsperado','evidenciaAprendizaje'],retroalimentacionDocente:['retroalimentacionDocente','retroalimentacion','feedbackDocente','retroalimentacion','evaluacionFormativa']};
  const normalized={...plan,id:normalizedId};
  for(const [key,names] of Object.entries(aliases))if(!normalized[key]){const value=names.map(n=>plan[n]).find(x=>typeof x==='string'&&x.trim());if(value)normalized[key]=value;}
  return {...m,planEstrategia:normalized};
