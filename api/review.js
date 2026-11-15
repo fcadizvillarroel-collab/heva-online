@@ -57,6 +57,8 @@ module.exports=async function(req,res){
   corrected=P.finalize(corrected,plan);corrected.autoriaIA=result.local?material.autoriaIA:{proveedor:result.provider,modelo:result.model,fecha:new Date().toISOString()};delete corrected.revisionIA;corrected.planGeneracion=plan;corrected.materialId=material.materialId;corrected.version=material.version;
   corrected.fuentesDocumentales=fuentesDocumentales;
   const evidence=Sources.validateEvidence(corrected.respaldoDocumental,fuentesDocumentales);corrected.respaldoDocumental=evidence.valid;corrected.incidenciasDocumentales=evidence.invalid;corrected=Skills.prepare(corrected,plan,fuentesDocumentales,evidence);
+  corrected.auditoriaExperimental=require('../experimental/quality-audit.cjs').inspect(corrected,plan);
+  corrected.auditoriaDisciplinar=require('../experimental/subject-audit.cjs').inspectAll(corrected,plan);
   corrected.historialRevisionIA=[...(material.historialRevisionIA||[]),review];
   return res.status(200).json({exito:true,material:corrected,pendiente:'Revisar nuevamente la corrección.'});
  }catch(e){return res.status(503).json({etapa:stage,codigo:e.code==='AI_RATE_LIMIT'?'cuota_o_limite':e.code,reintentable:true,reintentarEn:e.retryAfter||0,proveedores:e.proveedores,detalle:stage==='informe'?String(e.message).slice(0,180):undefined,error:'No se pudo completar la revisión o corrección independiente. Se conserva el material; revisión pendiente.'})}
