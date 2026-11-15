@@ -383,7 +383,6 @@
     window.onload = function() {
       actualizarTodoElCurriculo();
       cargarHistorial();
-      cargarStagingDesdeServidor();
     };
 
     function zoomLetra(delta) {
@@ -396,7 +395,9 @@
 
     function toggleModoAhorro() {
       const art = document.getElementById('hoja-material');
-      if (document.getElementById('check-ahorro-toner').checked) {
+      if (!art) return;
+      const check = document.getElementById('check-ahorro-toner');
+      if (check ? check.checked : !art.classList.contains('modo-ahorro')) {
         art.classList.add('modo-ahorro');
       } else {
         art.classList.remove('modo-ahorro');
@@ -873,8 +874,8 @@
 (function(){
 'use strict';
 const $=id=>document.getElementById(id);
-const subjectMap=[[/historia|social/i,'sociales'],[/matem/i,'matematica'],[/lengua|comunicaci/i,'lenguaje'],[/ciencia|biolog|fisic|quimic/i,'ciencias'],[/ingl/i,'ingles'],[/metal/i,'tp_metal'],[/conviv/i,'convivencia'],[/laboral|trabajo/i,'laboral'],[/emprend/i,'emprendimiento'],[/financ/i,'financiera'],[/consum/i,'consumo'],[/tecnolog|digital/i,'digital'],[/oficio/i,'oficios']];
-function family(){const select=$('asignatura');const name=(select.value||select.options[select.selectedIndex]?.text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();return subjectMap.find(([re])=>re.test(name))?.[1]||'oficios'}
+const subjectMap=[[/conviv/i,'convivencia'],[/historia|social/i,'sociales'],[/matem/i,'matematica'],[/lengua|comunicaci/i,'lenguaje'],[/ciencia|biolog|fisic|quimic/i,'ciencias'],[/ingl/i,'ingles'],[/metal/i,'tp_metal'],[/conviv/i,'convivencia'],[/laboral|trabajo/i,'laboral'],[/emprend/i,'emprendimiento'],[/financ/i,'financiera'],[/consum/i,'consumo'],[/tecnolog|digital/i,'digital'],[/oficio/i,'oficios']];
+function family(){const select=$('asignatura');const name=(select.value||select.options[select.selectedIndex]?.text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();return subjectMap.find(([re])=>re.test(name))?.[1]||'general'}
 function choices(){return [...document.querySelectorAll('#lab-strategies input[data-strategy]:checked')].map(e=>({id:e.dataset.strategy,quantity:Number($('lab-count-'+e.dataset.strategy).value)}))}
 function render(){const root=$('lab-strategies');root.replaceChildren();root.dataset.subject=family();const items=window.HEVAStrategyLab.items(family());for(const scope of ['Transversal','Disciplinar']){const details=document.createElement('details');details.className='border rounded bg-white mt-2 p-2';details.open=scope==='Transversal';const summary=document.createElement('summary');summary.className='cursor-pointer font-bold text-xs';summary.textContent=scope==='Transversal'?'Estrategias generales':'Estrategias de la asignatura';details.append(summary);for(const item of items.filter(i=>i.scope===scope)){const card=document.createElement('div');card.className='border-b py-2';const label=document.createElement('label');label.className='text-xs font-semibold block';const check=document.createElement('input');check.type='checkbox';check.dataset.strategy=item.id;check.checked=false;check.className='mr-2';label.append(check,document.createTextNode(item.name));card.append(label);const description=document.createElement('small');description.className='block text-stone-500';description.textContent=item.purpose;card.append(description);const qtyLabel=document.createElement('label');qtyLabel.className='block text-xs mt-1';qtyLabel.textContent='Cantidad de actividades';const qty=document.createElement('input');qty.type='number';qty.id='lab-count-'+item.id;qty.min='1';qty.max='12';qty.value='1';qty.className='block border rounded p-1 w-24';qty.disabled=!check.checked;qtyLabel.append(qty);card.append(qtyLabel);check.addEventListener('change',()=>{qty.disabled=!check.checked;refresh()});qty.addEventListener('change',refresh);details.append(card)}root.append(details)}refresh()}
 function counts(){return{alternativas:Number($('cant-alternativas').value),desarrollo:Number($('cant-desarrollo').value),lecturas:Number($('cant-casos').value)}}

@@ -72,17 +72,19 @@ function drawSemanticVisual(ppt,theme,slide,title,lines){
  if(kind==='equation'){
   const source=lines.join(' ');
   const matches=[...source.matchAll(/(?:\d[\d.,]*\s*[xX]|[xX])\s*(?:[+\-]\s*\d[\d.,]*)?\s*=\s*(?:\d[\d.,]*\s*(?:[+\-]\s*\d[\d.,]*)?|\d[\d.,]*\s*\/\s*\d[\d.,]*)/g)].map(x=>x[0]);
-  const equations=[...new Set(matches)].slice(0,4);
-  if(!equations.length||source.length>420)return false; // Preserve long explanatory text instead of replacing it with extracted equations.
+  const equations=[...new Set(matches)];
+  if(!equations.length||equations.length>4||source.length>420)return false; // Preserve long explanatory text instead of replacing it with extracted equations.
   tx(title,.8,.83,11.7,.9,31,theme.main,true);
   shape(.85,2.02,11.62,1.15,theme.main);tx(equations[0],1.18,2.16,10.9,.8,33,'FFFFFF',true);
-  const other=equations.slice(1),steps=other.length?other:lines.filter(x=>/paso|restar|dividir|simplificar|despejar|resultado|comprob/i.test(x)).slice(0,3);
+  const other=equations.slice(1),steps=other.length?other:lines;
+  // Keep the complete explanation in speaker notes when equations carry the visual.
+  if(typeof slide.addNotes==='function')slide.addNotes(lines.join('\n'));
   const n=Math.max(1,steps.length),w=(11.6-(n-1)*.18)/n;
   steps.forEach((line,i)=>{const x=.86+i*(w+.18);shape(x,3.56,w,2.7,i%2?'F1E7DB':'FFFFFF');tx('TRANSFORMACIÓN '+(i+1),x+.18,3.82,w-.36,.38,13,theme.main,true);tx(line,x+.2,4.42,w-.4,1.32,n>2?19:23);});
   return true;
  }
  if(kind==='process'||kind==='chronology'){
-  const items=lines.slice(0,4);if(!items.length)return false;
+  const items=lines;if(!items.length||items.length>4)return false;
   tx(title,.8,.83,11.7,.9,31,theme.main,true);
   const n=items.length,w=(11.6-(n-1)*.16)/n;
   items.forEach((line,i)=>{const x=.86+i*(w+.16);shape(x,2.35,w,3.65,i%2?'F1E7DB':'FFFFFF');shape(x+.22,2.68,.68,.68,theme.main);tx(String(i+1),x+.28,2.74,.54,.5,21,'FFFFFF',true);tx(line.replace(/^\s*\d+[.)]\s*/,''),x+.23,3.58,w-.46,1.98,n>=4?17:20);if(i<n-1)tx('→',x+w-.03,3.13,.3,.35,17,theme.accent,true)});
@@ -117,10 +119,10 @@ function addContent(ppt,theme,slide,title,lines,section,index=0){
    text(j?'SEGUNDA PERSPECTIVA':'PRIMERA PERSPECTIVA',x+.32,2.55,5.05,.38,15,theme.main,true);
    text(part.join('\n\n'),x+.32,3.15,5.02,2.88,20,theme.ink,false,{valign:'top'});
   });
- }else if(kind==='timeline'&&clean.length>=2){
+ }else if(kind==='timeline'&&clean.length>=2&&clean.length<=5){
   rect(1.06,2.3,.07,3.95,theme.accent);
   clean.slice(0,5).forEach((line,j)=>{const y=2.3+j*.79;rect(.96,y+.15,.27,.27,theme.main);text(line,1.5,y,10.65,.64,20,theme.ink)});
- }else if(kind==='cards'&&clean.length>=2){
+ }else if(kind==='cards'&&clean.length>=2&&clean.length<=4){
   const items=clean.slice(0,4),cols=items.length<=2?items.length:2,rows=Math.ceil(items.length/cols),gap=.16;
   const w=(11.7-gap*(cols-1))/cols,h=(4.45-gap*(rows-1))/rows;
   items.forEach((line,j)=>{const x=.82+(j%cols)*(w+gap),y=2.13+Math.floor(j/cols)*(h+gap);
@@ -163,7 +165,7 @@ async function powerpoint(m,teacher=false){
  cover.addText(String(material.titulo||'Presentación educativa'),{x:1.08,y:1.95,w:10.7,h:2.15,fontFace:'Aptos Display',fontSize:38,bold:true,color:'FFFFFF',margin:0,breakLine:false,valign:'mid',fit:'shrink'});
  cover.addText([material.asignatura,material.nivel,material.temaEspecifico].filter(Boolean).join('  ·  '),{x:1.1,y:4.55,w:10.6,h:.75,fontSize:18,color:'FFF0E0',margin:0,fit:'shrink'});
  cover.addText('HEVA VISUAL · MOTOR 2026.11',{x:1.1,y:5.57,w:5.8,h:.26,fontSize:10,color:'FFFFFF',margin:0});
- pages.forEach((page,i)=>{const slide=addChrome(ppt,theme,page.kind,i+2,total);addContent(ppt,theme,slide,page.title,page.lines,page.kind,i)});
+ pages.forEach((page,i)=>{const slide=addChrome(ppt,theme,page.kind,i+2,total);if(visual.large){const originalAddText=slide.addText.bind(slide);slide.addText=(text,options)=>originalAddText(text,{...options,fontSize:Math.max(26,options.fontSize||26)});}addContent(ppt,theme,slide,page.title,page.lines,page.kind,i)});
  await ppt.writeFile({fileName:safeName(material.titulo)+(teacher?'_docente':'_estudiante')+'.pptx'});return ppt;
 }
 

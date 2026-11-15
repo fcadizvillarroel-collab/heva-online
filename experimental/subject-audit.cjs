@@ -38,6 +38,7 @@ const discipline=s=>{
  const n=normalize(s);
  if(mathSubject(s))return 'matematica';
  if(/lenguaje|comunicacion|lengua|literatura|castellano/.test(n))return 'lenguaje';
+ if(/convivencia|insercion|laboral|instrumental/.test(n))return 'instrumental';
  if(/historia|social|ciudadan|geografia/.test(n))return 'sociales';
  if(/ciencia|biologia|fisica|quimica|naturaleza/.test(n))return 'ciencias';
  if(/ingles|english|idioma/.test(n))return 'ingles';
