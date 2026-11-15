@@ -78,7 +78,7 @@ function inspectAll(material,plan={}){
  const activities=Array.isArray(material?.actividadesGuiadas)?material.actividadesGuiadas:[];
  const allText=[full,reading,...cases.map(c=>[c.contextoReal,c.preguntaReflexion].join(' ')),...activities.map(a=>JSON.stringify(a))].join(' ');
  if(area==='ingles'){
-  if(/traduc|translate|vocabulario|vocabulary|reading|lectura|dialogue|di[aá]logo/i.test(allText)&&!/\\b(?:the|is|are|have|has|can|will|do|does|my|your|work|job|hello|good|what|where|when|why|how)\\b/i.test(allText))
+  if(/traduc|translate|vocabulario|vocabulary|reading|lectura|dialogue|di[aá]logo/i.test(allText)&&!/\b(?:the|is|are|have|has|can|will|do|does|my|your|work|job|hello|good|what|where|when|why|how)\b/i.test(allText))
    recommend('ING-IDIOMA','No se identifican ejemplos evidentes en inglés; revisar que haya input lingüístico auténtico y adecuado al nivel.');
   if(/listen|listening|escucha|audio/i.test(allText)&&!/transcripci[oó]n|script|guion|audio disponible|grabaci[oó]n/i.test(allText))
    recommend('ING-AUDIO','Se propone comprensión auditiva sin transcripción ni recurso de audio identificado.');
