@@ -135,3 +135,14 @@ test('subject audit supports every discipline and retains pending verification',
   assert.ok(result.criterios.length>=3);
  }
 });
+
+test('independent review receives discipline evidence and corrected material is reaudited',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const review=fs.readFileSync(path.join(__dirname,'../api/review.js'),'utf8');
+ const workflow=fs.readFileSync(path.join(__dirname,'../heva-workflow-ui.js'),'utf8');
+ assert.match(review,/AUDITORÍA ESPECIALIZADA POR ASIGNATURA/);
+ assert.match(review,/corrected\.auditoriaDisciplinar=/);
+ assert.match(review,/corrected\.auditoriaExperimental=/);
+ assert.match(workflow,/Auditoría disciplinar:/);
+ assert.match(workflow,/Revisión independiente pendiente o parcial/);
+});
