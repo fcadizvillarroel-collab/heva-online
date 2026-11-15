@@ -657,11 +657,16 @@
           try { await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/heva-design.js?v=20261113fix2';script.onload=()=>window.HEVADesign?resolve():reject(new Error('No se pudo inicializar HEVA Design'));script.onerror=()=>reject(new Error('No se pudo cargar HEVA Design'));document.head.appendChild(script)}); } catch(e) { console.warn('Diseño opcional no disponible; se generará sin él.',e); }
         }
       const leerCantidadHEVA=(id,max,etiqueta)=>{const input=document.getElementById(id),raw=input.value.trim();if(raw==='')throw new Error('Debes indicar la cantidad de '+etiqueta+' (usa 0 si no deseas incluirlas).');const n=Number(raw);if(!Number.isInteger(n)||n<0||n>max)throw new Error('Cantidad inválida de '+etiqueta+': debe estar entre 0 y '+max+'.');return n;};
-      const cantidadesHEVA={
-        cantAlternativas:leerCantidadHEVA('cant-alternativas',20,'alternativas'),
-        cantDesarrollo:leerCantidadHEVA('cant-desarrollo',10,'desarrollo'),
-        cantCasos:leerCantidadHEVA('cant-casos',4,'situaciones de lectura/análisis')
-      };
+      // Una presentación se construye con diapositivas y actividades integradas,
+      // no con el banco de preguntas de una evaluación.
+      const esPresentacionHEVA=document.getElementById('tipo-material').value==='PRESENTACION';
+      const cantidadesHEVA=esPresentacionHEVA
+        ? {cantAlternativas:0,cantDesarrollo:0,cantCasos:0}
+        : {
+          cantAlternativas:leerCantidadHEVA('cant-alternativas',20,'alternativas'),
+          cantDesarrollo:leerCantidadHEVA('cant-desarrollo',10,'desarrollo'),
+          cantCasos:leerCantidadHEVA('cant-casos',4,'situaciones de lectura/análisis')
+        };
       const planIntegrado = window.hevaExperimentalPlan ? window.hevaExperimentalPlan() : null;
       const payload = {
         modoHerramienta: modo,
