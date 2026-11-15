@@ -33,7 +33,39 @@ function classifySlide(title,lines,index){
  if(/causas|consecuencias|factores|características|elementos/.test(t))return 'cards';
  return 'editorial';
 }
+function visualKind(title,lines){
+ const t=String(title).toLowerCase(),body=lines.join(' ');
+ if(/línea de tiempo|cronología|etapas históricas|periodización/.test(t))return 'chronology';
+ if(/resoluci[oó]n|despej|comprobaci[oó]n|modelamiento/.test(t)&&/\d\s*[a-zA-Z]|[a-zA-Z]\s*[+=]|=\s*\d/.test(body))return 'equation';
+ if(/procedimiento|pasos|secuencia|modelamiento|proceso/.test(t)&&/(?:paso\s*\d|etapa\s*\d)/i.test(body))return 'process';
+ return null;
+}
+function drawSemanticVisual(ppt,theme,slide,title,lines){
+ const kind=visualKind(title,lines);if(!kind)return false;
+ const tx=(v,x,y,w,h,size=20,color=theme.ink,bold=false)=>slide.addText(String(v),{x,y,w,h,fontFace:'Aptos',fontSize:size,color,bold,margin:.05,fit:'shrink',valign:'mid'});
+ const shape=(x,y,w,h,c)=>slide.addShape(ppt.ShapeType.roundRect,{x,y,w,h,rectRadius:.12,line:{color:c,transparency:100},fill:{color:c}});
+ tx(title,.8,.83,11.7,.9,31,theme.main,true);
+ if(kind==='equation'){
+  const source=lines.join(' ');
+  const eq=[...source.matchAll(/(?:\d[\d.,]*\s*\(?\s*[xX]\s*\)?(?:\s*[+\-*/]\s*\d[\d.,]*)?\s*=\s*\d[\d.,]*|[xX]\s*[+\-*/]\s*\d[\d.,]*\s*=\s*\d[\d.,]*)/g)].map(x=>x[0]);
+  const unique=[...new Set(eq)].slice(0,3);
+  if(!unique.length)return false;
+  shape(.85,2.05,11.62,1.25,theme.main);tx(unique[0],1.2,2.2,10.9,.85,34,'FFFFFF',true);
+  const steps=lines.filter(x=>/paso|restar|dividir|sustitu|reemplaz|comprob|resultado|por lo tanto|ecuaci[oó]n/i.test(x)).slice(0,3);
+  const show=steps.length?steps:lines.filter(x=>!x.includes(unique[0])).slice(0,3);
+  const n=Math.max(1,show.length),w=(11.6-(n-1)*.18)/n;
+  show.forEach((line,i)=>{const x=.86+i*(w+.18);shape(x,3.66,w,2.55,i%2?'F1E7DB':'FFFFFF');tx('PASO '+(i+1),x+.22,3.9,w-.44,.38,14,theme.main,true);tx(line,x+.22,4.38,w-.44,1.45,Math.min(20,n===3?17:20));});
+  return true;
+ }
+ if(kind==='process'||kind==='chronology'){
+  const items=lines.slice(0,4),n=items.length,w=(11.6-(n-1)*.16)/n;
+  items.forEach((line,i)=>{const x=.86+i*(w+.16);shape(x,2.35,w,3.65,i%2?'F1E7DB':'FFFFFF');shape(x+.22,2.68,.68,.68,theme.main);tx(String(i+1),x+.28,2.74,.54,.5,21,'FFFFFF',true);tx(line,x+.23,3.58,w-.46,1.98,n>=4?17:20);if(i<n-1)tx('→',x+w-.03,3.13,.3,.35,17,theme.accent,true)});
+  return true;
+ }
+ return false;
+}
 function addContent(ppt,theme,slide,title,lines,section,index=0){
+ if(drawSemanticVisual(ppt,theme,slide,title,lines))return;
  const kind=classifySlide(title,lines,index),rect=(x,y,w,h,color)=>slide.addShape(ppt.ShapeType.rect,{x,y,w,h,line:{color,transparency:100},fill:{color}});
  const text=(value,x,y,w,h,size,color,bold=false,extra={})=>slide.addText(String(value),{x,y,w,h,fontFace:bold?'Aptos Display':'Aptos',fontSize:size,color,bold,margin:0,breakLine:false,valign:'mid',fit:'shrink',...extra});
  const clean=lines.map(x=>x.replace(/^[-•]\s*/,'').trim()).filter(Boolean);
