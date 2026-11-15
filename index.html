@@ -584,6 +584,17 @@
       actualizarObjetivosYEstrategias();
     }
 
+    // Catálogo documental de la especialidad EPJA. Fuente aportada por el docente:
+    // "especialidad.docx", Plan de Estudios Construcciones Metálicas, pp. 116-117 y 124-125.
+    // Se conserva separado del catálogo verificado de Supabase: NO se etiqueta como verificado.
+    const HEVA_TP_OFT=["Planificar y elaborar cronogramas para la utilización de recursos y distribución del tiempo.","Leer e interpretar planos y diagramas y elaborar croquis.","Aplicar conocimientos de metrología en la realización de mediciones y verificaciones.","Identificar, utilizar adecuadamente, y realizar la mantención básica de instrumentos, útiles, máquinas, equipos y componentes propios de la especialidad.","Instalar y organizar puestos de trabajo en construcciones.","Mecanizar con herramientas manuales y máquinas-herramientas, ejecutando labores de taladrado, torneado, esmerilado, aserrado y otros procesos.","Elaborar y mecanizar elementos de construcción mecánica.","Efectuar tratamientos térmicos básicos.","Realizar uniones separables y no separables: soldadura en fusión, soldadura eléctrica y pegado.","Realizar tareas de corte y de transformación en frío y en caliente.","Montar, desmontar y realizar la mantención de construcciones metálicas.","Montar, desmontar, mantener y realizar el ajuste de sistemas de cerradura y seguridad.","Dominar principios básicos de gestión micro-empresarial.","Realizar el tratamiento de residuos y desechos, aplicando técnicas compatibles de cuidado del medio ambiente.","Aplicar normas de seguridad e higiene con énfasis en la prevención de riesgos y la aplicación de primeros auxilios."];
+    const HEVA_TP_MODULOS=[["Trazado y corte de chapas, perfiles y tubos",144,1],["Calidad en construcciones metálicas",144,2],["Representación gráfica en construcciones metálicas",144,2],["Soldadura",144,3],["Armado de elementos y conjuntos",144,3],["Conformado en construcciones metálicas",72,3],["Mecanizado en construcciones metálicas",144,3],["Preparación y protección de superficies de construcciones metálicas",72,3]];
+    function objetivosConstruccionesMetalicas(nivel){
+      const lista=HEVA_TP_OFT.map((texto,i)=>({tipo:'OFT · perfil de egreso',codigo:'OFT-'+(i+1),texto}));
+      const nivelNumero={'I_MEDIO_TP':1,'II_MEDIO_TP':2,'III_MEDIO_TP':3}[nivel];
+      HEVA_TP_MODULOS.forEach(([nombre,horas,n],i)=>{if(n===nivelNumero)lista.push({tipo:'Módulo · programa de estudio',codigo:'MOD-'+(i+1),texto:'Módulo: '+nombre+'. Carga sugerida: '+horas+' horas. Seleccione el aprendizaje esperado específico del módulo para planificar y evaluar; el nombre del módulo por sí solo NO es un objetivo de aprendizaje.'})});
+      return lista;
+    }
     async function actualizarObjetivosYEstrategias() {
       const marco = document.getElementById('marco-curricular').value;
       const nivel = document.getElementById('nivel-epja').value;
@@ -592,6 +603,14 @@
       const contadorOAs = document.getElementById('contador-oas');
 
       selectOA.innerHTML = '';
+      if (/Construcciones Metálicas/i.test(asig)) {
+        const lista=objetivosConstruccionesMetalicas(nivel);
+        contadorOAs.innerText=lista.length+' referencias documentales · OFT y módulos (sin verificación en Supabase)';
+        lista.forEach(o=>{const opt=document.createElement('option');opt.value=o.texto;opt.innerText='['+o.tipo+'] ['+o.codigo+'] '+o.texto;selectOA.appendChild(opt)});
+        const custom=document.createElement('option');custom.value='CUSTOM';custom.innerText='✍️ Pegar aprendizaje esperado y criterio de evaluación literal del módulo';selectOA.appendChild(custom);
+        cargarOATexto();
+        return;
+      }
       contadorOAs.innerText = 'Consultando Supabase...';
 
       try {
