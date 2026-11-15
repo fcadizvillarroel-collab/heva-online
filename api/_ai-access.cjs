@@ -3,7 +3,25 @@
 // No service-role secret is ever returned to the client.
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 async function protect(req,res){
- if(process.env.HEVA_AI_REQUIRE_AUTH!=='true')return true;
+ // Piloto sin cuentas: cuota compartida opcional; no equivale a 10 usuarios identificados.
+ if(process.env.HEVA_AI_REQUIRE_AUTH!=='true'){
+  if(process.env.HEVA_PILOT_SHARED_QUOTA!=='true')return true;
+  const url=(process.env.SUPABASE_URL||'').replace(/\\/$/,'');
+  const key=(process.env.SUPABASE_SERVICE_ROLE_KEY||'').trim();
+  if(!url||!key){res.status(503).json({error:'La cuota del piloto no está configurada.'});return false}
+  try{
+   const limit=Math.max(1,Math.min(1000,Number(process.env.HEVA_PILOT_DAILY_REQUESTS)||100));
+   const response=await fetch(url+'/rest/v1/rpc/heva_consumir_cuota_piloto',{
+    method:'POST',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json'},
+    body:JSON.stringify({p_limite:limit}),signal:AbortSignal.timeout(5000)
+   });
+   const allowed=await response.json().catch(()=>null);
+   if(!response.ok){res.status(503).json({error:'No se pudo verificar la cuota del piloto.'});return false}
+   if(allowed!==true){res.status(429).json({error:'El piloto alcanzó su límite diario de solicitudes de IA.'});return false}
+   return true;
+  }catch{res.status(503).json({error:'No se pudo consultar la cuota del piloto.'});return false}
+ }
+
  const url=(process.env.SUPABASE_URL||'').replace(/\/$/,'');
  const key=(process.env.SUPABASE_SERVICE_ROLE_KEY||'').trim();
  if(!url||!key){res.status(503).json({error:'Acceso docente no configurado.'});return false}
