@@ -1,7 +1,31 @@
 (function(root){
 const safeName=s=>s.replace(/[^\p{L}\p{N} -]/gu,'').slice(0,90)||'HEVA_material';
 function download(blob,name){let a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000)}
-async function word(m,teacher=false){if(!root.docx)throw Error('No se cargó el exportador Word local. Recarga la página.');let visual=root.HEVATemplates.layout(m);let {Document,Packer,Paragraph,TextRun,HeadingLevel}=root.docx;let blocks=HEVA.blocks(HEVA.material(m),teacher);let children=[new Paragraph({children:[new TextRun({text:'ESCUELA HÉCTOR VALENZUELA · EPJA',bold:true,color:visual.theme.main})]})];blocks.forEach((b,i)=>{if(b.kind==='option'){children.push(new Paragraph({children:[new TextRun({text:b.title+' '+b.text,size:visual.wordSize})],spacing:{after:90}}));return}children.push(new Paragraph({heading:i===0?HeadingLevel.TITLE:HeadingLevel.HEADING_1,text:b.title}));b.text.split('\n').forEach(l=>children.push(new Paragraph({children:[new TextRun({text:l,size:visual.wordSize})],spacing:{after:140}})))});let blob=await Packer.toBlob(new Document({sections:[{properties:{},children}]}));download(blob,safeName(m.titulo)+(teacher?'_docente':'_estudiante')+'.docx');return blob}
+async function word(m,teacher=false){
+ if(!root.docx)throw Error('No se cargó el exportador Word local. Recarga la página.');
+ const material=HEVA.material(m),visual=root.HEVATemplates.layout(material);
+ const {Document,Packer,Paragraph,TextRun,HeadingLevel,AlignmentType}=root.docx;
+ const blocks=HEVA.blocks(material,teacher);
+ const main=visual.theme.main,ink=visual.theme.ink,children=[];
+ const line=(value,opts={})=>new Paragraph({children:[new TextRun({text:String(value),size:opts.size||visual.wordSize,bold:!!opts.bold,color:opts.color||ink})],spacing:{before:opts.before||0,after:opts.after??110},keepNext:!!opts.keepNext});
+ children.push(line('ESCUELA HÉCTOR VALENZUELA CEA · EPJA',{bold:true,color:main,size:20,after:260}));
+ children.push(new Paragraph({text:material.titulo||'Material educativo',heading:HeadingLevel.TITLE,spacing:{after:220},keepNext:true}));
+ children.push(line([material.asignatura,material.nivel,material.temaEspecifico].filter(Boolean).join(' · '),{color:main,after:260}));
+ for(const block of blocks){
+  if(block.kind==='option'){children.push(line(block.title+' '+block.text,{after:115}));continue;}
+  children.push(new Paragraph({text:block.title,heading:HeadingLevel.HEADING_2,spacing:{before:220,after:110},keepNext:true}));
+  for(const paragraph of String(block.text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean)){
+   children.push(line(paragraph,{after:140}));
+  }
+  if(/actividad|ejercicio|desarrollo|caso\s*\d|analiza y responde|aplicación autónoma/i.test(block.title)&&!teacher){
+   for(let j=0;j<3;j++)children.push(line('___________________________________________________________________',{size:19,color:'9A9A9A',after:155}));
+  }
+ }
+ const doc=new Document({sections:[{properties:{page:{margin:{top:1080,bottom:1080,left:1080,right:1080}}},children}]});
+ const blob=await Packer.toBlob(doc);
+ download(blob,safeName(material.titulo)+(teacher?'_docente':'_estudiante')+'.docx');
+ return blob;
+}
 function wrap(text,max=66){let out=[],line='';String(text).split('\n').forEach(par=>{par.split(/\s+/).forEach(w=>{if((line+' '+w).length>max){if(line)out.push(line);line=w}else line+=(line?' ':'')+w});out.push(line);line=''});return out}
 function slideText(value){return (Array.isArray(value)?value.join('\n'):String(value??'')).replace(/\r/g,'').trim()}
 function chunksOf(value,maxChars=850,maxItems=5){
