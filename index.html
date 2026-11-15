@@ -697,7 +697,7 @@
           'Desarrollo: '+payload.cantDesarrollo,
           'Situaciones de lectura/análisis: '+payload.cantCasos,
           'Adecuaciones: '+(payload.adecuacionesPIE.join(', ')||'Ninguna')
-        ].join('\\n');
+        ].join('\n');
         if(!window.confirm(resumenHEVA))throw new Error('Generación cancelada. No se enviaron solicitudes al servidor.');
 
         let data;
