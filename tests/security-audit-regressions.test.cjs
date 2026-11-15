@@ -78,3 +78,10 @@ test('PowerPoint exporter uses native slides and a warm 16:9 layout',()=>{
  assert.match(source,/function addContent/);
  assert.match(source,/fit:'shrink'/);
 });
+
+test('PowerPoint layouts vary by pedagogical purpose',()=>{
+ const source=fs.readFileSync(path.join(__dirname,'../heva-office.js'),'utf8');
+ for(const name of ['activity','compare','timeline','cards','feature','editorial'])assert.ok(source.includes("'"+name+"'"),name);
+ assert.match(source,/function classifySlide/);
+ assert.match(source,/addContent\(ppt,theme,slide,page.title,page.lines,page.kind,i\)/);
+});
