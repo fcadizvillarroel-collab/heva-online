@@ -73,7 +73,7 @@ function drawSemanticVisual(ppt,theme,slide,title,lines){
   const source=lines.join(' ');
   const matches=[...source.matchAll(/(?:\d[\d.,]*\s*[xX]|[xX])\s*(?:[+\-]\s*\d[\d.,]*)?\s*=\s*(?:\d[\d.,]*\s*(?:[+\-]\s*\d[\d.,]*)?|\d[\d.,]*\s*\/\s*\d[\d.,]*)/g)].map(x=>x[0]);
   const equations=[...new Set(matches)].slice(0,4);
-  if(!equations.length)return false;
+  if(!equations.length||source.length>420)return false; // Preserve long explanatory text instead of replacing it with extracted equations.
   tx(title,.8,.83,11.7,.9,31,theme.main,true);
   shape(.85,2.02,11.62,1.15,theme.main);tx(equations[0],1.18,2.16,10.9,.8,33,'FFFFFF',true);
   const other=equations.slice(1),steps=other.length?other:lines.filter(x=>/paso|restar|dividir|simplificar|despejar|resultado|comprob/i.test(x)).slice(0,3);
@@ -175,6 +175,7 @@ function auditExport(m,teacher=false){
  if(/(?:Paso\s*\d+\s*:\s*Paso\s*\d+)/i.test(text))issues.push({level:'warning',code:'PASO_REPETIDO',detail:'Se detectó una etiqueta de paso duplicada en el contenido original.'});
  if(/(?:imagin(?:e|ar)|visualic(?:e|ar))\s+(?:una\s+)?balanza/i.test(text))issues.push({level:'info',code:'BALANZA_VISUAL',detail:'Conviene acompañar la metáfora de la balanza con un diagrama.'});
  if(/evaluaci[oó]n|prueba/i.test(material.tipoMaterial||'')&&!/puntaje|puntos/i.test(text))issues.push({level:'warning',code:'SIN_PUNTAJE',detail:'No se identificó un puntaje explícito en la evaluación.'});
+ if(/(?:Caso\s*\d+|pregunta\s*\d+)/i.test(text)&&/\b2\s*puntos\b/i.test(text)&&/justific|comprob|represent|resuelv/i.test(text))issues.push({level:'info',code:'REVISAR_RUBRICA',detail:'Hay actividades de varios pasos con puntajes bajos; verifique la rúbrica y el desglose.'});
  return {estimatedSlides:slides,issues,wordAndPowerpointShareContent:true};
 }
 root.HEVAOffice={word,powerpoint,download,auditExport};})(typeof globalThis!=='undefined'?globalThis:this);
