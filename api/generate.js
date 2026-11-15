@@ -38,6 +38,12 @@ module.exports = async function handler(req, res) {
     preguntaARegenerar = null
   } = req.body || {};
 
+  // En presentaciones, el contenido evaluable se integra en las diapositivas.
+  // Ignorar las cantidades de ítems heredadas del formulario para evitar
+  // fallos ALT-# por distractores repetidos ajenos al PowerPoint.
+  const cantidadesEfectivas=tipoMaterial==='PRESENTACION'
+    ? {cantAlternativas:0,cantDesarrollo:0,cantCasos:0}
+    : {cantAlternativas,cantDesarrollo,cantCasos};
   if(!['NINGUNA','ESTILO','CONTENIDO'].includes(modoReferencia)||typeof referenciaRecibida!=='string'||referenciaRecibida.length>60000)return res.status(400).json({error:'Referencia opcional inválida.'});
   const textoReferencia=modoReferencia==='NINGUNA'?'':referenciaRecibida;
   for (const [name,value,max] of [['cantAlternativas',cantAlternativas,20],['cantDesarrollo',cantDesarrollo,10],['cantCasos',cantCasos,4]]) {
@@ -157,7 +163,7 @@ Responde ÚNICAMENTE en JSON:
     // Cada material tiene un contrato propio y una estrategia observable en sus tareas.
     if (!Object.hasOwn(Pedagogy.contracts, tipoMaterial)) return res.status(400).json({error:'Tipo de material no admitido.'});
     if (!objetivoAprendizaje.trim()) return res.status(400).json({error:'Selecciona un objetivo curricular antes de generar.'});
-    const plan = {...Object.fromEntries(["documentosBase","plantillaVisual","derivacion"].filter(k=>req.body[k]!=null).map(k=>[k,req.body[k]])),asignatura,nivel,marcoCurricular,objetivoAprendizaje,temaEspecifico,estrategiaDidactica,instruccionesDocente,disenoPedagogico,planIntegrado,textoReferencia,modoReferencia,adecuacionesPIE,tipoMaterial,cantAlternativas,cantDesarrollo,cantCasos,incluirTicketSalida};
+    const plan = {...Object.fromEntries(["documentosBase","plantillaVisual","derivacion"].filter(k=>req.body[k]!=null).map(k=>[k,req.body[k]])),asignatura,nivel,marcoCurricular,objetivoAprendizaje,temaEspecifico,estrategiaDidactica,instruccionesDocente,disenoPedagogico,planIntegrado,textoReferencia,modoReferencia,adecuacionesPIE,tipoMaterial,...cantidadesEfectivas,incluirTicketSalida};
     const extraIssues=require('../heva-studio.js').validateExtras(plan);if(extraIssues.length)return res.status(400).json({error:extraIssues.join('; ')});
     const designIssues=require('../heva-design.js').validate(disenoPedagogico,plan);
     if(designIssues.length)return res.status(400).json({error:designIssues.join('; ')});
@@ -174,11 +180,11 @@ Responde ÚNICAMENTE en JSON:
       const m=HEVA.material(traced,metadata);
       // Final defensive boundary: never return surplus items when the teacher
       // requested zero, regardless of model output or intermediary defaults.
-      for(const [field,count] of [['preguntasAlternativas',cantAlternativas],['preguntasDesarrollo',cantDesarrollo],['casosEstudio',cantCasos]])m[field]=m[field].slice(0,count);
+      for(const [field,count] of [['preguntasAlternativas',cantidadesEfectivas.cantAlternativas],['preguntasDesarrollo',cantidadesEfectivas.cantDesarrollo],['casosEstudio',cantidadesEfectivas.cantCasos]])m[field]=m[field].slice(0,count);
       m.trazabilidadEstrategia=Pedagogy.normalizeTaskTraces(m).trazabilidadEstrategia;
       return m;
     };
-    const check = m => [...HEVA.validate(m,{cantAlternativas,cantDesarrollo,cantCasos}),...Pedagogy.validate(m,plan),...Skills.generationIssues(m,plan)];
+    const check = m => [...HEVA.validate(m,cantidadesEfectivas),...Pedagogy.validate(m,plan),...Skills.generationIssues(m,plan)];
     let material = normalize(await draft(promptRedactor));
     let issues = check(material);
     if (issues.length) {
