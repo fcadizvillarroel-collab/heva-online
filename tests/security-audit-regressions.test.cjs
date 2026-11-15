@@ -125,3 +125,13 @@ test('PowerPoint visual engine provides native semantic diagrams',()=>{
  assert.match(source,/kind==='process'/);
  assert.match(source,/if\(drawSemanticVisual\(ppt,theme,slide,title,lines\)\)return/);
 });
+
+test('subject audit supports every discipline and retains pending verification',()=>{
+ const audit=require('../experimental/subject-audit.cjs');
+ for(const [subject,area] of [['Matemática','matematica'],['Lenguaje y Comunicación','lenguaje'],['Estudios Sociales','sociales'],['Ciencias Naturales','ciencias'],['Inglés','ingles'],['Construcciones Metálicas','tecnico'],['Convivencia Social','instrumental']]){
+  const result=audit.inspectAll({asignatura:subject,objetivoAprendizaje:'OA de prueba',diapositivas:[{titulo:'Introducción',contenido:'Conceptos y ejemplos que se desarrollan mediante un problema contextualizado en el aula.'}]});
+  assert.equal(result.disciplina,area);
+  assert.equal(result.alcanceProfundo.validacion,'pendiente_revision_independiente_y_docente');
+  assert.ok(result.criterios.length>=3);
+ }
+});
