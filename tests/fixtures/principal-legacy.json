@@ -1,0 +1,52 @@
+{
+  "titulo": "Material guardado antes de integrar",
+  "materialId": "legacy-1",
+  "version": 3,
+  "objetivoAprendizaje": "OA original",
+  "tipoMaterial": "GUIA",
+  "preguntasAlternativas": [
+    {
+      "numero": 1,
+      "enunciado": "Pregunta conservada",
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Opción A"
+        },
+        {
+          "letra": "B",
+          "texto": "Opción B"
+        },
+        {
+          "letra": "C",
+          "texto": "Opción C"
+        },
+        {
+          "letra": "D",
+          "texto": "Opción D"
+        }
+      ],
+      "claveCorrecta": "D",
+      "justificacion": "Fundamento original"
+    }
+  ],
+  "diapositivas": [
+    {
+      "titulo": "Contenido antiguo",
+      "contenido": [
+        "Materia conservada"
+      ]
+    }
+  ],
+  "introduccionLectura": "Lectura original",
+  "preguntasDesarrollo": [],
+  "casosEstudio": [],
+  "listaCotejoTP": [],
+  "glosario": [],
+  "actividadesGuiadas": [],
+  "planClase": [],
+  "procedimientoTaller": [],
+  "trazabilidadEstrategia": [],
+  "recursos": [],
+  "apoyosAcceso": []
+}

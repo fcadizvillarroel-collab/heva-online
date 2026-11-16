@@ -1,8 +1,10 @@
-name: HEVA experimental quality checks
+name: HEVA compatibility and quality checks
 on:
   push:
     branches:
       - experimental/estrategias-pedagogicas
+      - integration/**
+      - main
   pull_request:
     branches:
       - main
@@ -10,7 +12,6 @@ permissions:
   contents: read
 jobs:
   test:
-    if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout reviewed source
