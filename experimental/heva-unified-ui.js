@@ -11,8 +11,8 @@ container.id='heva-unified-pedagogy';container.className='rounded-xl border bord
 strategy.parentNode.insertBefore(container,strategy);
 container.append(strategy,questions,lab);
 const heading=document.createElement('div');heading.className='flex items-center justify-between gap-2';
-const title=document.createElement('strong');title.className='text-sm text-[#8B2635]';title.textContent='Diseño de estrategias y preguntas';
-const hint=document.createElement('span');hint.className='text-xs text-stone-500';hint.textContent='Un solo flujo';
+const title=document.createElement('strong');title.className='text-sm text-[#8B2635]';title.textContent='Estrategia pedagógica del material';
+const hint=document.createElement('span');hint.className='text-xs text-stone-500';hint.textContent='Configuración';
 heading.append(title,hint);container.prepend(heading);
 const note=document.createElement('p');note.className='text-xs text-stone-600';note.textContent='La estrategia principal se utiliza en modo habitual. Activa el laboratorio para combinar estrategias; las cantidades de preguntas son compartidas.';
 strategy.append(note);
@@ -46,7 +46,7 @@ body:has(#integrated-lab[open]){overflow:hidden}
 function update(){
 const active=enabled.checked;
 strategy.querySelector('label')?.classList.toggle('opacity-60',active);
-note.textContent=active?'Modo combinado activo: HEVA toma las estrategias del panel lateral. La estrategia principal también se exige; el informe del resultado mostrará qué tareas se vinculan a cada estrategia.':'Modo habitual: se usa la estrategia principal. Activa el laboratorio para combinar varias.';
+note.textContent=active?'Modo combinado activo: HEVA toma las estrategias del panel lateral. La estrategia principal también se exige; el informe del resultado mostrará qué tareas se vinculan a cada estrategia.':'Elige la estrategia principal en el menú. Para combinar varias, abre el botón de estrategias combinadas.';
 const summary=$('lab-summary');if(summary)summary.setAttribute('data-enabled',String(active));
 }
 enabled.addEventListener('change',update);update();
