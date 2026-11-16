@@ -6,7 +6,7 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
   let rateLimited=false,retryAfter=0,timedOut=false;const providerStatus=[];
   const track=(resp,provider)=>{if(!resp.ok)providerStatus.push({proveedor:provider,estadoHTTP:resp.status});if(resp.status===429){rateLimited=true;const seconds=Number(resp.headers?.get?.('retry-after'));if(Number.isFinite(seconds))retryAfter=Math.max(retryAfter,Math.min(3600,Math.ceil(seconds)));}};
   const timeoutFor=provider=>{const remaining=deadline-Date.now();const reserve=provider==='gemini'&&groqKey&&!exclude.includes('groq')?14000:0;return Math.max(1,Math.min(provider==='gemini'&&reserve?12000:20000,remaining-reserve));};
-  const remember=(e,provider)=>{if(e?.name==='TimeoutError'||e?.name==='AbortError'){timedOut=true;providerStatus.push({proveedor:provider,estado:'tiempo_agotado'});}if(String(e?.code||'').startsWith('AI_RESPONSE_'))responseErrors.push(e.code);};
+  const remember=(e,provider)=>{if(e?.name==='TimeoutError'||e?.name==='AbortError'){timedOut=true;providerStatus.push({proveedor:provider,estado:'tiempo_agotado'});}if(String(e?.code||'').startsWith('AI_RESPONSE_')){responseErrors.push(e.code);providerStatus.push({proveedor:provider,estado:e.code});}};
 
   // 1. ChatGPT (OpenAI - si está configurado)
   if (openAiKey && !exclude.includes('openai')) {
@@ -94,9 +94,9 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
           headers: { 'Authorization': `Bearer ${groqKey}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             model: mod,
-            messages: [{ role: 'system', content: 'Responde exclusivamente con JSON válido.' }, { role: 'user', content: prompt }],
+            messages: [{ role: 'system', content: 'Responde exclusivamente con JSON válido.' }, { role: 'user', content: options.fallbackPrompt||prompt }],
             response_format: { type: 'json_object' },
-            max_completion_tokens: options.maxOutputTokens || 8192,
+            max_completion_tokens: options.fallbackMaxOutputTokens || options.maxOutputTokens || 8192,
             ...(mod.startsWith('openai/gpt-oss')?{reasoning_effort:'low'}:{}),
             temperature: 0.4
           })
@@ -116,7 +116,7 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
 
   const error=new Error(responseErrors.length?'La IA no logró devolver un documento completo y válido.':'No se pudo obtener respuesta de los proveedores habilitados.');
   error.retryAfter=retryAfter;error.proveedores=providerStatus;
-  error.code=rateLimited&&!responseErrors.length?'AI_RATE_LIMIT':responseErrors.includes('AI_RESPONSE_INCOMPLETE')?'AI_RESPONSE_INCOMPLETE':responseErrors.length?'AI_RESPONSE_INVALID':timedOut?'AI_TIMEOUT':'AI_UNAVAILABLE';
+  error.code=providerStatus.some(s=>s.estadoHTTP===413)?'AI_REQUEST_TOO_LARGE':rateLimited&&!responseErrors.length?'AI_RATE_LIMIT':responseErrors.includes('AI_RESPONSE_INCOMPLETE')?'AI_RESPONSE_INCOMPLETE':responseErrors.length?'AI_RESPONSE_INVALID':timedOut?'AI_TIMEOUT':'AI_UNAVAILABLE';
   throw error;
 }
 
