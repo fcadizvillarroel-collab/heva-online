@@ -40,6 +40,26 @@ function chunksOf(value,maxChars=850,maxItems=5){
  if(page.length)pages.push(page);
  return pages.length?pages:[['Contenido pendiente de desarrollar']];
 }
+// Conservative text measurement shared by pagination and layout selection.
+let measureContext;
+function textWidth(value,size){
+ if(measureContext===undefined){try{measureContext=root.document?.createElement('canvas')?.getContext('2d')||null;}catch{measureContext=null;}}
+ if(measureContext){measureContext.font=size+'pt Aptos';return measureContext.measureText(String(value)).width*72/96;}
+ return [...String(value)].reduce((n,c)=>n+(/[ilI.,:;!|' ]/.test(c)?.3:/[MW@#%]/.test(c)?.88:.57)*size,0);
+}
+function lineCount(value,width,size){const limit=width*72;let count=0;for(const paragraph of String(value).split('\n')){let used=0;count++;for(const word of paragraph.split(/\s+/).filter(Boolean)){const w=textWidth(word,size),gap=used?textWidth(' ',size):0;if(used&&used+gap+w>limit){count++;used=0;}if(w>limit){count+=Math.ceil(w/limit)-1;used=w%limit;}else used+= (used?gap:0)+w;}}return count;}
+function fitsText(lines,width,height,size){return lineCount(lines.join('\n\n'),width,size)*size*1.28<=Math.max(0,height-.12)*72;}
+function paginatePresentation(section,large=false){
+ const size=large?26:23,activity=classifySlide(section.title,[],0)==='activity',height=activity?2.82:3.65,width=10.65;
+ const source=slideText(section.text).split(/\n+/).map(x=>x.trim()).filter(Boolean),pieces=[];
+ for(const paragraph of source){if(fitsText([paragraph],width,height,size)){pieces.push(paragraph);continue;}
+  // Prefer sentence boundaries. Very long sentences continue at word boundaries.
+  const sentences=paragraph.match(/[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g)||[paragraph];let current='';
+  for(const sentence of sentences){if(fitsText([current+(current?' ':'')+sentence.trim()],width,height,size)){current+=(current?' ':'')+sentence.trim();continue;}if(current){pieces.push(current);current='';}for(const word of sentence.trim().split(/\s+/)){if(current&&!fitsText([current+' '+word],width,height,size)){pieces.push(current);current='';}current+=(current?' ':'')+word;}}
+  if(current)pieces.push(current);
+ }
+ const pages=[];let page=[];for(const piece of pieces){if(page.length&&!fitsText([...page,piece],width,height,size)){pages.push(page);page=[];}page.push(piece);}if(page.length)pages.push(page);return pages.length?pages:[['Contenido pendiente de desarrollar']];
+}
 function addChrome(ppt,theme,section,num,total){
  const slide=ppt.addSlide();slide.background={color:theme.background};
  slide.addShape(ppt.ShapeType.rect,{x:0,y:0,w:13.333,h:.16,line:{color:theme.main},fill:{color:theme.main}});
@@ -74,7 +94,7 @@ function drawSemanticVisual(ppt,theme,slide,title,lines){
   const source=lines.join(' ');
   const matches=[...source.matchAll(/(?:\d[\d.,]*\s*[xX]|[xX])\s*(?:[+\-]\s*\d[\d.,]*)?\s*=\s*(?:\d[\d.,]*\s*(?:[+\-]\s*\d[\d.,]*)?|\d[\d.,]*\s*\/\s*\d[\d.,]*)/g)].map(x=>x[0]);
   const equations=[...new Set(matches)];
-  if(!equations.length||equations.length>4||source.length>420)return false; // Preserve long explanatory text instead of replacing it with extracted equations.
+  if(!equations.length||equations.length>4||source.length>420||lines.some(t=>!fitsText([t],3.2,1.32,26)))return false; // Preserve long explanatory text instead of replacing it with extracted equations.
   tx(title,.8,.83,11.7,.9,31,theme.main,true);
   shape(.85,2.02,11.62,1.15,theme.main);tx(equations[0],1.18,2.16,10.9,.8,33,'FFFFFF',true);
   const other=equations.slice(1),steps=other.length?other:lines;
@@ -85,7 +105,7 @@ function drawSemanticVisual(ppt,theme,slide,title,lines){
   return true;
  }
  if(kind==='process'||kind==='chronology'){
-  const items=lines;if(!items.length||items.length>4)return false;
+  const items=lines;if(!items.length||items.length>4||items.some(t=>!fitsText([t],(11.6-(items.length-1)*.16)/items.length-.46,1.98,26)))return false;
   tx(title,.8,.83,11.7,.9,31,theme.main,true);
   const n=items.length,w=(11.6-(n-1)*.16)/n;
   items.forEach((line,i)=>{const x=.86+i*(w+.16);shape(x,2.35,w,3.65,i%2?'F1E7DB':'FFFFFF');shape(x+.22,2.68,.68,.68,theme.main);tx(String(i+1),x+.28,2.74,.54,.5,21,'FFFFFF',true);tx(line.replace(/^\s*\d+[.)]\s*/,''),x+.23,3.58,w-.46,1.98,n>=4?17:20);if(i<n-1)tx('→',x+w-.03,3.13,.3,.35,17,theme.accent,true)});
@@ -104,7 +124,7 @@ function addContent(ppt,theme,slide,title,lines,section,index=0){
  const kind=classifySlide(title,lines,index),rect=(x,y,w,h,color)=>slide.addShape(ppt.ShapeType.rect,{x,y,w,h,line:{color,transparency:100},fill:{color}});
  const text=(value,x,y,w,h,size,color,bold=false,extra={})=>slide.addText(String(value),{x,y,w,h,fontFace:bold?'Aptos Display':'Aptos',fontSize:size,color,bold,margin:0,breakLine:false,valign:'mid',fit:'shrink',...extra});
  const clean=lines.map(x=>x.replace(/^[-•]\s*/,'').trim()).filter(Boolean);
- text(title.slice(0,125),.78,.85,11.75,1.08,title.length>65?27:33,theme.main,true);
+ let titleSize=title.length>65?27:33;while(titleSize>20&&!fitsText([title],11.75,1.08,titleSize))titleSize--;text(title,.78,.85,11.75,1.08,titleSize,theme.main,true);
  if(kind==='question'){
   rect(.8,2.12,11.73,4.45,'FFFFFF');rect(.8,2.12,.13,4.45,theme.accent);
   text(clean.join('\n\n'),1.25,2.45,10.8,3.78,21,theme.ink,false,{valign:'top'});
@@ -112,7 +132,7 @@ function addContent(ppt,theme,slide,title,lines,section,index=0){
   rect(.8,2.12,11.73,4.45,theme.main);rect(1.18,2.5,1.15,.09,theme.accent);
   text('ACTIVIDAD DE APLICACIÓN',1.18,2.73,10.6,.38,16,'FFE2BE',true);
   text(clean.join('\n\n'),1.18,3.3,10.7,2.82,23,'FFFFFF',false,{valign:'top'});
- }else if(kind==='compare'&&clean.length>=2){
+ }else if(kind==='compare'&&clean.length>=2&&clean.every(t=>fitsText([t],5.02,1.35,26))){
   const marker=clean.findIndex((x,i)=>i>0&&/^(Método\s*B|Opción\s*B|Segunda|En cambio|Por otro lado)/i.test(x));
   const mid=marker>0?marker:Math.ceil(clean.length/2);
   [clean.slice(0,mid),clean.slice(mid)].forEach((part,j)=>{
@@ -120,10 +140,10 @@ function addContent(ppt,theme,slide,title,lines,section,index=0){
    text(j?'SEGUNDA PERSPECTIVA':'PRIMERA PERSPECTIVA',x+.32,2.55,5.05,.38,15,theme.main,true);
    text(part.join('\n\n'),x+.32,3.15,5.02,2.88,20,theme.ink,false,{valign:'top'});
   });
- }else if(kind==='timeline'&&clean.length>=2&&clean.length<=5){
+ }else if(kind==='timeline'&&clean.length>=2&&clean.length<=5&&clean.every(t=>fitsText([t],10.65,.64,26))){
   rect(1.06,2.3,.07,3.95,theme.accent);
   clean.slice(0,5).forEach((line,j)=>{const y=2.3+j*.79;rect(.96,y+.15,.27,.27,theme.main);text(line,1.5,y,10.65,.64,20,theme.ink)});
- }else if(kind==='cards'&&clean.length>=2&&clean.length<=4){
+ }else if(kind==='cards'&&clean.length>=2&&clean.length<=4&&clean.every(t=>fitsText([t],5.2,1.4,26))){
   const items=clean.slice(0,4),cols=items.length<=2?items.length:2,rows=Math.ceil(items.length/cols),gap=.16;
   const w=(11.7-gap*(cols-1))/cols,h=(4.45-gap*(rows-1))/rows;
   items.forEach((line,j)=>{const x=.82+(j%cols)*(w+gap),y=2.13+Math.floor(j/cols)*(h+gap);
@@ -158,10 +178,10 @@ async function powerpoint(m,teacher=false){
   // Keep a complete multiple-choice question and its alternatives together.
   const isQuestion=/selección múltiple|alternativa|pregunta\s*\d+/i.test(section.title);
   const maxChars=isQuestion?1500:850;
-  return chunksOf(section.text,maxChars,isQuestion?12:5).map((lines,part)=>({...section,lines,title:section.title+(part?' · continuación':'')}));
+  return (isPresentation?paginatePresentation(section,visual.large):chunksOf(section.text,maxChars,isQuestion?12:5)).map((lines,part)=>({...section,lines,title:section.title+(part?' · continuación':'')}));
  });
  const news=material.fuentesDocumentales?.noticias?.items||[];
- if(isPresentation&&news.length)pages.push({title:'Fuentes de noticias consultadas',kind:'sources',lines:news.map(n=>n.publisher+' · '+String(n.publishedAt||'').slice(0,10)+' · '+n.title+'\n'+n.url)});
+ if(isPresentation&&news.length){const source={title:'Fuentes de noticias consultadas',kind:'sources',text:news.map(n=>n.publisher+' · '+String(n.publishedAt||'').slice(0,10)+' · '+n.title+'\n'+n.url).join('\n')};paginatePresentation(source,visual.large).forEach((lines,i)=>pages.push({...source,lines,title:source.title+(i?' · continuación':'')}));}
  const total=pages.length+1;
  let cover=addChrome(ppt,theme,'Portada',1,total);
  cover.addShape(ppt.ShapeType.rect,{x:.75,y:1.15,w:11.85,h:4.95,line:{color:theme.main,transparency:100},fill:{color:theme.main}});

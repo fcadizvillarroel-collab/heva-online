@@ -679,7 +679,7 @@
 
       try {
         if(typeof window.HEVADesign==='undefined' && typeof leerDisenoHEVA==='function') {
-          try { await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/heva-design.js?v=20261115-slides-bloques';script.onload=()=>window.HEVADesign?resolve():reject(new Error('No se pudo inicializar HEVA Design'));script.onerror=()=>reject(new Error('No se pudo cargar HEVA Design'));document.head.appendChild(script)}); } catch(e) { console.warn('Diseño opcional no disponible; se generará sin él.',e); }
+          try { await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/heva-design.js?v=20261115-fluidez';script.onload=()=>window.HEVADesign?resolve():reject(new Error('No se pudo inicializar HEVA Design'));script.onerror=()=>reject(new Error('No se pudo cargar HEVA Design'));document.head.appendChild(script)}); } catch(e) { console.warn('Diseño opcional no disponible; se generará sin él.',e); }
         }
       const leerCantidadHEVA=(id,max,etiqueta)=>{const input=document.getElementById(id),raw=input.value.trim();if(raw==='')throw new Error('Debes indicar la cantidad de '+etiqueta+' (usa 0 si no deseas incluirlas).');const n=Number(raw);if(!Number.isInteger(n)||n<0||n>max)throw new Error('Cantidad inválida de '+etiqueta+': debe estar entre 0 y '+max+'.');return n;};
       // Una presentación se construye con diapositivas y actividades integradas,
@@ -873,7 +873,7 @@
       pptx.writeFile({ fileName: 'presentacion.pptx' });
     }
   </script>
-<script src="/heva-assessment.js?v=20261115-slides-bloques"></script><script src="/heva-didactics.js?v=20261115-slides-bloques"></script><script src="/heva-design.js?v=20261115-slides-bloques"></script><script src="/heva-pedagogy.js?v=20261115-slides-bloques"></script><script src="/heva-core.js"></script><script src="/heva-calculation.js"></script><script src="/heva-audit.js"></script><script src="/heva-skills.js?v=20261115-equilibrio"></script><script src="/heva-studio.js"></script><script src="/heva-templates.js"></script><script src="/heva-office.js?v=20261115-evaluacion6"></script><script src="/heva-ui.js?v=20261115-evaluacion6"></script><script src="/heva-pedagogy-ui.js"></script><script src="/heva-recovery-ui.js?v=20261115-slides-bloques"></script><script src="/heva-quality-ui.js"></script><script src="/heva-sources-ui.js?v=20261115-slides-bloques"></script><script src="/heva-workflow-ui.js?v=20261115-equilibrio"></script><script src="/heva-skills-ui.js"></script><script src="/heva-studio-ui.js?v=20261114sidebar3"></script><script src="/heva-ux.js"></script><script src="/heva-interactive.js"></script><script src="/heva-ai-diagrams.js?v=20261114visual2"></script><script src="/experimental/strategy-lab.js"></script><script src="/experimental/integration.js?v=20261115-slides-bloques"></script><script src="/experimental/strategy-delivery.js?v=20261115-slides-bloques"></script><script>
+<script src="/heva-assessment.js?v=20261115-fluidez"></script><script src="/heva-didactics.js?v=20261115-fluidez"></script><script src="/heva-design.js?v=20261115-fluidez"></script><script src="/heva-pedagogy.js?v=20261115-fluidez"></script><script src="/heva-core.js"></script><script src="/heva-calculation.js"></script><script src="/heva-audit.js"></script><script src="/heva-skills.js?v=20261115-equilibrio"></script><script src="/heva-studio.js"></script><script src="/heva-templates.js"></script><script src="/heva-office.js?v=20261115-fluidez"></script><script src="/heva-ui.js?v=20261115-evaluacion6"></script><script src="/heva-pedagogy-ui.js"></script><script src="/heva-recovery-ui.js?v=20261115-fluidez"></script><script src="/heva-quality-ui.js"></script><script src="/heva-sources-ui.js?v=20261115-fluidez"></script><script src="/heva-workflow-ui.js?v=20261115-equilibrio"></script><script src="/heva-skills-ui.js"></script><script src="/heva-studio-ui.js?v=20261114sidebar3"></script><script src="/heva-ux.js"></script><script src="/heva-interactive.js"></script><script src="/heva-ai-diagrams.js?v=20261114visual2"></script><script src="/experimental/strategy-lab.js"></script><script src="/experimental/integration.js?v=20261115-fluidez"></script><script src="/experimental/strategy-delivery.js?v=20261115-fluidez"></script><script>
 (function(){
 'use strict';
 const $=id=>document.getElementById(id);
@@ -915,5 +915,5 @@ function refresh(){
 }
 type.addEventListener('change',refresh);refresh();
 })();
-</script><script src="/experimental/heva-unified-ui.js"></script><script src="/heva-strategy-delivery-ui.js?v=20261115-verificacion"></script><script src="/heva-assessment-ui.js?v=20261115-slides-bloques"></script></body>
+</script><script src="/experimental/heva-unified-ui.js"></script><script src="/heva-strategy-delivery-ui.js?v=20261115-verificacion"></script><script src="/heva-assessment-ui.js?v=20261115-fluidez"></script></body>
 </html>
