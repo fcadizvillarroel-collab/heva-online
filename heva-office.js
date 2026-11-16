@@ -15,6 +15,7 @@ async function word(m,teacher=false){
   if(block.path==='titulo'||(block===blocks[0]&&block.title===material.titulo))continue;
   if(block.kind==='option'){children.push(line(block.title+' '+block.text,{after:115}));continue;}
   children.push(new Paragraph({text:block.title,heading:HeadingLevel.HEADING_2,spacing:{before:220,after:110},keepNext:true}));
+  if(block.kind==='planning-moment'){for(const field of block.fields){children.push(line(field.title,{bold:true,color:main,keepNext:true,after:70}));for(const paragraph of field.text.split(/\n+/).filter(Boolean))children.push(line(paragraph,{after:140}));}continue;}
   for(const paragraph of String(block.text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean)){
    children.push(line(paragraph,{after:140}));
   }
