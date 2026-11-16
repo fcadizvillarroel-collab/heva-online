@@ -130,7 +130,7 @@
           <select id="tipo-material" class="w-full border rounded p-2 text-sm bg-white font-medium">
             <option value="GUIA">Guía de Aprendizaje Formativa</option>
             <option value="EVALUACION">Evaluación / Prueba Sumativa</option>
-            <option value="PRESENTACION">Presentación / PowerPoint</option><option value="ACCESIBLE">Versión accesible / lectura acompañada</option><option value="PLANIFICACION">Planificación de Clase (90 min DUA)</option>
+            <option value="PRESENTACION">Presentación / PowerPoint</option><option value="ACCESIBLE">Versión accesible / lectura acompañada</option><option value="PLANIFICACION">Planificación de clase (duración configurable)</option>
             <option value="TALLER">Taller Práctico / Módulo T-P</option>
           </select>
         </div>
@@ -679,20 +679,21 @@
 
       try {
         if(typeof window.HEVADesign==='undefined' && typeof leerDisenoHEVA==='function') {
-          try { await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/heva-design.js?v=20261115-pasos-completos';script.onload=()=>window.HEVADesign?resolve():reject(new Error('No se pudo inicializar HEVA Design'));script.onerror=()=>reject(new Error('No se pudo cargar HEVA Design'));document.head.appendChild(script)}); } catch(e) { console.warn('Diseño opcional no disponible; se generará sin él.',e); }
+          try { await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/heva-design.js?v=20261115-planificacion';script.onload=()=>window.HEVADesign?resolve():reject(new Error('No se pudo inicializar HEVA Design'));script.onerror=()=>reject(new Error('No se pudo cargar HEVA Design'));document.head.appendChild(script)}); } catch(e) { console.warn('Diseño opcional no disponible; se generará sin él.',e); }
         }
       const leerCantidadHEVA=(id,max,etiqueta)=>{const input=document.getElementById(id),raw=input.value.trim();if(raw==='')throw new Error('Debes indicar la cantidad de '+etiqueta+' (usa 0 si no deseas incluirlas).');const n=Number(raw);if(!Number.isInteger(n)||n<0||n>max)throw new Error('Cantidad inválida de '+etiqueta+': debe estar entre 0 y '+max+'.');return n;};
       // Una presentación se construye con diapositivas y actividades integradas,
       // no con el banco de preguntas de una evaluación.
       const esPresentacionHEVA=document.getElementById('tipo-material').value==='PRESENTACION';
-      const cantidadesHEVA=esPresentacionHEVA
+      const esPlanificacionHEVA=document.getElementById('tipo-material').value==='PLANIFICACION';
+      const cantidadesHEVA=esPresentacionHEVA||esPlanificacionHEVA
         ? {cantAlternativas:0,cantDesarrollo:0,cantCasos:0}
         : {
-          cantAlternativas:leerCantidadHEVA('cant-alternativas',20,'alternativas'),
-          cantDesarrollo:leerCantidadHEVA('cant-desarrollo',10,'desarrollo'),
-          cantCasos:leerCantidadHEVA('cant-casos',4,'situaciones de lectura/análisis')
+          cantAlternativas:leerCantidadHEVA('cant-alternativas',30,'alternativas'),
+          cantDesarrollo:leerCantidadHEVA('cant-desarrollo',30,'desarrollo'),
+          cantCasos:leerCantidadHEVA('cant-casos',30,'situaciones de lectura/análisis')
         };
-      const planIntegrado = window.hevaExperimentalPlan ? window.hevaExperimentalPlan() : null;
+      const planIntegrado = !esPlanificacionHEVA && window.hevaExperimentalPlan ? window.hevaExperimentalPlan() : null;
       const payload = {
         modoHerramienta: modo,
         ...(typeof studioGenerationExtras==='function'?studioGenerationExtras():{}),
@@ -710,7 +711,8 @@
         cantAlternativas: cantidadesHEVA.cantAlternativas,
         cantDesarrollo: cantidadesHEVA.cantDesarrollo,
         cantCasos: cantidadesHEVA.cantCasos,
-        adecuacionesPIE: [...document.querySelectorAll('input[id^="pie-"]:checked')].map(x=>x.parentElement.textContent.trim())
+        adecuacionesPIE: [...document.querySelectorAll('input[id^="pie-"]:checked')].map(x=>x.parentElement.textContent.trim()),
+        ...(window.hevaPlanningExtras?window.hevaPlanningExtras():{})
       };
 
         const resumenHEVA=[
@@ -873,7 +875,7 @@
       pptx.writeFile({ fileName: 'presentacion.pptx' });
     }
   </script>
-<script src="/heva-assessment.js?v=20261115-pasos-completos"></script><script src="/heva-didactics.js?v=20261115-pasos-completos"></script><script src="/heva-design.js?v=20261115-pasos-completos"></script><script src="/heva-pedagogy.js?v=20261115-pasos-completos"></script><script src="/heva-core.js"></script><script src="/heva-calculation.js"></script><script src="/heva-audit.js"></script><script src="/heva-skills.js?v=20261115-equilibrio"></script><script src="/heva-studio.js"></script><script src="/heva-templates.js"></script><script src="/heva-office.js?v=20261115-pasos-completos"></script><script src="/heva-ui.js?v=20261115-evaluacion6"></script><script src="/heva-pedagogy-ui.js"></script><script src="/heva-recovery-ui.js?v=20261115-pasos-completos"></script><script src="/heva-quality-ui.js"></script><script src="/heva-sources-ui.js?v=20261115-pasos-completos"></script><script src="/heva-workflow-ui.js?v=20261115-equilibrio"></script><script src="/heva-skills-ui.js"></script><script src="/heva-studio-ui.js?v=20261114sidebar3"></script><script src="/heva-ux.js"></script><script src="/heva-interactive.js"></script><script src="/heva-ai-diagrams.js?v=20261114visual2"></script><script src="/experimental/strategy-lab.js"></script><script src="/experimental/integration.js?v=20261115-pasos-completos"></script><script src="/experimental/strategy-delivery.js?v=20261115-pasos-completos"></script><script>
+<script src="/heva-assessment.js?v=20261115-planificacion"></script><script src="/heva-didactics.js?v=20261115-planificacion"></script><script src="/heva-design.js?v=20261115-planificacion"></script><script src="/heva-planning.js?v=20261115-planificacion"></script><script src="/heva-pedagogy.js?v=20261115-planificacion"></script><script src="/heva-core.js"></script><script src="/heva-calculation.js"></script><script src="/heva-audit.js"></script><script src="/heva-skills.js?v=20261115-equilibrio"></script><script src="/heva-studio.js"></script><script src="/heva-templates.js"></script><script src="/heva-office.js?v=20261115-planificacion"></script><script src="/heva-ui.js?v=20261115-evaluacion6"></script><script src="/heva-pedagogy-ui.js"></script><script src="/heva-recovery-ui.js?v=20261115-planificacion"></script><script src="/heva-quality-ui.js"></script><script src="/heva-sources-ui.js?v=20261115-planificacion"></script><script src="/heva-workflow-ui.js?v=20261115-equilibrio"></script><script src="/heva-skills-ui.js"></script><script src="/heva-studio-ui.js?v=20261114sidebar3"></script><script src="/heva-ux.js"></script><script src="/heva-interactive.js"></script><script src="/heva-ai-diagrams.js?v=20261114visual2"></script><script src="/experimental/strategy-lab.js"></script><script src="/experimental/integration.js?v=20261115-planificacion"></script><script src="/experimental/strategy-delivery.js?v=20261115-planificacion"></script><script>
 (function(){
 'use strict';
 const $=id=>document.getElementById(id);
@@ -915,5 +917,5 @@ function refresh(){
 }
 type.addEventListener('change',refresh);refresh();
 })();
-</script><script src="/experimental/heva-unified-ui.js"></script><script src="/heva-strategy-delivery-ui.js?v=20261115-verificacion"></script><script src="/heva-assessment-ui.js?v=20261115-pasos-completos"></script></body>
+</script><script src="/experimental/heva-unified-ui.js"></script><script src="/heva-strategy-delivery-ui.js?v=20261115-verificacion"></script><script src="/heva-assessment-ui.js?v=20261115-planificacion"></script><script src="/heva-planning-ui.js?v=20261115-planificacion"></script></body>
 </html>
