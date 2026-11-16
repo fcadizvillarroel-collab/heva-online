@@ -8,6 +8,12 @@ function inspect(raw){const m=H.material(raw),plan=m.planGeneracion||{},issues=[
  if(!text(m.objetivoAprendizaje))add('oa_ausente','error_comprobado','objetivoAprendizaje','El documento no tiene objetivo.','Vincular el objetivo seleccionado.');
  if(plan.objetivoAprendizaje&&m.objetivoAprendizaje!==plan.objetivoAprendizaje)add('oa_distinto','error_comprobado','objetivoAprendizaje','El OA del documento difiere del encargo.','Restituir el objetivo literal o generar un nuevo encargo.');
  for(const [field,key]of [['preguntasAlternativas','cantAlternativas'],['preguntasDesarrollo','cantDesarrollo'],['casosEstudio','cantCasos']])if(Number.isInteger(plan[key])&&m[field].length!==plan[key])add('cantidad_'+field,'error_comprobado',field,`Se solicitaron ${plan[key]} y hay ${m[field].length}.`,'Completar o ajustar explícitamente el encargo.');
+ const paragraphs=new Map();
+ for(const block of P.blocks(m,false)){
+  if(block.kind==='option'||/fuentes|noticias.*rss|vocabulario|objetivo curricular/i.test(block.title))continue;
+  for(const paragraph of String(block.text||'').split(/\n+/)){const n=norm(paragraph);if(n.length<160||n.split(' ').length<25)continue;const locations=paragraphs.get(n)||new Set();locations.add(block.path||block.title);paragraphs.set(n,locations);}
+ }
+ let duplicateIndex=0;for(const locations of paragraphs.values())if(locations.size>=3)add('texto_triplicado_'+duplicateIndex++,'error_comprobado',[...locations].join(', '),'El mismo párrafo extenso aparece en tres o más apartados.','Conservar la lectura una sola vez y referenciarla; usar situaciones diferentes en ejemplo guiado y aplicación autónoma.');
  const repeated=new Map();
  m.preguntasAlternativas.forEach((q,i)=>{const ref='ALT-'+(i+1),options=Array.isArray(q.alternativas)?q.alternativas.map(x=>x&&typeof x==='object'?x:{}):[],labels=options.map(x=>x.letra);
   if(!text(q.enunciado))add('consigna_'+ref,'error_comprobado',ref,'Falta el enunciado.','Completar una consigna suficiente.');
@@ -30,9 +36,11 @@ function inspect(raw){const m=H.material(raw),plan=m.planGeneracion||{},issues=[
  if(!text(m.introduccionLectura)&&m.preguntasAlternativas.some(q=>/segun el (texto|aviso|relato)|de acuerdo (con|al) (el )?(texto|aviso)|texto estimulo/.test(norm(q.enunciado))))add('estimulo_ausente','sugerencia','introduccionLectura','Las preguntas remiten a un texto o aviso, pero no hay lectura visible para analizar.','Incorporar el estímulo neutral o comprobar que toda la información esté en los enunciados.');
  const dist=H.distribution(m);if(m.preguntasAlternativas.length&&!dist.balanced)add('distribucion','sugerencia','preguntasAlternativas','Claves desequilibradas: '+Object.entries(dist.counts).map(([k,v])=>k+'='+v).join(', ')+'.','Reordenar opciones conservando el contenido de la respuesta correcta y su justificación.');
  m.preguntasDesarrollo.forEach((q,i)=>{const ref='DES-'+(i+1);if(!text(q.enunciado)||!text(q.criterioEvaluacion))add('criterio_'+ref,'error_comprobado',ref,'Falta consigna o criterio de corrección.','Completar consigna y criterio observable.');if(m.tipoMaterial==='EVALUACION'&&(!Array.isArray(q.rubrica)||q.rubrica.length!==4||![0,1,2,3].every(n=>q.rubrica.some(r=>r?.puntaje===n&&text(r.descripcion)))))add('rubrica_'+ref,'error_comprobado',ref,'La rúbrica no describe los niveles 0, 1, 2 y 3.','Completar los cuatro niveles sin repetir puntajes.');});
+ const caseQuestions=new Map();m.casosEstudio.forEach((q,i)=>{const n=norm(q.preguntaReflexion);if(n&&caseQuestions.has(n))add('caso_pregunta_repetida_'+i,'error_comprobado','CASO-'+(i+1),'La pregunta del caso repite literalmente '+caseQuestions.get(n)+'.','Crear un caso con datos, razonamiento y pregunta diferentes.');else if(n)caseQuestions.set(n,'CASO-'+(i+1));});
  m.casosEstudio.forEach((q,i)=>{const ref='CASO-'+(i+1);if(!text(q.contextoReal)||!text(q.preguntaReflexion)||!text(q.criterioEvaluacion))add('caso_'+ref,'error_comprobado',ref,'Falta contexto, pregunta o criterio del caso.','Completar información suficiente y criterio docente.');});
  if(m.tipoMaterial==='EVALUACION'){
-  const total=m.preguntasAlternativas.length+3*m.preguntasDesarrollo.length+2*m.casosEstudio.length;
+  const Assessment=typeof module==='object'&&module.exports?require('./heva-assessment.js'):globalThis.HEVAAssessment;
+  const total=m.preguntasAlternativas.length+3*m.preguntasDesarrollo.length+2*m.casosEstudio.length+(Assessment?.score(m)||0);
   if(m.puntajeTotal!==total)add('puntaje_total','error_comprobado','puntajeTotal',`El total indicado es ${m.puntajeTotal}; corresponde ${total}.`,'Corregir el total: alternativas 1, desarrollo 3, casos 2 puntos.');
   for(const [field,points,prefix]of [['preguntasAlternativas',1,'ALT'],['preguntasDesarrollo',3,'DES'],['casosEstudio',2,'CASO']])m[field].forEach((q,i)=>{if(q.puntaje!=null&&q.puntaje!==points)add('puntaje_'+prefix+'-'+(i+1),'error_comprobado',prefix+'-'+(i+1),'El puntaje del ítem difiere del contrato.','Asignar '+points+' puntos.');});
  }

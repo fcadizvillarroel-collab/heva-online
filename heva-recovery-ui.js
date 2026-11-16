@@ -1,19 +1,28 @@
 /* Recupera respuestas largas por bloques; el documento visible solo cambia tras validación final. */
-const HEVA_RECOVERY_KEY='heva-recuperacion-v1';
-function recoveryRead(plan){try{const x=JSON.parse(localStorage.getItem(HEVA_RECOVERY_KEY));if(x?.planKey!==JSON.stringify(plan))return null;if(x.base&&(!Array.isArray(x.parts)||!Array.isArray(x.bloques)))return null;if(Array.isArray(x.bloques)&&x.parts.length>x.bloques.length)return null;return x}catch{return null}}
-function recoverySave(x){try{localStorage.setItem(HEVA_RECOVERY_KEY,JSON.stringify(x))}catch{}}
+const HEVA_RECOVERY_VERSION=2;
+const HEVA_RECOVERY_KEY='heva-recuperacion-v2';
+function recoveryRead(plan){try{const x=JSON.parse(localStorage.getItem(HEVA_RECOVERY_KEY));if(x?.version!==HEVA_RECOVERY_VERSION||x?.planKey!==JSON.stringify(plan))return null;if(x.base&&(!Array.isArray(x.parts)||!Array.isArray(x.bloques)))return null;if(Array.isArray(x.bloques)&&x.parts.length>x.bloques.length)return null;return x}catch{return null}}
+function recoverySave(x){try{localStorage.setItem(HEVA_RECOVERY_KEY,JSON.stringify({...x,version:HEVA_RECOVERY_VERSION}))}catch{}}
 async function recuperarMaterialHEVA(plan,allowRepair=true){
  let checkpoint=recoveryRead(plan)||{planKey:JSON.stringify(plan),parts:[]};
  const message=document.getElementById('dictamen-calidad');
  const request=async (body,retry=true)=>{
   let response;try{response=await fetch('/api/recover',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan,...body}),signal:AbortSignal.timeout(58000)});}catch(err){throw Error('La solicitud de '+body.fase+' no llegó a completarse ('+(err.name==='TimeoutError'?'tiempo agotado':'red interrumpida')+'). El avance guardado se conserva. Reintenta Crear material.');}
   let data;try{data=await response.json()}catch{const type=response.headers.get('content-type')||'';throw Error('El servidor respondió HTTP '+response.status+' sin JSON válido durante '+body.fase+'. '+(response.status===504||response.status===502?'Probable límite de tiempo o error de función. ':'')+'El avance guardado se conserva.');}
+  if(!response.ok&&body.fase==='items'&&data.codigo==='ITEM_TRACES_INCOMPLETE'&&data.borradorBloque){
+   checkpoint.pendingPart={tipo:body.batch.tipo,inicio:body.batch.inicio,parte:data.borradorBloque};recoverySave(checkpoint);
+   if(retry){if(message)message.textContent='Las preguntas están guardadas. Completando solo la trazabilidad, sin regenerarlas…';return request({...body,borradorBloque:data.borradorBloque},false);}
+  }
   if(!response.ok&&retry&&data.codigo==='AI_RATE_LIMIT'&&data.reintentarEn>0&&data.reintentarEn<=60){
    if(message)message.textContent=`Esperando ${data.reintentarEn} segundos por la cuota de IA; el avance está guardado…`;
    await new Promise(resolve=>setTimeout(resolve,(data.reintentarEn+1)*1000));
    return request(body,false);
   }
-  if(!response.ok&&retry&&body.fase==='items'&&response.status===422&&typeof data.detalle==='string'&&(/Alternativas o clave inválidas/.test(data.detalle)||body.batch?.tipo==='casos'&&/casosEstudio:|Falta trazabilidad de CASO|Caso incompleto|estrategia Estudio de casos|estrategia Detección de errores/.test(data.detalle))){
+  if(!response.ok&&retry&&body.fase==='base'&&response.status===422&&['STRATEGY_PLAN_INCOMPLETE','BASE_TRACES_INCOMPLETE'].includes(data.codigo)){
+   if(message)message.textContent='El bloque base necesita completar su estrategia o las referencias de las diapositivas. Solicitando corrección…';
+   return request({...body,corregirFormato:true},false);
+  }
+  if(!response.ok&&retry&&body.fase==='items'&&response.status===422&&typeof data.detalle==='string'&&(/Alternativas o clave inválidas/.test(data.detalle)||(body.batch?.tipo==='casos'&&/casosEstudio:|Falta trazabilidad de CASO|Caso incompleto|estrategia Estudio de casos|estrategia Detección de errores/.test(data.detalle))||(body.batch?.tipo==='desarrollo'&&/preguntasDesarrollo:|Falta trazabilidad de DES|Rúbrica incompleta/.test(data.detalle)))){
    if(message)message.textContent='El bloque no cumplió la estructura pedagógica requerida. Corrigiendo automáticamente sin perder avances…';
    return request({...body,corregirFormato:true},false);
   }
@@ -21,17 +30,23 @@ async function recuperarMaterialHEVA(plan,allowRepair=true){
   if(!response.ok)throw Error((data.detalle||data.error||'Recuperación pendiente.')+(data.codigo?' ['+data.codigo+']':'')+(data.reintentable===false?' Revisa los parámetros del encargo antes de generar nuevamente.':data.codigo==='TYPE_ERROR'?' No se recomienda repetir la misma solicitud hasta corregir el error del servidor.':' Pulsa Crear material para continuar con el mismo encargo.'));
   return data;
  };
- if(!checkpoint.base){if(message)message.textContent='Recuperando la lectura y la estructura del material…';const data=await request({fase:'base'});checkpoint={...checkpoint,base:data.parte,autor:data.autor,bloques:data.bloques};recoverySave(checkpoint);}
- for(let i=checkpoint.parts.length;i<checkpoint.bloques.length;i++){
+ if(!checkpoint.base){if(message)message.textContent='Recuperando la lectura y la estructura del material…';const data=await request({fase:'base',correcciones:checkpoint.correcciones||[]});checkpoint={...checkpoint,base:data.parte,autor:data.autor,bloques:data.bloques};recoverySave(checkpoint);}
+ for(let i=0;i<checkpoint.bloques.length;i++){
+  if(checkpoint.parts[i])continue;
   if(message)message.textContent=`Completando actividades: bloque ${i+1} de ${checkpoint.bloques.length}…`;
-  const data=await request({fase:'items',base:checkpoint.base,autor:checkpoint.autor,parts:checkpoint.parts,batch:checkpoint.bloques[i]});
-  checkpoint.parts.push(data.parte);recoverySave(checkpoint);
+  const currentBatch=checkpoint.bloques[i],pending=checkpoint.pendingPart;
+  const data=await request({fase:'items',base:checkpoint.base,autor:checkpoint.autor,parts:checkpoint.parts,batch:currentBatch,correcciones:checkpoint.correcciones||[],...(pending?.tipo===currentBatch.tipo&&pending?.inicio===currentBatch.inicio?{borradorBloque:pending.parte}:{})});
+  delete checkpoint.pendingPart;checkpoint.parts[i]=data.parte;recoverySave(checkpoint);
  }
  if(message)message.textContent='Comprobando objetivo, cantidades, casos y estructura…';
  const result=await request({fase:'finalizar',base:checkpoint.base,parts:checkpoint.parts,autor:checkpoint.autor});
  if(result.reparacion){
-  if(!allowRepair)throw Error('El material aún requiere corrección. El avance se conserva para retomarlo.');
-  if(result.reparacion.base){checkpoint={planKey:JSON.stringify(plan),parts:[]}}else checkpoint.parts=checkpoint.parts.slice(0,result.reparacion.desde);
+  const detail=result.detalle||result.reparacion.diagnostico?.join('; ')||'El servidor no informó el detalle de la corrección.';
+  checkpoint.correcciones=result.reparacion.diagnostico||[detail];recoverySave(checkpoint);
+  if(!allowRepair||result.reparacion.localizada===false)throw Error('Corrección final pendiente: '+detail+' El avance está guardado.');
+  if(result.reparacion.base)delete checkpoint.base;
+  if(Array.isArray(result.reparacion.indices)){for(const i of result.reparacion.indices)checkpoint.parts[i]=null;}
+  else if(!result.reparacion.base)checkpoint.parts=checkpoint.parts.slice(0,result.reparacion.desde);
   recoverySave(checkpoint);return recuperarMaterialHEVA(plan,false);
  }
  try{localStorage.removeItem(HEVA_RECOVERY_KEY)}catch{}

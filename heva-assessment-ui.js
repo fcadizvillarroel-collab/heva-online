@@ -1,0 +1,15 @@
+(function(){
+function mountAssessment(){
+const A=HEVAAssessment,type=document.getElementById('tipo-material'),legacy=document.getElementById('cant-alternativas')?.closest('.border-t');if(!type||!legacy)return;
+const placeholder=document.createElement('span');placeholder.hidden=true;legacy.before(placeholder);
+const panel=document.createElement('details');panel.id='heva-assessment-panel';panel.className='no-print border rounded p-4 my-3 bg-sky-50';panel.innerHTML='<summary class="font-bold cursor-pointer">Formatos de la evaluación · selecciona cantidades</summary><p class="text-xs my-2">Estos son formatos de respuesta. La estrategia pedagógica define la habilidad y se mantiene aparte. Usa 0 para excluir un formato. Cada uno genera sus ítems y una pauta docente separada.</p><div id="heva-legacy-formats"></div><div id="heva-extra-formats" class="grid gap-3 mt-3"></div><p id="heva-assessment-total" class="text-xs font-bold mt-3"></p>';
+document.getElementById('heva-unified-pedagogy').prepend(panel);
+for(const [key,def]of Object.entries(A.types)){const row=document.createElement('label');row.className='block text-xs font-bold';row.textContent=def.label+(key==='pareados'?' · cantidad de relaciones':key==='comprension'?' · preguntas sobre una lectura':'');const input=document.createElement('input');input.id='assessment-'+key;input.type='number';input.min='0';input.max=String(def.max);input.value='0';input.className='block border rounded p-2 w-24 bg-white';input.setAttribute('aria-label',def.label);input.onchange=total;input.oninput=total;row.append(input);document.getElementById('heva-extra-formats').append(row)}
+window.hevaAssessmentExtras=()=>type.value==='EVALUACION'?{instrumentosEvaluacion:Object.fromEntries(Object.keys(A.types).map(k=>[k,Number(document.getElementById('assessment-'+k).value)]))}:{};
+const extras=window.studioGenerationExtras;window.studioGenerationExtras=()=>({...extras?.(),...window.hevaAssessmentExtras()});
+function total(){const additional=window.hevaAssessmentExtras().instrumentosEvaluacion||{},old=['cant-alternativas','cant-desarrollo','cant-casos'].map(id=>Number(document.getElementById(id).value)||0);document.getElementById('heva-assessment-total').textContent='Ítems solicitados: '+(old.reduce((a,n)=>a+n,0)+Object.values(additional).reduce((a,n)=>a+(Number(n)||0),0))+'. Máximo 30 por cada tipo, sin límite conjunto de 24. Las relaciones pareadas cuentan individualmente. Revisa la duración y el puntaje final.';}
+function refresh(){const exam=type.value==='EVALUACION';panel.hidden=!exam;if(exam){document.getElementById('heva-legacy-formats').append(legacy);panel.open=true;}else placeholder.before(legacy);total();}
+type.addEventListener('change',refresh);for(const id of ['cant-alternativas','cant-desarrollo','cant-casos']){document.getElementById(id).addEventListener('change',total);document.getElementById(id).addEventListener('input',total);}refresh();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mountAssessment,{once:true});else mountAssessment();
+})();

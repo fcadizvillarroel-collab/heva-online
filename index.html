@@ -205,19 +205,29 @@
           <div class="grid grid-cols-2 gap-2 text-xs">
             <div>
               <span class="text-stone-500">Alternativas (A-D):</span>
-              <input type="number" id="cant-alternativas" min="0" max="20" value="6" class="w-full border rounded p-1.5 text-center font-bold" />
+              <input type="number" id="cant-alternativas" min="0" max="30" value="6" class="w-full border rounded p-1.5 text-center font-bold" />
             </div>
             <div>
               <span class="text-stone-500">Desarrollo:</span>
-              <input type="number" id="cant-desarrollo" min="0" max="10" value="2" class="w-full border rounded p-1.5 text-center font-bold" />
+              <input type="number" id="cant-desarrollo" min="0" max="30" value="2" class="w-full border rounded p-1.5 text-center font-bold" />
             </div>
           </div>
           <div>
             <span class="text-xs text-stone-500 block mb-1">Situaciones de lectura / análisis:</span>
-            <input type="number" id="cant-casos" min="0" max="4" value="2" class="w-full border rounded p-1.5 text-xs text-center font-bold" />
+            <input type="number" id="cant-casos" min="0" max="30" value="2" class="w-full border rounded p-1.5 text-xs text-center font-bold" />
           </div>
         </div>
 
+        <details id="integrated-lab" class="rounded-xl border-2 border-amber-400 bg-amber-50 p-3 mt-3">
+          <summary class="cursor-pointer font-bold text-sm text-[#8B2635]">🧪 HEVA Experimental · Estrategias integradas (opcional)</summary>
+          <p class="text-xs mt-2">Usa automáticamente la asignatura, el nivel, el objetivo y el tema elegidos arriba. No necesitas repetirlos. Si no activas este módulo, HEVA mantiene su comportamiento habitual.</p>
+          <label class="block text-xs font-bold mt-3"><input id="lab-enabled" type="checkbox" class="mr-2">Activar estrategias integradas para esta generación</label>
+          <div id="lab-strategies" class="mt-3"></div>
+          <label class="block text-xs font-bold mt-3" for="lab-mode">Distribución de preguntas</label>
+          <select id="lab-mode" class="w-full border rounded p-2 text-xs"><option value="auto">Automática</option><option value="manual">Manual por actividad</option></select>
+          <div id="lab-manual" class="mt-2"></div>
+          <div id="lab-summary" class="text-xs bg-white rounded p-2 mt-3" aria-live="polite">Selecciona estrategias y cantidades.</div>
+        </details>
         <button onclick="generarMaterialReal('GENERADOR_ESTANDAR')" id="btn-generar" class="w-full py-3 bg-[#8B2635] hover:bg-[#701E2A] text-white font-bold rounded shadow transition flex items-center justify-center gap-2">
           <span>Generar con Inteligencia Artificial</span>
         </button>
@@ -373,7 +383,6 @@
     window.onload = function() {
       actualizarTodoElCurriculo();
       cargarHistorial();
-      cargarStagingDesdeServidor();
     };
 
     function zoomLetra(delta) {
@@ -386,7 +395,9 @@
 
     function toggleModoAhorro() {
       const art = document.getElementById('hoja-material');
-      if (document.getElementById('check-ahorro-toner').checked) {
+      if (!art) return;
+      const check = document.getElementById('check-ahorro-toner');
+      if (check ? check.checked : !art.classList.contains('modo-ahorro')) {
         art.classList.add('modo-ahorro');
       } else {
         art.classList.remove('modo-ahorro');
@@ -574,6 +585,22 @@
       actualizarObjetivosYEstrategias();
     }
 
+    // Catálogo documental de la especialidad EPJA. Fuente aportada por el docente:
+    // "especialidad.docx", Plan de Estudios Construcciones Metálicas, pp. 116-117 y 124-125.
+    // Se conserva separado del catálogo verificado de Supabase: NO se etiqueta como verificado.
+    const HEVA_TP_OFT=["Planificar y elaborar cronogramas para la utilización de recursos y distribución del tiempo.","Leer e interpretar planos y diagramas y elaborar croquis.","Aplicar conocimientos de metrología en la realización de mediciones y verificaciones.","Identificar, utilizar adecuadamente, y realizar la mantención básica de instrumentos, útiles, máquinas, equipos y componentes propios de la especialidad.","Instalar y organizar puestos de trabajo en construcciones.","Mecanizar con herramientas manuales y máquinas-herramientas, ejecutando labores de taladrado, torneado, esmerilado, aserrado y otros procesos.","Elaborar y mecanizar elementos de construcción mecánica.","Efectuar tratamientos térmicos básicos.","Realizar uniones separables y no separables: soldadura en fusión, soldadura eléctrica y pegado.","Realizar tareas de corte y de transformación en frío y en caliente.","Montar, desmontar y realizar la mantención de construcciones metálicas.","Montar, desmontar, mantener y realizar el ajuste de sistemas de cerradura y seguridad.","Dominar principios básicos de gestión micro-empresarial.","Realizar el tratamiento de residuos y desechos, aplicando técnicas compatibles de cuidado del medio ambiente.","Aplicar normas de seguridad e higiene con énfasis en la prevención de riesgos y la aplicación de primeros auxilios."];
+    const HEVA_TP_MODULOS=[["Trazado y corte de chapas, perfiles y tubos",144,1],["Calidad en construcciones metálicas",144,2],["Representación gráfica en construcciones metálicas",144,2],["Soldadura",144,3],["Armado de elementos y conjuntos",144,3],["Conformado en construcciones metálicas",72,3],["Mecanizado en construcciones metálicas",144,3],["Preparación y protección de superficies de construcciones metálicas",72,3]];
+    // Aprendizajes esperados transcritos de las tablas del programa adjunto; cobertura parcial.
+    const HEVA_TP_APRENDIZAJES=[[0,"Diseña y dibuja formas geométricas simples y de intersecciones de cuerpos, a partir de su representación gráfica."],[0,"Interpreta croquis, planos de piezas y fabricación de subconjuntos y conjuntos de construcciones metálicas."],[0,"Traza y marca chapas, perfiles y tubos."],[0,"Opera los medios de trazado y marcado sobre chapas, perfiles y tubos."],[1,"Analiza el proceso de control de calidad tipo de la fabricación de una construcción metálica."],[1,"Elabora pautas de inspección relativas al control de fabricación y recepción de construcciones metálicas, que permitan la elaboración del plan de calidad."],[1,"Aplica instrumentos y equipos de ensayos destructivos y no destructivos en el control de uniones soldadas, estableciendo la relación básica causa-efecto entre los resultados obtenidos."],[2,"Dibuja planos de definición de productos de construcciones metálicas a partir de croquis y de información general requerida."],[2,"Realiza trazados de desarrollos geométricos e intersección de elementos metálicos, aportando soluciones constructivas que permitan obtener el conjunto final con la forma y dimensión requerida."],[2,"Utiliza software específico de productividad personal para realizar dibujos y diseños asistidos por computadora."],[2,"Dibuja cuerpos diversos por medio de trazados de calderería, utilizando los métodos por paralelas, radial y triangulación."]];
+    function objetivosConstruccionesMetalicas(nivel){
+      const lista=HEVA_TP_OFT.map((texto,i)=>({tipo:'OFT · perfil de egreso',codigo:'OFT-'+(i+1),texto}));
+      // Distribución efectiva informada por la escuela: I Medio TP cursa solo Representación Gráfica.
+      const modulosPorNivel={'I_MEDIO_TP':[2],'II_MEDIO_TP':[0,1],'III_MEDIO_TP':[3,4,5,6,7]};
+      const modulosActivos=modulosPorNivel[nivel]||[];
+      HEVA_TP_MODULOS.forEach(([nombre,horas,n],i)=>{if(modulosActivos.includes(i))lista.push({tipo:'Módulo · programa de estudio',codigo:'MOD-'+(i+1),texto:'Módulo: '+nombre+'. Carga sugerida: '+horas+' horas. Seleccione el aprendizaje esperado específico del módulo para planificar y evaluar; el nombre del módulo por sí solo NO es un objetivo de aprendizaje.'})});
+      HEVA_TP_APRENDIZAJES.forEach(([i,texto],j)=>{if(modulosActivos.includes(i))lista.push({tipo:'Aprendizaje esperado · programa TP',codigo:'AE-'+(i+1)+'-'+(j+1),texto})});
+      return lista;
+    }
     async function actualizarObjetivosYEstrategias() {
       const marco = document.getElementById('marco-curricular').value;
       const nivel = document.getElementById('nivel-epja').value;
@@ -582,6 +609,14 @@
       const contadorOAs = document.getElementById('contador-oas');
 
       selectOA.innerHTML = '';
+      if (/Construcciones Metálicas/i.test(asig)) {
+        const lista=objetivosConstruccionesMetalicas(nivel);
+        contadorOAs.innerText=lista.length+' referencias documentales · OFT y módulos (sin verificación en Supabase)';
+        lista.forEach(o=>{const opt=document.createElement('option');opt.value=o.texto;opt.innerText='['+o.tipo+'] ['+o.codigo+'] '+o.texto;selectOA.appendChild(opt)});
+        const custom=document.createElement('option');custom.value='CUSTOM';custom.innerText='✍️ Pegar aprendizaje esperado y criterio de evaluación literal del módulo';selectOA.appendChild(custom);
+        cargarOATexto();
+        return;
+      }
       contadorOAs.innerText = 'Consultando Supabase...';
 
       try {
@@ -644,8 +679,20 @@
 
       try {
         if(typeof window.HEVADesign==='undefined' && typeof leerDisenoHEVA==='function') {
-          try { await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/heva-design.js?v=20261113fix2';script.onload=()=>window.HEVADesign?resolve():reject(new Error('No se pudo inicializar HEVA Design'));script.onerror=()=>reject(new Error('No se pudo cargar HEVA Design'));document.head.appendChild(script)}); } catch(e) { console.warn('Diseño opcional no disponible; se generará sin él.',e); }
+          try { await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='/heva-design.js?v=20261115-fluidez';script.onload=()=>window.HEVADesign?resolve():reject(new Error('No se pudo inicializar HEVA Design'));script.onerror=()=>reject(new Error('No se pudo cargar HEVA Design'));document.head.appendChild(script)}); } catch(e) { console.warn('Diseño opcional no disponible; se generará sin él.',e); }
         }
+      const leerCantidadHEVA=(id,max,etiqueta)=>{const input=document.getElementById(id),raw=input.value.trim();if(raw==='')throw new Error('Debes indicar la cantidad de '+etiqueta+' (usa 0 si no deseas incluirlas).');const n=Number(raw);if(!Number.isInteger(n)||n<0||n>max)throw new Error('Cantidad inválida de '+etiqueta+': debe estar entre 0 y '+max+'.');return n;};
+      // Una presentación se construye con diapositivas y actividades integradas,
+      // no con el banco de preguntas de una evaluación.
+      const esPresentacionHEVA=document.getElementById('tipo-material').value==='PRESENTACION';
+      const cantidadesHEVA=esPresentacionHEVA
+        ? {cantAlternativas:0,cantDesarrollo:0,cantCasos:0}
+        : {
+          cantAlternativas:leerCantidadHEVA('cant-alternativas',20,'alternativas'),
+          cantDesarrollo:leerCantidadHEVA('cant-desarrollo',10,'desarrollo'),
+          cantCasos:leerCantidadHEVA('cant-casos',4,'situaciones de lectura/análisis')
+        };
+      const planIntegrado = window.hevaExperimentalPlan ? window.hevaExperimentalPlan() : null;
       const payload = {
         modoHerramienta: modo,
         ...(typeof studioGenerationExtras==='function'?studioGenerationExtras():{}),
@@ -656,42 +703,79 @@
         objetivoAprendizaje: document.getElementById('texto-oa').value,
         temaEspecifico: document.getElementById('tema-especifico').value,
         estrategiaDidactica: document.getElementById('estrategia-didactica').value,
+        planIntegrado,
         modoReferencia: document.getElementById('modo-referencia').value,
         textoReferencia: document.getElementById('modo-referencia').value==='NINGUNA'?'':document.getElementById('texto-referencia').value,
         tipoMaterial: document.getElementById('tipo-material').value,
-        cantAlternativas: parseInt(document.getElementById('cant-alternativas').value) || 0,
-        cantDesarrollo: parseInt(document.getElementById('cant-desarrollo').value) || 0,
-        cantCasos: parseInt(document.getElementById('cant-casos').value) || 0,
+        cantAlternativas: cantidadesHEVA.cantAlternativas,
+        cantDesarrollo: cantidadesHEVA.cantDesarrollo,
+        cantCasos: cantidadesHEVA.cantCasos,
         adecuacionesPIE: [...document.querySelectorAll('input[id^="pie-"]:checked')].map(x=>x.parentElement.textContent.trim())
       };
 
+        const resumenHEVA=[
+          'Encargo enviado a HEVA:',
+          'Asignatura: '+payload.asignatura,
+          'Nivel: '+payload.nivel,
+          'Marco curricular: '+payload.marcoCurricular,
+          'Objetivo: '+payload.objetivoAprendizaje,
+          'Tema: '+(payload.temaEspecifico||'Sin tema adicional'),
+          'Material: '+payload.tipoMaterial,
+          'Estrategia: '+payload.estrategiaDidactica,
+          'Estrategias integradas: '+(payload.planIntegrado?.slots?.map(x=>x.strategy).filter((x,i,a)=>a.indexOf(x)===i).join(', ')||'Ninguna'),
+          'Alternativas: '+payload.cantAlternativas,
+          'Desarrollo: '+payload.cantDesarrollo,
+          'Situaciones de lectura/análisis: '+payload.cantCasos,
+          ...Object.entries(payload.instrumentosEvaluacion||{}).map(([k,n])=>(window.HEVAAssessment?.types[k]?.label||k)+': '+n),
+          'Noticias reales: '+(payload.usarNoticias?'Consultar canales disponibles':'Desactivadas'),
+          'Noticia didáctica simulada: '+(payload.noticiaDidacticaModo||'AUTO'),
+          'Adecuaciones: '+(payload.adecuacionesPIE.join(', ')||'Ninguna')
+        ].join('\n');
+        let resumenPanel=document.getElementById('heva-encargo-enviado');if(!resumenPanel){resumenPanel=document.createElement('details');resumenPanel.id='heva-encargo-enviado';resumenPanel.className='no-print border rounded p-3 my-3 bg-stone-50';document.getElementById('btn-generar').before(resumenPanel);}resumenPanel.replaceChildren();const resumenTitulo=document.createElement('summary');resumenTitulo.textContent='Ver el encargo enviado a la IA';const resumenTexto=document.createElement('pre');resumenTexto.className='text-xs whitespace-pre-wrap';resumenTexto.textContent=resumenHEVA;resumenPanel.append(resumenTitulo,resumenTexto);
+
         let data;
-        if(modo==='GENERADOR_ESTANDAR'&&(recoveryRead(payload)||payload.cantAlternativas+payload.cantDesarrollo+payload.cantCasos>=8))data=await recuperarMaterialHEVA(payload);
+        if(modo==='GENERADOR_ESTANDAR'&&(payload.tipoMaterial==='PRESENTACION'||recoveryRead(payload)||payload.cantAlternativas+payload.cantDesarrollo+payload.cantCasos+Object.values(payload.instrumentosEvaluacion||{}).reduce((a,n)=>a+n,0)>=8))data=await recuperarMaterialHEVA(payload);
         else{
           let respuesta;
           try{
             respuesta=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(58000)});
             data=await respuesta.json();
           }catch(error){
-            if(modo!=='GENERADOR_ESTANDAR')throw error;
+            if(modo!=='GENERADOR_ESTANDAR'||payload.tipoMaterial==='PRESENTACION')throw new Error('No se pudo completar la presentación en una sola generación. No se ha reemplazado el documento anterior. '+(error?.message||'Reintenta cuando el proveedor esté disponible.'));
             data=await recuperarMaterialHEVA(payload);respuesta=null;
           }
           if(respuesta&&!respuesta.ok){
-            if(modo==='GENERADOR_ESTANDAR'&&(respuesta.status===422||data.reintentable||respuesta.status>=500))data=await recuperarMaterialHEVA(payload);
+            if(modo==='GENERADOR_ESTANDAR'&&payload.tipoMaterial!=='PRESENTACION'&&(respuesta.status===422||data.reintentable||respuesta.status>=500))data=await recuperarMaterialHEVA(payload);
             else throw new Error(data.detalle||data.error||'Error en servidor.');
           }
         }
 
+        if(!data||data.exito!==true||!data.material||typeof data.material!=='object'){
+          throw new Error(data?.detalle||data?.error||'El servidor no entregó un material completo; no se habilitarán descargas vacías.');
+        }
         materialActual = data.material;
         materialActual.nivel = payload.nivel;
         materialActual.asignatura = payload.asignatura;
 
         renderizarDocumentoEnPantalla();
+        const audit=data.material?.auditoriaExperimental;
+        if(audit){
+          let el=document.getElementById('heva-experimental-audit');
+          if(!el){el=document.createElement('details');el.id='heva-experimental-audit';el.className='border rounded-lg p-3 bg-amber-50 text-xs mt-2';document.getElementById('barra-calidad')?.after(el)}
+          el.replaceChildren();
+          const title=document.createElement('summary');title.className='cursor-pointer font-bold';title.textContent='Auditoría experimental: '+audit.errores.length+' errores estructurales y '+audit.advertencias.length+' advertencias';el.append(title);
+          const description=document.createElement('p');description.className='mt-2';description.textContent=audit.alcance;el.append(description);
+          for(const finding of [...audit.errores,...audit.advertencias].slice(0,20)){const item=document.createElement('p');item.className='mt-2';item.textContent=finding.location+': '+finding.detail;el.append(item)}
+        }
         document.getElementById('dictamen-calidad').innerText = 'Revisión estructural completada · validación docente pendiente';
 
       } catch (err) {
         errorBox.classList.remove('hidden');
-        mensajeError.innerText = err.message;
+        mensajeError.innerText = 'No se generó el material: '+err.message+'. Word y PowerPoint permanecerán deshabilitados hasta recibir contenido válido.';
+        if(!materialActual){
+          ['btn-docx','btn-pptx','btn-guardar-doc'].forEach(id=>{const button=document.getElementById(id);if(button)button.disabled=true;});
+          document.getElementById('dictamen-calidad').innerText='SIN MATERIAL GENERADO · Revisar error de IA';
+        }
       } finally {
         box.classList.add('hidden');
         btn.disabled = false;
@@ -789,5 +873,47 @@
       pptx.writeFile({ fileName: 'presentacion.pptx' });
     }
   </script>
-<script src="/heva-didactics.js"></script><script src="/heva-design.js?v=20261113fix2"></script><script src="/heva-pedagogy.js"></script><script src="/heva-core.js"></script><script src="/heva-calculation.js"></script><script src="/heva-audit.js"></script><script src="/heva-skills.js"></script><script src="/heva-studio.js"></script><script src="/heva-templates.js"></script><script src="/heva-office.js"></script><script src="/heva-ui.js"></script><script src="/heva-pedagogy-ui.js"></script><script src="/heva-recovery-ui.js?v=20261114diag"></script><script src="/heva-quality-ui.js"></script><script src="/heva-sources-ui.js"></script><script src="/heva-workflow-ui.js?v=20261114separate"></script><script src="/heva-skills-ui.js"></script><script src="/heva-studio-ui.js?v=20261114sidebar3"></script><script src="/heva-ux.js"></script><script src="/heva-interactive.js"></script><script src="/heva-ai-diagrams.js?v=20261114visual2"></script></body>
+<script src="/heva-assessment.js?v=20261115-fluidez"></script><script src="/heva-didactics.js?v=20261115-fluidez"></script><script src="/heva-design.js?v=20261115-fluidez"></script><script src="/heva-pedagogy.js?v=20261115-fluidez"></script><script src="/heva-core.js"></script><script src="/heva-calculation.js"></script><script src="/heva-audit.js"></script><script src="/heva-skills.js?v=20261115-equilibrio"></script><script src="/heva-studio.js"></script><script src="/heva-templates.js"></script><script src="/heva-office.js?v=20261115-fluidez"></script><script src="/heva-ui.js?v=20261115-evaluacion6"></script><script src="/heva-pedagogy-ui.js"></script><script src="/heva-recovery-ui.js?v=20261115-fluidez"></script><script src="/heva-quality-ui.js"></script><script src="/heva-sources-ui.js?v=20261115-fluidez"></script><script src="/heva-workflow-ui.js?v=20261115-equilibrio"></script><script src="/heva-skills-ui.js"></script><script src="/heva-studio-ui.js?v=20261114sidebar3"></script><script src="/heva-ux.js"></script><script src="/heva-interactive.js"></script><script src="/heva-ai-diagrams.js?v=20261114visual2"></script><script src="/experimental/strategy-lab.js"></script><script src="/experimental/integration.js?v=20261115-fluidez"></script><script src="/experimental/strategy-delivery.js?v=20261115-fluidez"></script><script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const subjectMap=[[/conviv/i,'convivencia'],[/historia|social/i,'sociales'],[/matem/i,'matematica'],[/lengua|comunicaci/i,'lenguaje'],[/ciencia|biolog|fisic|quimic/i,'ciencias'],[/ingl/i,'ingles'],[/metal/i,'tp_metal'],[/conviv/i,'convivencia'],[/laboral|trabajo/i,'laboral'],[/emprend/i,'emprendimiento'],[/financ/i,'financiera'],[/consum/i,'consumo'],[/tecnolog|digital/i,'digital'],[/oficio/i,'oficios']];
+function family(){const select=$('asignatura');const name=(select.value||select.options[select.selectedIndex]?.text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();return subjectMap.find(([re])=>re.test(name))?.[1]||'general'}
+function choices(){return [...document.querySelectorAll('#lab-strategies input[data-strategy]:checked')].map(e=>({id:e.dataset.strategy,quantity:Number($('lab-count-'+e.dataset.strategy).value)}))}
+function render(){const root=$('lab-strategies');root.replaceChildren();root.dataset.subject=family();const items=window.HEVAStrategyLab.items(family());for(const scope of ['Transversal','Disciplinar']){const details=document.createElement('details');details.className='border rounded bg-white mt-2 p-2';details.open=scope==='Transversal';const summary=document.createElement('summary');summary.className='cursor-pointer font-bold text-xs';summary.textContent=scope==='Transversal'?'Estrategias generales':'Estrategias de la asignatura';details.append(summary);for(const item of items.filter(i=>i.scope===scope)){const card=document.createElement('div');card.className='border-b py-2';const label=document.createElement('label');label.className='text-xs font-semibold block';const check=document.createElement('input');check.type='checkbox';check.dataset.strategy=item.id;check.checked=false;check.className='mr-2';label.append(check,document.createTextNode(item.name));card.append(label);const description=document.createElement('small');description.className='block text-stone-500';description.textContent=item.purpose;card.append(description);const qtyLabel=document.createElement('label');qtyLabel.className='block text-xs mt-1';qtyLabel.textContent='Cantidad de actividades';const qty=document.createElement('input');qty.type='number';qty.id='lab-count-'+item.id;qty.min='1';qty.max='30';qty.value='1';qty.className='block border rounded p-1 w-24';qty.disabled=!check.checked;qtyLabel.append(qty);card.append(qtyLabel);check.addEventListener('change',()=>{qty.disabled=!check.checked;refresh()});qty.addEventListener('change',refresh);details.append(card)}root.append(details)}refresh()}
+function counts(){if($('tipo-material').value==='PRESENTACION')return{alternativas:0,desarrollo:0,lecturas:0};return{alternativas:Number($('cant-alternativas').value),desarrollo:Number($('cant-desarrollo').value),lecturas:Number($('cant-casos').value)}}
+function refresh(){if($('lab-strategies').dataset.subject!==family()){render();return}const root=$('lab-manual');root.replaceChildren();if($('lab-mode').value==='manual'){for(const s of choices())for(let n=1;n<=Math.min(30,Math.max(0,s.quantity));n++){const row=document.createElement('div');row.className='border rounded p-2 mt-2 bg-white';const title=document.createElement('strong');title.className='block text-xs';title.textContent=s.id+' · Actividad '+n;row.append(title);for(const [key,label]of [['alternativas','Alternativas'],['desarrollo','Desarrollo'],['lecturas','Lectura/análisis']]){const l=document.createElement('label');l.className='text-xs inline-block mr-2 mt-2';l.textContent=label+' ';const input=document.createElement('input');input.type='number';input.min='0';input.max='30';input.value='0';input.dataset.labSlot=s.id+'-'+n;input.dataset.labKind=key;input.className='w-16 border rounded p-1';l.append(input);row.append(l)}root.append(row)}}$('lab-summary').textContent=choices().length+' estrategias seleccionadas · '+choices().reduce((a,x)=>a+(Number.isFinite(x.quantity)?x.quantity:0),0)+' actividades. Las preguntas se toman de los controles existentes.'}
+window.hevaExperimentalPlan=function(){if(!$('lab-enabled').checked)return null;if(!choices().length)throw Error('Activaste estrategias integradas, pero no seleccionaste ninguna. Marca únicamente las estrategias que deseas utilizar o desactiva el módulo.');const oa=$('texto-oa').value.trim(),topic=$('tema-especifico').value.trim();if(!oa||!topic)throw Error('Selecciona un objetivo y escribe el tema antes de generar.');const strategies=choices(),c=counts();if(c.alternativas>30||c.desarrollo>30||c.lecturas>30)throw Error('Selecciona hasta 30 ítems por tipo de pregunta.');const manual={};if($('lab-mode').value==='manual')for(const input of document.querySelectorAll('[data-lab-slot]')){const id=input.dataset.labSlot;manual[id]??={};manual[id][input.dataset.labKind]=Number(input.value)}const p=window.HEVAIntegration.plan({strategies,counts:c,mode:$('lab-mode').value,manual});const audit=window.HEVAIntegration.validate(p);if(!audit.ok)throw Error(audit.errors.join('; '));return p};
+$('asignatura').addEventListener('change',render);$('marco-curricular').addEventListener('change',()=>setTimeout(render,0));$('nivel-epja').addEventListener('change',()=>setTimeout(render,0));$('integrated-lab').addEventListener('toggle',()=>{if($('integrated-lab').open)refresh()});$('lab-mode').addEventListener('change',refresh);for(const id of ['cant-alternativas','cant-desarrollo','cant-casos','tipo-material'])$(id).addEventListener('change',refresh);render();
+})();
+</script><script>
+(function(){
+'use strict';
+const type=document.getElementById('tipo-material'),strategy=document.getElementById('estrategia-didactica');
+const strategyBox=strategy?.parentElement,counts=document.getElementById('cant-alternativas')?.closest('.grid');
+if(!type||!strategyBox||!counts)return;
+const strategyLabel=strategyBox.querySelector('label span')||strategyBox.querySelector('label');
+const countsHeading=counts.previousElementSibling;
+const descriptions={
+ EVALUACION:'Instrumentos de evaluación: selecciona las cantidades de alternativas, desarrollo y situaciones de lectura/análisis. La estrategia pedagógica principal sigue disponible como orientación de la prueba. Selecciona los formatos y cantidades en el panel de evaluación.',
+ GUIA:'Estrategias de enseñanza y práctica guiada. Las cantidades inferiores corresponden a actividades que puedes incorporar a la guía.',
+ PRESENTACION:'Estrategias de explicación, modelado y aplicación. Las cantidades inferiores corresponden a actividades dentro de la presentación.',
+ TALLER:'Estrategias prácticas y de aplicación. Las cantidades inferiores corresponden a actividades del taller.',
+ ACCESIBLE:'Estrategias didácticas con apoyos de acceso, sin cambiar el objetivo curricular.',
+ PLANIFICACION:'Estrategias para organizar las actividades de aprendizaje de la clase.'
+};
+const note=document.createElement('p');note.id='heva-context-material';note.className='text-xs mt-2 text-stone-600';strategyBox.append(note);
+function refresh(){
+ const selected=type.value,exam=selected==='EVALUACION';
+ if(strategyLabel)strategyLabel.textContent=exam?'Estrategia pedagógica de la evaluación':'Estrategia pedagógica de enseñanza';
+ if(countsHeading&&/PREGUNTAS|CASOS|ACTIVIDADES/i.test(countsHeading.textContent))countsHeading.textContent=exam?'INSTRUMENTOS DE EVALUACIÓN · CANTIDADES':'PREGUNTAS Y ACTIVIDADES DE APRENDIZAJE';
+ note.textContent=descriptions[selected]||'Selecciona una estrategia adecuada al material.';
+ const caseLabel=document.getElementById('cant-casos')?.previousElementSibling;
+ if(caseLabel)caseLabel.textContent=exam?'Situaciones de lectura / análisis (con pregunta):':'Situaciones de lectura / análisis:';
+ const lab=document.getElementById('integrated-lab');
+ if(lab){const summary=lab.querySelector('summary');if(summary)summary.textContent=exam?'Estrategias combinadas para la evaluación · opcional':'Estrategias integradas de enseñanza · opcional';}
+}
+type.addEventListener('change',refresh);refresh();
+})();
+</script><script src="/experimental/heva-unified-ui.js"></script><script src="/heva-strategy-delivery-ui.js?v=20261115-verificacion"></script><script src="/heva-assessment-ui.js?v=20261115-fluidez"></script></body>
 </html>

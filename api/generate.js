@@ -14,6 +14,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Utilice POST.' });
 
+  if(!(await require('./_ai-access.cjs').protect(req,res)))return;
   const generationDeadline=Date.now()+55000;
   const {
     modoHerramienta = 'GENERADOR_ESTANDAR', // 'GENERADOR_ESTANDAR', 'DIFERENCIADOR_DIFFIT', 'REMEDIACION_ESCOLAR', 'REGENERAR_PREGUNTA'
@@ -25,6 +26,7 @@ module.exports = async function handler(req, res) {
     estrategiaDidactica = 'Análisis de contenido disciplinar formativo',
     instruccionesDocente = '',
     disenoPedagogico = null,
+    planIntegrado = null,
     textoReferencia: referenciaRecibida = '',
     modoReferencia = 'NINGUNA',
     adecuacionesPIE = [],
@@ -36,9 +38,15 @@ module.exports = async function handler(req, res) {
     preguntaARegenerar = null
   } = req.body || {};
 
+  // En presentaciones, el contenido evaluable se integra en las diapositivas.
+  // Ignorar las cantidades de ítems heredadas del formulario para evitar
+  // fallos ALT-# por distractores repetidos ajenos al PowerPoint.
+  const cantidadesEfectivas=tipoMaterial==='PRESENTACION'
+    ? {cantAlternativas:0,cantDesarrollo:0,cantCasos:0}
+    : {cantAlternativas,cantDesarrollo,cantCasos};
   if(!['NINGUNA','ESTILO','CONTENIDO'].includes(modoReferencia)||typeof referenciaRecibida!=='string'||referenciaRecibida.length>60000)return res.status(400).json({error:'Referencia opcional inválida.'});
   const textoReferencia=modoReferencia==='NINGUNA'?'':referenciaRecibida;
-  for (const [name,value,max] of [['cantAlternativas',cantAlternativas,20],['cantDesarrollo',cantDesarrollo,10],['cantCasos',cantCasos,4]]) {
+  for (const [name,value,max] of [['cantAlternativas',cantAlternativas,30],['cantDesarrollo',cantDesarrollo,30],['cantCasos',cantCasos,30]]) {
     if (!Number.isInteger(value) || value < 0 || value > max) return res.status(400).json({error:`${name} debe estar entre 0 y ${max}`});
   }
   if (typeof objetivoAprendizaje !== 'string' || typeof textoReferencia !== 'string' || textoReferencia.length > 60000) return res.status(400).json({error:'Objetivo o texto de referencia inválido o demasiado extenso.'});
@@ -155,22 +163,55 @@ Responde ÚNICAMENTE en JSON:
     // Cada material tiene un contrato propio y una estrategia observable en sus tareas.
     if (!Object.hasOwn(Pedagogy.contracts, tipoMaterial)) return res.status(400).json({error:'Tipo de material no admitido.'});
     if (!objetivoAprendizaje.trim()) return res.status(400).json({error:'Selecciona un objetivo curricular antes de generar.'});
-    const plan = {...Object.fromEntries(["documentosBase","plantillaVisual","derivacion"].filter(k=>req.body[k]!=null).map(k=>[k,req.body[k]])),asignatura,nivel,marcoCurricular,objetivoAprendizaje,temaEspecifico,estrategiaDidactica,instruccionesDocente,disenoPedagogico,textoReferencia,modoReferencia,adecuacionesPIE,tipoMaterial,cantAlternativas,cantDesarrollo,cantCasos,incluirTicketSalida};
+    const plan = {...Object.fromEntries(["documentosBase","plantillaVisual","derivacion","usarNoticias","noticiaDidacticaModo","instrumentosEvaluacion"].filter(k=>req.body[k]!=null).map(k=>[k,req.body[k]])),asignatura,nivel,marcoCurricular,objetivoAprendizaje,temaEspecifico,estrategiaDidactica,instruccionesDocente,disenoPedagogico,planIntegrado,textoReferencia,modoReferencia,adecuacionesPIE,tipoMaterial,...cantidadesEfectivas,incluirTicketSalida};
     const extraIssues=require('../heva-studio.js').validateExtras(plan);if(extraIssues.length)return res.status(400).json({error:extraIssues.join('; ')});
     const designIssues=require('../heva-design.js').validate(disenoPedagogico,plan);
     if(designIssues.length)return res.status(400).json({error:designIssues.join('; ')});
     const fuentesDocumentales=await Sources.retrieve(plan);
-    const promptRedactor = Pedagogy.prompt(plan)+Sources.evidencePrompt(fuentesDocumentales);
+    const presentationGuidance=tipoMaterial==='PRESENTACION'?'\nMODO PRESENTACIÓN: genera 8 a 12 diapositivas completas en una respuesta JSON. Incluye objetivos, explicación progresiva, ejemplo modelado, actividades de aplicación y cierre. Cada diapositiva requiere título, función, contenido desarrollado y notas docentes. Crea una trazabilidadEstrategia con una referencia DIAPO-1, DIAPO-2, etc. para CADA diapositiva real, con habilidad, evidencia observable y criterio específicos. Incluye además las referencias de otras tareas reales si existen; no inventes referencias ni agregues preguntas por encima de las cantidades solicitadas. REGLA DE COHERENCIA DISCIPLINAR: desarrolla exclusivamente la asignatura, el tema y el objetivo seleccionados. No mezcles Matemática y Lenguaje ni otras asignaturas salvo que el docente solicite explícitamente una integración interdisciplinaria. AUTOSUFICIENCIA: toda actividad que mencione un segundo texto, fuente, noticia, tabla, gráfico, caso o párrafo debe incluir el estímulo completo en la misma diapositiva o en otra diapositiva identificada; nunca remitas a un material inexistente. Evita fuentes inventadas o nombres de empresas ficticias presentadas como reales; etiqueta ejemplos simulados. Diseña diapositivas con 2-4 ideas explicadas y ejemplos específicos, no instrucciones genéricas de relleno. Las notas docentes deben desarrollar lo que no cabe visualmente.':'';
+    const promptRedactor = Pedagogy.prompt(plan)+presentationGuidance+Sources.evidencePrompt(fuentesDocumentales);
     const metadata = {objetivoAprendizaje,asignatura,nivel,marcoCurricular,temaEspecifico,tipoMaterial,estrategiaDidactica:Pedagogy.strategy(estrategiaDidactica).name};
     let author;
     const draft = async prompt => { const r = await call(prompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY,[],{deadline:generationDeadline}); author={proveedor:r.provider,modelo:r.model,fecha:new Date().toISOString()}; return r.value; };
-    const normalize = raw => HEVA.material(raw,metadata);
-    const check = m => [...HEVA.validate(m,{cantAlternativas,cantDesarrollo,cantCasos}),...Pedagogy.validate(m,plan),...Skills.generationIssues(m,plan)];
+    const normalize = raw => {
+      const normalized=Pedagogy.normalizeStrategyPlan(raw,plan);
+      const counted=Pedagogy.enforceRequestedCounts(normalized,plan);
+      const traced=Pedagogy.normalizeTaskTraces(counted);
+      const m=HEVA.material(traced,metadata);
+      // Final defensive boundary: never return surplus items when the teacher
+      // requested zero, regardless of model output or intermediary defaults.
+      for(const [field,count] of [['preguntasAlternativas',cantidadesEfectivas.cantAlternativas],['preguntasDesarrollo',cantidadesEfectivas.cantDesarrollo],['casosEstudio',cantidadesEfectivas.cantCasos]])m[field]=m[field].slice(0,count);
+      m.trazabilidadEstrategia=Pedagogy.normalizeTaskTraces(m).trazabilidadEstrategia;
+      return m;
+    };
+    const check = m => [...HEVA.validate(m,cantidadesEfectivas),...Pedagogy.validate(m,plan),...Skills.generationIssues(m,plan)];
     let material = normalize(await draft(promptRedactor));
     let issues = check(material);
     if (issues.length) {
-      material = normalize(await draft(promptRedactor+'\nCORRIGE LA RESPUESTA COMPLETA. Se detectaron estas incidencias: '+issues.join('; ')));
+      const missingRefs=Pedagogy.missingTaskTraces(material);
+      const selectedStrategy=Pedagogy.strategy(estrategiaDidactica);
+      const strategyPlan=material.planEstrategia||{};
+      const missingStrategyFields=['habilidadCentral','aplicacionConcreta','evidenciaEsperada','retroalimentacionDocente'].filter(k=>typeof strategyPlan[k]!=='string'||!strategyPlan[k].trim());
+      const strategyRepair=issues.some(x=>x.includes('La estrategia seleccionada no está desarrollada'))?
+        '\nPLAN DE ESTRATEGIA OBLIGATORIO: planEstrategia.id debe ser exactamente '+selectedStrategy.id+'. Completa planEstrategia.habilidadCentral, aplicacionConcreta, evidenciaEsperada y retroalimentacionDocente con textos específicos del objetivo y de las tareas reales. Campos actualmente vacíos: '+missingStrategyFields.join(', ')+'. No copies una plantilla genérica; describe cómo se aplica la estrategia y cómo se revisará el trabajo.':'';
+      material = normalize(await draft(promptRedactor+'\nCORRIGE LA RESPUESTA COMPLETA. Se detectaron estas incidencias: '+issues.join('; ')+(missingRefs.length?'\nTRAZABILIDAD OBLIGATORIA: agrega exactamente una entrada con habilidad, evidencia y criterio específicos para cada referencia real que falta: '+missingRefs.join(', ')+'. No inventes actividades ni referencias.':'')+strategyRepair ));
       issues = check(material);
+    }
+    // A complete slide deck must not be discarded solely because the model
+    // omitted the strategy metadata. Request only that metadata, and validate
+    // it before merging; never synthesize evidence or silently pass validation.
+    if(issues.some(x=>x.includes('La estrategia seleccionada no está desarrollada'))&&Date.now()<generationDeadline-6500){
+      try{
+        const selected=Pedagogy.strategy(estrategiaDidactica);
+        const summary=(material.diapositivas||[]).map((d,i)=>({numero:i+1,titulo:d.titulo,contenido:String(Array.isArray(d.contenido)?d.contenido.join(' '):d.contenido||'').slice(0,420)}));
+        const repairPrompt='Devuelve SOLO un objeto JSON con planEstrategia. Estrategia obligatoria: '+selected.id+' ('+selected.name+'). Objetivo: '+objetivoAprendizaje+'. Tema: '+temaEspecifico+'. Diapositivas existentes: '+JSON.stringify(summary)+'. Completa los cuatro campos habilidadCentral, aplicacionConcreta, evidenciaEsperada, retroalimentacionDocente con textos específicos y verificables respecto de las diapositivas; no inventes actividades. Forma: {"planEstrategia":{"id":"'+selected.id+'","habilidadCentral":"...","aplicacionConcreta":"...","evidenciaEsperada":"...","retroalimentacionDocente":"..."}}';
+        const response=await draft(repairPrompt);
+        if(response?.planEstrategia&&typeof response.planEstrategia==='object'){
+          const candidate=normalize({...material,planEstrategia:response.planEstrategia});
+          const candidateIssues=check(candidate);
+          if(candidateIssues.length<issues.length){material=candidate;issues=candidateIssues;}
+        }
+      }catch(error){console.warn('Reparación puntual de estrategia no disponible:',error.code||'ERROR');}
     }
     if (issues.length) return res.status(422).json({error:'El material no cumple la estructura pedagógica solicitada. Se conserva el documento anterior.',detalle:issues.join('; '),borrador:material});
     material = Pedagogy.finalize(material,plan);
@@ -181,10 +222,13 @@ Responde ÚNICAMENTE en JSON:
     material.respaldoDocumental=evidence.valid;material.incidenciasDocumentales=evidence.invalid;
     material=Skills.prepare(material,plan,fuentesDocumentales,evidence);
     material=require('../heva-studio.js').link(material,plan);
+    material.auditoriaExperimental=require('../experimental/quality-audit.cjs').inspect(material,plan);
+    material.auditoriaDisciplinar=require('../experimental/subject-audit.cjs').inspectAll(material,plan);
     return res.status(200).json({exito:true,material,revision:{alcance:'Estructura, cantidades y trazabilidad; revisión pedagógica docente pendiente',tipo:tipoMaterial,estrategia:metadata.estrategiaDidactica}});
 
   } catch (error) {
-    console.error('Fallo de generación HEVA:',error.code||'ERROR');
+    console.error('Fallo de generación HEVA:',error.code||'ERROR',JSON.stringify(error.proveedores||[]));
+    if(error.code==='AI_TIMEOUT'||error.code==='AI_UNAVAILABLE')return res.status(503).json({error:error.code==='AI_TIMEOUT'?'Las IA no respondieron dentro del tiempo disponible.':'Los proveedores de IA no están disponibles.',detalle:'Se conserva tu selección. Los PowerPoint se completan por grupos de diapositivas para reducir el tiempo de cada solicitud.',codigo:error.code,reintentable:true});
     if(error.code==='AI_RATE_LIMIT')return res.status(503).json({error:'Los proveedores de IA están temporalmente saturados.',detalle:'Espera unos minutos y vuelve a intentar. El material anterior permanece disponible.',codigo:error.code,reintentable:true});
     if(error.code?.startsWith('AI_RESPONSE_'))return res.status(502).json({error:'La IA devolvió una respuesta incompleta o con formato inválido.',detalle:'No se pudo recuperar un documento completo. Se conserva el material anterior y tu selección. Puedes volver a generar.',codigo:error.code,reintentable:true});
     return res.status(500).json({
