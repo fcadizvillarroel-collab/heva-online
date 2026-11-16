@@ -5,3 +5,14 @@ test('planning input enforces real timing, selected methods and material decisio
 test('planning schema, primary and compact fallback honor duration and all selections',()=>{const p=plan(),m=P.schema('PLANIFICACION',p);assert.deepEqual(m.planClase.map(x=>x.minutos),[10,40,10]);assert.match(P.prompt(p),/Presentación oral de un minuto/);assert.match(R.fallbackPrompt(p,{},undefined),/Simular una solicitud/);assert.equal(R.batches(p).length,0);for(const [i,row]of m.planClase.entries()){row.metodosAplicados=i===1?['modelado','simulacion']:[];row.agrupamientos=['parejas'];row.recursosUsados=['texto'];row.comprobaciones=['oral','cotejo'];row.apoyosAplicados=['lectura'];}assert.deepEqual(C.audit(m,p),[]);m.planClase[1].metodosAplicados=['modelado'];assert.ok(C.audit(m,p).some(x=>x.includes('Simulación')))});
 test('duration and existing ninety-minute plans remain compatible through display and export blocks',()=>{const p=plan(),m=P.finalize(P.schema('PLANIFICACION',p),p);assert.equal(m.planificacionClase.duracion,60);assert.ok(P.blocks(m).find(b=>b.title==='Diseño de la clase').text.includes('60 minutos'));assert.equal(C.duration({tipoMaterial:'PLANIFICACION'}),90);assert.deepEqual(P.schema('PLANIFICACION').planClase.map(x=>x.minutos),[15,60,15]);assert.ok(C.validate({...p,tipoMaterial:'GUIA'}).length)});
 test('server planning contract rejects a different distribution even with the same total',()=>{const p=plan(),m=P.schema('PLANIFICACION',p);m.planClase[0].minutos=20;m.planClase[1].minutos=30;assert.ok(C.audit(m,p).some(x=>x.includes('tiempo de inicio')))});
+test('planning accepts visible labels and actual reading activities without losing required coverage',()=>{
+const p=plan(),m=P.schema('PLANIFICACION',p);p.planificacionClase.recursos=['texto','noticia'];p.planificacionClase.comprobaciones=['ticket'];
+for(const row of m.planClase){row.metodosAplicados=['modelado','simulacion'];row.agrupamientos=['parejas'];row.apoyosAplicados=['lectura'];}
+m.planClase[1].accionesEstudiantes='Leen y analizan una noticia sobre la comunicación en servicios públicos, identificando su idea central.';
+m.ticketSalida={pregunta1:'¿Qué idea comunicarás primero al realizar una solicitud?'};
+assert.deepEqual(C.audit(m,p),[]);
+m.planClase[1].accionesEstudiantes='Realizan una exposición oral.';delete m.ticketSalida;
+assert.equal(C.audit(m,p).filter(x=>/Texto o documento|Noticia|Ticket de salida/.test(x)).length,3);
+m.planClase[1].recursosUsados=['Texto o documento','Noticia'];m.planClase[2].comprobaciones=['Ticket de salida'];assert.deepEqual(C.audit(m,p),[]);
+});
+test('selected planning ticket overrides the hidden generic switch in the generation prompt',()=>{const p=plan();p.incluirTicketSalida=false;p.planificacionClase.comprobaciones=['ticket'];assert.doesNotMatch(P.prompt(p),/No incluyas ticketSalida/);assert.match(P.prompt(p),/preguntas concretas en ticketSalida/);});
