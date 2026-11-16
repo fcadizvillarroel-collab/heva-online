@@ -36,21 +36,21 @@ module.exports=async(req,res)=>{
   const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+strictFormat+caseRepair+developmentRepair+strategyRepair+correctionContext;
   let result;
   if(fase==='items'&&borradorBloque){
-   const preserved=R.normalizePart(borradorBloque,batch),pending=R.partIssues(preserved,plan,batch);
+   const preserved=R.normalizePart(borradorBloque,batch),pending=R.partIssues(preserved,plan,batch,parts);
    if(pending.length&&!R.traceIssuesOnly(pending))return res.status(400).json({error:'El borrador no puede repararse solo con trazabilidad.',detalle:pending.join('; '),reintentable:false});
    result={value:preserved,provider:autor.proveedor,model:autor.modelo};
   }else result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true}),...keys,exclude,{deadline,maxOutputTokens:fase==='base'?(plan.tipoMaterial==='PRESENTACION'?2600:10000):batch?.formato?8000:5000});
   if(fase==='items')result.value=R.normalizePart(result.value,batch);
-  let issues=R.partIssues(result.value,plan,fase==='items'?batch:null);
+  let issues=R.partIssues(result.value,plan,fase==='items'?batch:null,parts);
   if(issues.length&&!R.traceIssuesOnly(issues)&&deadline-Date.now()>5000){
    result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true})+'\nCORRIGE este bloque completo: '+issues.join('; '),...keys,exclude,{deadline,maxOutputTokens:fase==='base'?(plan.tipoMaterial==='PRESENTACION'?2600:10000):batch?.formato?8000:5000});
    if(fase==='items')result.value=R.normalizePart(result.value,batch);
-   issues=R.partIssues(result.value,plan,fase==='items'?batch:null);
+   issues=R.partIssues(result.value,plan,fase==='items'?batch:null,parts);
   }
   if(fase==='items'&&R.traceIssuesOnly(issues)&&deadline-Date.now()>5500){
    try{
     const fixed=await call(R.traceRepairPrompt(plan,result.value,batch),...keys,exclude,{deadline,maxOutputTokens:2600});
-    const candidate=R.mergeTraceRepair(result.value,fixed.value,plan,batch),candidateIssues=R.partIssues(candidate,plan,batch);
+    const candidate=R.mergeTraceRepair(result.value,fixed.value,plan,batch),candidateIssues=R.partIssues(candidate,plan,batch,parts);
     if(candidateIssues.length<issues.length){result.value=candidate;issues=candidateIssues;}
    }catch(error){console.warn('HEVA trace repair pending:',error.code||'TRACE_REPAIR_ERROR');}
   }
