@@ -40,8 +40,8 @@ function inspect(raw){const m=H.material(raw),plan=m.planGeneracion||{},issues=[
  m.casosEstudio.forEach((q,i)=>{const ref='CASO-'+(i+1);if(!text(q.contextoReal)||!text(q.preguntaReflexion)||!text(q.criterioEvaluacion))add('caso_'+ref,'error_comprobado',ref,'Falta contexto, pregunta o criterio del caso.','Completar información suficiente y criterio docente.');});
  if(m.tipoMaterial==='EVALUACION'){
   const Assessment=typeof module==='object'&&module.exports?require('./heva-assessment.js'):globalThis.HEVAAssessment;
-  const total=m.preguntasAlternativas.length+3*m.preguntasDesarrollo.length+2*m.casosEstudio.length+(Assessment?.score(m)||0);
-  if(m.puntajeTotal!==total)add('puntaje_total','error_comprobado','puntajeTotal',`El total indicado es ${m.puntajeTotal}; corresponde ${total}.`,'Corregir el total: alternativas 1, desarrollo 3, casos 2 puntos.');
+  const total=Assessment.totalScore(m);
+  if(m.puntajeTotal!==total)add('puntaje_total','error_comprobado','puntajeTotal',`El total indicado es ${m.puntajeTotal}; corresponde ${total}.`,'Recalcular el total con los puntajes elegidos por el docente.');
   for(const [field,points,prefix]of [['preguntasAlternativas',1,'ALT'],['preguntasDesarrollo',3,'DES'],['casosEstudio',2,'CASO']])m[field].forEach((q,i)=>{if(q.puntaje!=null&&q.puntaje!==points)add('puntaje_'+prefix+'-'+(i+1),'error_comprobado',prefix+'-'+(i+1),'El puntaje del ítem difiere del contrato.','Asignar '+points+' puntos.');});
  }
  if(m.versionPedagogica===3){try{for(const [i,error]of P.validate(m,{...plan,tipoMaterial:m.tipoMaterial,estrategiaDidactica:m.estrategiaDidactica}).entries())add('contrato_'+i,'error_comprobado','estructura',error,'Completar el contrato del tipo de material y su trazabilidad.');}catch{add('estructura_invalida','error_comprobado','estructura','El material contiene secciones incompletas o inválidas.','Revisar o regenerar las secciones antes de exportar.');}}

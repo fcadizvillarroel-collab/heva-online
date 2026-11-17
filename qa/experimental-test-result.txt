@@ -1,88 +1,88 @@
-(node:318) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(node:329) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 (Use `node --trace-warnings ...` to show where the warning was created)
 TAP version 13
-# (node:325) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:336) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: automatic distribution balances exact totals without adding cases
 ok 1 - automatic distribution balances exact totals without adding cases
   ---
-  duration_ms: 1.125992
+  duration_ms: 1.106843
   type: 'test'
   ...
 # Subtest: manual distribution requires matching totals
 ok 2 - manual distribution requires matching totals
   ---
-  duration_ms: 0.412096
+  duration_ms: 0.440147
   type: 'test'
   ...
 # Subtest: reject invalid strategy and question quantities
 ok 3 - reject invalid strategy and question quantities
   ---
-  duration_ms: 0.138778
+  duration_ms: 0.545825
   type: 'test'
   ...
-# (node:326) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:337) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: Every subject offers general and discipline-specific strategies
 ok 4 - Every subject offers general and discipline-specific strategies
   ---
-  duration_ms: 1.433902
+  duration_ms: 1.459449
   type: 'test'
   ...
 # Subtest: All strategies create verifiable demonstration activities for all materials
 ok 5 - All strategies create verifiable demonstration activities for all materials
   ---
-  duration_ms: 19.415038
+  duration_ms: 21.780566
   type: 'test'
   ...
 # Subtest: Detect duplicated instructions and incomplete output
 ok 6 - Detect duplicated instructions and incomplete output
   ---
-  duration_ms: 0.213409
+  duration_ms: 0.30804
   type: 'test'
   ...
 # Subtest: Reject irrelevant strategy and missing OA
 ok 7 - Reject irrelevant strategy and missing OA
   ---
-  duration_ms: 0.243344
+  duration_ms: 0.283042
   type: 'test'
   ...
-# (node:327) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:338) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: sin respuestas faltantes ni errores de cantidad
 ok 8 - sin respuestas faltantes ni errores de cantidad
   ---
-  duration_ms: 0.629691
+  duration_ms: 0.606175
   type: 'test'
   ...
 # Subtest: detecta preguntas de desarrollo ausentes
 ok 9 - detecta preguntas de desarrollo ausentes
   ---
-  duration_ms: 0.68262
+  duration_ms: 0.126459
   type: 'test'
   ...
 # Subtest: detecta enunciados repetidos
 ok 10 - detecta enunciados repetidos
   ---
-  duration_ms: 0.312167
+  duration_ms: 0.80406
   type: 'test'
   ...
 # Subtest: reconoce descuadre entre estrategias y cantidades
 ok 11 - reconoce descuadre entre estrategias y cantidades
   ---
-  duration_ms: 0.184215
+  duration_ms: 0.194441
   type: 'test'
   ...
 # Subtest: planificador no duplica actividades ni añade casos extras
 ok 12 - planificador no duplica actividades ni añade casos extras
   ---
-  duration_ms: 0.474068
+  duration_ms: 0.44888
   type: 'test'
   ...
 # Subtest: auditoría no afirma verificación semántica automática
 ok 13 - auditoría no afirma verificación semántica automática
   ---
-  duration_ms: 0.12661
+  duration_ms: 0.159238
   type: 'test'
   ...
 1..13
@@ -93,4 +93,4 @@ ok 13 - auditoría no afirma verificación semántica automática
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 73.728278
+# duration_ms 79.72974

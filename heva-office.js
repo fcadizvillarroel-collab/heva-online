@@ -51,7 +51,7 @@ function textWidth(value,size){
 function lineCount(value,width,size){const limit=width*72;let count=0;for(const paragraph of String(value).split('\n')){let used=0;count++;for(const word of paragraph.split(/\s+/).filter(Boolean)){const w=textWidth(word,size),gap=used?textWidth(' ',size):0;if(used&&used+gap+w>limit){count++;used=0;}if(w>limit){count+=Math.ceil(w/limit)-1;used=w%limit;}else used+= (used?gap:0)+w;}}return count;}
 function fitsText(lines,width,height,size){return lineCount(lines.join('\n\n'),width,size)*size*1.28<=Math.max(0,height-.12)*72;}
 function paginatePresentation(section,large=false){
- const size=large?26:23,activity=classifySlide(section.title,[],0)==='activity',height=activity?2.82:3.65,width=10.65;
+ const size=26,height=3.65,width=11.5;
  const source=slideText(section.text).split(/\n+/).map(x=>x.trim()).filter(Boolean),pieces=[];
  for(const paragraph of source){if(fitsText([paragraph],width,height,size)){pieces.push(paragraph);continue;}
   // Prefer sentence boundaries. Very long sentences continue at word boundaries.
@@ -59,12 +59,13 @@ function paginatePresentation(section,large=false){
   for(const sentence of sentences){if(fitsText([current+(current?' ':'')+sentence.trim()],width,height,size)){current+=(current?' ':'')+sentence.trim();continue;}if(current){pieces.push(current);current='';}for(const word of sentence.trim().split(/\s+/)){if(current&&!fitsText([current+' '+word],width,height,size)){pieces.push(current);current='';}current+=(current?' ':'')+word;}}
   if(current)pieces.push(current);
  }
- const pages=[];let page=[];for(const piece of pieces){if(page.length&&!fitsText([...page,piece],width,height,size)){pages.push(page);page=[];}page.push(piece);}if(page.length)pages.push(page);return pages.length?pages:[['Contenido pendiente de desarrollar']];
+ const pages=[];let page=[];for(const piece of pieces){if(page.length&&(page.length>=3||!fitsText([...page,piece],width,height,size))){pages.push(page);page=[];}page.push(piece);}if(page.length)pages.push(page);return pages.length?pages:[['Contenido pendiente de desarrollar']];
 }
 function addChrome(ppt,theme,section,num,total){
  const slide=ppt.addSlide();slide.background={color:theme.background};
- slide.addShape(ppt.ShapeType.rect,{x:0,y:0,w:13.333,h:.16,line:{color:theme.main},fill:{color:theme.main}});
- slide.addShape(ppt.ShapeType.rect,{x:0,y:.16,w:.18,h:7.34,line:{color:theme.accent},fill:{color:theme.accent}});
+ if(section==='activity')theme={...theme,main:'FFFFFF',ink:'FFFFFF'};
+ slide.addShape(ppt.ShapeType.rect,{x:0,y:0,w:13.333,h:.06,line:{color:theme.main},fill:{color:theme.main}});
+
  slide.addText('HEVA  /  EDUCACIÓN DE PERSONAS JÓVENES Y ADULTAS',{x:.72,y:.33,w:10.7,h:.25,fontSize:10,bold:true,color:theme.main,margin:0});
  slide.addShape(ppt.ShapeType.line,{x:.72,y:6.96,w:11.88,h:0,line:{color:'DDCDBE',width:1}});
  slide.addText('ESCUELA HÉCTOR VALENZUELA CEA · VILLARRICA',{x:.72,y:7.06,w:9.9,h:.18,fontSize:9,color:theme.ink,margin:0});
@@ -73,6 +74,7 @@ function addChrome(ppt,theme,section,num,total){
 }
 function classifySlide(title,lines,index){
  const t=title.toLowerCase();
+ if(/idea clave|concepto central|definición/.test(t))return 'feature';
  if(/selección múltiple|alternativa|opción\s+[a-d]/i.test(t))return 'question';
  if(/actividad|ejercicio|desafío|reflexión|pregunta|aplicación|debate|práctica|ticket de salida/.test(t))return 'activity';
  if(/comparación|comparar|diferencias|versus|ventajas y desventajas/.test(t))return 'compare';
@@ -122,44 +124,23 @@ function drawBalance(ppt,theme,slide){
 }
 function addContent(ppt,theme,slide,title,lines,section,index=0){
  if(drawSemanticVisual(ppt,theme,slide,title,lines))return;
- const kind=classifySlide(title,lines,index),rect=(x,y,w,h,color)=>slide.addShape(ppt.ShapeType.rect,{x,y,w,h,line:{color,transparency:100},fill:{color}});
- const text=(value,x,y,w,h,size,color,bold=false,extra={})=>slide.addText(String(value),{x,y,w,h,fontFace:bold?'Aptos Display':'Aptos',fontSize:size,color,bold,margin:0,breakLine:false,valign:'mid',fit:'shrink',...extra});
- const clean=lines.map(x=>x.replace(/^[-•]\s*/,'').trim()).filter(Boolean);
- let titleSize=title.length>65?27:33;while(titleSize>20&&!fitsText([title],11.75,1.08,titleSize))titleSize--;text(title,.78,.85,11.75,1.08,titleSize,theme.main,true);
- if(kind==='question'){
-  rect(.8,2.12,11.73,4.45,'FFFFFF');rect(.8,2.12,.13,4.45,theme.accent);
-  text(clean.join('\n\n'),1.25,2.45,10.8,3.78,21,theme.ink,false,{valign:'top'});
- }else if(kind==='activity'){
-  rect(.8,2.12,11.73,4.45,theme.main);rect(1.18,2.5,1.15,.09,theme.accent);
-  text('ACTIVIDAD DE APLICACIÓN',1.18,2.73,10.6,.38,16,'FFE2BE',true);
-  text(clean.join('\n\n'),1.18,3.3,10.7,2.82,23,'FFFFFF',false,{valign:'top'});
- }else if(kind==='compare'&&clean.length>=2&&clean.every(t=>fitsText([t],5.02,1.35,26))){
-  const marker=clean.findIndex((x,i)=>i>0&&/^(Método\s*B|Opción\s*B|Segunda|En cambio|Por otro lado)/i.test(x));
-  const mid=marker>0?marker:Math.ceil(clean.length/2);
-  [clean.slice(0,mid),clean.slice(mid)].forEach((part,j)=>{
-   const x=.8+j*6;rect(x,2.15,5.73,4.35,j?'E9E2D8':'F7EBDD');rect(x,2.15,5.73,.12,j?theme.accent:theme.main);
-   text(j?'SEGUNDA PERSPECTIVA':'PRIMERA PERSPECTIVA',x+.32,2.55,5.05,.38,15,theme.main,true);
-   text(part.join('\n\n'),x+.32,3.15,5.02,2.88,20,theme.ink,false,{valign:'top'});
-  });
- }else if(kind==='timeline'&&clean.length>=2&&clean.length<=5&&clean.every(t=>fitsText([t],10.65,.64,26))){
-  rect(1.06,2.3,.07,3.95,theme.accent);
-  clean.slice(0,5).forEach((line,j)=>{const y=2.3+j*.79;rect(.96,y+.15,.27,.27,theme.main);text(line,1.5,y,10.65,.64,20,theme.ink)});
- }else if(kind==='cards'&&clean.length>=2&&clean.length<=4&&clean.every(t=>fitsText([t],5.2,1.4,26))){
-  const items=clean.slice(0,4),cols=items.length<=2?items.length:2,rows=Math.ceil(items.length/cols),gap=.16;
-  const w=(11.7-gap*(cols-1))/cols,h=(4.45-gap*(rows-1))/rows;
-  items.forEach((line,j)=>{const x=.82+(j%cols)*(w+gap),y=2.13+Math.floor(j/cols)*(h+gap);
-   rect(x,y,w,h,j%2?'F1E7DB':'FFFFFF');rect(x,y,.085,h,theme.accent);
-   text(String(j+1).padStart(2,'0'),x+.25,y+.16,.64,.38,15,theme.main,true);
-   text(line,x+.26,y+.59,w-.52,h-.74,items.length>4?17:20,theme.ink,false,{valign:'top'});
-  });
- }else if(kind==='feature'){
-  rect(.8,2.13,4.1,4.4,theme.main);text(String(index+1).padStart(2,'0'),1.2,3.12,3.3,1.6,76,'FFFFFF',true);
-  rect(5.1,2.13,7.42,4.4,'FFFFFF');
-  text(clean.join('\n\n'),5.46,2.52,6.7,3.55,22,theme.ink,false,{valign:'top'});
- }else{
-  rect(.8,2.13,11.73,4.4,'FFFFFF');rect(.8,2.13,.13,4.4,theme.accent);
-  if(/balanza/i.test(title)&&clean.join(' ').length<180){drawBalance(ppt,theme,slide);text(clean.join('\n\n'),1.3,2.38,10.65,.7,20,theme.ink,false,{valign:'top'});}else{  text(clean.join('\n\n'),1.3,2.48,10.65,3.65,23,theme.ink,false,{valign:'top'});}
- }
+ const kind=classifySlide(title,lines,index),clean=lines.map(x=>x.replace(/^[-•]\s*/,'').trim()).filter(Boolean);
+ const activity=kind==='activity',ink=activity?'FFFFFF':theme.ink,main=activity?'FFFFFF':theme.main;
+ // A single canvas: no nested cards, decorative counters or repeated panel grids.
+ if(activity)slide.background={color:theme.main};
+ const text=(value,x,y,w,h,size,color,bold=false)=>slide.addText(String(value),{x,y,w,h,fontFace:'Arial',fontSize:size,color,bold,margin:0,breakLine:false,valign:'top',fit:'shrink',paraSpaceAfterPt:12});
+ const titleSize=title.length>85?28:title.length>60?32:36;
+ text(title,.85,.92,11.6,1.18,titleSize,main,true);
+ if(activity)text('TRABAJO EN CLASE',.86,2.14,11.4,.32,14,'FFFFFF',true);
+ const top=activity?2.7:2.4;
+ // Comparison stays a real two-column comparison only when both halves fit.
+ const mid=Math.ceil(clean.length/2),halves=[clean.slice(0,mid),clean.slice(mid)];
+ if(kind==='compare'&&clean.length>=2&&halves.every(x=>fitsText(x,5.4,3.65,26))){
+  halves.forEach((part,j)=>text(part.join('\n\n'),.86+j*6.03,top,5.4,3.65,26,ink));
+ }else if(!activity&&clean.length===2&&fitsText([clean[0]],11.5,1.65,30)&&fitsText([clean[1]],10.7,1.65,26)){
+  text(clean[0],.86,2.4,11.5,1.65,30,main,true);
+  text(clean[1],1.35,4.5,10.7,1.65,26,ink);
+ }else text(clean.join('\n\n'),.86,top,11.5,3.65,kind==='feature'&&fitsText(clean,11.5,3.65,30)?30:26,ink);
 }
 function presentationPages(material,teacher=false){
  const visual=root.HEVATemplates.layout(material);
@@ -184,19 +165,24 @@ function presentationPages(material,teacher=false){
  return pages;
 }
 function renderCover(ppt,theme,material,total){
- const cover=addChrome(ppt,theme,'Portada',1,total);
- cover.addShape(ppt.ShapeType.rect,{x:.75,y:1.15,w:11.85,h:4.95,line:{color:theme.main,transparency:100},fill:{color:theme.main}});
- cover.addShape(ppt.ShapeType.rect,{x:1.08,y:1.57,w:1.25,h:.09,line:{color:theme.accent},fill:{color:theme.accent}});
- cover.addText(String(material.titulo||'Presentación educativa'),{x:1.08,y:1.95,w:10.7,h:2.15,fontFace:'Aptos Display',fontSize:Math.max(22,Math.min(38,material.titulo?.length>100?28:38)),bold:true,color:'FFFFFF',margin:0,breakLine:false,valign:'mid',fit:'shrink'});
- cover.addText([material.asignatura,material.nivel,material.temaEspecifico].filter(Boolean).join('  ·  '),{x:1.1,y:4.55,w:10.6,h:.75,fontSize:18,color:'FFF0E0',margin:0,fit:'shrink'});
- cover.addText('HEVA VISUAL · MOTOR 2026.11',{x:1.1,y:5.57,w:5.8,h:.26,fontSize:10,color:'FFFFFF',margin:0});
+ const cover=ppt.addSlide(),contrast=theme.background==='FFFFFF'&&theme.main==='111111';
+ const image=root.HEVAVisualAssets?.cover;
+ cover.background={color:contrast?'FFFFFF':theme.main};
+ if(image&&!contrast)cover.addImage({data:image,x:0,y:0,w:13.333,h:7.5,altText:'Cuaderno y materiales de estudio. Imagen decorativa generada.'});
+ const color=contrast?'111111':'FFFFFF',title=String(material.titulo||'Presentación educativa');
+ const size=title.length>100?32:title.length>65?38:44;
+ cover.addText('HEVA  /  APRENDER Y APLICAR',{x:.85,y:.7,w:7,h:.4,fontSize:14,bold:true,color,margin:0});
+ cover.addText(title,{x:.85,y:2,w:6.25,h:2.8,fontFace:'Arial',fontSize:size,bold:true,color,margin:0,valign:'mid',fit:'shrink'});
+ cover.addText([material.asignatura,material.nivel].filter(Boolean).join(' · '),{x:.85,y:5.3,w:6.2,h:.65,fontSize:20,color,margin:0,fit:'shrink'});
+ cover.addText('ESCUELA HÉCTOR VALENZUELA CEA · VILLARRICA',{x:.85,y:6.85,w:10.5,h:.3,fontSize:10,color,margin:0});
+ if(typeof cover.addNotes==='function'&&image&&!contrast)cover.addNotes('Imagen de portada decorativa generada para HEVA. No constituye una fuente ni evidencia curricular.');
 }
 // Preview records exactly the shapes and text boxes used by the PPTX renderer.
 function preview(m,teacher=false){
  const material=HEVA.material(m),visual=root.HEVATemplates.layout(material),pages=presentationPages(material,teacher),record=[];
- const ppt={ShapeType:{rect:'rect',roundRect:'roundRect',line:'line'},addSlide(){const page={elements:[],background:{color:visual.theme.background}};record.push(page);return Object.defineProperties({addShape:(shape,options)=>page.elements.push({kind:'shape',shape,...options}),addText:(text,options)=>page.elements.push({kind:'text',text:String(text),...options}),addNotes:()=>{}},{background:{set(v){page.background=v}}});}};
+ const ppt={ShapeType:{rect:'rect',roundRect:'roundRect',line:'line'},addSlide(){const page={elements:[],background:{color:visual.theme.background}};record.push(page);return Object.defineProperties({addImage:(options)=>page.elements.push({kind:'image',...options}),addShape:(shape,options)=>page.elements.push({kind:'shape',shape,...options}),addText:(text,options)=>page.elements.push({kind:'text',text:String(text),...options}),addNotes:()=>{}},{background:{set(v){page.background=v}}});}};
  renderCover(ppt,visual.theme,material,pages.length+1);
- pages.forEach((page,i)=>{const slide=addChrome(ppt,visual.theme,page.kind,i+2,pages.length+1);if(visual.large){const add=slide.addText;slide.addText=(text,options)=>add(text,{...options,fontSize:Math.max(26,options.fontSize||26)});}addContent(ppt,visual.theme,slide,page.title,page.lines,page.kind,i);});
+ pages.forEach((page,i)=>{const slide=addChrome(ppt,visual.theme,classifySlide(page.title,page.lines,i),i+2,pages.length+1);if(visual.large){const add=slide.addText;slide.addText=(text,options)=>add(text,{...options,fontSize:(options.fontSize>=17?Math.max(26,options.fontSize):options.fontSize)});}addContent(ppt,visual.theme,slide,page.title,page.lines,page.kind,i);});
  return {pages:record,width:13.333,height:7.5,limitation:'Comparte paginación y geometría con PPTX. Las fuentes y saltos de línea pueden variar en PowerPoint; comprobar el archivo final.'};
 }
 async function powerpoint(m,teacher=false){
@@ -207,7 +193,7 @@ async function powerpoint(m,teacher=false){
  const pages=presentationPages(material,teacher);
  const total=pages.length+1;
  renderCover(ppt,theme,material,total);
- pages.forEach((page,i)=>{const slide=addChrome(ppt,theme,page.kind,i+2,total);if(visual.large){const originalAddText=slide.addText.bind(slide);slide.addText=(text,options)=>originalAddText(text,{...options,fontSize:Math.max(26,options.fontSize||26)});}addContent(ppt,theme,slide,page.title,page.lines,page.kind,i);if(page.notes&&typeof slide.addNotes==='function')slide.addNotes(page.notes)});
+ pages.forEach((page,i)=>{const slide=addChrome(ppt,theme,classifySlide(page.title,page.lines,i),i+2,total);if(visual.large){const originalAddText=slide.addText.bind(slide);slide.addText=(text,options)=>originalAddText(text,{...options,fontSize:(options.fontSize>=17?Math.max(26,options.fontSize):options.fontSize)});}addContent(ppt,theme,slide,page.title,page.lines,page.kind,i);if(page.notes&&typeof slide.addNotes==='function')slide.addNotes(page.notes)});
  await ppt.writeFile({fileName:safeName(material.titulo)+(teacher?'_docente':'_estudiante')+'.pptx'});return ppt;
 }
 

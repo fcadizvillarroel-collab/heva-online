@@ -5,7 +5,7 @@ const {fixture}=require('./ui-check.cjs');
 fs.mkdirSync('/tmp/heva-qa',{recursive:true});let captured;
 const context={console,Buffer,Blob,TextEncoder,TextDecoder,Uint8Array,ArrayBuffer,DataView,URL:{createObjectURL(blob){captured=blob;return 'blob:local-qa'},revokeObjectURL(){}},setTimeout,clearTimeout,setImmediate,process,Promise,atob,btoa,HEVA:require('../heva-core.js'),HEVAPedagogy:require('../heva-pedagogy.js'),HEVATemplates:require('../heva-templates.js')};
 context.document={createElement(tag){if(tag==='canvas')return {getContext:()=>null};return {click(){},remove(){},style:{}}},body:{appendChild(){}}};context.window=context;context.navigator={userAgent:'node QA'};vm.createContext(context);
-for(const path of ['vendor/docx.js','vendor/pptxgen.js','heva-office.js'])vm.runInContext(fs.readFileSync(path,'utf8'),context,{filename:path,importModuleDynamically:vm.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER});
+for(const path of ['vendor/docx.js','vendor/pptxgen.js','heva-visual-assets.js','heva-office.js'])vm.runInContext(fs.readFileSync(path,'utf8'),context,{filename:path,importModuleDynamically:vm.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER});
 const Original=context.PptxGenJS;let deckBytes;context.PptxGenJS=class extends Original{async writeFile(){deckBytes=await this.write({outputType:'nodebuffer'});return 'qa.pptx'}};
 const guide=fixture();guide.accesibilidadVisual={contraste:true,letraGrande:true,tamano:20,fuente:'Verdana',interlineado:1.6,espaciado:.08};
 const before=JSON.stringify(guide),word=await context.HEVAOffice.word(guide,false);assert.equal(JSON.stringify(guide),before);fs.writeFileSync('/tmp/heva-qa/qa.docx',Buffer.from(await word.arrayBuffer()));
