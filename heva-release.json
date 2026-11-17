@@ -1,5 +1,5 @@
 {
-  "version": "2026.11.17.4-docentes",
+  "version": "2026.11.17.5-docentes",
   "basePrincipal": "37374748067f8f15a70f109d687c3b1f916e65ff",
   "mejorasIntegradas": "7819ab5",
   "formatoHistorial": "heva-online-v2",
@@ -10,8 +10,12 @@
   "revisionIndependiente": "Solicitud compacta sin recortar el material",
   "reparacionPruebas": "Detección por bloque y reparación localizada de duplicados; recuperación del encargo guardado",
   "puntajesDocente": "Asignación de 1, 2 o 3 puntos por pregunta, ponderación de rúbricas y total automático",
-  "presentaciones": "Imágenes interiores temáticas, edición local de imágenes, composición según función didáctica y conservación del texto completo",
+  "presentaciones": "Composición general de todos los interiores, también sin metadatos y al convertir guías a PPT; conservación de texto y conteo visual real",
   "baseInteriores": "46e823272e13437d5e338508f13d435be070ba3e",
   "graficos": "Barras nativas editables desde datos explícitos; comparaciones con formas y secuencias; sin estadísticas inventadas",
-  "organizadoresIA": "Opción retirada de la interfaz; ruta antigua responde 410 sin consumir IA"
+  "organizadoresIA": "Opción retirada de la interfaz; ruta antigua responde 410 sin consumir IA",
+  "baseInterioresV5": "2f4b73a8f02ac54b1ca4f2f77de72160e7407da3",
+  "imagenesAutomaticas": "Biblioteca local de tres temas; habilitada también para guías, talleres y accesibles convertidos a PPT. Sin cobertura universal.",
+  "diagramasIntegrados": "Relaciones y pasos explícitos del texto, sin inferir relaciones entre párrafos comunes",
+  "guiasVisuales": "Imágenes de apoyo en DOCX, datos con barras proporcionales, diagramas explícitos y recuadros; imagen docente compartida con PPT"
 }
