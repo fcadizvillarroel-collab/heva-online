@@ -1,1894 +1,1993 @@
-(node:6) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
-(Use `node --trace-warnings ...` to show where the warning was created)
-npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
 > heva-online@1.0.0 test
 > node --test tests/*.cjs
 
-(node:19) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
-(Use `node --trace-warnings ...` to show where the warning was created)
 TAP version 13
-# (node:26) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:27) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Fallo de generación HEVA: AI_RESPONSE_INVALID [{"proveedor":"gemini","estado":"AI_RESPONSE_INVALID"},{"proveedor":"gemini","estado":"AI_RESPONSE_INVALID"}]
 # Subtest: recupera comas finales sin cambiar las cadenas del contenido
 ok 1 - recupera comas finales sin cambiar las cadenas del contenido
   ---
-  duration_ms: 2.577653
+  duration_ms: 2.006153
   type: 'test'
   ...
 # Subtest: rechaza documentos truncados y no inventa claves ni cierres
 ok 2 - rechaza documentos truncados y no inventa claves ni cierres
   ---
-  duration_ms: 0.788288
+  duration_ms: 0.44498
   type: 'test'
   ...
 # Subtest: combina todas las partes de respuesta y omite los pensamientos
 ok 3 - combina todas las partes de respuesta y omite los pensamientos
   ---
-  duration_ms: 1.306278
+  duration_ms: 0.878594
   type: 'test'
   ...
 # Subtest: reintenta una respuesta mal formada conservando el encargo
 ok 4 - reintenta una respuesta mal formada conservando el encargo
   ---
-  duration_ms: 0.697891
+  duration_ms: 0.329697
   type: 'test'
   ...
 # Subtest: respuesta cortada se regenera, aunque el texto parezca JSON válido
 ok 5 - respuesta cortada se regenera, aunque el texto parezca JSON válido
   ---
-  duration_ms: 0.526283
+  duration_ms: 0.334014
   type: 'test'
   ...
 # Subtest: fallo persistente termina con código claro, sin texto crudo ni bucle
 ok 6 - fallo persistente termina con código claro, sin texto crudo ni bucle
   ---
-  duration_ms: 0.609739
+  duration_ms: 0.421776
   type: 'test'
   ...
 # Subtest: mantiene el proveedor alternativo tras agotar recuperación de Gemini
 ok 7 - mantiene el proveedor alternativo tras agotar recuperación de Gemini
   ---
-  duration_ms: 1.039987
+  duration_ms: 0.521826
   type: 'test'
   ...
 # Subtest: API informa fallo recuperable de formato sin error técnico de JSON
 ok 8 - API informa fallo recuperable de formato sin error técnico de JSON
   ---
-  duration_ms: 23.47654
+  duration_ms: 14.679384
   type: 'test'
   ...
 # Subtest: cuota agotada tiene código y plazo sin exponer respuesta del proveedor
 ok 9 - cuota agotada tiene código y plazo sin exponer respuesta del proveedor
   ---
-  duration_ms: 1.77189
+  duration_ms: 0.515988
   type: 'test'
   ...
 # Subtest: Gemini utiliza respaldo del mismo proveedor ante indisponibilidad temporal
 ok 10 - Gemini utiliza respaldo del mismo proveedor ante indisponibilidad temporal
   ---
-  duration_ms: 1.078265
+  duration_ms: 0.397059
   type: 'test'
   ...
 # Subtest: reserves a usable fallback window when both Gemini requests time out
 ok 11 - reserves a usable fallback window when both Gemini requests time out
   ---
-  duration_ms: 0.917833
+  duration_ms: 1.529214
   type: 'test'
   ...
 # Subtest: Groq receives the compact request and block output budget after Gemini returns invalid JSON
 ok 12 - Groq receives the compact request and block output budget after Gemini returns invalid JSON
   ---
-  duration_ms: 1.903098
+  duration_ms: 0.321154
   type: 'test'
   ...
 # Subtest: oversized fallback requests are diagnosed separately from invalid provider output
 ok 13 - oversized fallback requests are diagnosed separately from invalid provider output
   ---
-  duration_ms: 0.55043
+  duration_ms: 0.314204
   type: 'test'
   ...
-# (node:27) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:28) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: all requested assessment formats validate with exact counts and total points
 ok 14 - all requested assessment formats validate with exact counts and total points
   ---
-  duration_ms: 12.870191
+  duration_ms: 18.307973
   type: 'test'
   ...
 # Subtest: student exports omit keys and solutions for every new format
 ok 15 - student exports omit keys and solutions for every new format
   ---
-  duration_ms: 2.179173
+  duration_ms: 0.614125
   type: 'test'
   ...
 # Subtest: missing reading, invalid matching and excess items cannot pass
 ok 16 - missing reading, invalid matching and excess items cannot pass
   ---
-  duration_ms: 2.890906
+  duration_ms: 0.730781
   type: 'test'
   ...
 # Subtest: V/F requires a boolean key, justification, corrections and a majority of false claims
 ok 17 - V/F requires a boolean key, justification, corrections and a majority of false claims
   ---
-  duration_ms: 0.828058
+  duration_ms: 0.217388
   type: 'test'
   ...
 # Subtest: recovery generates new formats in separate blocks and retains all their keys
 ok 18 - recovery generates new formats in separate blocks and retains all their keys
   ---
-  duration_ms: 13.453681
+  duration_ms: 7.920392
   type: 'test'
   ...
 # Subtest: long exercise sets split into bounded batches
 ok 19 - long exercise sets split into bounded batches
   ---
-  duration_ms: 0.557029
+  duration_ms: 0.243087
   type: 'test'
   ...
 # Subtest: integrated strategies can be tied to the new formats without phantom alternatives
 ok 20 - integrated strategies can be tied to the new formats without phantom alternatives
   ---
-  duration_ms: 2.462891
+  duration_ms: 0.980418
   type: 'test'
   ...
 # Subtest: repeated case questions are detected even if the case narratives differ
 ok 21 - repeated case questions are detected even if the case narratives differ
   ---
-  duration_ms: 1.922056
+  duration_ms: 0.615678
   type: 'test'
   ...
 # Subtest: matching options shuffle without changing the correct term-definition relationships
 ok 22 - matching options shuffle without changing the correct term-definition relationships
   ---
-  duration_ms: 1.402203
+  duration_ms: 0.461506
   type: 'test'
   ...
 # Subtest: generation prompt carries concrete integrated requirements, not just strategy IDs
 ok 23 - generation prompt carries concrete integrated requirements, not just strategy IDs
   ---
-  duration_ms: 6.699995
+  duration_ms: 1.918972
   type: 'test'
   ...
-# (node:33) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:29) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: accepts thirty of each assessment format without shared cap and splits into bounded batches
 ok 24 - accepts thirty of each assessment format without shared cap and splits into bounded batches
   ---
-  duration_ms: 12.441905
+  duration_ms: 7.060141
   type: 'test'
   ...
 # Subtest: each integrated strategy permits thirty activities and rejects thirty-one
 ok 25 - each integrated strategy permits thirty activities and rejects thirty-one
   ---
-  duration_ms: 1.332168
+  duration_ms: 1.398557
   type: 'test'
   ...
-# (node:34) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:35) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: deduplicación de catálogo y separación de básica/media
 ok 26 - deduplicación de catálogo y separación de básica/media
   ---
-  duration_ms: 65.473262
+  duration_ms: 43.38049
   type: 'test'
   ...
 # Subtest: aliases de asignatura y marco consultan objetivos automáticamente
 ok 27 - aliases de asignatura y marco consultan objetivos automáticamente
   ---
-  duration_ms: 13.784478
+  duration_ms: 5.312267
   type: 'test'
   ...
 # Subtest: validación detecta casos y desarrollo faltantes
 ok 28 - validación detecta casos y desarrollo faltantes
   ---
-  duration_ms: 0.47096
+  duration_ms: 0.264689
   type: 'test'
   ...
 # Subtest: exportación incluye todos los ítems y separa pauta docente
 ok 29 - exportación incluye todos los ítems y separa pauta docente
   ---
-  duration_ms: 1.138085
+  duration_ms: 0.445592
   type: 'test'
   ...
 # Subtest: ruta verified no vuelve a interceptarse como GET staging
 ok 30 - ruta verified no vuelve a interceptarse como GET staging
   ---
-  duration_ms: 3.930411
+  duration_ms: 1.859573
   type: 'test'
   ...
-# (node:36) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:38) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: selected strategy IDs resolve to full requirements and exact existing task references
 ok 31 - selected strategy IDs resolve to full requirements and exact existing task references
   ---
-  duration_ms: 5.806398
+  duration_ms: 2.492626
   type: 'test'
   ...
 # Subtest: integrated strategy without real item and trace association cannot pass
 ok 32 - integrated strategy without real item and trace association cannot pass
   ---
-  duration_ms: 2.354958
+  duration_ms: 1.131866
   type: 'test'
   ...
 # Subtest: subject-specific selections from another discipline are rejected before generation
 ok 33 - subject-specific selections from another discipline are rejected before generation
   ---
-  duration_ms: 3.259891
+  duration_ms: 2.145313
   type: 'test'
   ...
 # Subtest: an exam cannot promise an integrated activity with no assigned items
 ok 34 - an exam cannot promise an integrated activity with no assigned items
   ---
-  duration_ms: 0.612412
+  duration_ms: 0.339461
   type: 'test'
   ...
 # Subtest: presentation maps integrated activities to actual slides without phantom alternatives
 ok 35 - presentation maps integrated activities to actual slides without phantom alternatives
   ---
-  duration_ms: 0.814577
+  duration_ms: 0.421145
   type: 'test'
   ...
 # Subtest: a headline or a name alone never proves that a strategy was applied
 ok 36 - a headline or a name alone never proves that a strategy was applied
   ---
-  duration_ms: 0.67098
+  duration_ms: 0.366362
   type: 'test'
   ...
 # Subtest: news story requested uses a complete schema and immutable simulated attribution on export
 ok 37 - news story requested uses a complete schema and immutable simulated attribution on export
   ---
-  duration_ms: 4.747864
+  duration_ms: 2.476603
   type: 'test'
   ...
 # Subtest: disabling simulated news is respected while real news remain independent
 ok 38 - disabling simulated news is respected while real news remain independent
   ---
-  duration_ms: 0.787317
+  duration_ms: 0.372652
   type: 'test'
   ...
 # Subtest: triplicate long stimulus is blocked; multiple questions may reference one shared reading
 ok 39 - triplicate long stimulus is blocked; multiple questions may reference one shared reading
   ---
-  duration_ms: 6.007602
+  duration_ms: 2.613039
   type: 'test'
   ...
 # Subtest: national feeds and allowlisted publisher-specific HTTPS upgrade
 ok 40 - national feeds and allowlisted publisher-specific HTTPS upgrade
   ---
-  duration_ms: 1.986763
+  duration_ms: 0.637791
   type: 'test'
   ...
-# (node:41) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:47) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: sin respuestas faltantes ni errores de cantidad
 ok 41 - sin respuestas faltantes ni errores de cantidad
   ---
-  duration_ms: 2.165613
+  duration_ms: 4.194923
   type: 'test'
   ...
 # Subtest: detecta preguntas de desarrollo ausentes
 ok 42 - detecta preguntas de desarrollo ausentes
   ---
-  duration_ms: 0.256626
+  duration_ms: 0.175915
   type: 'test'
   ...
 # Subtest: detecta enunciados repetidos
 ok 43 - detecta enunciados repetidos
   ---
-  duration_ms: 0.43123
+  duration_ms: 11.847196
   type: 'test'
   ...
 # Subtest: reconoce descuadre entre estrategias y cantidades
 ok 44 - reconoce descuadre entre estrategias y cantidades
   ---
-  duration_ms: 0.279
+  duration_ms: 0.434675
   type: 'test'
   ...
 # Subtest: planificador no duplica actividades ni añade casos extras
 ok 45 - planificador no duplica actividades ni añade casos extras
   ---
-  duration_ms: 0.621497
+  duration_ms: 0.81646
   type: 'test'
   ...
 # Subtest: auditoría no afirma verificación semántica automática
 ok 46 - auditoría no afirma verificación semántica automática
   ---
-  duration_ms: 0.228083
+  duration_ms: 0.239
   type: 'test'
   ...
 # (node:53) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: number-only actions and empty reasoning are rejected for guides and accessible guides
-ok 47 - number-only actions and empty reasoning are rejected for guides and accessible guides
+# Subtest: guide visuals select real embedded image, chart and explicit diagram without changing blocks
+ok 47 - guide visuals select real embedded image, chart and explicit diagram without changing blocks
   ---
-  duration_ms: 9.488777
+  duration_ms: 7.674747
+  type: 'test'
+  ...
+# Subtest: evaluation and teacher-only blocks receive no automatic guide visuals
+ok 48 - evaluation and teacher-only blocks receive no automatic guide visuals
+  ---
+  duration_ms: 0.398941
+  type: 'test'
+  ...
+# Subtest: teacher guide image attaches after reading and opt-out suppresses photos
+ok 49 - teacher guide image attaches after reading and opt-out suppresses photos
+  ---
+  duration_ms: 0.916421
+  type: 'test'
+  ...
+# Subtest: guide images stay out of IA requests and survive correction with the same OA
+ok 50 - guide images stay out of IA requests and survive correction with the same OA
+  ---
+  duration_ms: 0.237038
+  type: 'test'
+  ...
+# Subtest: legacy reading without a path receives the teacher image after the reading
+ok 51 - legacy reading without a path receives the teacher image after the reading
+  ---
+  duration_ms: 0.275025
+  type: 'test'
+  ...
+# Subtest: plain guide retains every block and disables each optional resource
+ok 52 - plain guide retains every block and disables each optional resource
+  ---
+  duration_ms: 0.586674
+  type: 'test'
+  ...
+# (node:56) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: number-only actions and empty reasoning are rejected for guides and accessible guides
+ok 53 - number-only actions and empty reasoning are rejected for guides and accessible guides
+  ---
+  duration_ms: 6.571384
   type: 'test'
   ...
 # Subtest: old guides show existing action text once under its step rather than duplicate the empty heading
-ok 48 - old guides show existing action text once under its step rather than duplicate the empty heading
+ok 54 - old guides show existing action text once under its step rather than duplicate the empty heading
   ---
-  duration_ms: 1.197655
+  duration_ms: 0.936622
   type: 'test'
   ...
 # Subtest: properly developed actions retain their separate reasons and editable paths
-ok 49 - properly developed actions retain their separate reasons and editable paths
+ok 55 - properly developed actions retain their separate reasons and editable paths
   ---
-  duration_ms: 0.818583
+  duration_ms: 0.658522
   type: 'test'
   ...
-# (node:63) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:91) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: guides and assessments balance even when every rationale explicitly names letters
-ok 50 - guides and assessments balance even when every rationale explicitly names letters
+ok 56 - guides and assessments balance even when every rationale explicitly names letters
   ---
-  duration_ms: 64.253097
+  duration_ms: 27.217491
   type: 'test'
   ...
 # Subtest: one ambiguous rationale no longer blocks all the other movable questions
-ok 51 - one ambiguous rationale no longer blocks all the other movable questions
+ok 57 - one ambiguous rationale no longer blocks all the other movable questions
   ---
-  duration_ms: 0.501656
+  duration_ms: 0.216857
   type: 'test'
   ...
 # Subtest: references to scenario labels are preserved when other questions can balance
-ok 52 - references to scenario labels are preserved when other questions can balance
+ok 58 - references to scenario labels are preserved when other questions can balance
   ---
-  duration_ms: 0.303597
+  duration_ms: 0.155324
   type: 'test'
   ...
 # Subtest: impossible safe rebalance reports blocked items and leaves the complete material untouched
-ok 53 - impossible safe rebalance reports blocked items and leaves the complete material untouched
+ok 59 - impossible safe rebalance reports blocked items and leaves the complete material untouched
   ---
-  duration_ms: 0.302777
+  duration_ms: 0.122234
   type: 'test'
   ...
 # Subtest: already balanced materials are left intact
-ok 54 - already balanced materials are left intact
+ok 60 - already balanced materials are left intact
   ---
-  duration_ms: 0.204658
+  duration_ms: 0.082084
   type: 'test'
   ...
-# (node:90) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:92) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: news parse retains publisher, publication date, bounded summary and RSS scope
-ok 55 - news parse retains publisher, publication date, bounded summary and RSS scope
+ok 61 - news parse retains publisher, publication date, bounded summary and RSS scope
   ---
-  duration_ms: 8.845206
+  duration_ms: 3.445303
   type: 'test'
   ...
 # Subtest: reject unknown hosts, credentials, unsafe ports, non HTTPS and external entities
-ok 56 - reject unknown hosts, credentials, unsafe ports, non HTTPS and external entities
+ok 62 - reject unknown hosts, credentials, unsafe ports, non HTTPS and external entities
   ---
-  duration_ms: 1.218336
+  duration_ms: 1.032146
   type: 'test'
   ...
 # Subtest: undated, future and stale articles cannot be labelled recent
-ok 57 - undated, future and stale articles cannot be labelled recent
+ok 63 - undated, future and stale articles cannot be labelled recent
   ---
-  duration_ms: 0.467003
+  duration_ms: 0.400294
   type: 'test'
   ...
 # Subtest: selection requires topic relevance, deduplicates and never fills irrelevant topics
-ok 58 - selection requires topic relevance, deduplicates and never fills irrelevant topics
+ok 64 - selection requires topic relevance, deduplicates and never fills irrelevant topics
   ---
-  duration_ms: 1.219267
+  duration_ms: 0.942701
   type: 'test'
   ...
 # Subtest: disabled retrieval does not access network
-ok 59 - disabled retrieval does not access network
+ok 65 - disabled retrieval does not access network
   ---
-  duration_ms: 0.277378
+  duration_ms: 0.24547
   type: 'test'
   ...
 # Subtest: all feed failures are explicit and do not fabricate a story
-ok 60 - all feed failures are explicit and do not fabricate a story
+ok 66 - all feed failures are explicit and do not fabricate a story
   ---
-  duration_ms: 1.13487
+  duration_ms: 0.735388
   type: 'test'
   ...
 # Subtest: news provenance exports in student and teacher materials
-ok 61 - news provenance exports in student and teacher materials
+ok 67 - news provenance exports in student and teacher materials
   ---
-  duration_ms: 5.959919
+  duration_ms: 5.772309
   type: 'test'
   ...
 # Subtest: disciplinary resources and evaluation boundaries survive prompt generation
-ok 62 - disciplinary resources and evaluation boundaries survive prompt generation
+ok 68 - disciplinary resources and evaluation boundaries survive prompt generation
   ---
-  duration_ms: 0.926066
+  duration_ms: 1.157725
   type: 'test'
   ...
-# (node:96) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:98) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: exporters and audit are available
-ok 63 - exporters and audit are available
+ok 69 - exporters and audit are available
   ---
-  duration_ms: 4.403004
+  duration_ms: 3.112922
   type: 'test'
   ...
 # Subtest: assessment missing scoring is flagged
-ok 64 - assessment missing scoring is flagged
+ok 70 - assessment missing scoring is flagged
   ---
-  duration_ms: 1.494622
+  duration_ms: 1.173789
   type: 'test'
   ...
 # Subtest: no invented warning for scored assessment
-ok 65 - no invented warning for scored assessment
+ok 71 - no invented warning for scored assessment
   ---
-  duration_ms: 1.063643
+  duration_ms: 1.142041
   type: 'test'
   ...
 # Subtest: balance visual prompt is identified
-ok 66 - balance visual prompt is identified
+ok 72 - balance visual prompt is identified
   ---
-  duration_ms: 1.118215
+  duration_ms: 0.725193
   type: 'test'
   ...
 # Subtest: PowerPoint preserves fifth card and fifth process step
-ok 67 - PowerPoint preserves fifth card and fifth process step
+ok 73 - PowerPoint preserves fifth card and fifth process step
   ---
-  duration_ms: 7.171295
+  duration_ms: 4.696458
   type: 'test'
   ...
 # Subtest: Convivencia Social is not classified as history
-ok 68 - Convivencia Social is not classified as history
+ok 74 - Convivencia Social is not classified as history
   ---
-  duration_ms: 1.985751
+  duration_ms: 1.417686
   type: 'test'
   ...
 # Subtest: presentation exports teacher notes and real news provenance
-ok 69 - presentation exports teacher notes and real news provenance
+ok 75 - presentation exports teacher notes and real news provenance
   ---
-  duration_ms: 1.545458
+  duration_ms: 0.904273
   type: 'test'
   ...
 # Subtest: dense presentation paragraphs paginate without losing content in normal and large print
-ok 70 - dense presentation paragraphs paginate without losing content in normal and large print
+ok 76 - dense presentation paragraphs paginate without losing content in normal and large print
   ---
-  duration_ms: 29.27615
+  duration_ms: 11.97
   type: 'test'
   ...
 # Subtest: dense cards fall back to full-width reading instead of overflowing narrow boxes
-ok 71 - dense cards fall back to full-width reading instead of overflowing narrow boxes
+ok 77 - dense cards fall back to full-width reading instead of overflowing narrow boxes
   ---
-  duration_ms: 3.347414
+  duration_ms: 2.273496
   type: 'test'
   ...
-# (node:103) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:99) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: contrato válido: GUIA
-ok 72 - contrato válido: GUIA
+ok 78 - contrato válido: GUIA
   ---
-  duration_ms: 5.204601
+  duration_ms: 4.134381
   type: 'test'
   ...
 # Subtest: contrato válido: EVALUACION
-ok 73 - contrato válido: EVALUACION
+ok 79 - contrato válido: EVALUACION
   ---
-  duration_ms: 0.487514
+  duration_ms: 0.25217
   type: 'test'
   ...
 # Subtest: contrato válido: PRESENTACION
-ok 74 - contrato válido: PRESENTACION
+ok 80 - contrato válido: PRESENTACION
   ---
-  duration_ms: 0.568366
+  duration_ms: 0.49088
   type: 'test'
   ...
 # Subtest: contrato válido: PLANIFICACION
-ok 75 - contrato válido: PLANIFICACION
+ok 81 - contrato válido: PLANIFICACION
   ---
-  duration_ms: 0.873907
+  duration_ms: 0.601857
   type: 'test'
   ...
 # Subtest: contrato válido: TALLER
-ok 76 - contrato válido: TALLER
+ok 82 - contrato válido: TALLER
   ---
-  duration_ms: 0.605002
+  duration_ms: 0.351209
   type: 'test'
   ...
 # Subtest: contrato válido: ACCESIBLE
-ok 77 - contrato válido: ACCESIBLE
+ok 83 - contrato válido: ACCESIBLE
   ---
-  duration_ms: 0.389737
+  duration_ms: 0.264949
   type: 'test'
   ...
 # Subtest: prueba rechaza ejemplo resuelto, guía rechaza falta de andamiaje
-ok 78 - prueba rechaza ejemplo resuelto, guía rechaza falta de andamiaje
+ok 84 - prueba rechaza ejemplo resuelto, guía rechaza falta de andamiaje
   ---
-  duration_ms: 1.145586
+  duration_ms: 0.641847
   type: 'test'
   ...
 # Subtest: estrategia debe corresponder a la seleccionada y a tareas reales
-ok 79 - estrategia debe corresponder a la seleccionada y a tareas reales
+ok 85 - estrategia debe corresponder a la seleccionada y a tareas reales
   ---
-  duration_ms: 0.873006
+  duration_ms: 0.441325
   type: 'test'
   ...
 # Subtest: exportación estudiante excluye claves, criterios, notas y modelamiento en prueba
-ok 80 - exportación estudiante excluye claves, criterios, notas y modelamiento en prueba
+ok 86 - exportación estudiante excluye claves, criterios, notas y modelamiento en prueba
   ---
-  duration_ms: 5.032682
+  duration_ms: 3.176237
   type: 'test'
   ...
 # Subtest: la planificación comprueba 90 minutos
-ok 81 - la planificación comprueba 90 minutos
+ok 87 - la planificación comprueba 90 minutos
   ---
-  duration_ms: 0.963722
+  duration_ms: 0.545031
   type: 'test'
   ...
 # Subtest: el prompt distingue tipos y operaciones según estrategia
-ok 82 - el prompt distingue tipos y operaciones según estrategia
+ok 88 - el prompt distingue tipos y operaciones según estrategia
   ---
-  duration_ms: 11.019041
+  duration_ms: 6.357641
   type: 'test'
   ...
 # Subtest: API usa contrato elegido y conserva el objetivo literal
-ok 83 - API usa contrato elegido y conserva el objetivo literal
+ok 89 - API usa contrato elegido y conserva el objetivo literal
   ---
-  duration_ms: 23.168298
+  duration_ms: 15.853524
   type: 'test'
   ...
 # Subtest: las alternativas se agrupan con su pregunta para presentar y exportar
-ok 84 - las alternativas se agrupan con su pregunta para presentar y exportar
+ok 90 - las alternativas se agrupan con su pregunta para presentar y exportar
   ---
-  duration_ms: 0.717421
+  duration_ms: 0.399151
   type: 'test'
   ...
 # Subtest: la pauta siempre muestra la clave aunque falte su explicación
-ok 85 - la pauta siempre muestra la clave aunque falte su explicación
+ok 91 - la pauta siempre muestra la clave aunque falte su explicación
   ---
-  duration_ms: 0.974828
+  duration_ms: 0.553674
   type: 'test'
   ...
-# (node:105) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:119) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: planning suggestions follow the objective and discipline without overwriting the objective
-ok 86 - planning suggestions follow the objective and discipline without overwriting the objective
+ok 92 - planning suggestions follow the objective and discipline without overwriting the objective
   ---
-  duration_ms: 1.638569
+  duration_ms: 1.201601
   type: 'test'
   ...
 # Subtest: planning input enforces real timing, selected methods and material decisions
-ok 87 - planning input enforces real timing, selected methods and material decisions
+ok 93 - planning input enforces real timing, selected methods and material decisions
   ---
-  duration_ms: 3.638472
+  duration_ms: 3.039982
   type: 'test'
   ...
 # Subtest: planning schema, primary and compact fallback honor duration and all selections
-ok 88 - planning schema, primary and compact fallback honor duration and all selections
+ok 94 - planning schema, primary and compact fallback honor duration and all selections
   ---
-  duration_ms: 7.296172
+  duration_ms: 4.854336
   type: 'test'
   ...
 # Subtest: duration and existing ninety-minute plans remain compatible through display and export blocks
-ok 89 - duration and existing ninety-minute plans remain compatible through display and export blocks
+ok 95 - duration and existing ninety-minute plans remain compatible through display and export blocks
   ---
-  duration_ms: 2.766438
+  duration_ms: 1.358398
   type: 'test'
   ...
 # Subtest: server planning contract rejects a different distribution even with the same total
-ok 90 - server planning contract rejects a different distribution even with the same total
+ok 96 - server planning contract rejects a different distribution even with the same total
   ---
-  duration_ms: 0.843651
+  duration_ms: 0.618242
   type: 'test'
   ...
 # Subtest: planning accepts visible labels and actual reading activities without losing required coverage
-ok 91 - planning accepts visible labels and actual reading activities without losing required coverage
+ok 97 - planning accepts visible labels and actual reading activities without losing required coverage
   ---
-  duration_ms: 1.192757
+  duration_ms: 0.837813
   type: 'test'
   ...
 # Subtest: selected planning ticket overrides the hidden generic switch in the generation prompt
-ok 92 - selected planning ticket overrides the hidden generic switch in the generation prompt
+ok 98 - selected planning ticket overrides the hidden generic switch in the generation prompt
   ---
-  duration_ms: 1.145265
+  duration_ms: 0.563419
   type: 'test'
   ...
 # Subtest: teacher planning includes subject explanations and editable moment fields in shared export blocks
-ok 93 - teacher planning includes subject explanations and editable moment fields in shared export blocks
+ok 99 - teacher planning includes subject explanations and editable moment fields in shared export blocks
   ---
-  duration_ms: 4.731809
+  duration_ms: 1.324947
   type: 'test'
   ...
-# (node:112) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:126) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: PowerPoint generation splits the complete pedagogical sequence into small bounded blocks
-ok 94 - PowerPoint generation splits the complete pedagogical sequence into small bounded blocks
+ok 100 - PowerPoint generation splits the complete pedagogical sequence into small bounded blocks
   ---
-  duration_ms: 23.948087
+  duration_ms: 11.697178
   type: 'test'
   ...
 # Subtest: missing slide metadata is repaired without replacing slide content
-ok 95 - missing slide metadata is repaired without replacing slide content
+ok 101 - missing slide metadata is repaired without replacing slide content
   ---
-  duration_ms: 1.149812
+  duration_ms: 0.553985
   type: 'test'
   ...
 # Subtest: cross-block repetition of exercise situations is caught before assembly
-ok 96 - cross-block repetition of exercise situations is caught before assembly
+ok 102 - cross-block repetition of exercise situations is caught before assembly
   ---
-  duration_ms: 1.790808
+  duration_ms: 0.979486
   type: 'test'
   ...
-# (node:123) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:127) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: presentations use resumable slide batches while other large materials retain recovery
-ok 97 - presentations use resumable slide batches while other large materials retain recovery
+ok 103 - presentations use resumable slide batches while other large materials retain recovery
   ---
-  duration_ms: 1.309613
+  duration_ms: 0.979907
   type: 'test'
   ...
 # Subtest: direct presentation generation requires slide traces
-ok 98 - direct presentation generation requires slide traces
+ok 104 - direct presentation generation requires slide traces
   ---
-  duration_ms: 0.304609
+  duration_ms: 0.245641
   type: 'test'
   ...
-# (node:136) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:145) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: all subject profiles carry objective-driven content and performance into generation
-ok 99 - all subject profiles carry objective-driven content and performance into generation
+ok 105 - all subject profiles carry objective-driven content and performance into generation
   ---
-  duration_ms: 3.744071
+  duration_ms: 1.741736
   type: 'test'
   ...
 # Subtest: presentation reserves explanation before eight integrated activities with real slide links
-ok 100 - presentation reserves explanation before eight integrated activities with real slide links
+ok 106 - presentation reserves explanation before eight integrated activities with real slide links
   ---
-  duration_ms: 8.656151
+  duration_ms: 7.83611
   type: 'test'
   ...
 # Subtest: oral objectives explicitly require speaking rather than written substitution
-ok 101 - oral objectives explicitly require speaking rather than written substitution
+ok 107 - oral objectives explicitly require speaking rather than written substitution
   ---
-  duration_ms: 0.26521
+  duration_ms: 0.257147
   type: 'test'
   ...
 # Subtest: explanatory slides require visible examples and application slides carry concrete exercise templates
-ok 102 - explanatory slides require visible examples and application slides carry concrete exercise templates
+ok 108 - explanatory slides require visible examples and application slides carry concrete exercise templates
   ---
-  duration_ms: 0.749719
+  duration_ms: 0.63752
   type: 'test'
   ...
 # Subtest: opening translates the learning goal for students while preserving the literal OA in teacher notes
-ok 103 - opening translates the learning goal for students while preserving the literal OA in teacher notes
+ok 109 - opening translates the learning goal for students while preserving the literal OA in teacher notes
   ---
-  duration_ms: 0.758643
+  duration_ms: 0.588977
   type: 'test'
   ...
-# (node:143) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:153) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # HEVA review {"etapa":"llamada","codigo":"AI_UNAVAILABLE","proveedores":[]}
 # Subtest: rechaza informe vacío y ajustes sin hallazgo concreto
-ok 104 - rechaza informe vacío y ajustes sin hallazgo concreto
+ok 110 - rechaza informe vacío y ajustes sin hallazgo concreto
   ---
-  duration_ms: 1.655524
+  duration_ms: 0.829981
   type: 'test'
   ...
 # Subtest: huella ignora versiones e informes pero detecta cambios de contenido
-ok 105 - huella ignora versiones e informes pero detecta cambios de contenido
+ok 111 - huella ignora versiones e informes pero detecta cambios de contenido
   ---
-  duration_ms: 0.549909
+  duration_ms: 0.327804
   type: 'test'
   ...
 # Subtest: revisor usa otro proveedor y registra un informe, no una certificación
-ok 106 - revisor usa otro proveedor y registra un informe, no una certificación
+ok 112 - revisor usa otro proveedor y registra un informe, no una certificación
   ---
-  duration_ms: 18.82317
+  duration_ms: 11.69781
   type: 'test'
   ...
 # Subtest: un solo proveedor nunca se declara revisión independiente
-ok 107 - un solo proveedor nunca se declara revisión independiente
+ok 113 - un solo proveedor nunca se declara revisión independiente
   ---
-  duration_ms: 2.575
+  duration_ms: 1.387772
   type: 'test'
   ...
 # Subtest: rechaza corrección con revisión de una versión anterior
-ok 108 - rechaza corrección con revisión de una versión anterior
+ok 114 - rechaza corrección con revisión de una versión anterior
   ---
-  duration_ms: 0.340743
+  duration_ms: 0.271339
   type: 'test'
   ...
 # Subtest: rechaza material legado sin autoría comprobable
-ok 109 - rechaza material legado sin autoría comprobable
+ok 115 - rechaza material legado sin autoría comprobable
   ---
-  duration_ms: 0.420914
+  duration_ms: 0.300163
   type: 'test'
   ...
 # Subtest: las instrucciones exigen fuentes verificables y criterios para adultos
-ok 110 - las instrucciones exigen fuentes verificables y criterios para adultos
+ok 116 - las instrucciones exigen fuentes verificables y criterios para adultos
   ---
-  duration_ms: 0.439152
+  duration_ms: 0.420504
   type: 'test'
   ...
 # Subtest: corrección conserva el OA, registra el informe y exige nueva revisión
-ok 111 - corrección conserva el OA, registra el informe y exige nueva revisión
+ok 117 - corrección conserva el OA, registra el informe y exige nueva revisión
   ---
-  duration_ms: 8.580503
+  duration_ms: 9.383723
   type: 'test'
   ...
 # Subtest: revisión respeta el contrato y nunca exige ítems no solicitados
-ok 112 - revisión respeta el contrato y nunca exige ítems no solicitados
+ok 118 - revisión respeta el contrato y nunca exige ítems no solicitados
   ---
-  duration_ms: 0.666144
+  duration_ms: 0.712894
   type: 'test'
   ...
 # Subtest: revisión no duplica documentos ni apunte, pero conserva tareas completas
-ok 113 - revisión no duplica documentos ni apunte, pero conserva tareas completas
+ok 119 - revisión no duplica documentos ni apunte, pero conserva tareas completas
   ---
-  duration_ms: 0.807457
+  duration_ms: 0.858774
   type: 'test'
   ...
 # Subtest: informe mal formado se recupera sin reutilizar al autor
-ok 114 - informe mal formado se recupera sin reutilizar al autor
+ok 120 - informe mal formado se recupera sin reutilizar al autor
   ---
-  duration_ms: 1.718519
+  duration_ms: 2.520919
   type: 'test'
   ...
 # Subtest: ajuste sin hallazgo no se transforma en aprobación ni impide conservar el informe
-ok 115 - ajuste sin hallazgo no se transforma en aprobación ni impide conservar el informe
+ok 121 - ajuste sin hallazgo no se transforma en aprobación ni impide conservar el informe
   ---
-  duration_ms: 0.277829
+  duration_ms: 0.397409
   type: 'test'
   ...
 # Subtest: hallazgo incompleto no se inventa y queda identificado como límite de la revisión
-ok 116 - hallazgo incompleto no se inventa y queda identificado como límite de la revisión
+ok 122 - hallazgo incompleto no se inventa y queda identificado como límite de la revisión
   ---
-  duration_ms: 0.317989
+  duration_ms: 0.294104
   type: 'test'
   ...
 # Subtest: guardar corrección sincroniza contra la nueva pantalla y no restaura textos anteriores
-ok 117 - guardar corrección sincroniza contra la nueva pantalla y no restaura textos anteriores
+ok 123 - guardar corrección sincroniza contra la nueva pantalla y no restaura textos anteriores
   ---
-  duration_ms: 2.50226
+  duration_ms: 2.304914
   type: 'test'
   ...
 # Subtest: criterio inválido conserva los demás y queda pendiente sin aprobar
-ok 118 - criterio inválido conserva los demás y queda pendiente sin aprobar
+ok 124 - criterio inválido conserva los demás y queda pendiente sin aprobar
   ---
-  duration_ms: 0.205079
+  duration_ms: 0.140321
   type: 'test'
   ...
-# (node:151) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:155) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: bloques respetan 10/3/2 sin reinterpretar 4/0/0
-ok 119 - bloques respetan 10/3/2 sin reinterpretar 4/0/0
+ok 125 - bloques respetan 10/3/2 sin reinterpretar 4/0/0
   ---
-  duration_ms: 3.656795
+  duration_ms: 1.417116
   type: 'test'
   ...
 # Subtest: bloque de alternativas descarta desarrollo y casos extra
-ok 120 - bloque de alternativas descarta desarrollo y casos extra
+ok 126 - bloque de alternativas descarta desarrollo y casos extra
   ---
-  duration_ms: 1.285296
+  duration_ms: 0.872425
   type: 'test'
   ...
 # Subtest: base no exige preguntas ni confunde extras con solicitud
-ok 121 - base no exige preguntas ni confunde extras con solicitud
+ok 127 - base no exige preguntas ni confunde extras con solicitud
   ---
-  duration_ms: 0.30546
-  type: 'test'
-  ...
-# (node:160) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
-# (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: old blocks contribute bounded task summaries without teacher notes or trace payloads
-ok 122 - old blocks contribute bounded task summaries without teacher notes or trace payloads
-  ---
-  duration_ms: 25.093208
-  type: 'test'
-  ...
-# Subtest: fallback keeps the exact OA, requested block and schema while excluding large historical payloads
-ok 123 - fallback keeps the exact OA, requested block and schema while excluding large historical payloads
-  ---
-  duration_ms: 9.893947
-  type: 'test'
-  ...
-# Subtest: primary slide requests do not serialize complete earlier notes
-ok 124 - primary slide requests do not serialize complete earlier notes
-  ---
-  duration_ms: 2.817015
-  type: 'test'
-  ...
-# (node:168) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
-# (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: ALT-10 se detecta contra ALT-8 antes del ensamblado
-ok 125 - ALT-10 se detecta contra ALT-8 antes del ensamblado
-  ---
-  duration_ms: 9.175925
-  type: 'test'
-  ...
-# Subtest: CASO-2 se detecta contra CASO-1 aunque sus contextos sean distintos
-ok 126 - CASO-2 se detecta contra CASO-1 aunque sus contextos sean distintos
-  ---
-  duration_ms: 1.275682
-  type: 'test'
-  ...
-# Subtest: normaliza mayúsculas, tildes y puntuación igual que el control final
-ok 127 - normaliza mayúsculas, tildes y puntuación igual que el control final
-  ---
-  duration_ms: 0.728437
-  type: 'test'
-  ...
-# Subtest: detecta repeticiones dentro del mismo bloque sin confundir opciones compartidas
-ok 128 - detecta repeticiones dentro del mismo bloque sin confundir opciones compartidas
-  ---
-  duration_ms: 1.287169
-  type: 'test'
-  ...
-# Subtest: no compara un bloque con su propia copia guardada
-ok 129 - no compara un bloque con su propia copia guardada
-  ---
-  duration_ms: 0.547605
-  type: 'test'
-  ...
-# Subtest: el banco conserva enunciados completos sin reenviar opciones, claves o notas
-ok 130 - el banco conserva enunciados completos sin reenviar opciones, claves o notas
-  ---
-  duration_ms: 0.413163
-  type: 'test'
-  ...
-# Subtest: la reparación conserva ALT-9 y su pauta aunque la IA intente cambiarlas
-ok 131 - la reparación conserva ALT-9 y su pauta aunque la IA intente cambiarlas
-  ---
-  duration_ms: 0.870672
-  type: 'test'
-  ...
-# Subtest: final localiza solo los bloques afectados y los duplicados concretos
-ok 132 - final localiza solo los bloques afectados y los duplicados concretos
-  ---
-  duration_ms: 8.295037
-  type: 'test'
-  ...
-# Subtest: API corrige duplicados de un bloque sin cambiar su vecino válido
-ok 133 - API corrige duplicados de un bloque sin cambiar su vecino válido
-  ---
-  duration_ms: 23.222279
-  type: 'test'
-  ...
-# Subtest: API no acepta una reparación que sigue repitiendo y conserva el borrador
-ok 134 - API no acepta una reparación que sigue repitiendo y conserva el borrador
-  ---
-  duration_ms: 6.238189
-  type: 'test'
-  ...
-# Subtest: API final rechaza la prueba repetida y acepta 10/3/2 al corregir solo ALT-10 y CASO-2
-ok 135 - API final rechaza la prueba repetida y acepta 10/3/2 al corregir solo ALT-10 y CASO-2
-  ---
-  duration_ms: 25.575153
-  type: 'test'
-  ...
-# Subtest: un checkpoint antiguo atascado retoma solo los duplicados y conserva los otros cinco bloques
-ok 136 - un checkpoint antiguo atascado retoma solo los duplicados y conserva los otros cinco bloques
-  ---
-  duration_ms: 4.996499
-  type: 'test'
-  ...
-# Subtest: reintentos finales son acotados y dejan preparado el bloque para retomar, sin borrar el avance
-ok 137 - reintentos finales son acotados y dejan preparado el bloque para retomar, sin borrar el avance
-  ---
-  duration_ms: 4.189633
+  duration_ms: 0.228084
   type: 'test'
   ...
 # (node:169) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: alternativas locales bloque dos se vuelven globales
-ok 138 - alternativas locales bloque dos se vuelven globales
+# Subtest: old blocks contribute bounded task summaries without teacher notes or trace payloads
+ok 128 - old blocks contribute bounded task summaries without teacher notes or trace payloads
   ---
-  duration_ms: 6.05956
+  duration_ms: 3.282557
+  type: 'test'
+  ...
+# Subtest: fallback keeps the exact OA, requested block and schema while excluding large historical payloads
+ok 129 - fallback keeps the exact OA, requested block and schema while excluding large historical payloads
+  ---
+  duration_ms: 9.082339
+  type: 'test'
+  ...
+# Subtest: primary slide requests do not serialize complete earlier notes
+ok 130 - primary slide requests do not serialize complete earlier notes
+  ---
+  duration_ms: 2.434529
+  type: 'test'
+  ...
+# (node:171) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: ALT-10 se detecta contra ALT-8 antes del ensamblado
+ok 131 - ALT-10 se detecta contra ALT-8 antes del ensamblado
+  ---
+  duration_ms: 4.889569
+  type: 'test'
+  ...
+# Subtest: CASO-2 se detecta contra CASO-1 aunque sus contextos sean distintos
+ok 132 - CASO-2 se detecta contra CASO-1 aunque sus contextos sean distintos
+  ---
+  duration_ms: 1.643016
+  type: 'test'
+  ...
+# Subtest: normaliza mayúsculas, tildes y puntuación igual que el control final
+ok 133 - normaliza mayúsculas, tildes y puntuación igual que el control final
+  ---
+  duration_ms: 0.387204
+  type: 'test'
+  ...
+# Subtest: detecta repeticiones dentro del mismo bloque sin confundir opciones compartidas
+ok 134 - detecta repeticiones dentro del mismo bloque sin confundir opciones compartidas
+  ---
+  duration_ms: 0.853046
+  type: 'test'
+  ...
+# Subtest: no compara un bloque con su propia copia guardada
+ok 135 - no compara un bloque con su propia copia guardada
+  ---
+  duration_ms: 0.329266
+  type: 'test'
+  ...
+# Subtest: el banco conserva enunciados completos sin reenviar opciones, claves o notas
+ok 136 - el banco conserva enunciados completos sin reenviar opciones, claves o notas
+  ---
+  duration_ms: 0.253302
+  type: 'test'
+  ...
+# Subtest: la reparación conserva ALT-9 y su pauta aunque la IA intente cambiarlas
+ok 137 - la reparación conserva ALT-9 y su pauta aunque la IA intente cambiarlas
+  ---
+  duration_ms: 0.652213
+  type: 'test'
+  ...
+# Subtest: final localiza solo los bloques afectados y los duplicados concretos
+ok 138 - final localiza solo los bloques afectados y los duplicados concretos
+  ---
+  duration_ms: 5.624847
+  type: 'test'
+  ...
+# Subtest: API corrige duplicados de un bloque sin cambiar su vecino válido
+ok 139 - API corrige duplicados de un bloque sin cambiar su vecino válido
+  ---
+  duration_ms: 12.532038
+  type: 'test'
+  ...
+# Subtest: API no acepta una reparación que sigue repitiendo y conserva el borrador
+ok 140 - API no acepta una reparación que sigue repitiendo y conserva el borrador
+  ---
+  duration_ms: 3.575389
+  type: 'test'
+  ...
+# Subtest: API final rechaza la prueba repetida y acepta 10/3/2 al corregir solo ALT-10 y CASO-2
+ok 141 - API final rechaza la prueba repetida y acepta 10/3/2 al corregir solo ALT-10 y CASO-2
+  ---
+  duration_ms: 17.701239
+  type: 'test'
+  ...
+# Subtest: un checkpoint antiguo atascado retoma solo los duplicados y conserva los otros cinco bloques
+ok 142 - un checkpoint antiguo atascado retoma solo los duplicados y conserva los otros cinco bloques
+  ---
+  duration_ms: 3.602489
+  type: 'test'
+  ...
+# Subtest: reintentos finales son acotados y dejan preparado el bloque para retomar, sin borrar el avance
+ok 143 - reintentos finales son acotados y dejan preparado el bloque para retomar, sin borrar el avance
+  ---
+  duration_ms: 2.997698
+  type: 'test'
+  ...
+# (node:184) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: alternativas locales bloque dos se vuelven globales
+ok 144 - alternativas locales bloque dos se vuelven globales
+  ---
+  duration_ms: 4.495195
   type: 'test'
   ...
 # Subtest: desarrollo conserva dos trazas sin textos genéricos
-ok 139 - desarrollo conserva dos trazas sin textos genéricos
+ok 145 - desarrollo conserva dos trazas sin textos genéricos
   ---
-  duration_ms: 0.505091
+  duration_ms: 0.369868
   type: 'test'
   ...
 # Subtest: desarrollo sin evidencia es rechazado
-ok 140 - desarrollo sin evidencia es rechazado
+ok 146 - desarrollo sin evidencia es rechazado
   ---
-  duration_ms: 0.561876
+  duration_ms: 0.392822
   type: 'test'
   ...
 # Subtest: caso global y local se alinean
-ok 141 - caso global y local se alinean
+ok 147 - caso global y local se alinean
   ---
-  duration_ms: 0.514966
+  duration_ms: 0.389387
   type: 'test'
   ...
 # Subtest: ensamblado 10/3/2 tiene quince referencias únicas
-ok 142 - ensamblado 10/3/2 tiene quince referencias únicas
+ok 148 - ensamblado 10/3/2 tiene quince referencias únicas
   ---
-  duration_ms: 0.845314
+  duration_ms: 0.634977
   type: 'test'
   ...
 # Subtest: sin dobles escapes en regex y prompts
-ok 143 - sin dobles escapes en regex y prompts
+ok 149 - sin dobles escapes en regex y prompts
   ---
-  duration_ms: 7.159437
+  duration_ms: 5.815364
   type: 'test'
   ...
-# (node:175) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:191) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: presentación conserva trazabilidad de diapositivas al ensamblar sin preguntas
-ok 144 - presentación conserva trazabilidad de diapositivas al ensamblar sin preguntas
+ok 150 - presentación conserva trazabilidad de diapositivas al ensamblar sin preguntas
   ---
-  duration_ms: 2.38962
+  duration_ms: 3.345433
   type: 'test'
   ...
 # Subtest: presentación conserva trazas base al combinar preguntas
-ok 145 - presentación conserva trazas base al combinar preguntas
+ok 151 - presentación conserva trazas base al combinar preguntas
   ---
-  duration_ms: 1.189312
+  duration_ms: 1.039387
   type: 'test'
   ...
-# (node:186) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:192) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: recuperación conserva cantidades y divide las tareas sin omitir casos
-ok 146 - recuperación conserva cantidades y divide las tareas sin omitir casos
+ok 152 - recuperación conserva cantidades y divide las tareas sin omitir casos
   ---
-  duration_ms: 13.004723
+  duration_ms: 11.412671
   type: 'test'
   ...
 # Subtest: no acepta bloques incompletos ni trazabilidad inventada
-ok 147 - no acepta bloques incompletos ni trazabilidad inventada
+ok 153 - no acepta bloques incompletos ni trazabilidad inventada
   ---
-  duration_ms: 2.636792
+  duration_ms: 2.087827
   type: 'test'
   ...
 # Subtest: ensambla todos los ítems y sus trazas sin sustituir el contenido base
-ok 148 - ensambla todos los ítems y sus trazas sin sustituir el contenido base
+ok 154 - ensambla todos los ítems y sus trazas sin sustituir el contenido base
   ---
-  duration_ms: 0.445762
+  duration_ms: 0.401606
   type: 'test'
   ...
 # Subtest: recuperación rechaza planes arbitrarios y ejemplos no seleccionados
-ok 149 - recuperación rechaza planes arbitrarios y ejemplos no seleccionados
+ok 155 - recuperación rechaza planes arbitrarios y ejemplos no seleccionados
   ---
-  duration_ms: 2.605165
+  duration_ms: 0.998144
   type: 'test'
   ...
 # Subtest: Chrome retoma el último bloque y conserva el material visible hasta validación
-ok 150 - Chrome retoma el último bloque y conserva el material visible hasta validación
+ok 156 - Chrome retoma el último bloque y conserva el material visible hasta validación
   ---
-  duration_ms: 3.117688
+  duration_ms: 3.765115
   type: 'test'
   ...
 # Subtest: espera una cuota breve una sola vez y no entra en bucle
-ok 151 - espera una cuota breve una sola vez y no entra en bucle
+ok 157 - espera una cuota breve una sola vez y no entra en bucle
   ---
-  duration_ms: 0.98225
+  duration_ms: 0.782689
   type: 'test'
   ...
 # Subtest: final correction reveals diagnostics and preserves all completed blocks when no target is known
-ok 152 - final correction reveals diagnostics and preserves all completed blocks when no target is known
+ok 158 - final correction reveals diagnostics and preserves all completed blocks when no target is known
   ---
-  duration_ms: 1.305507
+  duration_ms: 0.919666
   type: 'test'
   ...
 # Subtest: targeted regeneration accepts saved holes while retaining other blocks as context
-ok 153 - targeted regeneration accepts saved holes while retaining other blocks as context
+ok 159 - targeted regeneration accepts saved holes while retaining other blocks as context
   ---
-  duration_ms: 1.806802
+  duration_ms: 1.361972
   type: 'test'
   ...
-# (node:189) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:200) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: 4 alternativas, cero desarrollo y cero casos: se descartan extras sin inventar
-ok 154 - 4 alternativas, cero desarrollo y cero casos: se descartan extras sin inventar
+ok 160 - 4 alternativas, cero desarrollo y cero casos: se descartan extras sin inventar
   ---
-  duration_ms: 2.023749
+  duration_ms: 1.749106
   type: 'test'
   ...
 # Subtest: no fabrica preguntas faltantes ni altera las solicitadas
-ok 155 - no fabrica preguntas faltantes ni altera las solicitadas
+ok 161 - no fabrica preguntas faltantes ni altera las solicitadas
   ---
-  duration_ms: 0.217748
+  duration_ms: 0.174092
   type: 'test'
   ...
 # Subtest: cero desarrollo no deja errores de desarrollo sin pregunta
-ok 156 - cero desarrollo no deja errores de desarrollo sin pregunta
+ok 162 - cero desarrollo no deja errores de desarrollo sin pregunta
   ---
-  duration_ms: 0.463648
-  type: 'test'
-  ...
-# (node:197) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
-# (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: revisión compacta conserva contenido, OA, tareas y trazas sin duplicar auditorías
-ok 157 - revisión compacta conserva contenido, OA, tareas y trazas sin duplicar auditorías
-  ---
-  duration_ms: 3.222034
-  type: 'test'
-  ...
-# Subtest: documento largo no se recorta para simular una revisión completa
-ok 158 - documento largo no se recorta para simular una revisión completa
-  ---
-  duration_ms: 9.479893
-  type: 'test'
-  ...
-# Subtest: fuentes parciales conservan IDs reales y distinguen respaldo factual de OA
-ok 159 - fuentes parciales conservan IDs reales y distinguen respaldo factual de OA
-  ---
-  duration_ms: 0.672913
-  type: 'test'
-  ...
-# Subtest: la ruta de revisión usa solicitud compacta en Groq sin llamar al autor ni enviar metadatos duplicados
-ok 160 - la ruta de revisión usa solicitud compacta en Groq sin llamar al autor ni enviar metadatos duplicados
-  ---
-  duration_ms: 25.525389
+  duration_ms: 0.406963
   type: 'test'
   ...
 # (node:218) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: base recovery preserves non-question strategy references
-ok 161 - base recovery preserves non-question strategy references
+# Subtest: revisión compacta conserva contenido, OA, tareas y trazas sin duplicar auditorías
+ok 163 - revisión compacta conserva contenido, OA, tareas y trazas sin duplicar auditorías
   ---
-  duration_ms: 4.252337
+  duration_ms: 2.028597
+  type: 'test'
+  ...
+# Subtest: documento largo no se recorta para simular una revisión completa
+ok 164 - documento largo no se recorta para simular una revisión completa
+  ---
+  duration_ms: 7.09335
+  type: 'test'
+  ...
+# Subtest: fuentes parciales conservan IDs reales y distinguen respaldo factual de OA
+ok 165 - fuentes parciales conservan IDs reales y distinguen respaldo factual de OA
+  ---
+  duration_ms: 0.77637
+  type: 'test'
+  ...
+# Subtest: la ruta de revisión usa solicitud compacta en Groq sin llamar al autor ni enviar metadatos duplicados
+ok 166 - la ruta de revisión usa solicitud compacta en Groq sin llamar al autor ni enviar metadatos duplicados
+  ---
+  duration_ms: 13.768922
+  type: 'test'
+  ...
+# (node:221) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: base recovery preserves non-question strategy references
+ok 167 - base recovery preserves non-question strategy references
+  ---
+  duration_ms: 2.102379
   type: 'test'
   ...
 # Subtest: curriculum admin rejects invalid IDs and checks PATCH outcomes
-ok 162 - curriculum admin rejects invalid IDs and checks PATCH outcomes
+ok 168 - curriculum admin rejects invalid IDs and checks PATCH outcomes
   ---
-  duration_ms: 0.26556
+  duration_ms: 0.27844
   type: 'test'
   ...
 # Subtest: Groq fallback stops when remaining deadline is insufficient
-ok 163 - Groq fallback stops when remaining deadline is insufficient
+ok 169 - Groq fallback stops when remaining deadline is insufficient
   ---
-  duration_ms: 0.189696
+  duration_ms: 0.216967
   type: 'test'
   ...
 # Subtest: atomic curriculum approval is gated and SQL is restricted
-ok 164 - atomic curriculum approval is gated and SQL is restricted
+ok 170 - atomic curriculum approval is gated and SQL is restricted
   ---
-  duration_ms: 0.29899
+  duration_ms: 0.339522
   type: 'test'
   ...
 # Subtest: database hardening proposal removes permissive policies and table grants
-ok 165 - database hardening proposal removes permissive policies and table grants
+ok 171 - database hardening proposal removes permissive policies and table grants
   ---
-  duration_ms: 0.244058
+  duration_ms: 0.261384
   type: 'test'
   ...
 # Subtest: all four active AI endpoints require the shared access guard
-ok 166 - all four active AI endpoints require the shared access guard
+ok 172 - all four active AI endpoints require the shared access guard
   ---
-  duration_ms: 0.474154
+  duration_ms: 0.332481
   type: 'test'
   ...
 # Subtest: quota guard fails closed when enabled and quotas are unavailable
-ok 167 - quota guard fails closed when enabled and quotas are unavailable
+ok 173 - quota guard fails closed when enabled and quotas are unavailable
   ---
-  duration_ms: 0.233742
+  duration_ms: 0.28549
   type: 'test'
   ...
 # Subtest: pilot remains login-free and supports an optional shared request ceiling
-ok 168 - pilot remains login-free and supports an optional shared request ceiling
+ok 174 - pilot remains login-free and supports an optional shared request ceiling
   ---
-  duration_ms: 0.265049
+  duration_ms: 0.266581
   type: 'test'
   ...
 # Subtest: PowerPoint mode does not inherit assessment multiple-choice counts
-ok 169 - PowerPoint mode does not inherit assessment multiple-choice counts
+ok 175 - PowerPoint mode does not inherit assessment multiple-choice counts
   ---
-  duration_ms: 0.999165
+  duration_ms: 0.700336
   type: 'test'
   ...
 # Subtest: PowerPoint exporter uses native slides and a warm 16:9 layout
-ok 170 - PowerPoint exporter uses native slides and a warm 16:9 layout
+ok 176 - PowerPoint exporter uses native slides and a warm 16:9 layout
   ---
-  duration_ms: 0.676469
+  duration_ms: 0.867858
   type: 'test'
   ...
 # Subtest: PowerPoint layouts vary by pedagogical purpose
-ok 171 - PowerPoint layouts vary by pedagogical purpose
+ok 177 - PowerPoint layouts vary by pedagogical purpose
   ---
-  duration_ms: 0.360754
+  duration_ms: 0.638452
   type: 'test'
   ...
 # Subtest: strategy metadata can be repaired without inventing evidence
-ok 172 - strategy metadata can be repaired without inventing evidence
+ok 178 - strategy metadata can be repaired without inventing evidence
   ---
-  duration_ms: 1.921735
+  duration_ms: 2.464574
   type: 'test'
   ...
 # Subtest: PowerPoint assets use a versioned URL and prompts require complete classroom stimuli
-ok 173 - PowerPoint assets use a versioned URL and prompts require complete classroom stimuli
+ok 179 - PowerPoint assets use a versioned URL and prompts require complete classroom stimuli
   ---
-  duration_ms: 0.422316
+  duration_ms: 1.158365
   type: 'test'
   ...
 # Subtest: recovery base repairs incomplete strategy metadata without discarding slides
-ok 174 - recovery base repairs incomplete strategy metadata without discarding slides
+ok 180 - recovery base repairs incomplete strategy metadata without discarding slides
   ---
-  duration_ms: 0.183637
+  duration_ms: 0.281754
   type: 'test'
   ...
 # Subtest: PowerPoint visual engine provides native semantic diagrams
-ok 175 - PowerPoint visual engine provides native semantic diagrams
+ok 181 - PowerPoint visual engine provides native semantic diagrams
   ---
-  duration_ms: 0.215745
+  duration_ms: 0.479353
   type: 'test'
   ...
 # Subtest: subject audit supports every discipline and retains pending verification
-ok 176 - subject audit supports every discipline and retains pending verification
+ok 182 - subject audit supports every discipline and retains pending verification
   ---
-  duration_ms: 7.942667
+  duration_ms: 3.619746
   type: 'test'
   ...
 # Subtest: independent review receives discipline evidence and corrected material is reaudited
-ok 177 - independent review receives discipline evidence and corrected material is reaudited
+ok 183 - independent review receives discipline evidence and corrected material is reaudited
   ---
-  duration_ms: 0.364229
-  type: 'test'
-  ...
-# (node:224) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
-# (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: cinco procedimientos versionados tienen operaciones explícitas
-ok 178 - cinco procedimientos versionados tienen operaciones explícitas
-  ---
-  duration_ms: 1.909196
-  type: 'test'
-  ...
-# Subtest: perfiles cubren asignaturas y separan Historia, convivencia, oficios y metal
-ok 179 - perfiles cubren asignaturas y separan Historia, convivencia, oficios y metal
-  ---
-  duration_ms: 1.696696
-  type: 'test'
-  ...
-# Subtest: didáctica de Lenguaje e Inglés incluye texto suficiente y comunicación adulta
-ok 180 - didáctica de Lenguaje e Inglés incluye texto suficiente y comunicación adulta
-  ---
-  duration_ms: 0.84241
-  type: 'test'
-  ...
-# Subtest: diseño inicial cambia de disciplina y conserva OA y tipo de prueba
-ok 181 - diseño inicial cambia de disciplina y conserva OA y tipo de prueba
-  ---
-  duration_ms: 1.642545
-  type: 'test'
-  ...
-# Subtest: generación completa y recuperación reciben los mismos procedimientos
-ok 182 - generación completa y recuperación reciben los mismos procedimientos
-  ---
-  duration_ms: 12.220381
-  type: 'test'
-  ...
-# Subtest: equilibrar claves conserva el texto correcto, la pauta y los ítems
-ok 183 - equilibrar claves conserva el texto correcto, la pauta y los ítems
-  ---
-  duration_ms: 3.261293
-  type: 'test'
-  ...
-# Subtest: actualiza referencias explícitas de la pauta al equilibrar claves
-ok 184 - actualiza referencias explícitas de la pauta al equilibrar claves
-  ---
-  duration_ms: 0.714476
-  type: 'test'
-  ...
-# Subtest: generación rechaza estímulo ausente y pauta faltante antes de guardar
-ok 185 - generación rechaza estímulo ausente y pauta faltante antes de guardar
-  ---
-  duration_ms: 7.727943
-  type: 'test'
-  ...
-# Subtest: informe documental distingue recuperación, contenido y citas sin certificar interpretación
-ok 186 - informe documental distingue recuperación, contenido y citas sin certificar interpretación
-  ---
-  duration_ms: 0.550359
-  type: 'test'
-  ...
-# Subtest: cada versión conserva registro real y revisión independiente pendiente
-ok 187 - cada versión conserva registro real y revisión independiente pendiente
-  ---
-  duration_ms: 2.581309
-  type: 'test'
-  ...
-# Subtest: el registro no se duplica en la revisión ni se filtra al ejemplar estudiante
-ok 188 - el registro no se duplica en la revisión ni se filtra al ejemplar estudiante
-  ---
-  duration_ms: 2.624484
-  type: 'test'
-  ...
-# Subtest: base de una prueba de lectura incluye el estímulo aunque sus preguntas se añadan después
-ok 189 - base de una prueba de lectura incluye el estímulo aunque sus preguntas se añadan después
-  ---
-  duration_ms: 0.593755
-  type: 'test'
-  ...
-# Subtest: API completa entrega procedimientos, perfil, fuentes y claves equilibradas sin activar pago
-ok 190 - API completa entrega procedimientos, perfil, fuentes y claves equilibradas sin activar pago
-  ---
-  duration_ms: 20.524464
-  type: 'test'
-  ...
-# Subtest: API de recuperación final aplica los mismos controles y registra los cinco procedimientos
-ok 191 - API de recuperación final aplica los mismos controles y registra los cinco procedimientos
-  ---
-  duration_ms: 10.053387
-  type: 'test'
-  ...
-# Subtest: control aritmético detecta la clave errónea observada en un aumento porcentual
-ok 192 - control aritmético detecta la clave errónea observada en un aumento porcentual
-  ---
-  duration_ms: 1.840463
-  type: 'test'
-  ...
-# Subtest: cálculo local no adivina fórmulas, datos adicionales ni interpretaciones ajenas
-ok 193 - cálculo local no adivina fórmulas, datos adicionales ni interpretaciones ajenas
-  ---
-  duration_ms: 0.211929
-  type: 'test'
-  ...
-# Subtest: corrección aritmética conserva opciones y autoría, registra operación e invalida revisión
-ok 194 - corrección aritmética conserva opciones y autoría, registra operación e invalida revisión
-  ---
-  duration_ms: 0.496599
-  type: 'test'
-  ...
-# Subtest: API aplica corrección aritmética comprobada sin inventar una llamada de IA
-ok 195 - API aplica corrección aritmética comprobada sin inventar una llamada de IA
-  ---
-  duration_ms: 7.038004
-  type: 'test'
-  ...
-# Subtest: cálculo directo y descuento detectan la letra incorrecta del valor 1200
-ok 196 - cálculo directo y descuento detectan la letra incorrecta del valor 1200
-  ---
-  duration_ms: 0.324068
-  type: 'test'
-  ...
-# Subtest: calcula cantidades explícitas y no confunde la cantidad restante
-ok 197 - calcula cantidades explícitas y no confunde la cantidad restante
-  ---
-  duration_ms: 0.31206
-  type: 'test'
-  ...
-# Subtest: pauta con letra contradictoria queda bloqueada aunque la clave numérica sea correcta
-ok 198 - pauta con letra contradictoria queda bloqueada aunque la clave numérica sea correcta
-  ---
-  duration_ms: 0.774747
-  type: 'test'
-  ...
-# Subtest: corrección y equilibrio preservan la correspondencia numérica tras normalizar la pauta
-ok 199 - corrección y equilibrio preservan la correspondencia numérica tras normalizar la pauta
-  ---
-  duration_ms: 0.960597
-  type: 'test'
-  ...
-# Subtest: mencionar una opción incorrecta en la justificación no equivale a declararla correcta
-ok 200 - mencionar una opción incorrecta en la justificación no equivale a declararla correcta
-  ---
-  duration_ms: 0.625943
+  duration_ms: 0.548126
   type: 'test'
   ...
 # (node:231) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: images require embedded supported data, dimensions and bounded size
-ok 201 - images require embedded supported data, dimensions and bounded size
+# Subtest: cinco procedimientos versionados tienen operaciones explícitas
+ok 184 - cinco procedimientos versionados tienen operaciones explícitas
   ---
-  duration_ms: 8.278933
+  duration_ms: 1.066888
+  type: 'test'
+  ...
+# Subtest: perfiles cubren asignaturas y separan Historia, convivencia, oficios y metal
+ok 185 - perfiles cubren asignaturas y separan Historia, convivencia, oficios y metal
+  ---
+  duration_ms: 1.066617
+  type: 'test'
+  ...
+# Subtest: didáctica de Lenguaje e Inglés incluye texto suficiente y comunicación adulta
+ok 186 - didáctica de Lenguaje e Inglés incluye texto suficiente y comunicación adulta
+  ---
+  duration_ms: 0.202255
+  type: 'test'
+  ...
+# Subtest: diseño inicial cambia de disciplina y conserva OA y tipo de prueba
+ok 187 - diseño inicial cambia de disciplina y conserva OA y tipo de prueba
+  ---
+  duration_ms: 1.029342
+  type: 'test'
+  ...
+# Subtest: generación completa y recuperación reciben los mismos procedimientos
+ok 188 - generación completa y recuperación reciben los mismos procedimientos
+  ---
+  duration_ms: 8.720532
+  type: 'test'
+  ...
+# Subtest: equilibrar claves conserva el texto correcto, la pauta y los ítems
+ok 189 - equilibrar claves conserva el texto correcto, la pauta y los ítems
+  ---
+  duration_ms: 2.226816
+  type: 'test'
+  ...
+# Subtest: actualiza referencias explícitas de la pauta al equilibrar claves
+ok 190 - actualiza referencias explícitas de la pauta al equilibrar claves
+  ---
+  duration_ms: 0.445061
+  type: 'test'
+  ...
+# Subtest: generación rechaza estímulo ausente y pauta faltante antes de guardar
+ok 191 - generación rechaza estímulo ausente y pauta faltante antes de guardar
+  ---
+  duration_ms: 6.106454
+  type: 'test'
+  ...
+# Subtest: informe documental distingue recuperación, contenido y citas sin certificar interpretación
+ok 192 - informe documental distingue recuperación, contenido y citas sin certificar interpretación
+  ---
+  duration_ms: 0.444069
+  type: 'test'
+  ...
+# Subtest: cada versión conserva registro real y revisión independiente pendiente
+ok 193 - cada versión conserva registro real y revisión independiente pendiente
+  ---
+  duration_ms: 1.900234
+  type: 'test'
+  ...
+# Subtest: el registro no se duplica en la revisión ni se filtra al ejemplar estudiante
+ok 194 - el registro no se duplica en la revisión ni se filtra al ejemplar estudiante
+  ---
+  duration_ms: 2.005272
+  type: 'test'
+  ...
+# Subtest: base de una prueba de lectura incluye el estímulo aunque sus preguntas se añadan después
+ok 195 - base de una prueba de lectura incluye el estímulo aunque sus preguntas se añadan después
+  ---
+  duration_ms: 0.395777
+  type: 'test'
+  ...
+# Subtest: API completa entrega procedimientos, perfil, fuentes y claves equilibradas sin activar pago
+ok 196 - API completa entrega procedimientos, perfil, fuentes y claves equilibradas sin activar pago
+  ---
+  duration_ms: 11.161191
+  type: 'test'
+  ...
+# Subtest: API de recuperación final aplica los mismos controles y registra los cinco procedimientos
+ok 197 - API de recuperación final aplica los mismos controles y registra los cinco procedimientos
+  ---
+  duration_ms: 6.472334
+  type: 'test'
+  ...
+# Subtest: control aritmético detecta la clave errónea observada en un aumento porcentual
+ok 198 - control aritmético detecta la clave errónea observada en un aumento porcentual
+  ---
+  duration_ms: 2.328409
+  type: 'test'
+  ...
+# Subtest: cálculo local no adivina fórmulas, datos adicionales ni interpretaciones ajenas
+ok 199 - cálculo local no adivina fórmulas, datos adicionales ni interpretaciones ajenas
+  ---
+  duration_ms: 0.165309
+  type: 'test'
+  ...
+# Subtest: corrección aritmética conserva opciones y autoría, registra operación e invalida revisión
+ok 200 - corrección aritmética conserva opciones y autoría, registra operación e invalida revisión
+  ---
+  duration_ms: 0.439933
+  type: 'test'
+  ...
+# Subtest: API aplica corrección aritmética comprobada sin inventar una llamada de IA
+ok 201 - API aplica corrección aritmética comprobada sin inventar una llamada de IA
+  ---
+  duration_ms: 4.506342
+  type: 'test'
+  ...
+# Subtest: cálculo directo y descuento detectan la letra incorrecta del valor 1200
+ok 202 - cálculo directo y descuento detectan la letra incorrecta del valor 1200
+  ---
+  duration_ms: 0.23884
+  type: 'test'
+  ...
+# Subtest: calcula cantidades explícitas y no confunde la cantidad restante
+ok 203 - calcula cantidades explícitas y no confunde la cantidad restante
+  ---
+  duration_ms: 0.233873
+  type: 'test'
+  ...
+# Subtest: pauta con letra contradictoria queda bloqueada aunque la clave numérica sea correcta
+ok 204 - pauta con letra contradictoria queda bloqueada aunque la clave numérica sea correcta
+  ---
+  duration_ms: 0.580014
+  type: 'test'
+  ...
+# Subtest: corrección y equilibrio preservan la correspondencia numérica tras normalizar la pauta
+ok 205 - corrección y equilibrio preservan la correspondencia numérica tras normalizar la pauta
+  ---
+  duration_ms: 0.634386
+  type: 'test'
+  ...
+# Subtest: mencionar una opción incorrecta en la justificación no equivale a declararla correcta
+ok 206 - mencionar una opción incorrecta en la justificación no equivale a declararla correcta
+  ---
+  duration_ms: 0.490499
+  type: 'test'
+  ...
+# (node:240) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: images require embedded supported data, dimensions and bounded size
+ok 207 - images require embedded supported data, dimensions and bounded size
+  ---
+  duration_ms: 3.866648
   type: 'test'
   ...
 # Subtest: automatic photos require both a matching topic and slide and occur once
-ok 202 - automatic photos require both a matching topic and slide and occur once
+ok 208 - automatic photos require both a matching topic and slide and occur once
   ---
-  duration_ms: 2.745356
+  duration_ms: 0.896941
   type: 'test'
   ...
 # Subtest: evaluations and high contrast do not acquire illustrative photos
-ok 203 - evaluations and high contrast do not acquire illustrative photos
+ok 209 - evaluations and high contrast do not acquire illustrative photos
   ---
-  duration_ms: 0.390989
+  duration_ms: 0.221414
   type: 'test'
   ...
 # Subtest: teacher image wins and explicit hide survives without altering content
-ok 204 - teacher image wins and explicit hide survives without altering content
+ok 210 - teacher image wins and explicit hide survives without altering content
   ---
-  duration_ms: 0.241213
+  duration_ms: 0.163406
   type: 'test'
   ...
 # Subtest: contain preserves image proportions and stays inside allotted box
-ok 205 - contain preserves image proportions and stays inside allotted box
+ok 211 - contain preserves image proportions and stays inside allotted box
   ---
-  duration_ms: 0.378621
+  duration_ms: 0.286001
   type: 'test'
   ...
 # Subtest: slide function determines an activity even when its title omits the word
-ok 206 - slide function determines an activity even when its title omits the word
+ok 212 - slide function determines an activity even when its title omits the word
   ---
-  duration_ms: 12.32551
+  duration_ms: 14.560173
   type: 'test'
   ...
 # Subtest: illustrated slide retains all text and caption, never repeats its photo on continuations
-ok 207 - illustrated slide retains all text and caption, never repeats its photo on continuations
+ok 213 - illustrated slide retains all text and caption, never repeats its photo on continuations
   ---
-  duration_ms: 22.892681
+  duration_ms: 18.107461
   type: 'test'
   ...
 # Subtest: guided example shows its complete phases in an editable sequence
-ok 208 - guided example shows its complete phases in an editable sequence
+ok 214 - guided example shows its complete phases in an editable sequence
   ---
-  duration_ms: 9.651311
+  duration_ms: 6.457412
   type: 'test'
   ...
 # Subtest: bar chart accepts only explicit comparable rows with matching units
-ok 209 - bar chart accepts only explicit comparable rows with matching units
+ok 215 - bar chart accepts only explicit comparable rows with matching units
   ---
-  duration_ms: 0.930071
+  duration_ms: 0.688138
   type: 'test'
   ...
 # Subtest: native chart preview preserves source labels, values and complete visible data
-ok 210 - native chart preview preserves source labels, values and complete visible data
+ok 216 - native chart preview preserves source labels, values and complete visible data
   ---
-  duration_ms: 10.018825
+  duration_ms: 5.438426
   type: 'test'
   ...
 # Subtest: local images are excluded from AI requests and restored only on unique matching slide titles
-ok 211 - local images are excluded from AI requests and restored only on unique matching slide titles
+ok 217 - local images are excluded from AI requests and restored only on unique matching slide titles
   ---
-  duration_ms: 0.526753
+  duration_ms: 0.476007
   type: 'test'
   ...
 # Subtest: comparison of alternatives is a visual comparison, not a multiple-choice question
-ok 212 - comparison of alternatives is a visual comparison, not a multiple-choice question
+ok 218 - comparison of alternatives is a visual comparison, not a multiple-choice question
   ---
-  duration_ms: 9.410328
+  duration_ms: 5.511667
   type: 'test'
   ...
 # Subtest: converting an evaluation to PPT does not add a chart to its stimuli
-ok 213 - converting an evaluation to PPT does not add a chart to its stimuli
+ok 219 - converting an evaluation to PPT does not add a chart to its stimuli
   ---
-  duration_ms: 11.141777
+  duration_ms: 6.672066
   type: 'test'
   ...
-# HEVA smoke checks passed; 106 JavaScript files parsed.
-# (node:239) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# Subtest: all generic interiors are composed even without role metadata or topic photos
+ok 220 - all generic interiors are composed even without role metadata or topic photos
+  ---
+  duration_ms: 43.540846
+  type: 'test'
+  ...
+# Subtest: guide converted to PPT receives the new interior compositions too
+ok 221 - guide converted to PPT receives the new interior compositions too
+  ---
+  duration_ms: 6.377822
+  type: 'test'
+  ...
+# Subtest: dense generic pages retain every phrase in framed readable continuations
+ok 222 - dense generic pages retain every phrase in framed readable continuations
+  ---
+  duration_ms: 16.686399
+  type: 'test'
+  ...
+# Subtest: pagination preserves decimal numbers and punctuation without spaces
+ok 223 - pagination preserves decimal numbers and punctuation without spaces
+  ---
+  duration_ms: 6.758285
+  type: 'test'
+  ...
+# Subtest: explicit relations use source labels without inferring links between ordinary paragraphs
+ok 224 - explicit relations use source labels without inferring links between ordinary paragraphs
+  ---
+  duration_ms: 2.913791
+  type: 'test'
+  ...
+# Subtest: guide export can use the topic illustration and preview reports interior images separately
+ok 225 - guide export can use the topic illustration and preview reports interior images separately
+  ---
+  duration_ms: 5.563264
+  type: 'test'
+  ...
+# Subtest: an interior can retain its illustration together with an explicit diagram
+ok 226 - an interior can retain its illustration together with an explicit diagram
+  ---
+  duration_ms: 5.54712
+  type: 'test'
+  ...
+# Subtest: guide image is not silently discarded when the reading also becomes a chart
+ok 227 - guide image is not silently discarded when the reading also becomes a chart
+  ---
+  duration_ms: 4.31307
+  type: 'test'
+  ...
+# Subtest: visual choices default on, validate booleans and preserve explicit opt-outs
+ok 228 - visual choices default on, validate booleans and preserve explicit opt-outs
+  ---
+  duration_ms: 0.26492
+  type: 'test'
+  ...
+# Subtest: plain presentation keeps source data but suppresses photos charts diagrams and frames
+ok 229 - plain presentation keeps source data but suppresses photos charts diagrams and frames
+  ---
+  duration_ms: 4.235604
+  type: 'test'
+  ...
+# Subtest: review keeps local visual preferences without sending them to the AI
+ok 230 - review keeps local visual preferences without sending them to the AI
+  ---
+  duration_ms: 0.120552
+  type: 'test'
+  ...
+# HEVA smoke checks passed; 109 JavaScript files parsed.
+# (node:247) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: tests/smoke.cjs
-ok 28 - tests/smoke.cjs
+ok 29 - tests/smoke.cjs
   ---
-  duration_ms: 219.758799
+  duration_ms: 145.696615
   type: 'test'
   ...
-# (node:241) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:250) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: localiza un OA que continúa en la página siguiente sin inventar la página
-ok 215 - localiza un OA que continúa en la página siguiente sin inventar la página
+ok 232 - localiza un OA que continúa en la página siguiente sin inventar la página
   ---
-  duration_ms: 1.816627
+  duration_ms: 1.885041
   type: 'test'
   ...
 # Subtest: no da por oficial un objetivo parecido o de otro documento
-ok 216 - no da por oficial un objetivo parecido o de otro documento
+ok 233 - no da por oficial un objetivo parecido o de otro documento
   ---
-  duration_ms: 0.238159
+  duration_ms: 0.27267
   type: 'test'
   ...
 # Subtest: cita literal válida conserva la página y no certifica la interpretación
-ok 217 - cita literal válida conserva la página y no certifica la interpretación
+ok 234 - cita literal válida conserva la página y no certifica la interpretación
   ---
-  duration_ms: 0.541616
+  duration_ms: 0.39129
   type: 'test'
   ...
 # Subtest: rechaza citas y referencias inventadas
-ok 218 - rechaza citas y referencias inventadas
+ok 235 - rechaza citas y referencias inventadas
   ---
-  duration_ms: 0.256476
+  duration_ms: 0.179801
   type: 'test'
   ...
 # Subtest: registro solo contiene documentos oficiales HTTPS sin URLs aportadas por IA
-ok 219 - registro solo contiene documentos oficiales HTTPS sin URLs aportadas por IA
+ok 236 - registro solo contiene documentos oficiales HTTPS sin URLs aportadas por IA
   ---
-  duration_ms: 0.754797
+  duration_ms: 0.381465
   type: 'test'
   ...
 # Subtest: fragmentos de tema no agregan páginas de otro asunto por omisión
-ok 220 - fragmentos de tema no agregan páginas de otro asunto por omisión
+ok 237 - fragmentos de tema no agregan páginas de otro asunto por omisión
   ---
-  duration_ms: 1.184816
+  duration_ms: 0.6566
   type: 'test'
   ...
 # Subtest: fuentes se exportan sin exponer los respaldos docentes al estudiante
-ok 221 - fuentes se exportan sin exponer los respaldos docentes al estudiante
+ok 238 - fuentes se exportan sin exponer los respaldos docentes al estudiante
   ---
-  duration_ms: 4.011614
+  duration_ms: 2.86667
   type: 'test'
   ...
 # Subtest: la recuperación no mezcla marcos y nunca solicita una URL del cliente
-ok 222 - la recuperación no mezcla marcos y nunca solicita una URL del cliente
+ok 239 - la recuperación no mezcla marcos y nunca solicita una URL del cliente
   ---
-  duration_ms: 3.288545
+  duration_ms: 2.989896
   type: 'test'
   ...
 # Subtest: ninguna guía de ejemplo se consulta automáticamente
-ok 223 - ninguna guía de ejemplo se consulta automáticamente
+ok 240 - ninguna guía de ejemplo se consulta automáticamente
   ---
-  duration_ms: 0.323527
+  duration_ms: 0.250578
   type: 'test'
   ...
 # Subtest: ejemplos requieren selección explícita y separan estilo de contenido
-ok 224 - ejemplos requieren selección explícita y separan estilo de contenido
+ok 241 - ejemplos requieren selección explícita y separan estilo de contenido
   ---
-  duration_ms: 0.540935
+  duration_ms: 0.400173
   type: 'test'
   ...
 # Subtest: recursos regulares se eligen por tema y no confirman el objetivo EPJA
-ok 225 - recursos regulares se eligen por tema y no confirman el objetivo EPJA
+ok 242 - recursos regulares se eligen por tema y no confirman el objetivo EPJA
   ---
-  duration_ms: 1.003792
+  duration_ms: 0.487324
   type: 'test'
   ...
 # Subtest: contexto estudiantil preserva la exigencia sin inventar diagnósticos
-ok 226 - contexto estudiantil preserva la exigencia sin inventar diagnósticos
+ok 243 - contexto estudiantil preserva la exigencia sin inventar diagnósticos
   ---
-  duration_ms: 11.45557
+  duration_ms: 6.842533
   type: 'test'
   ...
 # Subtest: cada familia pendiente tiene referencias específicas y convivencia no es Historia
-ok 227 - cada familia pendiente tiene referencias específicas y convivencia no es Historia
+ok 244 - cada familia pendiente tiene referencias específicas y convivencia no es Historia
   ---
-  duration_ms: 1.494532
+  duration_ms: 1.020208
   type: 'test'
   ...
 # Subtest: TP respeta especialidad y educación regular respeta nivel
-ok 228 - TP respeta especialidad y educación regular respeta nivel
+ok 245 - TP respeta especialidad y educación regular respeta nivel
   ---
-  duration_ms: 0.262545
+  duration_ms: 0.202295
   type: 'test'
   ...
 # Subtest: cobertura cuenta fragmentos recuperados, no solo enlaces registrados
-ok 229 - cobertura cuenta fragmentos recuperados, no solo enlaces registrados
+ok 246 - cobertura cuenta fragmentos recuperados, no solo enlaces registrados
   ---
-  duration_ms: 0.327844
+  duration_ms: 0.216676
   type: 'test'
   ...
-# (node:253) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:257) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: estrategia por nombre y campos equivalentes
-ok 230 - estrategia por nombre y campos equivalentes
+ok 247 - estrategia por nombre y campos equivalentes
   ---
-  duration_ms: 2.339425
+  duration_ms: 1.821576
   type: 'test'
   ...
 # Subtest: no inventa plan ni evidencia ausente
-ok 231 - no inventa plan ni evidencia ausente
+ok 248 - no inventa plan ni evidencia ausente
   ---
-  duration_ms: 3.590911
+  duration_ms: 0.183176
   type: 'test'
   ...
 # Subtest: rechaza estrategia distinta
-ok 232 - rechaza estrategia distinta
+ok 249 - rechaza estrategia distinta
   ---
-  duration_ms: 0.357418
-  type: 'test'
-  ...
-# (node:255) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
-# (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: Editar una sección no modifica OA, otras preguntas ni original; invalida revisión y cita afectada
-ok 233 - Editar una sección no modifica OA, otras preguntas ni original; invalida revisión y cita afectada
-  ---
-  duration_ms: 2.627499
-  type: 'test'
-  ...
-# Subtest: Secciones cerradas y trazabilidad obligatoria
-ok 234 - Secciones cerradas y trazabilidad obligatoria
-  ---
-  duration_ms: 0.436047
-  type: 'test'
-  ...
-# Subtest: Adaptación de prueba conserva tipo, OA y cantidades; relación con versión exacta
-ok 235 - Adaptación de prueba conserva tipo, OA y cantidades; relación con versión exacta
-  ---
-  duration_ms: 2.172434
-  type: 'test'
-  ...
-# Subtest: Referencias docentes explícitas, acotadas y nunca declaradas oficiales
-ok 236 - Referencias docentes explícitas, acotadas y nunca declaradas oficiales
-  ---
-  duration_ms: 4.062121
-  type: 'test'
-  ...
-# Subtest: Plantillas y tamaños accesibles válidos sin recursos externos
-ok 237 - Plantillas y tamaños accesibles válidos sin recursos externos
-  ---
-  duration_ms: 0.319001
-  type: 'test'
-  ...
-# Subtest: abreviar no puede borrar la pregunta y dejar solo datos
-ok 238 - abreviar no puede borrar la pregunta y dejar solo datos
-  ---
-  duration_ms: 0.626774
-  type: 'test'
-  ...
-# Subtest: exportadores propagan plantilla y tamaño accesible a sus bibliotecas
-ok 239 - exportadores propagan plantilla y tamaño accesible a sus bibliotecas
-  ---
-  duration_ms: 6.43121
+  duration_ms: 0.27202
   type: 'test'
   ...
 # (node:272) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: English listening without audio/transcript flagged
-ok 240 - English listening without audio/transcript flagged
+# Subtest: Editar una sección no modifica OA, otras preguntas ni original; invalida revisión y cita afectada
+ok 250 - Editar una sección no modifica OA, otras preguntas ni original; invalida revisión y cita afectada
   ---
-  duration_ms: 2.710784
+  duration_ms: 1.371497
+  type: 'test'
+  ...
+# Subtest: Secciones cerradas y trazabilidad obligatoria
+ok 251 - Secciones cerradas y trazabilidad obligatoria
+  ---
+  duration_ms: 0.23912
+  type: 'test'
+  ...
+# Subtest: Adaptación de prueba conserva tipo, OA y cantidades; relación con versión exacta
+ok 252 - Adaptación de prueba conserva tipo, OA y cantidades; relación con versión exacta
+  ---
+  duration_ms: 1.351717
+  type: 'test'
+  ...
+# Subtest: Referencias docentes explícitas, acotadas y nunca declaradas oficiales
+ok 253 - Referencias docentes explícitas, acotadas y nunca declaradas oficiales
+  ---
+  duration_ms: 2.461509
+  type: 'test'
+  ...
+# Subtest: Plantillas y tamaños accesibles válidos sin recursos externos
+ok 254 - Plantillas y tamaños accesibles válidos sin recursos externos
+  ---
+  duration_ms: 0.209516
+  type: 'test'
+  ...
+# Subtest: abreviar no puede borrar la pregunta y dejar solo datos
+ok 255 - abreviar no puede borrar la pregunta y dejar solo datos
+  ---
+  duration_ms: 0.361215
+  type: 'test'
+  ...
+# Subtest: exportadores propagan plantilla y tamaño accesible a sus bibliotecas
+ok 256 - exportadores propagan plantilla y tamaño accesible a sus bibliotecas
+  ---
+  duration_ms: 6.932409
+  type: 'test'
+  ...
+# (node:281) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: English listening without audio/transcript flagged
+ok 257 - English listening without audio/transcript flagged
+  ---
+  duration_ms: 1.830819
   type: 'test'
   ...
 # Subtest: English listening with transcript does not trigger missing audio warning
-ok 241 - English listening with transcript does not trigger missing audio warning
+ok 258 - English listening with transcript does not trigger missing audio warning
   ---
-  duration_ms: 0.582658
+  duration_ms: 2.252204
   type: 'test'
   ...
 # Subtest: Science investigation requires variable consideration
-ok 242 - Science investigation requires variable consideration
+ok 259 - Science investigation requires variable consideration
   ---
-  duration_ms: 0.503489
+  duration_ms: 0.373072
   type: 'test'
   ...
 # Subtest: Language reading needs text
-ok 243 - Language reading needs text
+ok 260 - Language reading needs text
   ---
-  duration_ms: 0.555848
+  duration_ms: 0.3715
   type: 'test'
   ...
 # Subtest: Social studies source needs provenance
-ok 244 - Social studies source needs provenance
+ok 261 - Social studies source needs provenance
   ---
-  duration_ms: 0.343046
+  duration_ms: 0.277519
   type: 'test'
   ...
-# (node:273) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:282) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: math subject detection
-ok 245 - math subject detection
+ok 262 - math subject detection
   ---
-  duration_ms: 1.311095
+  duration_ms: 0.785454
   type: 'test'
   ...
 # Subtest: safe arithmetic precedence and rejection
-ok 246 - safe arithmetic precedence and rejection
+ok 263 - safe arithmetic precedence and rejection
   ---
-  duration_ms: 0.626554
+  duration_ms: 0.354244
   type: 'test'
   ...
 # Subtest: detect wrong math key and retain limited scope
-ok 247 - detect wrong math key and retain limited scope
+ok 264 - detect wrong math key and retain limited scope
   ---
-  duration_ms: 3.111849
+  duration_ms: 1.240339
   type: 'test'
   ...
 # Subtest: other disciplines not audited as mathematics
-ok 248 - other disciplines not audited as mathematics
+ok 265 - other disciplines not audited as mathematics
   ---
-  duration_ms: 0.167442
-  type: 'test'
-  ...
-# (node:289) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
-# (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: normaliza alias y conserva referencias reales
-ok 249 - normaliza alias y conserva referencias reales
-  ---
-  duration_ms: 5.098301
-  type: 'test'
-  ...
-# Subtest: detecta faltantes sin inventar evidencias
-ok 250 - detecta faltantes sin inventar evidencias
-  ---
-  duration_ms: 0.665733
+  duration_ms: 0.079821
   type: 'test'
   ...
 # (node:296) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: OA superior con tareas solo de reconocimiento señala revisión sin certificación
-ok 251 - OA superior con tareas solo de reconocimiento señala revisión sin certificación
+# Subtest: normaliza alias y conserva referencias reales
+ok 266 - normaliza alias y conserva referencias reales
   ---
-  duration_ms: 2.6745
+  duration_ms: 1.682536
+  type: 'test'
+  ...
+# Subtest: detecta faltantes sin inventar evidencias
+ok 267 - detecta faltantes sin inventar evidencias
+  ---
+  duration_ms: 0.357519
+  type: 'test'
+  ...
+# (node:304) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: OA superior con tareas solo de reconocimiento señala revisión sin certificación
+ok 268 - OA superior con tareas solo de reconocimiento señala revisión sin certificación
+  ---
+  duration_ms: 1.422975
   type: 'test'
   ...
 # Subtest: progresión guiada sencilla seguida de juicio fundamentado no genera alarma global
-ok 252 - progresión guiada sencilla seguida de juicio fundamentado no genera alarma global
+ok 269 - progresión guiada sencilla seguida de juicio fundamentado no genera alarma global
   ---
-  duration_ms: 0.395045
+  duration_ms: 0.21264
   type: 'test'
   ...
 # Subtest: consigna desconocida no recibe nivel inventado
-ok 253 - consigna desconocida no recibe nivel inventado
+ok 270 - consigna desconocida no recibe nivel inventado
   ---
-  duration_ms: 0.197257
+  duration_ms: 0.094523
   type: 'test'
   ...
 # Subtest: la habilidad declarada no reemplaza el análisis de la consigna real
-ok 254 - la habilidad declarada no reemplaza el análisis de la consigna real
+ok 271 - la habilidad declarada no reemplaza el análisis de la consigna real
   ---
-  duration_ms: 0.244598
+  duration_ms: 0.108764
   type: 'test'
   ...
 # Subtest: evidencia de reconocimiento no cubre consigna de análisis
-ok 255 - evidencia de reconocimiento no cubre consigna de análisis
+ok 272 - evidencia de reconocimiento no cubre consigna de análisis
   ---
-  duration_ms: 0.475386
+  duration_ms: 0.224338
   type: 'test'
   ...
 # Subtest: noticia ausente se detecta y noticia incluida elimina esa señal
-ok 256 - noticia ausente se detecta y noticia incluida elimina esa señal
+ok 273 - noticia ausente se detecta y noticia incluida elimina esa señal
   ---
-  duration_ms: 0.410589
+  duration_ms: 0.198149
   type: 'test'
   ...
 # Subtest: Ciencias Sociales y Convivencia no heredan el ejemplo de Ciencias Naturales
-ok 257 - Ciencias Sociales y Convivencia no heredan el ejemplo de Ciencias Naturales
+ok 274 - Ciencias Sociales y Convivencia no heredan el ejemplo de Ciencias Naturales
   ---
-  duration_ms: 0.546944
+  duration_ms: 0.281804
   type: 'test'
   ...
 # Subtest: Inglés como lengua extranjera conserva la secuencia comunicativa
-ok 258 - Inglés como lengua extranjera conserva la secuencia comunicativa
+ok 275 - Inglés como lengua extranjera conserva la secuencia comunicativa
   ---
-  duration_ms: 0.211168
+  duration_ms: 0.084477
   type: 'test'
   ...
 # Subtest: mover diapositiva conserva notas, OA, IDs y renumera referencias sin mutar el original
-ok 259 - mover diapositiva conserva notas, OA, IDs y renumera referencias sin mutar el original
+ok 276 - mover diapositiva conserva notas, OA, IDs y renumera referencias sin mutar el original
   ---
-  duration_ms: 0.768908
+  duration_ms: 0.41118
   type: 'test'
   ...
 # Subtest: mover preguntas conserva opciones, claves y justificaciones del ítem
-ok 260 - mover preguntas conserva opciones, claves y justificaciones del ítem
+ok 277 - mover preguntas conserva opciones, claves y justificaciones del ítem
   ---
-  duration_ms: 0.636749
+  duration_ms: 0.336237
   type: 'test'
   ...
 # Subtest: mover fuera de los límites o por rutas arbitrarias no modifica el material
-ok 261 - mover fuera de los límites o por rutas arbitrarias no modifica el material
+ok 278 - mover fuera de los límites o por rutas arbitrarias no modifica el material
   ---
-  duration_ms: 0.214664
+  duration_ms: 0.105629
   type: 'test'
   ...
 # Subtest: reordenar invalida el estado de la revisión anterior
-ok 262 - reordenar invalida el estado de la revisión anterior
+ok 279 - reordenar invalida el estado de la revisión anterior
   ---
-  duration_ms: 0.201133
+  duration_ms: 0.098118
   type: 'test'
   ...
 # Subtest: comparación muestra cambios reales y mantiene las dos versiones
-ok 263 - comparación muestra cambios reales y mantiene las dos versiones
+ok 280 - comparación muestra cambios reales y mantiene las dos versiones
   ---
-  duration_ms: 1.985361
+  duration_ms: 1.08867
   type: 'test'
   ...
 # Subtest: comparación identifica eliminación de un bloque
-ok 264 - comparación identifica eliminación de un bloque
+ok 281 - comparación identifica eliminación de un bloque
   ---
-  duration_ms: 0.522938
+  duration_ms: 0.274584
   type: 'test'
   ...
 # Subtest: pasos genéricos ampliados se rechazan pero instrucciones desarrolladas permanecen válidas
-ok 265 - pasos genéricos ampliados se rechazan pero instrucciones desarrolladas permanecen válidas
+ok 282 - pasos genéricos ampliados se rechazan pero instrucciones desarrolladas permanecen válidas
   ---
-  duration_ms: 0.518031
+  duration_ms: 0.335225
   type: 'test'
   ...
 # Subtest: títulos repetidos se reconocen entre lotes, ignorando marcadores
-ok 266 - títulos repetidos se reconocen entre lotes, ignorando marcadores
+ok 283 - títulos repetidos se reconocen entre lotes, ignorando marcadores
   ---
-  duration_ms: 0.432021
+  duration_ms: 0.295785
   type: 'test'
   ...
 # Subtest: vista previa conserva el contenido y excluye notas docentes de sus cajas visibles
-ok 267 - vista previa conserva el contenido y excluye notas docentes de sus cajas visibles
+ok 284 - vista previa conserva el contenido y excluye notas docentes de sus cajas visibles
   ---
-  duration_ms: 5.039673
+  duration_ms: 4.351057
   type: 'test'
   ...
 # Subtest: vista previa pagina texto denso sin perder repeticiones ni desbordar cajas geométricas
-ok 268 - vista previa pagina texto denso sin perder repeticiones ni desbordar cajas geométricas
+ok 285 - vista previa pagina texto denso sin perder repeticiones ni desbordar cajas geométricas
   ---
-  duration_ms: 7.490615
+  duration_ms: 11.104676
   type: 'test'
   ...
 # Subtest: diapositivas con títulos iguales se distinguen al exportar sin alterar la fuente
-ok 269 - diapositivas con títulos iguales se distinguen al exportar sin alterar la fuente
+ok 286 - diapositivas con títulos iguales se distinguen al exportar sin alterar la fuente
   ---
-  duration_ms: 0.812214
+  duration_ms: 1.487542
   type: 'test'
   ...
 # Subtest: ajustes de acceso modifican contraste y tamaño de exportación
-ok 270 - ajustes de acceso modifican contraste y tamaño de exportación
+ok 287 - ajustes de acceso modifican contraste y tamaño de exportación
   ---
-  duration_ms: 0.117798
+  duration_ms: 0.113001
   type: 'test'
   ...
 # Subtest: organizadores retirados se rechazan sin autenticar ni consumir IA
-ok 271 - organizadores retirados se rechazan sin autenticar ni consumir IA
+ok 288 - organizadores retirados se rechazan sin autenticar ni consumir IA
   ---
-  duration_ms: 2.618355
+  duration_ms: 0.480754
   type: 'test'
   ...
 # Subtest: proveedor de pago no se llama sin habilitación explícita, aunque se entregue una clave
-ok 272 - proveedor de pago no se llama sin habilitación explícita, aunque se entregue una clave
+ok 289 - proveedor de pago no se llama sin habilitación explícita, aunque se entregue una clave
   ---
-  duration_ms: 1.211616
-  type: 'test'
-  ...
-# (node:302) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
-# (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: default points remain compatible with saved tests
-ok 273 - default points remain compatible with saved tests
-  ---
-  duration_ms: 1.784439
-  type: 'test'
-  ...
-# Subtest: each item accepts only integer teacher weights 1, 2 or 3
-ok 274 - each item accepts only integer teacher weights 1, 2 or 3
-  ---
-  duration_ms: 0.266191
-  type: 'test'
-  ...
-# Subtest: custom weights reach total, student blocks and teacher rubric without changing answers
-ok 275 - custom weights reach total, student blocks and teacher rubric without changing answers
-  ---
-  duration_ms: 2.165422
-  type: 'test'
-  ...
-# Subtest: all eight response formats contribute weighted points once
-ok 276 - all eight response formats contribute weighted points once
-  ---
-  duration_ms: 0.386302
-  type: 'test'
-  ...
-# Subtest: weight travels with a reordered question and survives JSON history
-ok 277 - weight travels with a reordered question and survives JSON history
-  ---
-  duration_ms: 0.417289
-  type: 'test'
-  ...
-# (node:303) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
-# (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: unified service worker includes every local script and stylesheet loaded by the main interface
-ok 278 - unified service worker includes every local script and stylesheet loaded by the main interface
-  ---
-  duration_ms: 1.520441
-  type: 'test'
-  ...
-# Subtest: materials exported by the previous principal retain content, IDs and keys when opened by the unified core
-ok 279 - materials exported by the previous principal retain content, IDs and keys when opened by the unified core
-  ---
-  duration_ms: 3.885995
-  type: 'test'
-  ...
-# Subtest: history key and backup format remain compatible with the stable principal
-ok 280 - history key and backup format remain compatible with the stable principal
-  ---
-  duration_ms: 0.364359
+  duration_ms: 1.180429
   type: 'test'
   ...
 # (node:315) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
-# Subtest: accepts real VOF, V/F and named-field aliases without fabricating missing metadata
-ok 281 - accepts real VOF, V/F and named-field aliases without fabricating missing metadata
+# Subtest: default points remain compatible with saved tests
+ok 290 - default points remain compatible with saved tests
   ---
-  duration_ms: 6.330312
+  duration_ms: 1.309764
+  type: 'test'
+  ...
+# Subtest: each item accepts only integer teacher weights 1, 2 or 3
+ok 291 - each item accepts only integer teacher weights 1, 2 or 3
+  ---
+  duration_ms: 0.181083
+  type: 'test'
+  ...
+# Subtest: custom weights reach total, student blocks and teacher rubric without changing answers
+ok 292 - custom weights reach total, student blocks and teacher rubric without changing answers
+  ---
+  duration_ms: 1.813523
+  type: 'test'
+  ...
+# Subtest: all eight response formats contribute weighted points once
+ok 293 - all eight response formats contribute weighted points once
+  ---
+  duration_ms: 0.187452
+  type: 'test'
+  ...
+# Subtest: weight travels with a reordered question and survives JSON history
+ok 294 - weight travels with a reordered question and survives JSON history
+  ---
+  duration_ms: 0.178379
+  type: 'test'
+  ...
+# (node:316) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: unified service worker includes every local script and stylesheet loaded by the main interface
+ok 295 - unified service worker includes every local script and stylesheet loaded by the main interface
+  ---
+  duration_ms: 1.404056
+  type: 'test'
+  ...
+# Subtest: materials exported by the previous principal retain content, IDs and keys when opened by the unified core
+ok 296 - materials exported by the previous principal retain content, IDs and keys when opened by the unified core
+  ---
+  duration_ms: 1.874565
+  type: 'test'
+  ...
+# Subtest: history key and backup format remain compatible with the stable principal
+ok 297 - history key and backup format remain compatible with the stable principal
+  ---
+  duration_ms: 1.635705
+  type: 'test'
+  ...
+# (node:317) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: accepts real VOF, V/F and named-field aliases without fabricating missing metadata
+ok 298 - accepts real VOF, V/F and named-field aliases without fabricating missing metadata
+  ---
+  duration_ms: 3.910403
   type: 'test'
   ...
 # Subtest: second VF block maps local aliases to global references 7–12
-ok 282 - second VF block maps local aliases to global references 7–12
+ok 299 - second VF block maps local aliases to global references 7–12
   ---
-  duration_ms: 0.821067
+  duration_ms: 0.387824
   type: 'test'
   ...
 # Subtest: metadata-only repair cannot overwrite a statement, key, correction or an existing valid trace
-ok 283 - metadata-only repair cannot overwrite a statement, key, correction or an existing valid trace
+ok 300 - metadata-only repair cannot overwrite a statement, key, correction or an existing valid trace
   ---
-  duration_ms: 0.795889
+  duration_ms: 0.945435
   type: 'test'
   ...
 # Subtest: content defects are never mistaken for missing metadata
-ok 284 - content defects are never mistaken for missing metadata
+ok 301 - content defects are never mistaken for missing metadata
   ---
-  duration_ms: 0.874197
+  duration_ms: 0.762489
   type: 'test'
   ...
 # Subtest: server repairs exactly the reported six-item failure while preserving all six questions
-ok 285 - server repairs exactly the reported six-item failure while preserving all six questions
+ok 302 - server repairs exactly the reported six-item failure while preserving all six questions
   ---
-  duration_ms: 16.028268
+  duration_ms: 13.122768
   type: 'test'
   ...
-# (node:322) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+# (node:333) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
 # (Use `node --trace-warnings ...` to show where the warning was created)
 # Subtest: propuesta editable se valida y llega al prompt sin reemplazar OA ni cantidades
-ok 286 - propuesta editable se valida y llega al prompt sin reemplazar OA ni cantidades
+ok 303 - propuesta editable se valida y llega al prompt sin reemplazar OA ni cantidades
   ---
-  duration_ms: 14.764339
+  duration_ms: 8.217434
   type: 'test'
   ...
 # Subtest: diseño no permite OA distinto, campos vacíos o estrategia distinta
-ok 287 - diseño no permite OA distinto, campos vacíos o estrategia distinta
+ok 304 - diseño no permite OA distinto, campos vacíos o estrategia distinta
   ---
-  duration_ms: 0.343157
+  duration_ms: 0.183326
   type: 'test'
   ...
 # Subtest: prueba válida queda exportable con juicio semántico expresamente pendiente
-ok 288 - prueba válida queda exportable con juicio semántico expresamente pendiente
+ok 305 - prueba válida queda exportable con juicio semántico expresamente pendiente
   ---
-  duration_ms: 6.197126
+  duration_ms: 3.209046
   type: 'test'
   ...
 # Subtest: control bloquea claves inválidas, opciones repetidas y rúbrica incompleta
-ok 289 - control bloquea claves inválidas, opciones repetidas y rúbrica incompleta
+ok 306 - control bloquea claves inválidas, opciones repetidas y rúbrica incompleta
   ---
-  duration_ms: 1.107088
+  duration_ms: 0.605502
   type: 'test'
   ...
 # Subtest: control identifica pauta ausente, total incorrecto y OA alterado
-ok 290 - control identifica pauta ausente, total incorrecto y OA alterado
+ok 307 - control identifica pauta ausente, total incorrecto y OA alterado
   ---
-  duration_ms: 1.216143
+  duration_ms: 0.593765
   type: 'test'
   ...
 # Subtest: equilibrio y posibles pistas son sugerencias, no errores conceptuales probados
-ok 291 - equilibrio y posibles pistas son sugerencias, no errores conceptuales probados
+ok 308 - equilibrio y posibles pistas son sugerencias, no errores conceptuales probados
   ---
-  duration_ms: 1.241801
+  duration_ms: 0.634106
   type: 'test'
   ...
 # Subtest: un distractor falso no se considera por sí solo un error factual
-ok 292 - un distractor falso no se considera por sí solo un error factual
+ok 309 - un distractor falso no se considera por sí solo un error factual
   ---
-  duration_ms: 3.074902
+  duration_ms: 1.808146
   type: 'test'
   ...
 # Subtest: clasificación no convierte opiniones del revisor en errores comprobados
-ok 293 - clasificación no convierte opiniones del revisor en errores comprobados
+ok 310 - clasificación no convierte opiniones del revisor en errores comprobados
   ---
-  duration_ms: 2.335178
+  duration_ms: 1.296164
   type: 'test'
   ...
 # Subtest: incorpora errores locales aunque el revisor no los detecte
-ok 294 - incorpora errores locales aunque el revisor no los detecte
+ok 311 - incorpora errores locales aunque el revisor no los detecte
   ---
-  duration_ms: 1.047188
+  duration_ms: 0.594166
   type: 'test'
   ...
 # Subtest: snapshot de exportación coincide con huella del servidor e invalida cambios
-ok 295 - snapshot de exportación coincide con huella del servidor e invalida cambios
+ok 312 - snapshot de exportación coincide con huella del servidor e invalida cambios
   ---
-  duration_ms: 1.132727
+  duration_ms: 0.577159
   type: 'test'
   ...
 # Subtest: recuperación por bloques también valida y conserva el diseño editado
-ok 296 - recuperación por bloques también valida y conserva el diseño editado
+ok 313 - recuperación por bloques también valida y conserva el diseño editado
   ---
-  duration_ms: 4.056782
+  duration_ms: 2.352666
   type: 'test'
   ...
 # Subtest: importaciones con ítems nulos quedan bloqueadas con un informe legible
-ok 297 - importaciones con ítems nulos quedan bloqueadas con un informe legible
+ok 314 - importaciones con ítems nulos quedan bloqueadas con un informe legible
   ---
-  duration_ms: 0.788438
+  duration_ms: 0.462036
   type: 'test'
   ...
 # Subtest: sincronizar una pauta cerrada conserva justificaciones y contenido oculto
-ok 298 - sincronizar una pauta cerrada conserva justificaciones y contenido oculto
+ok 315 - sincronizar una pauta cerrada conserva justificaciones y contenido oculto
   ---
-  duration_ms: 0.202465
+  duration_ms: 0.093401
   type: 'test'
   ...
 # Subtest: referencia a un estímulo ausente se presenta como señal para revisar suficiencia
-ok 299 - referencia a un estímulo ausente se presenta como señal para revisar suficiencia
+ok 316 - referencia a un estímulo ausente se presenta como señal para revisar suficiencia
   ---
-  duration_ms: 0.580645
+  duration_ms: 0.35834
   type: 'test'
   ...
-1..299
-# tests 299
+1..316
+# tests 316
 # suites 0
-# pass 299
+# pass 316
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 821.395493
+# duration_ms 596.415383
