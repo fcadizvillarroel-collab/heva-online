@@ -1,5 +1,5 @@
 {
-  "version": "2026.11.17.1-docentes",
+  "version": "2026.11.17.2-docentes",
   "basePrincipal": "37374748067f8f15a70f109d687c3b1f916e65ff",
   "mejorasIntegradas": "7819ab5",
   "formatoHistorial": "heva-online-v2",
@@ -7,5 +7,6 @@
   "fecha": "2026-11-17",
   "historialCompatible": true,
   "baseIntegracion": "f945e4b088ff20e9d6d8fbd1e09f64ec7defc9cc",
-  "revisionIndependiente": "Solicitud compacta sin recortar el material"
+  "revisionIndependiente": "Solicitud compacta sin recortar el material",
+  "reparacionPruebas": "Detección por bloque y reparación localizada de duplicados; recuperación del encargo guardado"
 }

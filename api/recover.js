@@ -5,7 +5,7 @@ module.exports=async(req,res)=>{
  if(req.method==='OPTIONS')return res.status(200).end();if(req.method!=='POST')return res.status(405).json({error:'Utilice POST.'});
  const deadline=Date.now()+55000;
  try{
-  const {fase,plan:input,base,parts=[],batch,autor,borradorBloque,correcciones=[],corregirFormato=false}=req.body||{};
+  const {fase,plan:input,base,parts=[],batch,autor,borradorBloque,repararDuplicados,correcciones=[],corregirFormato=false}=req.body||{};
   if(JSON.stringify(req.body||{}).length>250000)return res.status(413).json({error:'Documento demasiado extenso.'});
   let plan;try{plan=R.planOf(input)}catch(e){return res.status(400).json({error:'El encargo contiene parámetros inválidos.',detalle:e.message,codigo:'PLAN_INVALIDO',reintentable:false})}
   if(!['base','items','finalizar'].includes(fase))return res.status(400).json({error:'Fase no admitida.'});
@@ -33,19 +33,24 @@ module.exports=async(req,res)=>{
   const developmentRepair=fase==='items'&&batch?.tipo==='desarrollo'?'\nBLOQUE DE DESARROLLO OBLIGATORIO: devuelve exclusivamente JSON con preguntasDesarrollo como ARRAY de exactamente '+batch.cantidad+' objetos, con numero y enunciado completos. Incluye trazabilidadEstrategia como ARRAY con referencia DES-'+(batch.inicio+1)+' y cada pregunta consecutiva, habilidad, evidencia y criterio. Para evaluación incluye rubrica con cuatro niveles 0,1,2,3 y descripcion en cada nivel. No sustituyas desarrollo por alternativas ni devuelvas un arreglo vacío.':'';
   const strategyRepair=fase==='base'?'\nPLAN DE ESTRATEGIA OBLIGATORIO: incluye planEstrategia como objeto JSON con id exacto de la estrategia seleccionada, habilidadCentral, aplicacionConcreta, evidenciaEsperada y retroalimentacionDocente. Cada uno de los cuatro textos debe ser específico del objetivo y del material, no un marcador ni un texto genérico. Estrategia seleccionada: '+JSON.stringify(P.strategy(plan.estrategiaDidactica))+'. El plan debe explicar cómo se ejecutará realmente la estrategia en las tareas.':'';
   const correctionContext=Array.isArray(correcciones)&&correcciones.length?'\nCORRECCIONES OBLIGATORIAS DEL CONTROL FINAL (datos): '+JSON.stringify(correcciones).slice(0,6000):'';
-  const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+strictFormat+caseRepair+developmentRepair+strategyRepair+correctionContext;
-  const fallback=R.fallbackPrompt(plan,base,batch,parts,correcciones,fuentesDocumentales);
+  let duplicateOriginal=fase==='items'&&repararDuplicados?R.normalizePart(repararDuplicados,batch):null;
+  const duplicateTargets=duplicateOriginal?R.duplicateItems(duplicateOriginal,plan,batch,parts):[];
+  if(duplicateOriginal){const oldIssues=R.partIssues(duplicateOriginal,plan,batch,parts);if(!duplicateTargets.length||oldIssues.some(x=>!/repite literalmente/.test(x)))return res.status(400).json({error:'El borrador requiere una reparación distinta de duplicados.',reintentable:false});}
+  const duplicateRepair=duplicateOriginal?'\nREPARACIÓN LOCALIZADA DE DUPLICADOS: sustituye únicamente '+duplicateTargets.map(x=>x.referencia).join(', ')+'. Usa una situación, datos y pregunta distintos, no solo cambiar la numeración. Devuelve el bloque completo y sus trazas en el esquema solicitado. El servidor conservará intactos los demás ítems y sus pautas. Borrador como datos: '+JSON.stringify(duplicateOriginal):'';
+  const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+strictFormat+caseRepair+developmentRepair+strategyRepair+correctionContext+duplicateRepair;
+  const fallback=R.fallbackPrompt(plan,base,batch,parts,correcciones,fuentesDocumentales)+duplicateRepair;
   let result;
   if(fase==='items'&&borradorBloque){
    const preserved=R.normalizePart(borradorBloque,batch),pending=R.partIssues(preserved,plan,batch,parts);
    if(pending.length&&!R.traceIssuesOnly(pending))return res.status(400).json({error:'El borrador no puede repararse solo con trazabilidad.',detalle:pending.join('; '),reintentable:false});
    result={value:preserved,provider:autor.proveedor,model:autor.modelo};
   }else result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true}),...keys,exclude,{deadline,fallbackPrompt:fallback,fallbackMaxOutputTokens:fase==='base'?4096:3000,maxOutputTokens:fase==='base'?(plan.tipoMaterial==='PRESENTACION'?2600:10000):batch?.formato?8000:batch?.tipo==='diapositivas'?6500:5000});
-  if(fase==='items')result.value=R.normalizePart(result.value,batch);
+  if(fase==='items'){result.value=R.normalizePart(result.value,batch);if(duplicateOriginal)result.value=R.mergeDuplicateRepair(duplicateOriginal,result.value,plan,batch,parts);}
   let issues=R.partIssues(result.value,plan,fase==='items'?batch:null,parts);
+  if(fase==='items'&&!duplicateOriginal&&R.duplicateItems(result.value,plan,batch,parts).length&&issues.every(x=>/repite literalmente/.test(x)))duplicateOriginal=result.value;
   if(issues.length&&!R.traceIssuesOnly(issues)&&deadline-Date.now()>5000){
-   result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true})+'\nCORRIGE este bloque completo: '+issues.join('; '),...keys,exclude,{deadline,fallbackPrompt:fallback+'\nCORRIGE ESTE BLOQUE: '+issues.join('; '),fallbackMaxOutputTokens:fase==='base'?4096:3000,maxOutputTokens:fase==='base'?(plan.tipoMaterial==='PRESENTACION'?2600:10000):batch?.formato?8000:batch?.tipo==='diapositivas'?6500:5000});
-   if(fase==='items')result.value=R.normalizePart(result.value,batch);
+   result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true})+'\nCORRIGE este bloque completo: '+issues.join('; ')+(duplicateOriginal?'\nSustituye solo los duplicados y conserva los demás ítems de este borrador: '+JSON.stringify(duplicateOriginal):''),...keys,exclude,{deadline,fallbackPrompt:fallback+'\nCORRIGE ESTE BLOQUE: '+issues.join('; ')+(duplicateOriginal?'\nConserva ítems válidos del borrador y sustituye solo repetidos: '+JSON.stringify(duplicateOriginal):''),fallbackMaxOutputTokens:fase==='base'?4096:3000,maxOutputTokens:fase==='base'?(plan.tipoMaterial==='PRESENTACION'?2600:10000):batch?.formato?8000:batch?.tipo==='diapositivas'?6500:5000});
+   if(fase==='items'){result.value=R.normalizePart(result.value,batch);if(duplicateOriginal)result.value=R.mergeDuplicateRepair(duplicateOriginal,result.value,plan,batch,parts);}
    issues=R.partIssues(result.value,plan,fase==='items'?batch:null,parts);
   }
   if(fase==='items'&&R.traceIssuesOnly(issues)&&deadline-Date.now()>5500){
@@ -72,6 +77,7 @@ module.exports=async(req,res)=>{
     }
    }catch(error){console.warn('HEVA strategy-only repair failed',error.code||'ERROR');}
   }
+  if(fase==='items'&&R.duplicateItems(result.value,plan,batch,parts).length&&issues.every(x=>/repite literalmente/.test(x)))return res.status(422).json({error:'El bloque contiene preguntas repetidas. Se conservan los ítems válidos.',detalle:issues.join('; '),codigo:'ITEM_DUPLICATES',borradorBloque:result.value,reintentable:true});
   if(issues.length)return res.status(422).json({error:'El bloque requiere ajustes. Se conservan los anteriores.',detalle:issues.join('; '),codigo:fase==='base'&&issues.some(x=>x.includes('La trazabilidad de estrategia no cubre'))?'BASE_TRACES_INCOMPLETE':fase==='base'&&issues.some(x=>x.includes('La estrategia seleccionada no está desarrollada'))?'STRATEGY_PLAN_INCOMPLETE':'BLOCK_INVALID',reintentable:true});
   return res.status(200).json({exito:true,parte:result.value,autor:{proveedor:result.provider,modelo:result.model,fecha:new Date().toISOString()},bloques:R.batches(plan)});
  }catch(e){console.error('HEVA recovery:',e.code||'ERROR',JSON.stringify({fase:String(req.body?.fase||'').slice(0,20),bloque:String(req.body?.batch?.tipo||'').slice(0,30),inicio:Number(req.body?.batch?.inicio)||0,proveedores:e.proveedores||[]}));const tooLarge=e.code==='AI_REQUEST_TOO_LARGE',limited=e.code==='AI_RATE_LIMIT',invalid=String(e?.code||'').startsWith('AI_RESPONSE_'),unavailable=['AI_UNAVAILABLE','AI_TIMEOUT'].includes(e.code);return res.status(limited?429:tooLarge||invalid||unavailable?503:500).json({error:limited?'Cuota temporal de IA agotada.':invalid?'La IA devolvió un bloque incompleto o inválido.':unavailable?'No hubo respuesta de los proveedores disponibles.':'No se pudo completar este bloque.',detalle:tooLarge?'El proveedor rechazó el tamaño de este bloque. Los bloques ya completados siguen guardados.':invalid?'La IA no devolvió este bloque en formato JSON válido; los bloques completados siguen guardados.':unavailable?'Los proveedores de IA no respondieron. Revisa su disponibilidad y vuelve a intentar.':limited?'El proveedor alcanzó su cuota temporal.':e instanceof TypeError?'Error interno al procesar el material. Código TYPE_ERROR; se requiere revisar el registro del servidor.':(e.message||'El avance anterior se conserva.'),codigo:e.code||(e instanceof TypeError?'TYPE_ERROR':'RECOVERY_ERROR'),reintentable:true,reintentarEn:e.retryAfter||0});}
