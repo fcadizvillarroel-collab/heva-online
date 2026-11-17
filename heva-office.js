@@ -45,13 +45,15 @@ function chunksOf(value,maxChars=850,maxItems=5){
 let measureContext;
 function textWidth(value,size){
  if(measureContext===undefined){try{measureContext=root.document?.createElement('canvas')?.getContext('2d')||null;}catch{measureContext=null;}}
- if(measureContext){measureContext.font=size+'pt Aptos';return measureContext.measureText(String(value)).width*72/96;}
+ if(measureContext){measureContext.font=size+'pt Arial';return measureContext.measureText(String(value)).width*72/96;}
  return [...String(value)].reduce((n,c)=>n+(/[ilI.,:;!|' ]/.test(c)?.3:/[MW@#%]/.test(c)?.88:.57)*size,0);
 }
 function lineCount(value,width,size){const limit=width*72;let count=0;for(const paragraph of String(value).split('\n')){let used=0;count++;for(const word of paragraph.split(/\s+/).filter(Boolean)){const w=textWidth(word,size),gap=used?textWidth(' ',size):0;if(used&&used+gap+w>limit){count++;used=0;}if(w>limit){count+=Math.ceil(w/limit)-1;used=w%limit;}else used+= (used?gap:0)+w;}}return count;}
 function fitsText(lines,width,height,size){return lineCount(lines.join('\n\n'),width,size)*size*1.28<=Math.max(0,height-.12)*72;}
 function paginatePresentation(section,large=false){
- const size=26,height=3.65,width=11.5;
+ const size=26,height=section.image?4.1:4.05,width=section.image?6.7:11.5;
+ const dataRows=slideText(section.text).split(/\n+/).map(x=>x.trim()).filter(Boolean);
+ if(root.HEVASlideDesign?.role(section)!=='activity'&&root.HEVASlideDesign?.dataChart(dataRows)&&fitsText([dataRows.join('\n')],5.15,3.9,26))return[dataRows];
  const source=slideText(section.text).split(/\n+/).map(x=>x.trim()).filter(Boolean),pieces=[];
  for(const paragraph of source){if(fitsText([paragraph],width,height,size)){pieces.push(paragraph);continue;}
   // Prefer sentence boundaries. Very long sentences continue at word boundaries.
@@ -59,7 +61,7 @@ function paginatePresentation(section,large=false){
   for(const sentence of sentences){if(fitsText([current+(current?' ':'')+sentence.trim()],width,height,size)){current+=(current?' ':'')+sentence.trim();continue;}if(current){pieces.push(current);current='';}for(const word of sentence.trim().split(/\s+/)){if(current&&!fitsText([current+' '+word],width,height,size)){pieces.push(current);current='';}current+=(current?' ':'')+word;}}
   if(current)pieces.push(current);
  }
- const pages=[];let page=[];for(const piece of pieces){if(page.length&&(page.length>=3||!fitsText([...page,piece],width,height,size))){pages.push(page);page=[];}page.push(piece);}if(page.length)pages.push(page);return pages.length?pages:[['Contenido pendiente de desarrollar']];
+ const pages=[];let page=[];for(const piece of pieces){const pageWidth=pages.length?11.5:width;if(page.length&&(page.length>=3||!fitsText([...page,piece],pageWidth,height,size))){pages.push(page);page=[];}page.push(piece);}if(page.length)pages.push(page);return pages.length?pages:[['Contenido pendiente de desarrollar']];
 }
 function addChrome(ppt,theme,section,num,total){
  const slide=ppt.addSlide();slide.background={color:theme.background};
@@ -75,7 +77,7 @@ function addChrome(ppt,theme,section,num,total){
 function classifySlide(title,lines,index){
  const t=title.toLowerCase();
  if(/idea clave|concepto central|definición/.test(t))return 'feature';
- if(/selección múltiple|alternativa|opción\s+[a-d]/i.test(t))return 'question';
+ if(/selección múltiple|pregunta de alternativas|alternativas?\s*\d+|^alternativas?$|opción\s+[a-d]\b/i.test(t))return 'question';
  if(/actividad|ejercicio|desafío|reflexión|pregunta|aplicación|debate|práctica|ticket de salida/.test(t))return 'activity';
  if(/comparación|comparar|diferencias|versus|ventajas y desventajas/.test(t))return 'compare';
  if(/cronología|línea de tiempo|etapas|proceso histórico|evolución/.test(t))return 'timeline';
@@ -111,7 +113,7 @@ function drawSemanticVisual(ppt,theme,slide,title,lines){
   const items=lines;if(!items.length||items.length>4||items.some(t=>!fitsText([t],(11.6-(items.length-1)*.16)/items.length-.46,1.98,26)))return false;
   tx(title,.8,.83,11.7,.9,31,theme.main,true);
   const n=items.length,w=(11.6-(n-1)*.16)/n;
-  items.forEach((line,i)=>{const x=.86+i*(w+.16);shape(x,2.35,w,3.65,i%2?'F1E7DB':'FFFFFF');shape(x+.22,2.68,.68,.68,theme.main);tx(String(i+1),x+.28,2.74,.54,.5,21,'FFFFFF',true);tx(line.replace(/^\s*\d+[.)]\s*/,''),x+.23,3.58,w-.46,1.98,n>=4?17:20);if(i<n-1)tx('→',x+w-.03,3.13,.3,.35,17,theme.accent,true)});
+  items.forEach((line,i)=>{const x=.86+i*(w+.16);shape(x,2.35,w,3.65,i%2?'F1E7DB':'FFFFFF');shape(x+.22,2.68,.68,.68,theme.main);tx(String(i+1),x+.28,2.74,.54,.5,21,'FFFFFF',true);tx(line.replace(/^\s*\d+[.)]\s*/,''),x+.23,3.58,w-.46,1.98,n>=4?22:26);if(i<n-1)tx('→',x+w-.03,3.13,.3,.35,17,theme.accent,true)});
   return true;
  }
  return false;
@@ -122,21 +124,50 @@ function drawBalance(ppt,theme,slide){
  line(4.3,4.35,1.7,0);line(7.2,4.35,1.7,0);line(5.75,5.35,1.7,0,3);
  slide.addText('MISMA OPERACIÓN EN AMBOS LADOS',{x:3.1,y:5.63,w:7,h:.45,fontSize:18,bold:true,color:theme.main,align:'center',margin:0});
 }
-function addContent(ppt,theme,slide,title,lines,section,index=0){
- if(drawSemanticVisual(ppt,theme,slide,title,lines))return;
+function addContent(ppt,theme,slide,title,lines,section,index=0,scene={}){
+ const illustration=scene.image;
+ if(!illustration){if(drawSemanticVisual(ppt,theme,slide,title,lines))return;}
  const kind=classifySlide(title,lines,index),clean=lines.map(x=>x.replace(/^[-•]\s*/,'').trim()).filter(Boolean);
- const activity=kind==='activity',ink=activity?'FFFFFF':theme.ink,main=activity?'FFFFFF':theme.main;
+ const activity=scene.design==='activity'||kind==='activity',ink=activity?'FFFFFF':theme.ink,main=activity?'FFFFFF':theme.main;
  // A single canvas: no nested cards, decorative counters or repeated panel grids.
  if(activity)slide.background={color:theme.main};
  const text=(value,x,y,w,h,size,color,bold=false)=>slide.addText(String(value),{x,y,w,h,fontFace:'Arial',fontSize:size,color,bold,margin:0,breakLine:false,valign:'top',fit:'shrink',paraSpaceAfterPt:12});
+ const chart=scene.allowDataChart!==false&&!activity&&fitsText([clean.join('\n')],5.15,3.9,26)?root.HEVASlideDesign?.dataChart(clean):null;
  const titleSize=title.length>85?28:title.length>60?32:36;
- text(title,.85,.92,11.6,1.18,titleSize,main,true);
+ text(title,.85,.92,illustration&&!chart?7.05:11.6,1.18,illustration&&!chart?Math.min(titleSize,32):titleSize,main,true);
+ if(chart){
+  text(clean.join('\n'),.86,2.4,5.15,3.9,26,ink);
+  text('Unidad: '+chart.unit,6.6,2.08,5.65,.35,16,main,true);
+  slide.addChart(ppt.ChartType.bar,[{name:chart.unit,labels:chart.labels,values:chart.values}],{x:6.45,y:2.65,w:5.95,h:3.65,barDir:'bar',showLegend:false,showValue:true,showTitle:false,catAxisLabelFontSize:18,valAxisLabelFontSize:14,dataLabelFontSize:18,valAxisMinVal:0,chartColors:[theme.main],showBorder:false,showCatName:false,showShadow:false});
+  return;
+ }
+ if(illustration){
+  const box=root.HEVASlideDesign.contain(illustration,{x:8.45,y:1.75,w:4.03,h:4.82});
+  slide.addImage({data:illustration.data,...box,altText:illustration.alt});
+  text(clean.join('\n\n'),.86,2.35,6.7,4.1,26,ink);
+  if(illustration.generated)text('IMAGEN ILUSTRATIVA GENERADA',8.45,6.66,4.03,.18,9,main);
+  if(typeof slide.addNotes==='function')slide.addNotes(illustration.alt);
+  return;
+ }
  if(activity)text('TRABAJO EN CLASE',.86,2.14,11.4,.32,14,'FFFFFF',true);
  const top=activity?2.7:2.4;
+ if(scene.design==='example'&&clean.length>=2&&clean.length<=3&&clean.every(t=>fitsText([t],10.4,1.05,26))){
+  clean.forEach((line,j)=>{const y=2.3+j*1.34;text(String(j+1),.86,y,.65,.8,38,main,true);text(line,1.85,y,10.4,1.05,26,ink);});return;
+ }
+
+ if(activity&&clean.length===2&&fitsText([clean[0]],11.5,1.7,26)&&fitsText([clean[1]],11.5,1.6,30)){
+  text(clean[0],.86,2.7,11.5,1.7,26,ink);
+  text(clean[1],.86,4.7,11.5,1.6,30,ink,true);return;
+ }
+ if(scene.design==='closing'&&clean.length&&fitsText([clean[0]],11.5,1.7,32)&&fitsText(clean.slice(1),11.5,1.65,26)){
+  text(clean[0],.86,2.4,11.5,1.7,32,main,true);
+  text(clean.slice(1).join('\n\n'),.86,4.6,11.5,1.65,26,ink);return;
+ }
  // Comparison stays a real two-column comparison only when both halves fit.
  const mid=Math.ceil(clean.length/2),halves=[clean.slice(0,mid),clean.slice(mid)];
- if(kind==='compare'&&clean.length>=2&&halves.every(x=>fitsText(x,5.4,3.65,26))){
-  halves.forEach((part,j)=>text(part.join('\n\n'),.86+j*6.03,top,5.4,3.65,26,ink));
+ if(kind==='compare'&&clean.length>=2&&halves.every(x=>fitsText(x,4.9,3.3,26))){
+  const panelHeight=Math.min(4.15,Math.max(2.6,...halves.map(part=>lineCount(part.join('\n\n'),4.9,26)*26*1.28/72+.75))),panelY=2.3+(4.15-panelHeight)/2;
+  halves.forEach((part,j)=>{const x=.86+j*6.03;slide.addShape(ppt.ShapeType.roundRect,{x,y:panelY,w:5.6,h:panelHeight,rectRadius:.12,line:{color:theme.accent,width:1},fill:{color:theme.main==='111111'?'FFFFFF':j?'F1E7DB':'FFFFFF'}});text(part.join('\n\n'),x+.35,panelY+.35,4.9,panelHeight-.7,26,ink);});
  }else if(!activity&&clean.length===2&&fitsText([clean[0]],11.5,1.65,30)&&fitsText([clean[1]],10.7,1.65,26)){
   text(clean[0],.86,2.4,11.5,1.65,30,main,true);
   text(clean[1],1.35,4.5,10.7,1.65,26,ink);
@@ -144,20 +175,22 @@ function addContent(ppt,theme,slide,title,lines,section,index=0){
 }
 function presentationPages(material,teacher=false){
  const visual=root.HEVATemplates.layout(material);
- const isPresentation=String(material.tipoMaterial||m.tipoMaterial||'').toUpperCase()==='PRESENTACION'&&Array.isArray(material.diapositivas)&&material.diapositivas.length>0;
+ const isPresentation=String(material.tipoMaterial||'').toUpperCase()==='PRESENTACION'&&Array.isArray(material.diapositivas)&&material.diapositivas.length>0;
  let sections=[];
  if(isPresentation){
-  sections=material.diapositivas.map((d,i)=>({title:d.titulo||'Diapositiva '+(i+1),text:slideText(d.contenido),kind:'slide',notes:d.notasDocente||''}));
+  sections=material.diapositivas.map((d,i)=>({title:d.titulo||'Diapositiva '+(i+1),text:slideText(d.contenido),kind:'slide',role:d.funcion||'',image:d.imagenHEVA,hideImage:d.ocultarImagenHEVA===true,notes:d.notasDocente||''}));
  }else{
   let blocks=[];HEVA.blocks(material,teacher).forEach(item=>{let prev=blocks.at(-1);if(item.kind==='option'&&prev?.group===item.group)prev.text+='\n'+item.title+' '+item.text;else blocks.push({...item})});
   sections=blocks.map(item=>({title:item.title,text:slideText(item.text),kind:item.kind||'section'}));
  }
  const story=root.HEVAPedagogy?.newsText(material);if(isPresentation&&story)sections.unshift({title:'Noticia didáctica · SIMULADA',text:story,kind:'resource'});
+ sections=root.HEVASlideDesign?.decorate(material,sections,root.HEVAContextAssets)||sections;
+ sections=sections.map(s=>({...s,allowDataChart:isPresentation}));
  const pages=sections.flatMap((section,index)=>{
   // Keep a complete multiple-choice question and its alternatives together.
   const isQuestion=/selección múltiple|alternativa|pregunta\s*\d+/i.test(section.title);
   const maxChars=isQuestion?1500:850;
-  return (isPresentation?paginatePresentation(section,visual.large):chunksOf(section.text,maxChars,isQuestion?12:5)).map((lines,part)=>({...section,lines,title:section.title+(part?' · continuación':'')}));
+  return (isPresentation?paginatePresentation(section,visual.large):chunksOf(section.text,maxChars,isQuestion?12:5)).map((lines,part)=>({...section,lines,image:part?null:section.image,title:section.title+(part?' · continuación':'')}));
  });
  const used=new Map();for(const page of pages){const key=page.title.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();const n=(used.get(key)||0)+1;used.set(key,n);if(n>1)page.title+=' ('+n+')';}
  const news=material.fuentesDocumentales?.noticias?.items||[];
@@ -180,9 +213,9 @@ function renderCover(ppt,theme,material,total){
 // Preview records exactly the shapes and text boxes used by the PPTX renderer.
 function preview(m,teacher=false){
  const material=HEVA.material(m),visual=root.HEVATemplates.layout(material),pages=presentationPages(material,teacher),record=[];
- const ppt={ShapeType:{rect:'rect',roundRect:'roundRect',line:'line'},addSlide(){const page={elements:[],background:{color:visual.theme.background}};record.push(page);return Object.defineProperties({addImage:(options)=>page.elements.push({kind:'image',...options}),addShape:(shape,options)=>page.elements.push({kind:'shape',shape,...options}),addText:(text,options)=>page.elements.push({kind:'text',text:String(text),...options}),addNotes:()=>{}},{background:{set(v){page.background=v}}});}};
+ const ppt={ChartType:{bar:'bar'},ShapeType:{rect:'rect',roundRect:'roundRect',line:'line'},addSlide(){const page={elements:[],background:{color:visual.theme.background}};record.push(page);return Object.defineProperties({addChart:(chartType,data,options)=>page.elements.push({kind:'chart',chartType,data,...options}),addImage:(options)=>page.elements.push({kind:'image',...options}),addShape:(shape,options)=>page.elements.push({kind:'shape',shape,...options}),addText:(text,options)=>page.elements.push({kind:'text',text:String(text),...options}),addNotes:()=>{}},{background:{set(v){page.background=v}}});}};
  renderCover(ppt,visual.theme,material,pages.length+1);
- pages.forEach((page,i)=>{const slide=addChrome(ppt,visual.theme,classifySlide(page.title,page.lines,i),i+2,pages.length+1);if(visual.large){const add=slide.addText;slide.addText=(text,options)=>add(text,{...options,fontSize:(options.fontSize>=17?Math.max(26,options.fontSize):options.fontSize)});}addContent(ppt,visual.theme,slide,page.title,page.lines,page.kind,i);});
+ pages.forEach((page,i)=>{const slide=addChrome(ppt,visual.theme,page.design==='activity'?'activity':classifySlide(page.title,page.lines,i),i+2,pages.length+1);if(visual.large){const add=slide.addText;slide.addText=(text,options)=>add(text,{...options,fontSize:(options.fontSize>=17?Math.max(26,options.fontSize):options.fontSize)});}addContent(ppt,visual.theme,slide,page.title,page.lines,page.kind,i,page);});
  return {pages:record,width:13.333,height:7.5,limitation:'Comparte paginación y geometría con PPTX. Las fuentes y saltos de línea pueden variar en PowerPoint; comprobar el archivo final.'};
 }
 async function powerpoint(m,teacher=false){
@@ -193,7 +226,7 @@ async function powerpoint(m,teacher=false){
  const pages=presentationPages(material,teacher);
  const total=pages.length+1;
  renderCover(ppt,theme,material,total);
- pages.forEach((page,i)=>{const slide=addChrome(ppt,theme,classifySlide(page.title,page.lines,i),i+2,total);if(visual.large){const originalAddText=slide.addText.bind(slide);slide.addText=(text,options)=>originalAddText(text,{...options,fontSize:(options.fontSize>=17?Math.max(26,options.fontSize):options.fontSize)});}addContent(ppt,theme,slide,page.title,page.lines,page.kind,i);if(page.notes&&typeof slide.addNotes==='function')slide.addNotes(page.notes)});
+ pages.forEach((page,i)=>{const slide=addChrome(ppt,theme,page.design==='activity'?'activity':classifySlide(page.title,page.lines,i),i+2,total);if(visual.large){const originalAddText=slide.addText.bind(slide);slide.addText=(text,options)=>originalAddText(text,{...options,fontSize:(options.fontSize>=17?Math.max(26,options.fontSize):options.fontSize)});}addContent(ppt,theme,slide,page.title,page.lines,page.kind,i,page);if(page.notes&&typeof slide.addNotes==='function')slide.addNotes(page.notes)});
  await ppt.writeFile({fileName:safeName(material.titulo)+(teacher?'_docente':'_estudiante')+'.pptx'});return ppt;
 }
 

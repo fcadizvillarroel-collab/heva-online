@@ -31,8 +31,8 @@ test('database hardening proposal removes permissive policies and table grants',
  assert.match(sql,/REVOKE ALL PRIVILEGES ON TABLE public.heva_perfiles FROM anon, authenticated/);
 });
 
-test('all five AI endpoints require the shared access guard',()=>{
- for(const file of ['generate','review','recover','studio','diagram']){
+test('all four active AI endpoints require the shared access guard',()=>{
+ for(const file of ['generate','review','recover','studio']){
   const source=fs.readFileSync(path.join(__dirname,'../api/'+file+'.js'),'utf8');
   assert.match(source,/require\('\.\/_ai-access\.cjs'\)\.protect\(req,res\)/,file);
  }
@@ -83,7 +83,7 @@ test('PowerPoint layouts vary by pedagogical purpose',()=>{
  const source=fs.readFileSync(path.join(__dirname,'../heva-office.js'),'utf8');
  for(const name of ['activity','compare','timeline','cards','feature','editorial'])assert.ok(source.includes("'"+name+"'"),name);
  assert.match(source,/function classifySlide/);
- assert.match(source,/addContent\(ppt,theme,slide,page.title,page.lines,page.kind,i\)/);
+ assert.match(source,/addContent\(ppt,theme,slide,page.title,page.lines,page.kind,i(?:,page)?\)/);
 });
 
 test('strategy metadata can be repaired without inventing evidence',()=>{

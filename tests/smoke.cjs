@@ -25,7 +25,7 @@ for(const id of ['modo-referencia','texto-referencia','studio-reference-slot','s
 }
 assert(html.includes('heva-studio-ui.js'),'Studio UI must be loaded');
 assert(html.includes('heva-recovery-ui.js'),'Recovery must be loaded');
-assert(html.includes('heva-ai-diagrams.js'),'Diagrams must be loaded');
+assert(!html.includes('heva-ai-diagrams.js'),'Removed AI organizer must not be loaded');
 const design=require('../heva-design.js');
 const pedagogy=require('../heva-pedagogy.js');
 const studioModule=require('../heva-studio.js');
@@ -81,7 +81,7 @@ assert(!recoverySource.includes("e.code?.startsWith("),'Recovery must guard non-
 const review=require('../heva-quality.cjs');
 assert.equal(typeof review.readReview,'function');
 assert.equal(typeof review.fingerprint,'function');
-for(const endpoint of ['api/generate.js','api/recover.js','api/review.js','api/diagram.js']){
+for(const endpoint of ['api/generate.js','api/recover.js','api/review.js']){
  const code=fs.readFileSync(path.join(root,endpoint),'utf8');
  assert(code.includes('require('),'Endpoint missing dependencies: '+endpoint);
 }
