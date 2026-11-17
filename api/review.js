@@ -25,12 +25,13 @@ module.exports=async function(req,res){
    const subjectPrompt='\nAUDITORÍA ESPECIALIZADA POR ASIGNATURA: '+JSON.stringify({disciplina:discipline.disciplina,criterios:discipline.criterios,observaciones:discipline.incidencias.slice(0,24),objetivo:material.planGeneracion?.objetivoAprendizaje||material.objetivoAprendizaje,marco:material.planGeneracion?.marcoCurricular||material.marcoCurricular})+'\nContrasta cada observación con el contenido real. No supongas que una heurística es un error comprobado. Revisa pertinencia al OA, ejemplos guiados, exactitud disciplinar, adecuaciones, actividades autosuficientes y evidencia evaluativa. Para hechos y objetivos exige fuentes verificables; sin ellas marca no_verificable. Mantén los ocho criterios del esquema.';
    const strategyReport=require('../experimental/strategy-delivery.js').audit(updated,material.planGeneracion||material);
    const reviewPrompt=Q.prompt(clean)+subjectPrompt+'\nESTRATEGIAS SOLICITADAS Y EVIDENCIA REAL: '+JSON.stringify(strategyReport)+'\nLa sección noticiaDidactica es un estímulo SIMULADO: no exijas una noticia periodística real para sus personajes o hechos ficticios; sí revisa los conceptos disciplinares y que no se atribuya a medios reales. Revisa también repeticiones: una lectura compartida puede aparecer una sola vez, pero ejemplo resuelto, práctica guiada y aplicación autónoma requieren contextos o datos y razonamientos distintos. Comprueba cada actividad integrada por su ID, recursos completos, consigna y producto. Una etiqueta estrategiasIntegradas o un planEstrategia no prueba cumplimiento. Señala las estrategias ausentes o solo nominales como requiere_ajuste, con la referencia exacta.'+Sources.evidencePrompt(fuentesDocumentales)+'\nAdemás devuelve contrastesDocumentales:[{seccion,afirmacion,fuenteId,cita}]. Citas literales breves. Una orientación o el OA no prueban hechos disciplinares. Fundamentos concisos y específicos, hallazgos sin repeticiones; conserva los ocho criterios.';
-   let result=await call(reviewPrompt,...keys,[author],{maxOutputTokens:4096,deadline});
+   const compactReviewPrompt=Q.compactPrompt(clean,fuentesDocumentales);
+   let result=await call(reviewPrompt,...keys,[author],{maxOutputTokens:4096,fallbackPrompt:compactReviewPrompt,fallbackMaxOutputTokens:2600,deadline});
    stage='informe';
    let report;
    try{report=Q.readReview(result.value)}catch(e){
     stage='llamada';
-    result=await call(reviewPrompt+'\nEl informe anterior no cumple el esquema: '+e.message+' Devuelve TODOS los ocho criterios, y hallazgos con todos los campos; cada requiere_ajuste debe tener un hallazgo. No cambies ni reescribas el material.',...keys,[author],{maxOutputTokens:4096,deadline});
+    result=await call(reviewPrompt+'\nEl informe anterior no cumple el esquema: '+e.message+' Devuelve TODOS los ocho criterios, y hallazgos con todos los campos; cada requiere_ajuste debe tener un hallazgo. No cambies ni reescribas el material.',...keys,[author],{maxOutputTokens:4096,fallbackPrompt:compactReviewPrompt+'\nReintento: devuelve los ocho criterios completos y hallazgos íntegros; no cambies el material.',fallbackMaxOutputTokens:2600,deadline});
     stage='informe';report=Q.readReview(result.value);
    }
    const contrasts=Sources.validateEvidence(result.value.contrastesDocumentales,fuentesDocumentales);
@@ -62,5 +63,5 @@ module.exports=async function(req,res){
   corrected.auditoriaDisciplinar=require('../experimental/subject-audit.cjs').inspectAll(corrected,plan);
   corrected.historialRevisionIA=[...(material.historialRevisionIA||[]),review];
   return res.status(200).json({exito:true,material:corrected,pendiente:'Revisar nuevamente la corrección.'});
- }catch(e){return res.status(503).json({etapa:stage,codigo:e.code==='AI_RATE_LIMIT'?'cuota_o_limite':e.code,reintentable:true,reintentarEn:e.retryAfter||0,proveedores:e.proveedores,detalle:stage==='informe'?String(e.message).slice(0,180):undefined,error:'No se pudo completar la revisión o corrección independiente. Se conserva el material; revisión pendiente.'})}
+ }catch(e){console.warn('HEVA review',JSON.stringify({etapa:stage,codigo:e.code||'REVIEW_ERROR',proveedores:e.proveedores||[]}));return res.status(503).json({etapa:stage,codigo:e.code==='AI_RATE_LIMIT'?'cuota_o_limite':e.code,reintentable:true,reintentarEn:e.retryAfter||0,proveedores:e.proveedores,detalle:stage==='informe'?String(e.message).slice(0,180):undefined,error:'No se pudo completar la revisión o corrección independiente. Se conserva el material; revisión pendiente.'})}
 };
