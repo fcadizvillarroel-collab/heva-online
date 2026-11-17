@@ -1,0 +1,47 @@
+{
+  "alcance": "Seis muestras técnicas redactadas para exportación; no prueba generación IA ni alineación curricular.",
+  "cases": [
+    {
+      "id": "matematica",
+      "asignatura": "Matemática",
+      "wordBytes": 9495,
+      "pptSlides": 4,
+      "profile": "matematica"
+    },
+    {
+      "id": "lenguaje",
+      "asignatura": "Lenguaje y Comunicación",
+      "wordBytes": 9613,
+      "pptSlides": 4,
+      "profile": "lenguaje"
+    },
+    {
+      "id": "ciencias",
+      "asignatura": "Ciencias Naturales",
+      "wordBytes": 9625,
+      "pptSlides": 4,
+      "profile": "ciencias"
+    },
+    {
+      "id": "historia",
+      "asignatura": "Estudios Sociales",
+      "wordBytes": 9630,
+      "pptSlides": 4,
+      "profile": "historia"
+    },
+    {
+      "id": "ingles",
+      "asignatura": "Inglés",
+      "wordBytes": 9643,
+      "pptSlides": 4,
+      "profile": "ingles"
+    },
+    {
+      "id": "especialidad",
+      "asignatura": "Construcciones Metálicas",
+      "wordBytes": 9600,
+      "pptSlides": 4,
+      "profile": "especialidad"
+    }
+  ]
+}

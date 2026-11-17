@@ -1,5 +1,5 @@
 {
-  "version": "2026.11.17.5-docentes",
+  "version": "2026.11.17.6-auditoria",
   "basePrincipal": "37374748067f8f15a70f109d687c3b1f916e65ff",
   "mejorasIntegradas": "7819ab5",
   "formatoHistorial": "heva-online-v2",
@@ -18,5 +18,7 @@
   "imagenesAutomaticas": "Biblioteca local de tres temas; habilitada también para guías, talleres y accesibles convertidos a PPT. Sin cobertura universal.",
   "diagramasIntegrados": "Relaciones y pasos explícitos del texto, sin inferir relaciones entre párrafos comunes",
   "guiasVisuales": "Imágenes de apoyo en DOCX, datos con barras proporcionales, diagramas explícitos y recuadros; imagen docente compartida con PPT",
-  "recursosVisuales": "Elección independiente de imágenes, diagramas, gráficos y recuadros, antes y después de generar; presets con recursos y solo texto; persistencia por material."
+  "recursosVisuales": "Elección independiente de imágenes, diagramas, gráficos y recuadros, antes y después de generar; presets con recursos y solo texto; persistencia por material.",
+  "auditoriaSolicitudes": "docs/AUDITORIA_SOLICITUDES_20261117.md",
+  "revisionConsignas": "Incluye V/F, comprensión, ejercicios e identificación; detecta referencias a noticias vacías o con solo titular. Control estructural, no semántico."
 }

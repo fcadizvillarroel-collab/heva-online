@@ -25,7 +25,8 @@ Este protocolo complementa `node tests/smoke.cjs`. No se ejecuta una llamada rea
 - [ ] Material anterior como referencia: NINGUNA, ESTILO y CONTENIDO.
 - [ ] Importar y seleccionar documentos base, y cambiar plantilla visual.
 - [ ] Los paneles Diseño pedagógico y Profundidad se abren y cierran por separado.
-- [ ] Crear organizador gráfico, editar nodos, exportar SVG/Mermaid.
+- [ ] Confirmar que no exista el generador de organizadores con IA ni mapas conceptuales; la ruta retirada debe responder 410 sin llamar a proveedores.
+- [ ] Elegir imágenes, diagramas, gráficos y recuadros por separado; comprobar también «Solo texto» en Word/PPT y guardar la elección.
 - [ ] Exportar Word y PowerPoint, comprobar textos completos y legibilidad.
 - [ ] Historial y recuperación no muestran datos de un material diferente.
 
