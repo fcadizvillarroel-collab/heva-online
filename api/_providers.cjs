@@ -9,7 +9,7 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
   const remember=(e,provider)=>{if(e?.name==='TimeoutError'||e?.name==='AbortError'){timedOut=true;providerStatus.push({proveedor:provider,estado:'tiempo_agotado'});}if(String(e?.code||'').startsWith('AI_RESPONSE_')){responseErrors.push(e.code);providerStatus.push({proveedor:provider,estado:e.code});}};
 
   // 1. ChatGPT (OpenAI - si está configurado)
-  if (openAiKey && !exclude.includes('openai')) {
+  if (process.env.ALLOW_PAID_AI === 'true' && openAiKey && !exclude.includes('openai')) {
     try {
       const resp = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST', signal: AbortSignal.timeout(timeoutFor('openai')),

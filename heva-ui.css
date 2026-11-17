@@ -47,3 +47,17 @@ body.alto-contraste main .bg-white,body.alto-contraste main .bg-stone-100{backgr
 #panel-crear select,#panel-crear textarea{font-size:.875rem!important;line-height:1.45}
 @media(max-width:640px){.heva-welcome{flex-direction:column;align-items:stretch;padding:1rem}.heva-start{width:100%}.heva-steps{grid-template-columns:1fr}}
 @media print{.heva-welcome,.heva-steps{display:none!important}}
+/* Herramientas docentes y lectura accesible */
+#heva-teacher-tools,#heva-pending-request{padding:16px;border:1px solid #d7c8b7;background:#fffaf1;border-radius:12px;margin:14px 0}
+#heva-teacher-tools button,.heva-teacher-dialog button{padding:9px 13px;border:1px solid #8b2635;border-radius:7px;margin:5px;background:#fff;color:#64202d;min-height:42px}
+.heva-teacher-dialog{max-width:min(96vw,1350px);max-height:92vh;width:100%;padding:22px;border:2px solid #8b2635;border-radius:14px;background:#fffaf5;color:#302723;overflow:auto}
+.heva-teacher-dialog::backdrop{background:#20100aaa}
+.heva-teacher-dialog h2{font-size:24px;font-weight:bold}.heva-teacher-dialog h3{font-size:18px;font-weight:bold;margin:12px 0}
+.heva-teacher-dialog label{display:block;margin:10px 0}.heva-teacher-dialog input,.heva-teacher-dialog select,.heva-teacher-dialog textarea{border:1px solid #8c8075;padding:8px;margin:5px}
+.heva-teacher-dialog textarea{display:block;width:100%;min-height:100px}
+.heva-edit-row,.heva-diff{border:1px solid #d7c8b7;padding:14px;border-radius:10px;margin:12px 0}
+.heva-diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.heva-diff-grid>div:first-child{background:#fff0ed}.heva-diff-grid>div:last-child{background:#eef8ef}.heva-diff-grid pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;padding:10px}
+.heva-slide-wrapper{position:relative;overflow:hidden;width:100%;margin:20px 0;border:1px solid #d7c8b7}.heva-slide-canvas{width:1280px;height:720px;position:relative;transform-origin:top left}
+#hoja-material.heva-access,#hoja-material.heva-access [contenteditable],#hoja-material.heva-access .text-sm{font-family:var(--heva-reader-font,Arial)!important;font-size:var(--heva-reader-size,16px)!important;line-height:var(--heva-reader-line,1.5)!important;letter-spacing:var(--heva-reader-space,0)!important}
+#hoja-material.heva-access-contrast,#hoja-material.heva-access-contrast *{background:#fff!important;color:#000!important;border-color:#000!important}
+@media(max-width:680px){.heva-diff-grid{grid-template-columns:1fr}}

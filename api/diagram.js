@@ -1,12 +1,12 @@
 const {call}=require('./_providers.cjs');
-const types=['conceptual','cronologia','causas','comparativo','decisiones'];
+const types=['cronologia','causas','comparativo','decisiones'];
 const safe=s=>String(s??'').replace(/[\u0000-\u001f]/g,' ').slice(0,300);
 module.exports=async(req,res)=>{
  res.setHeader('Content-Type','application/json; charset=utf-8');
  res.setHeader('Cache-Control','no-store');
  if(req.method!=='POST')return res.status(405).json({error:'Utiliza POST.'});
  try{
-  const {material,tipo='conceptual'}=req.body||{};
+  const {material,tipo='comparativo'}=req.body||{};
   if(!types.includes(tipo))return res.status(400).json({error:'Tipo de diagrama no válido.'});
   if(!material||typeof material!=='object'||JSON.stringify(material).length>90000)return res.status(400).json({error:'Material ausente o demasiado extenso.'});
   if(!(await require('./_ai-access.cjs').protect(req,res)))return;
@@ -14,7 +14,7 @@ module.exports=async(req,res)=>{
   const sections=[...(material.diapositivas||[]).map(x=>({titulo:safe(x.titulo),contenido:safe(Array.isArray(x.contenido)?x.contenido.join(' '):x.contenido)})),...(material.actividadesGuiadas||[]).map(x=>({titulo:safe(x.titulo||x.nombre),contenido:safe(x.descripcion||x.instrucciones)}))].slice(0,16);
   const pedagogical={activacion:safe(material.activacion),instrucciones:safe(material.instruccionesEstudiante),ejemplo:safe(material.ejemploGuiado?.situacion),lectura:safe(material.introduccionLectura),glosario:(material.glosario||[]).slice(0,12).map(x=>({termino:safe(x.termino||x.concepto),definicion:safe(x.definicion)})),casos:(material.casosEstudio||[]).slice(0,4).map(x=>({contexto:safe(x.contextoReal),pregunta:safe(x.preguntaReflexion)}))};
   const context=JSON.stringify({title,topic,objective,asignatura:safe(material.asignatura),nivel:safe(material.nivel),pedagogical,sections});
-  const instructions={conceptual:'conceptos principales y relaciones semánticas etiquetadas',cronologia:'eventos y fechas en orden temporal, sin inventar fechas',causas:'causas y consecuencias con vínculos fundamentados',comparativo:'comparación de dos o más elementos con criterios explícitos',decisiones:'decisiones y resultados posibles, sin afirmar que sean hechos'}[tipo];
+  const instructions={cronologia:'eventos y fechas en orden temporal, sin inventar fechas',causas:'causas y consecuencias con vínculos fundamentados',comparativo:'comparación de dos o más elementos con criterios explícitos',decisiones:'decisiones y resultados posibles, sin afirmar que sean hechos'}[tipo];
   const prompt='Eres especialista en didáctica EPJA chilena. Construye un organizador visual basado SOLO en el material aportado. Tipo: '+tipo+'. Objetivo: '+instructions+'. Respeta el OA, la asignatura y el tema exclusivo; no mezcles temas ni cambies el enfoque curricular. Diferencia hechos y relaciones inferidas. No inventes datos, fechas, citas ni vínculos. Si faltan evidencias, marca la relación como por verificar. Responde ÚNICAMENTE JSON con forma {"titulo":"...","nodos":[{"id":"n1","texto":"...","detalle":"..."}],"relaciones":[{"origen":"n1","destino":"n2","etiqueta":"..."}],"advertencias":["..."]}. Entre 2 y 12 nodos, máximo 18 relaciones. Los textos de los nodos deben ser breves y legibles. Material: '+context;
   const keyGemini=(process.env.GEMINI_API_KEY||'').trim(),keyGroq=(process.env.GROQ_API_KEY||'').trim();
   if(!keyGemini&&!keyGroq)return res.status(503).json({error:'No hay proveedor gratuito configurado.'});

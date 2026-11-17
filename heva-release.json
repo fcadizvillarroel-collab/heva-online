@@ -1,7 +1,9 @@
 {
-  "version": "2026.11-unificado",
-  "basePrincipal": "5ad90895783d890903129e7bf1f51ce42e1e10c2",
-  "mejorasIntegradas": "0845c0286847b8e826a3b9aefa881e543bdb258f",
+  "version": "2026.11.17-docentes",
+  "basePrincipal": "37374748067f8f15a70f109d687c3b1f916e65ff",
+  "mejorasIntegradas": "7819ab5",
   "formatoHistorial": "heva-online-v2",
-  "claveHistorial": "heva_historial"
+  "claveHistorial": "heva_historial",
+  "fecha": "2026-11-17",
+  "historialCompatible": true
 }

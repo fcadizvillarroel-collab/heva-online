@@ -1,0 +1,16 @@
+{
+  "checks": [
+    "carga de todos los scripts de la app",
+    "editor",
+    "accesibilidad persistida",
+    "comparación",
+    "17 diapositivas previsualizadas en DOM",
+    "reordenar conservando referencias",
+    "deshacer",
+    "encargo pendiente sin conexión",
+    "recuperar marco, nivel y asignatura distintos",
+    "historial anterior intacto",
+    "sin mapas conceptuales"
+  ],
+  "errors": []
+}

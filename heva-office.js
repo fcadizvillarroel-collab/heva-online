@@ -7,7 +7,7 @@ async function word(m,teacher=false){
  const {Document,Packer,Paragraph,TextRun,HeadingLevel,AlignmentType}=root.docx;
  const blocks=HEVA.blocks(material,teacher);
  const main=visual.theme.main,ink=visual.theme.ink,children=[];
- const line=(value,opts={})=>new Paragraph({children:[new TextRun({text:String(value),size:opts.size||visual.wordSize,bold:!!opts.bold,color:opts.color||ink})],spacing:{before:opts.before||0,after:opts.after??110},keepNext:!!opts.keepNext});
+ const line=(value,opts={})=>new Paragraph({children:[new TextRun({text:String(value),size:opts.size||visual.wordSize,font:material.accesibilidadVisual?.fuente||'Arial',characterSpacing:Math.round((material.accesibilidadVisual?.espaciado||0)*(opts.size||visual.wordSize)*10),bold:!!opts.bold,color:opts.color||ink})],spacing:{before:opts.before||0,after:opts.after??110},keepNext:!!opts.keepNext});
  children.push(line('ESCUELA HÉCTOR VALENZUELA CEA · EPJA',{bold:true,color:main,size:20,after:260}));
  children.push(new Paragraph({text:material.titulo||'Material educativo',heading:HeadingLevel.TITLE,spacing:{after:220},keepNext:true}));
  children.push(line([material.asignatura,material.nivel,material.temaEspecifico].filter(Boolean).join(' · '),{color:main,after:260}));
@@ -23,7 +23,7 @@ async function word(m,teacher=false){
    for(let j=0;j<3;j++)children.push(line('___________________________________________________________________',{size:19,color:'9A9A9A',after:155}));
   }
  }
- const doc=new Document({sections:[{properties:{page:{margin:{top:1080,bottom:1080,left:1080,right:1080}}},children}]});
+ const doc=new Document({styles:{paragraphStyles:[{id:'Heading2',name:'Heading 2',basedOn:'Normal',next:'Normal',run:{font:material.accesibilidadVisual?.fuente||'Arial',size:Math.max(visual.wordSize,28),bold:true,color:main},paragraph:{keepNext:true}},{id:'Title',name:'Title',basedOn:'Normal',next:'Normal',run:{font:material.accesibilidadVisual?.fuente||'Arial',size:Math.max(visual.wordSize+8,36),bold:true,color:main},paragraph:{keepNext:true}}],default:{document:{run:{font:material.accesibilidadVisual?.fuente||'Arial',size:visual.wordSize},paragraph:{spacing:{line:Math.round(240*(material.accesibilidadVisual?.interlineado||1.3))}}}}},sections:[{properties:{page:{margin:{top:1080,bottom:1080,left:1080,right:1080}}},children}]});
  const blob=await Packer.toBlob(doc);
  download(blob,safeName(material.titulo)+(teacher?'_docente':'_estudiante')+'.docx');
  return blob;
@@ -161,11 +161,8 @@ function addContent(ppt,theme,slide,title,lines,section,index=0){
   if(/balanza/i.test(title)&&clean.join(' ').length<180){drawBalance(ppt,theme,slide);text(clean.join('\n\n'),1.3,2.38,10.65,.7,20,theme.ink,false,{valign:'top'});}else{  text(clean.join('\n\n'),1.3,2.48,10.65,3.65,23,theme.ink,false,{valign:'top'});}
  }
 }
-async function powerpoint(m,teacher=false){
- if(!root.PptxGenJS)throw Error('No se cargó el exportador PowerPoint. Recarga la página.');
- const material=HEVA.material(m),visual=root.HEVATemplates.layout(material),theme=visual.theme;
- const ppt=new root.PptxGenJS();ppt.layout='LAYOUT_WIDE';ppt.author='Escuela Héctor Valenzuela CEA';ppt.subject=material.objetivoAprendizaje||'';ppt.title=material.titulo;
- ppt.lang='es-CL';ppt.theme={headFontFace:'Aptos Display',bodyFontFace:'Aptos',lang:'es-CL'};
+function presentationPages(material,teacher=false){
+ const visual=root.HEVATemplates.layout(material);
  const isPresentation=String(material.tipoMaterial||m.tipoMaterial||'').toUpperCase()==='PRESENTACION'&&Array.isArray(material.diapositivas)&&material.diapositivas.length>0;
  let sections=[];
  if(isPresentation){
@@ -181,15 +178,35 @@ async function powerpoint(m,teacher=false){
   const maxChars=isQuestion?1500:850;
   return (isPresentation?paginatePresentation(section,visual.large):chunksOf(section.text,maxChars,isQuestion?12:5)).map((lines,part)=>({...section,lines,title:section.title+(part?' · continuación':'')}));
  });
+ const used=new Map();for(const page of pages){const key=page.title.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();const n=(used.get(key)||0)+1;used.set(key,n);if(n>1)page.title+=' ('+n+')';}
  const news=material.fuentesDocumentales?.noticias?.items||[];
  if(isPresentation&&news.length){const source={title:'Fuentes de noticias consultadas',kind:'sources',text:news.map(n=>n.publisher+' · '+String(n.publishedAt||'').slice(0,10)+' · '+n.title+'\n'+n.url).join('\n')};paginatePresentation(source,visual.large).forEach((lines,i)=>pages.push({...source,lines,title:source.title+(i?' · continuación':'')}));}
- const total=pages.length+1;
- let cover=addChrome(ppt,theme,'Portada',1,total);
+ return pages;
+}
+function renderCover(ppt,theme,material,total){
+ const cover=addChrome(ppt,theme,'Portada',1,total);
  cover.addShape(ppt.ShapeType.rect,{x:.75,y:1.15,w:11.85,h:4.95,line:{color:theme.main,transparency:100},fill:{color:theme.main}});
  cover.addShape(ppt.ShapeType.rect,{x:1.08,y:1.57,w:1.25,h:.09,line:{color:theme.accent},fill:{color:theme.accent}});
- cover.addText(String(material.titulo||'Presentación educativa'),{x:1.08,y:1.95,w:10.7,h:2.15,fontFace:'Aptos Display',fontSize:38,bold:true,color:'FFFFFF',margin:0,breakLine:false,valign:'mid',fit:'shrink'});
+ cover.addText(String(material.titulo||'Presentación educativa'),{x:1.08,y:1.95,w:10.7,h:2.15,fontFace:'Aptos Display',fontSize:Math.max(22,Math.min(38,material.titulo?.length>100?28:38)),bold:true,color:'FFFFFF',margin:0,breakLine:false,valign:'mid',fit:'shrink'});
  cover.addText([material.asignatura,material.nivel,material.temaEspecifico].filter(Boolean).join('  ·  '),{x:1.1,y:4.55,w:10.6,h:.75,fontSize:18,color:'FFF0E0',margin:0,fit:'shrink'});
  cover.addText('HEVA VISUAL · MOTOR 2026.11',{x:1.1,y:5.57,w:5.8,h:.26,fontSize:10,color:'FFFFFF',margin:0});
+}
+// Preview records exactly the shapes and text boxes used by the PPTX renderer.
+function preview(m,teacher=false){
+ const material=HEVA.material(m),visual=root.HEVATemplates.layout(material),pages=presentationPages(material,teacher),record=[];
+ const ppt={ShapeType:{rect:'rect',roundRect:'roundRect',line:'line'},addSlide(){const page={elements:[],background:{color:visual.theme.background}};record.push(page);return Object.defineProperties({addShape:(shape,options)=>page.elements.push({kind:'shape',shape,...options}),addText:(text,options)=>page.elements.push({kind:'text',text:String(text),...options}),addNotes:()=>{}},{background:{set(v){page.background=v}}});}};
+ renderCover(ppt,visual.theme,material,pages.length+1);
+ pages.forEach((page,i)=>{const slide=addChrome(ppt,visual.theme,page.kind,i+2,pages.length+1);if(visual.large){const add=slide.addText;slide.addText=(text,options)=>add(text,{...options,fontSize:Math.max(26,options.fontSize||26)});}addContent(ppt,visual.theme,slide,page.title,page.lines,page.kind,i);});
+ return {pages:record,width:13.333,height:7.5,limitation:'Comparte paginación y geometría con PPTX. Las fuentes y saltos de línea pueden variar en PowerPoint; comprobar el archivo final.'};
+}
+async function powerpoint(m,teacher=false){
+ if(!root.PptxGenJS)throw Error('No se cargó el exportador PowerPoint. Recarga la página.');
+ const material=HEVA.material(m),visual=root.HEVATemplates.layout(material),theme=visual.theme;
+ const ppt=new root.PptxGenJS();ppt.layout='LAYOUT_WIDE';ppt.author='Escuela Héctor Valenzuela CEA';ppt.subject=material.objetivoAprendizaje||'';ppt.title=material.titulo;
+ ppt.lang='es-CL';ppt.theme={headFontFace:'Aptos Display',bodyFontFace:'Aptos',lang:'es-CL'};
+ const pages=presentationPages(material,teacher);
+ const total=pages.length+1;
+ renderCover(ppt,theme,material,total);
  pages.forEach((page,i)=>{const slide=addChrome(ppt,theme,page.kind,i+2,total);if(visual.large){const originalAddText=slide.addText.bind(slide);slide.addText=(text,options)=>originalAddText(text,{...options,fontSize:Math.max(26,options.fontSize||26)});}addContent(ppt,theme,slide,page.title,page.lines,page.kind,i);if(page.notes&&typeof slide.addNotes==='function')slide.addNotes(page.notes)});
  await ppt.writeFile({fileName:safeName(material.titulo)+(teacher?'_docente':'_estudiante')+'.pptx'});return ppt;
 }
@@ -205,4 +222,4 @@ function auditExport(m,teacher=false){
  if(/(?:Caso\s*\d+|pregunta\s*\d+)/i.test(text)&&/\b2\s*puntos\b/i.test(text)&&/justific|comprob|represent|resuelv/i.test(text))issues.push({level:'info',code:'REVISAR_RUBRICA',detail:'Hay actividades de varios pasos con puntajes bajos; verifique la rúbrica y el desglose.'});
  return {estimatedSlides:slides,issues,wordAndPowerpointShareContent:true};
 }
-root.HEVAOffice={word,powerpoint,download,auditExport};})(typeof globalThis!=='undefined'?globalThis:this);
+root.HEVAOffice={word,powerpoint,download,auditExport,preview,presentationPages,paginatePresentation,classifySlide};})(typeof globalThis!=='undefined'?globalThis:this);

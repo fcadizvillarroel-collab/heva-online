@@ -1,0 +1,13 @@
+{
+  "wordBytes": 10985,
+  "powerpointBytes": 233323,
+  "slides": 17,
+  "notes": 17,
+  "checks": [
+    "vendor local real",
+    "noticia en Word",
+    "tipografía y tamaño accesibles",
+    "notas fuera de diapositivas",
+    "entrada inmutable"
+  ]
+}

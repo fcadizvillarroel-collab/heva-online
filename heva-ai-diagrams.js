@@ -1,11 +1,11 @@
 /* Organizador visual inteligente: la IA propone, el docente edita y valida. */
 (function(root){
- const types={conceptual:'Mapa conceptual',cronologia:'Línea de tiempo',causas:'Causas y consecuencias',comparativo:'Cuadro comparativo',decisiones:'Árbol de decisiones'};
+ const types={cronologia:'Línea de tiempo',causas:'Causas y consecuencias',comparativo:'Cuadro comparativo',decisiones:'Árbol de decisiones'};
  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
  const current=()=>typeof materialActual!=='undefined'?materialActual:root.materialActual;
  let graph=null;
  function draw(g){
-  const nodes=Array.isArray(g.nodos)?g.nodos:[],edges=Array.isArray(g.relaciones)?g.relaciones:[],type=g.tipo||'conceptual';
+  const nodes=Array.isArray(g.nodos)?g.nodos:[],edges=Array.isArray(g.relaciones)?g.relaciones:[],type=g.tipo||'comparativo';
   const w=1100,cols=type==='cronologia'?1:type==='comparativo'?2:type==='causas'?3:2,cellW=Math.floor((w-80)/cols),rowH=type==='cronologia'?135:175,rows=Math.ceil(nodes.length/cols),h=135+rows*rowH;
   const pos=i=>({x:40+(i%cols)*cellW,y:105+Math.floor(i/cols)*rowH});
   const byId=new Map(nodes.map((n,i)=>[n.id,i]));
@@ -13,7 +13,7 @@
   const wrap=(value,max=42)=>{const words=String(value||'').split(/\\s+/),lines=[''];for(const word of words){const last=lines.length-1;if((lines[last]+' '+word).trim().length>max&&lines[last])lines.push(word);else lines[last]=(lines[last]+' '+word).trim()}return lines.slice(0,3)};
   let out='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="'+esc(g.titulo||'Organizador visual')+'"><rect width="100%" height="100%" fill="#fffbf5"/><defs><marker id="heva-arrow" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0 0 L8 3 L0 6Z" fill="#8b2635"/></marker></defs>';
   out+=text(40,49,(g.titulo||'Organizador visual').slice(0,75),26,'#8b2635','bold');
-  out+=text(40,77,({conceptual:'Relaciones entre conceptos',cronologia:'Secuencia temporal',causas:'Causas y consecuencias',comparativo:'Comparación por criterios',decisiones:'Decisiones y posibles resultados'})[type]||'Organizador',14,'#57534e');
+  out+=text(40,77,({cronologia:'Secuencia temporal',causas:'Causas y consecuencias',comparativo:'Comparación por criterios',decisiones:'Decisiones y posibles resultados'})[type]||'Organizador',14,'#57534e');
   edges.forEach(e=>{const ai=byId.get(e.origen),bi=byId.get(e.destino);if(ai===undefined||bi===undefined||ai===bi)return;const p=pos(ai),q=pos(bi),x1=p.x+cellW/2,y1=p.y+106,x2=q.x+cellW/2,y2=q.y;const middle=(y1+y2)/2;
    out+='<path d="M'+x1+' '+y1+' Q'+((x1+x2)/2)+' '+middle+' '+x2+' '+y2+'" stroke="#8b2635" stroke-width="2" marker-end="url(#heva-arrow)" fill="none"/>';
    if(e.etiqueta)out+=text(Math.min(x1,x2)+12,Math.max(96,middle-6),e.etiqueta.slice(0,34),12,'#57534e');
