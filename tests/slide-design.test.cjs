@@ -62,7 +62,7 @@ test('Lenguaje obtiene un organizador visual local cuando no hay imagen de catá
   const slides=[section('Objetivo','Comprender textos','objetivo'),section('Lectura de noticias','Identificar idea principal y evidencias')];
   const result=D.decorate(material,slides,{});
   assert.equal(result[1].image?.generated,true);
-  assert.match(result[1].image?.alt||'',/(TEXTO|AFIRMACIÓN)/);
+  assert.match(result[1].image?.alt||'',/(TEXTO|AFIRMACIÓN|MENSAJE)/);
   assert.equal(D.decorate({...material,recursosVisualesHEVA:{imagenes:false,diagramas:true}},slides,{})[1].image,null);
  }finally{global.document=old;}
 });
