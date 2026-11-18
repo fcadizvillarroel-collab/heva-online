@@ -44,3 +44,10 @@ test('EPJA subjects attach contextual images only to matching explanatory slides
   assert.ok(!D.decorate({...m,recursosVisualesHEVA:{imagenes:false}},sections,{[key]:sample}).some(x=>x.image));
  }
 });
+
+
+test('guided examples and comparisons can use a matching contextual image',()=>{
+ const m={tipoMaterial:'PRESENTACION',titulo:'Globalización'},sections=[section('Objetivo','Comprender'),section('Comparación del intercambio','Producto y proveedor','explicación'),section('Ejemplo de comercio','Intercambio de productos','modelamiento')];
+ const a=D.decorate(m,sections,{intercambio:sample});assert.ok(a[1].image);assert.ok(!a[2].image,'Do not repeat the same illustration');
+ const b=D.decorate(m,[sections[0],sections[2]],{intercambio:sample});assert.ok(b[1].image);
+});
