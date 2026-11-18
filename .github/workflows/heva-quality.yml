@@ -31,7 +31,7 @@ jobs:
       - name: Install Chromium smoke test tooling
         run: |
           npm install --no-save --ignore-scripts --no-audit --no-fund playwright@1.56.1
-          npx playwright install --with-deps chromium
+          npx playwright install chromium
       - name: Export real DOCX and PPTX in Chromium
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/heva-http.log 2>&1 &
