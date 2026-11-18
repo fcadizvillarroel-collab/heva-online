@@ -51,3 +51,18 @@ test('guided examples and comparisons can use a matching contextual image',()=>{
  const a=D.decorate(m,sections,{intercambio:sample});assert.ok(a[1].image);assert.ok(!a[2].image,'Do not repeat the same illustration');
  const b=D.decorate(m,[sections[0],sections[2]],{intercambio:sample});assert.ok(b[1].image);
 });
+
+
+test('Lenguaje obtiene un organizador visual local cuando no hay imagen de catálogo',()=>{
+ const old=global.document;
+ const ctx={fillRect(){},fillText(){},beginPath(){},roundRect(){},fill(){},moveTo(){},lineTo(){}};
+ global.document={createElement:()=>({width:0,height:0,getContext:()=>ctx,toDataURL:()=>sample.data})};
+ try{
+  const material={tipoMaterial:'GUIA',asignatura:'Lenguaje y Comunicación',temaEspecifico:'Comprensión lectora de noticias',recursosVisualesHEVA:{imagenes:true,diagramas:true}};
+  const slides=[section('Objetivo','Comprender textos','objetivo'),section('Lectura de noticias','Identificar idea principal y evidencias')];
+  const result=D.decorate(material,slides,{});
+  assert.equal(result[1].image?.generated,true);
+  assert.match(result[1].image?.alt||'',/(TEXTO|AFIRMACIÓN)/);
+  assert.equal(D.decorate({...material,recursosVisualesHEVA:{imagenes:false,diagramas:true}},slides,{})[1].image,null);
+ }finally{global.document=old;}
+});
