@@ -62,7 +62,23 @@ test('Lenguaje obtiene un organizador visual local cuando no hay imagen de catá
   const slides=[section('Objetivo','Comprender textos','objetivo'),section('Lectura de noticias','Identificar idea principal y evidencias')];
   const result=D.decorate(material,slides,{});
   assert.equal(result[1].image?.generated,true);
-  assert.match(result[1].image?.alt||'',/(TEXTO|AFIRMACIÓN)/);
+  assert.match(result[1].image?.alt||'',/(TEXTO|AFIRMACIÓN|MENSAJE)/);
   assert.equal(D.decorate({...material,recursosVisualesHEVA:{imagenes:false,diagramas:true}},slides,{})[1].image,null);
+ }finally{global.document=old;}
+});
+
+
+test('infografías temáticas se generan en todas las asignaturas con opción de desactivarlas',()=>{
+ const old=global.document;const ctx={fillRect(){},fillText(){},beginPath(){},roundRect(){},fill(){},moveTo(){},lineTo(){}};
+ global.document={createElement:()=>({getContext:()=>ctx,toDataURL:()=>sample.data})};
+ try{
+  const cases=[['Matemática','Ecuaciones lineales','DATOS'],['Ciencias Naturales','Ecosistemas','OBSERVAR'],['Historia','Guerra Fría','CONTEXTO'],['Inglés','Vocabulary','VOCABULARIO'],['Construcciones Metálicas','Soldadura y EPP','PREPARAR'],['Convivencia Social','Resolución de conflictos','SITUACIÓN'],['Lenguaje y Comunicación','Registros de habla','MENSAJE']];
+  for(const [asignatura,temaEspecifico,label] of cases){
+   const material={tipoMaterial:'PRESENTACION',asignatura,temaEspecifico,recursosVisualesHEVA:{imagenes:true,diagramas:true}};
+   const sections=[section('Objetivo','Aprender','objetivo'),section('Explicación de conceptos','Conceptos y procedimientos fundamentales')];
+   const result=D.decorate(material,sections,{});
+   assert.match(result[1].image?.alt||'',new RegExp(label),asignatura);
+   assert.equal(D.decorate({...material,recursosVisualesHEVA:{imagenes:false,diagramas:true}},sections,{})[1].image,null);
+  }
  }finally{global.document=old;}
 });

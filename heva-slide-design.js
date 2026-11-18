@@ -8,32 +8,37 @@ function validateOptions(value){return value!=null&&typeof value==='object'&&!Ar
 function image(value){if(!value||typeof value!=='object'||!/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/]+=*$/.test(value.data||'')||value.data.length>1800000)return null;const w=Number(value.width),h=Number(value.height);if(!Number.isFinite(w)||!Number.isFinite(h)||w<=0||h<=0||w/h<.15||w/h>7)return null;return{data:value.data,width:w,height:h,alt:String(value.alt||'Imagen incorporada por el docente').slice(0,300),generated:value.generated===true};}
 function role(s){const f=norm(s.role||s.funcion),t=norm(s.title);if(/aplicacion|actividad|practica|desafio|ejercicio/.test(f)||/actividad|ejercicio|desafio|ticket de salida/.test(t))return'activity';if(/objetivo/.test(f))return'opening';if(/cierre|sintesis/.test(f))return'closing';if(/modelamiento|ejemplo/.test(f))return'example';if(/explicacion/.test(f))return'concept';return'editorial';}
 const rules=[{id:'intercambio',topic:/globaliza|comercio internacional|cadena de suministro/,slide:/comercio|producto|proveedor|intercambio|cadena|econom/},{id:'dialogo',topic:/resolucion.*conflic|convivencia|escucha activa|mediacion/,slide:/dialog|escuch|mediac|acuerdo|comunic/},{id:'observacion',topic:/germinacion|semilla|crecimiento vegetal/,slide:/germina|semilla|brote|raiz|planta/},{id:'linea_tiempo',topic:/historia|guerra mundial|guerra fria|revolucion industrial|independencia|descoloniza|edad media|edad moderna/,slide:/cronolog|periodo|etapa|antecedente|acontecimiento|hito|secuencia/},{id:'territorio',topic:/geograf|araucania|guerra del pacifico|territorio|migracion|expansion territorial/,slide:/mapa|region|frontera|territorio|ubicacion|desplazamiento/},{id:'ecuaciones',topic:/matematica|ecuacion|algebra|funcion lineal/,slide:/ecuacion|incognita|variable|despeje|igualdad|solucion/},{id:'lenguaje',topic:/lenguaje|comunicacion|comprension lectora|argumentacion/,slide:/lectura|texto|argumento|idea principal|comprension|evidencia/},{id:'ingles',topic:/ingles|english|vocabulary|grammar/,slide:/dialogue|conversation|vocabulary|sentence|dialogo|pronunciation/},{id:'ciencias',topic:/ciencias naturales|biologia|ecosistema|celula|sistema solar|fotosintesis/,slide:/organismo|celula|ecosistema|energia|ciclo|proceso|experimento/},{id:'seguridad',topic:/construcciones metalicas|prevencion de riesgos|seguridad laboral|soldadura|epp/,slide:/proteccion|riesgo|equipo|soldadura|procedimiento|seguridad/}];
-function languageVisual(section,topic){
- // An original, offline infographic, not a photo or a purported documentary source.
+function subjectVisual(section,topic){
+ // Offline original teaching diagram: never presented as a documentary photograph.
  if(typeof document==='undefined'||typeof document.createElement!=='function')return null;
  const words=norm([section.title,section.text].join(' '));
- if(!/lenguaje|comunicacion|comprension lectora|argumentacion|lectura|texto|noticia|argumento/.test(topic)||!/texto|lectura|argument|noticia|idea|evidencia|mensaje|comunicacion|fuente|comprension/.test(words))return null;
+ const groups=[
+ {re:/lenguaje|comunicacion|comprension lectora|argumentacion|lectura|texto|noticia/,title:'Comprender y comunicar',labels:['MENSAJE','EVIDENCIA','INTERPRETACIÓN'],notes:['¿Qué se expresa?','¿Qué lo sustenta?','¿Cómo se comprende?']},
+ {re:/ingles|english|idioma extranjero/,title:'Comunicar en inglés',labels:['VOCABULARIO','CONTEXTO','USO'],notes:['Palabras clave','Situación comunicativa','Frase aplicada']},
+ {re:/matematica|algebra|ecuacion|geometria|numeros/,title:'Resolver un problema',labels:['DATOS','PROCEDIMIENTO','COMPROBACIÓN'],notes:['Identificar valores','Resolver paso a paso','Verificar el resultado']},
+ {re:/ciencias naturales|biologia|quimica|fisica|ecosistema|experimento/,title:'Explicar un fenómeno',labels:['OBSERVAR','EXPLICAR','VERIFICAR'],notes:['Identificar evidencias','Relacionar causas','Comprobar la idea']},
+ {re:/historia|estudios sociales|geografia|ciudadania|guerra|revolucion/,title:'Analizar un proceso',labels:['CONTEXTO','CAUSAS','CONSECUENCIAS'],notes:['Ubicar tiempo y lugar','Relacionar factores','Explicar cambios']},
+ {re:/construcciones metalicas|soldadura|metal|taller|especialidad|seguridad laboral|prevencion de riesgos/,title:'Aplicar un procedimiento',labels:['PREPARAR','EJECUTAR','VERIFICAR'],notes:['Revisar materiales y EPP','Seguir pasos seguros','Controlar la calidad']},
+ {re:/convivencia|insercion laboral|empleabilidad|emprendimiento/,title:'Resolver una situación',labels:['SITUACIÓN','DECISIÓN','EVALUACIÓN'],notes:['Reconocer el problema','Justificar una acción','Revisar resultados']}
+ ];
+ const group=groups.find(g=>g.re.test(topic))||{title:'Aprender y aplicar',labels:['CONCEPTO','EJEMPLO','APLICACIÓN'],notes:['Comprender la idea','Observar un modelo','Resolver una tarea']};
  try{
   const canvas=document.createElement('canvas');canvas.width=1000;canvas.height=550;
   const ctx=canvas.getContext('2d');if(!ctx)return null;
   ctx.fillStyle='#FFF8EE';ctx.fillRect(0,0,1000,550);
-  const argument=/argument|evidencia|opinion|tesis/.test(words);
-  const labels=argument?['AFIRMACIÓN','EVIDENCIA','CONCLUSIÓN']:['TEXTO','IDEA PRINCIPAL','INTERPRETACIÓN'];
-  ctx.fillStyle='#7B2837';ctx.font='bold 36px Arial';ctx.fillText(argument?'Cómo construir un argumento':'Cómo comprender un texto',50,76);
+  ctx.fillStyle='#7B2837';ctx.font='bold 36px Arial';ctx.fillText(group.title,50,76);
   ctx.font='22px Arial';ctx.fillStyle='#554A42';ctx.fillText('Organizador visual de apoyo · HEVA',50,118);
   for(let i=0;i<3;i++){
    const x=38+i*332,y=200;ctx.fillStyle=i===1?'#F5E1BC':'#E9DDD2';ctx.beginPath();ctx.roundRect(x,y,290,190,18);ctx.fill();
-   ctx.fillStyle='#742B39';ctx.font='bold 23px Arial';ctx.fillText(labels[i],x+18,y+70);
-   ctx.font='20px Arial';ctx.fillStyle='#3F3A36';
-   const subtitles=argument?['¿Qué se sostiene?','¿Qué lo demuestra?','¿Qué se concluye?']:['¿Qué dice?','¿Qué es lo central?','¿Qué significa?'];
-   ctx.fillText(subtitles[i],x+18,y+113);
+   ctx.fillStyle='#742B39';ctx.font='bold 22px Arial';ctx.fillText(group.labels[i],x+16,y+70);
+   ctx.font='19px Arial';ctx.fillStyle='#3F3A36';ctx.fillText(group.notes[i],x+16,y+113);
    if(i<2){ctx.fillStyle='#A55C31';ctx.beginPath();ctx.moveTo(x+294,y+83);ctx.lineTo(x+326,y+97);ctx.lineTo(x+294,y+111);ctx.fill();}
   }
-  ctx.font='18px Arial';ctx.fillStyle='#66564C';ctx.fillText('Esquema didáctico, no imagen documental',50,485);
-  return image({data:canvas.toDataURL('image/png'),width:1000,height:550,alt:'Organizador visual: '+labels.join(' → '),generated:true});
+  ctx.font='18px Arial';ctx.fillStyle='#66564C';ctx.fillText('Esquema didáctico general; no sustituye ejemplos específicos ni fuentes',50,485);
+  return image({data:canvas.toDataURL('image/png'),width:1000,height:550,alt:'Organizador visual: '+group.labels.join(' → '),generated:true});
  }catch{return null;}
 }
-function decorate(m,sections,assets={}){const topic=norm([m.titulo,m.temaEspecifico,m.objetivoAprendizaje,m.planGeneracion?.temaEspecifico].join(' ')),used=new Set();return sections.map((s,i)=>{const prefs=options(m),out={...s,design:role(s),visualOptions:prefs},own=image(s.image);if(!prefs.imagenes||s.hideImage)return{...out,image:null};if(own)return{...out,image:own};if(!['PRESENTACION','GUIA','TALLER','ACCESIBLE'].includes(m.tipoMaterial)||m.accesibilidadVisual?.contraste||i===0||out.design==='activity'||out.design==='closing'||out.design==='opening')return out;const words=norm(s.title+' '+s.text);for(const rule of rules){const asset=image(assets[rule.id]);if(asset&&!used.has(rule.id)&&rule.topic.test(topic)&&rule.slide.test(words)){used.add(rule.id);return{...out,image:asset};}}if(!used.has('lenguaje-infografia')&&prefs.diagramas&&/lenguaje|comunicacion|comprension lectora|argumentacion|lectura|texto|noticia/.test(topic)){const generated=languageVisual(s,topic);if(generated){used.add('lenguaje-infografia');return{...out,image:generated};}}return out;});}
+function decorate(m,sections,assets={}){const topic=norm([m.asignatura,m.titulo,m.temaEspecifico,m.objetivoAprendizaje,m.planGeneracion?.temaEspecifico].join(' ')),used=new Set();return sections.map((s,i)=>{const prefs=options(m),out={...s,design:role(s),visualOptions:prefs},own=image(s.image);if(!prefs.imagenes||s.hideImage)return{...out,image:null};if(own)return{...out,image:own};if(!['PRESENTACION','GUIA','TALLER','ACCESIBLE'].includes(m.tipoMaterial)||m.accesibilidadVisual?.contraste||i===0||out.design==='activity'||out.design==='closing'||out.design==='opening')return out;const words=norm(s.title+' '+s.text);for(const rule of rules){const asset=image(assets[rule.id]);if(asset&&!used.has(rule.id)&&rule.topic.test(topic)&&rule.slide.test(words)){used.add(rule.id);return{...out,image:asset};}}if(!used.has('infografia-asignatura')&&prefs.diagramas){const generated=subjectVisual(s,topic);if(generated){used.add('infografia-asignatura');return{...out,image:generated};}}return out;});}
 function contain(asset,box){const ratio=asset.width/asset.height,w=Math.min(box.w,box.h*ratio),h=w/ratio;return{x:box.x+(box.w-w)/2,y:box.y+(box.h-h)/2,w,h};}
 function dataChart(lines){
  if(!Array.isArray(lines)||lines.length<2||lines.length>6)return null;
