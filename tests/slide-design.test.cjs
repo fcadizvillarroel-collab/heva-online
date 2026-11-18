@@ -32,3 +32,15 @@ test('guide image is not silently discarded when the reading also becomes a char
 test('visual choices default on, validate booleans and preserve explicit opt-outs',()=>{assert.deepEqual(D.options({}),{imagenes:true,diagramas:true,graficos:true,recuadros:true});assert.equal(D.options({planGeneracion:{recursosVisualesHEVA:{imagenes:false}}}).imagenes,false);assert.ok(D.validateOptions({graficos:false}));for(const bad of [[],null,{imagenes:'false'},{otro:true}])assert.equal(D.validateOptions(bad),false);});
 test('plain presentation keeps source data but suppresses photos charts diagrams and frames',()=>{const prefs={imagenes:false,diagramas:false,graficos:false,recuadros:false},m={tipoMaterial:'PRESENTACION',titulo:'Globalización',recursosVisualesHEVA:prefs,diapositivas:[{titulo:'Datos',contenido:['Grupo A: 8 personas','Grupo B: 12 personas']},{titulo:'Relación',contenido:['Causa: Se retrasa la entrega de productos.','Consecuencia: Se reorganiza el trabajo.']}]},v=office().preview(m),elements=v.pages.flatMap(p=>p.elements);assert.equal(elements.filter(x=>x.kind==='image').length,0);assert.equal(v.visualSummary.charts,0);assert.equal(v.visualSummary.diagrams,0);assert.equal(elements.filter(x=>x.shape==='roundRect').length,0);const text=elements.map(x=>x.text||'').join(' ');for(const s of m.diapositivas.flatMap(x=>x.contenido))assert.ok(text.includes(s));});
 test('review keeps local visual preferences without sending them to the AI',()=>{const m={objetivoAprendizaje:'OA literal',recursosVisualesHEVA:{imagenes:false,graficos:false}};assert.ok(!D.forAI(m).recursosVisualesHEVA);assert.equal(D.restoreImages(m,{objetivoAprendizaje:'OA literal'}).recursosVisualesHEVA.imagenes,false);});
+
+
+test('EPJA subjects attach contextual images only to matching explanatory slides',()=>{
+ const cases=[['Guerra Fría','Cronología del conflicto','linea_tiempo'],['Ocupación de la Araucanía','Mapa del territorio','territorio'],['Ecuaciones lineales','Despeje de la incógnita','ecuaciones'],['Comprensión lectora','Idea principal del texto','lenguaje'],['English vocabulary','Conversation practice','ingles'],['Ciencias naturales: ecosistema','Ciclo de energía','ciencias'],['Seguridad laboral en soldadura','Equipos de protección','seguridad']];
+ for(const [titulo,slide,key] of cases){
+  const m={tipoMaterial:'PRESENTACION',titulo},sections=[section('Objetivo','Aprender'),section(slide,'Explicación del tema')];
+  const matched=D.decorate(m,sections,{[key]:sample});
+  assert.ok(matched[1].image,'Missing '+key);
+  assert.ok(!matched[0].image);
+  assert.ok(!D.decorate({...m,recursosVisualesHEVA:{imagenes:false}},sections,{[key]:sample}).some(x=>x.image));
+ }
+});
