@@ -38,4 +38,4 @@ jobs:
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
           sleep 2
-          node tests/export-browser-smoke.cjs
+          node scripts/export-browser-smoke.cjs
