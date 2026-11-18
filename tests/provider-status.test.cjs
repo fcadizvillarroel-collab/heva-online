@@ -10,7 +10,7 @@ test('status does not reveal keys and rejects writes',async()=>{
   process.env.GEMINI_API_KEY='PRIVATE_GEMINI_VALUE';process.env.GROQ_API_KEY='PRIVATE_GROQ_VALUE';
   global.fetch=async(url,opts)=>({ok:true,status:200});
   const r=await run();assert.equal(r.code,200);assert.equal(r.body.proveedores.gemini.conectividad,'correcta');assert.equal(r.body.proveedores.groq.conectividad,'correcta');assert.ok(!JSON.stringify(r.body).includes('PRIVATE_'));assert.equal((await run('POST')).code,405);
- }finally{[process.env.GEMINI_API_KEY,process.env.GROQ_API_KEY,global.fetch]=prior;}
+ }finally{for(const [k,v] of [['GEMINI_API_KEY',prior[0]],['GROQ_API_KEY',prior[1]]]){if(v===undefined)delete process.env[k];else process.env[k]=v;}global.fetch=prior[2];}
 });
 test('status distinguishes configured credentials from connectivity',async()=>{
  const prior=[process.env.GEMINI_API_KEY,process.env.GROQ_API_KEY,global.fetch];
@@ -18,5 +18,5 @@ test('status distinguishes configured credentials from connectivity',async()=>{
   delete process.env.GEMINI_API_KEY;process.env.GROQ_API_KEY='dummy';
   global.fetch=async()=>({ok:false,status:401});
   const r=await run();assert.equal(r.body.proveedores.gemini.conectividad,'sin_configurar');assert.equal(r.body.proveedores.groq.estadoHTTP,401);
- }finally{[process.env.GEMINI_API_KEY,process.env.GROQ_API_KEY,global.fetch]=prior;}
+ }finally{for(const [k,v] of [['GEMINI_API_KEY',prior[0]],['GROQ_API_KEY',prior[1]]]){if(v===undefined)delete process.env[k];else process.env[k]=v;}global.fetch=prior[2];}
 });
