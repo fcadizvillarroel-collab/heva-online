@@ -9,3 +9,12 @@ test('guide images stay out of IA requests and survive correction with the same 
 test('legacy reading without a path receives the teacher image after the reading',()=>{const old=[{title:'Título',text:'Curso'},{title:'Lectura',text:'Información'},{title:'Otra sección',text:'Actividad'}],a=G.attach({tipoMaterial:'GUIA',imagenGuiaHEVA:picture},old);assert.ok(a[1].image);assert.ok(!a[2].image);});
 
 test('plain guide retains every block and disables each optional resource',()=>{const before=JSON.stringify(blocks),m={tipoMaterial:'GUIA',titulo:'Globalización',recursosVisualesHEVA:{imagenes:false,diagramas:false,graficos:false,recuadros:false}},out=G.plan(m,blocks,{intercambio:picture});for(const b of out){assert.ok(!b.guideVisual?.image);assert.ok(!b.guideVisual?.chart);assert.ok(!b.guideVisual?.diagram);assert.ok(!b.guideVisual?.box);}assert.equal(JSON.stringify(blocks),before);assert.deepEqual(out.map(x=>x.text),blocks.map(x=>x.text));});
+
+
+test('guide visuals may appear in matching explanatory sections, not only the reading',()=>{
+ const m={tipoMaterial:'GUIA',titulo:'Globalización'},blocks=[{title:'Título',text:'Globalización',path:'titulo'},{title:'Lectura',text:'Ideas iniciales',path:'introduccionLectura'},{title:'Intercambio de productos',text:'Comercio y proveedores',path:'desarrollo'}];
+ const p=G.plan(m,blocks,{intercambio:{...picture,generated:true}});
+ assert.ok(p[2].guideVisual.image,'Contextual image should reach explanatory section');
+ assert.ok(!p[0].guideVisual.image);
+ assert.ok(!G.plan({...m,recursosVisualesHEVA:{imagenes:false}},blocks,{intercambio:picture}).some(b=>b.guideVisual?.image));
+});

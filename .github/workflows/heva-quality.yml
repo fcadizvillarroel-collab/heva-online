@@ -1,0 +1,41 @@
+name: HEVA quality and export checks
+on:
+  push:
+    branches:
+      - 'work/prioridades-1-7-20261118'
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Validate JavaScript syntax
+        run: |
+          node --check heva-office.js
+          node --check heva-slide-design.js
+          node --check heva-guide-visuals.js
+          node --check heva-assessment.js
+      - name: Run regression tests
+        run: npm test
+      - name: Install Chromium smoke test tooling
+        run: |
+          npm install --no-save --ignore-scripts --no-audit --no-fund playwright@1.56.1
+          npx playwright install chromium
+      - name: Export real DOCX and PPTX in Chromium
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/heva-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          sleep 2
+          node scripts/export-browser-smoke.cjs
