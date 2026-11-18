@@ -23,7 +23,7 @@ function tasks(m){return [
 ...(m.actividadAutonoma?[{ref:'AUTONOMA',text:m.actividadAutonoma.consigna}]:[]),
 ...(m.diapositivas||[]).filter(x=>/aplic|actividad|desafio/i.test(x.funcion||'')).map(x=>({ref:'DIAPO-'+(m.diapositivas.indexOf(x)+1),text:Array.isArray(x.contenido)?x.contenido.join(' '):x.contenido}))
 ].map(x=>({...x,cognicion:cognitive(x.text)}));}
-function hasNewsBody(m,t){const body=m.noticiaDidactica?.cuerpo;if(typeof body==='string'&&body.trim())return true;const candidate=[m.introduccionLectura,t.stimulus].filter(x=>typeof x==='string');return candidate.some(x=>/noticia|titular/.test(norm(x))&&x.trim().split(/\s+/).length>=20);}
+function hasNewsBody(m,t){const body=m.noticiaDidactica?.cuerpo;if(typeof body==='string'&&body.trim().split(/\s+/).length>=20)return true;const candidate=[m.introduccionLectura,t.stimulus].filter(x=>typeof x==='string');return candidate.some(x=>/noticia|titular/.test(norm(x))&&x.trim().split(/\s+/).length>=20);}
 function inspect(m){const objetivo=cognitive(m.objetivoAprendizaje),actividades=tasks(m),issues=[];
 if(objetivo?.indice>=3&&actividades.length&&actividades.every(x=>x.cognicion&&x.cognicion.indice<objetivo.indice))issues.push({code:'DESEMPENO_OA',detail:'Las consignas reconocibles parecen exigir menos complejidad que el OA. Revisar la transferencia y su pauta; la clasificación por verbos es orientativa.'});
 for(const t of actividades){const tr=(m.trazabilidadEstrategia||[]).find(x=>x.referencia===t.ref),e=cognitive(tr?.evidencia);if(t.cognicion&&e&&e.indice<t.cognicion.indice)issues.push({code:'EVIDENCIA_'+t.ref,detail:t.ref+': comprobar que la evidencia recoja el desempeño solicitado y no solo reconocimiento.'});
