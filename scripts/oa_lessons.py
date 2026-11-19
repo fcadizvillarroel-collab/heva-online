@@ -2,6 +2,7 @@
 Never claim these are individual expert-approved lessons.
 """
 from oa_blueprints import blueprint
+from oa_grounded_tasks import task
 
 def lesson(oa):
     b=blueprint(oa)
@@ -65,6 +66,7 @@ def lesson(oa):
         scenario='Compare: «I work in the morning» and «She works in the morning».'
         worked='En presente simple afirmativo, con he/she/it suele añadirse -s al verbo: work → works.'
         transfer='Completa: «He ___ (study) every day».'
+    scenario,worked,transfer=task(oa)
     return {
       'focus':focus,
       'explanation':('El objetivo exige trabajar de forma explícita: '+focus+
