@@ -98,7 +98,7 @@ def inspect_pdf(pdf,expected_pages):
   if pages not in (expected_pages if isinstance(expected_pages,(list,tuple)) else [expected_pages]):issues.append('Unexpected page count: '+str(pages))
   for n,p in enumerate(d):
    text=p.get_text().strip()
-   if len(text)<45:issues.append('Page '+str(n+1)+' nearly empty')
+   if len(text)<45 and not p.get_images(full=True):issues.append('Page '+str(n+1)+' nearly empty')
    pix=p.get_pixmap(matrix=fitz.Matrix(.55,.55),alpha=False)
    im=Image.frombytes('RGB',[pix.width,pix.height],pix.samples)
    stat=ImageStat.Stat(im)
