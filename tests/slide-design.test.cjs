@@ -72,7 +72,7 @@ test('infografías temáticas se generan en todas las asignaturas con opción de
  const old=global.document;const ctx={fillRect(){},fillText(){},beginPath(){},roundRect(){},fill(){},moveTo(){},lineTo(){}};
  global.document={createElement:()=>({getContext:()=>ctx,toDataURL:()=>sample.data})};
  try{
-  const cases=[['Matemática','Ecuaciones lineales','PLANTEAR'],['Ciencias Naturales','Ecosistemas','INTERACCIONES'],['Historia','Guerra Fría','ANTECEDENTES'],['Inglés','Vocabulary','VOCABULARIO'],['Construcciones Metálicas','Soldadura y EPP','PREPARAR'],['Convivencia Social','Resolución de conflictos','PERSONAS'],['Lenguaje y Comunicación','Registros de habla','REGISTRO']];
+  const cases=[['Matemática','Ecuaciones lineales','PLANTEAR'],['Ciencias Naturales','Ecosistemas','INTERACCIONES'],['Historia','Guerra Fría','ANTECEDENTES'],['Inglés','Vocabulary','SITUATION'],['Construcciones Metálicas','Soldadura y EPP','PREPARAR'],['Convivencia Social','Resolución de conflictos','PERSONAS'],['Lenguaje y Comunicación','Registros de habla','REGISTRO']];
   for(const [asignatura,temaEspecifico,label] of cases){
    const material={tipoMaterial:'PRESENTACION',asignatura,temaEspecifico,recursosVisualesHEVA:{imagenes:true,diagramas:true}};
    const sections=[section('Objetivo','Aprender','objetivo'),section('Explicación de conceptos','Conceptos y procedimientos fundamentales')];
