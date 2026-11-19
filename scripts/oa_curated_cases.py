@@ -462,6 +462,106 @@ CASES = {
   "Mayor asistencia: martes con 18. Menor: lunes con 12. Total = 12+18+15=45 asistencias, no necesariamente 45 personas diferentes. Un gráfico de barras debe mostrar escala y días.",
   "Calcula la diferencia entre máximo y mínimo y redacta una conclusión precisa.",
  ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N3|12":(
+  "Analiza «Los estudiantes revisaron la guía ayer».",
+  "Sujeto: «Los estudiantes»; predicado: «revisaron la guía ayer»; núcleo verbal: «revisaron». «La guía» funciona como complemento directo y «ayer» como circunstancial temporal. Es una oración simple porque tiene un verbo conjugado principal.",
+  "Escribe otra oración simple, identifica sujeto y predicado y explica su sentido.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N3|11":(
+  "Une «Estudié el contenido» y «respondí correctamente» mediante un conector causal o consecutivo.",
+  "«Estudié el contenido; por eso respondí correctamente». «Por eso» expresa consecuencia. «Aunque estudié, me equivoqué» expresa concesión; cambiar el conector cambia la relación lógica.",
+  "Redacta tres pares de oraciones usando «porque», «sin embargo» y «por lo tanto».",
+ ),
+ "B24|MED|Filosofía|N1 y 2|4":(
+  "Una comunidad debate si debe priorizar libertad individual o bienestar colectivo al asignar un recurso escaso.",
+  "Una postura puede priorizar autonomía; otra, distribución equitativa. Una visión personal fundamentada compara criterios y consecuencias, reconoce límites y revisa su posición ante razones mejores. No atribuir argumentos inventados a filósofos reales.",
+  "Contrasta dos perspectivas filosóficas con fuentes auténticas identificadas y escribe una conclusión propia.",
+ ),
+ "B24|MED|Filosofía|N1 y 2|3":(
+  "En un diálogo sobre justicia, una persona sostiene que todos deben recibir lo mismo; otra que deben considerarse necesidades.",
+  "Definir igualdad y equidad, preguntar por supuestos y responder con razones. Ejemplo de reformulación empática: «Entiendo que valoras reglas iguales; me preocupa que produzcan barreras para algunas personas».",
+  "Construye una pregunta abierta, una objeción y una respuesta respetuosa.",
+ ),
+ "B24|MED|Filosofía|N1 y 2|2":(
+  "Analiza la afirmación «Ser libre significa hacer siempre lo que uno quiere».",
+  "La afirmación supone que libertad es ausencia de límites. Preguntas filosóficas: «¿Puede haber libertad sin responsabilidad?» y «¿Los derechos de otros limitan mis decisiones?». Las preguntas problematizan conceptos y permiten revisar creencias.",
+  "Formula una pregunta filosófica sobre autonomía y explica qué supuesto cuestiona.",
+ ),
+ "B24|MED|Filosofía|N1 y 2|1":(
+  "Texto filosófico didáctico original: «Una decisión es razonable si podemos justificarla ante quienes resultan afectados».",
+  "Problema: fundamento de decisiones justas. Conceptos: razón, justificación, afectación. Método: examinar premisas y contraejemplos. Implicancia: escuchar a quienes soportan consecuencias. El fragmento es original, no cita histórica.",
+  "Presenta un contraejemplo y explica si modificarías la tesis.",
+ ),
+ "B24|MED|Educación Física y Salud|N1 y 2|4":(
+  "Compara dos barrios ficticios: uno tiene veredas seguras y plaza; otro carece de espacios públicos y transporte.",
+  "El acceso a actividad física depende de infraestructura, tiempo, recursos, cultura y tecnología. No se puede inferir que las personas del segundo barrio carezcan de motivación. La comparación debe considerar barreras estructurales.",
+  "Propón una intervención accesible y un indicador de participación que permita evaluar su impacto.",
+ ),
+ "B24|MED|Educación Física y Salud|N1 y 2|3":(
+  "Un grupo organiza caminatas adaptables de 20 minutos y una charla sobre alimentación variada.",
+  "Proyecto: objetivo promover actividad segura; responsables rotativos; adaptación a capacidades; registro voluntario de asistencia y esfuerzo percibido; respeto por diversidad. Evitar prescribir dietas individuales sin evaluación pertinente.",
+  "Diseña una actividad alternativa para personas con movilidad limitada y un criterio de evaluación.",
+ ),
+ "B24|MED|Educación Física y Salud|N1 y 2|2":(
+  "Una persona puede caminar 15 minutos a intensidad moderada y desea aumentar su resistencia.",
+  "Plan inicial hipotético: tres sesiones semanales de 15 minutos, calentamiento y vuelta a la calma; registrar esfuerzo percibido y progresar gradualmente si tolera bien. Ajustar a condiciones individuales; detener ante síntomas de alarma.",
+  "Propón una progresión de dos semanas y un registro para evaluar adherencia y tolerancia.",
+ ),
+ "B24|MED|Educación Física y Salud|N1 y 2|1":(
+  "Un grupo practica lanzamientos a una diana desde distancias adaptadas a cada participante.",
+  "Habilidad especializada: coordinación ojo-mano, ajuste de fuerza y dirección. La adaptación de distancia y material permite participación responsable; observar seguridad del espacio y turnos.",
+  "Diseña dos variantes de dificultad y explica cómo evaluar precisión sin excluir participantes.",
+ ),
+ "B24|MED|Artes Visuales|N1 y 2|3":(
+  "Un curso prepara una exposición de afiches propios y fotografías autorizadas para un público comunitario.",
+  "Proyecto: definir mensaje y público, solicitar consentimiento, acreditar autorías, revisar licencias, elegir soportes accesibles y asignar roles. Publicar imágenes de personas sin autorización puede vulnerar privacidad.",
+  "Crea un cronograma de difusión y una lista de control ético antes de publicar.",
+ ),
+ "B24|MED|Artes Visuales|N1 y 2|2":(
+  "Una fotografía documental muestra una calle vacía al amanecer con contraste fuerte de luces y sombras.",
+  "Observación: encuadre amplio y alto contraste. Interpretación posible: soledad o calma, pero no es un hecho demostrado. La postura estética debe justificar cómo composición, luz y contexto apoyan el sentido atribuido.",
+  "Escribe una interpretación alternativa y explica qué información contextual falta.",
+ ),
+ "B24|MED|Artes Visuales|N1 y 2|1":(
+  "Crea un afiche visual original que exprese esperanza mediante contraste de formas y colores.",
+  "Ejemplo de propuesta: fondo oscuro, camino claro ascendente y tipografía legible. Justificación: contraste enfatiza cambio y dirección guía la mirada. La intención expresiva debe ser explicada por quien crea la obra.",
+  "Diseña un boceto alternativo, identifica un referente artístico auténtico y explica dos decisiones visuales.",
+ ),
+ "B24|MED|Pensamiento Computacional|N1 y 2|6":(
+  "Diseña un algoritmo para asignar turnos de uso de una herramienta a tres personas.",
+  "Algoritmo: recibir solicitudes, ordenar por hora de registro, asignar intervalos iguales y registrar devolución; si hay empate, aplicar regla pública. Comprobar que nadie quede omitido y no registrar datos sensibles innecesarios.",
+  "Escribe pseudocódigo y prueba con tres solicitudes, dos de ellas simultáneas.",
+ ),
+ "B24|MED|Pensamiento Computacional|N1 y 2|5":(
+  "Un algoritmo que asigna turnos de una herramienta debe reutilizarse para prestar libros.",
+  "Se conservan entradas, orden y registro, pero cambian duración y condición de devolución. La transferencia exige identificar componentes generales y adaptar reglas particulares sin copiar datos personales.",
+  "Rediseña el algoritmo para libros y explica dos ajustes.",
+ ),
+ "B24|MED|Pensamiento Computacional|N1 y 2|4":(
+  "Observa la secuencia de solicitudes por hora: 9:00, 9:15, 9:30, 9:45.",
+  "El patrón es incremento de 15 minutos. Próxima hora 10:00, suponiendo regularidad. Debe distinguirse patrón observado de regla garantizada para todo día.",
+  "Identifica un patrón distinto en una lista de préstamos y explica una excepción posible.",
+ ),
+ "B24|MED|Pensamiento Computacional|N1 y 2|3":(
+  "Modela tres préstamos de herramientas con columnas persona ficticia, objeto, hora de salida y devolución.",
+  "Tabla de datos: A→taladro→9:00→9:30; B→llave→9:10→9:25; C→taladro→9:30→10:00. Un diagrama puede mostrar solicitud→entrega→devolución. El modelo permite verificar solapamientos.",
+  "Dibuja el flujo con un paso de validación de disponibilidad y simula una solicitud simultánea.",
+ ),
+ "B24|MED|Pensamiento Computacional|N1 y 2|2":(
+  "Datos de préstamos: A retira a las 9:00 y devuelve a las 9:30; B intenta retirar el mismo objeto a las 9:15.",
+  "Orden correcto: registrar salida, comprobar disponibilidad antes de nueva entrega, registrar devolución. Error: permitir entrega simultánea de un único objeto. Solución: cola de espera y aviso claro.",
+  "Organiza los pasos y diseña un mensaje de error comprensible.",
+ ),
+ "B24|MED|Pensamiento Computacional|N1 y 2|1":(
+  "Un curso pierde tiempo buscando materiales comunes antes de cada actividad.",
+  "Problema formulado: «¿Cómo localizar y prestar materiales sin pérdidas ni conflictos?». Partes: inventario, ubicación, solicitud, disponibilidad, devolución y responsables. Perspectivas: estudiantes, docentes y encargados.",
+  "Define entradas, restricciones y criterio de éxito sin proponer aún un programa.",
+ ),
+ "B24|MED|Responsabilidad Personal y Social|N1 y 2|5":(
+  "Una persona no comprende una actividad y dispone de una guía, un compañero y una consulta docente.",
+  "Plan autónomo: releer objetivo, intentar un ejemplo, registrar duda concreta, solicitar apoyo y volver a practicar. La colaboración no elimina responsabilidad individual; pedir ayuda a tiempo es estrategia de aprendizaje.",
+  "Diseña una pauta semanal de seguimiento con meta, dificultad, apoyo y resultado.",
+ ),
 }
 def curated_case(oa):
     return CASES.get(oa['clave_interna'])
