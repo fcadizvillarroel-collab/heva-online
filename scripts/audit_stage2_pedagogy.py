@@ -21,10 +21,10 @@ for oa in rows:
  # Explicit evidence gates. A template is not independently validated OA-specific instruction.
  has_structure=all(l.get(k) for k in ('explanation','scenario','worked','transfer','accessibility','exit_ticket')) and len(l.get('questions',[]))==4
  terms=words(topic)-STOP
- overlap=sorted(terms & (words(l['scenario']+' '+l['worked']+' '+l['transfer'])-STOP))
+ overlap=sorted(terms & (words(l['worked']+' '+l['transfer'])-STOP))
  relevance=round(len(overlap)/max(len(terms),1),3)
  issues=[]
- if not overlap:issues.append('EJEMPLO_SIN_COINCIDENCIA_TEMATICA_LEXICA')
+ if not overlap:issues.append('SOLUCION_SIN_TERMINO_ESPECIFICO_DEL_OA')
  elif relevance<0.15:issues.append('BAJA_COINCIDENCIA_TEMATICA_LEXICA')
  if not has_structure:issues.append('ESTRUCTURA_INCOMPLETA')
  if l.get('status')!='VALIDADO_POR_ESPECIALISTA':issues.append('SIN_VALIDACION_DISCIPLINAR')
@@ -34,7 +34,7 @@ for oa in rows:
  results.append({'clave_interna':oa['clave_interna'],'asignatura':oa['asignatura'],'nivel':oa['nivel'],'dominio':key,'objetivo_literal':topic,'estructura_completa':has_structure,'coincidencia_lexica':relevance,'terminos_coincidentes':', '.join(overlap),'estado':'REQUIERE_REVISION_EXPERTA' if issues else 'VALIDADO','alertas':'|'.join(issues),'ejemplo':l['scenario'],'solucion_orientativa':l['worked']})
 with (out/'registro_revision_pedagogica_407.csv').open('w',encoding='utf-8-sig',newline='') as f:
  w=csv.DictWriter(f,fieldnames=results[0].keys());w.writeheader();w.writerows(results)
-summary={'total_oa':len(results),'estructura_completa':sum(r['estructura_completa'] for r in results),'validacion_experta_acreditada':sum(r['estado']=='VALIDADO' for r in results),'pendiente_revision':sum(r['estado']!='VALIDADO' for r in results),'sin_coincidencia_lexica':sum('EJEMPLO_SIN_COINCIDENCIA_TEMATICA_LEXICA' in r['alertas'] for r in results),'baja_coincidencia_lexica':sum('BAJA_COINCIDENCIA_TEMATICA_LEXICA' in r['alertas'] for r in results),'metodo':'Revisión automática de estructura y trazabilidad. No sustituye cotejo experto ni fuentes verificadas.'}
+summary={'total_oa':len(results),'estructura_completa':sum(r['estructura_completa'] for r in results),'validacion_experta_acreditada':sum(r['estado']=='VALIDADO' for r in results),'pendiente_revision':sum(r['estado']!='VALIDADO' for r in results),'sin_coincidencia_lexica':sum('SOLUCION_SIN_TERMINO_ESPECIFICO_DEL_OA' in r['alertas'] for r in results),'baja_coincidencia_lexica':sum('BAJA_COINCIDENCIA_TEMATICA_LEXICA' in r['alertas'] for r in results),'metodo':'Revisión automática de estructura y trazabilidad. No sustituye cotejo experto ni fuentes verificadas.'}
 (out/'resumen.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding='utf-8')
 print(json.dumps(summary,ensure_ascii=False))
 assert len(results)==407
