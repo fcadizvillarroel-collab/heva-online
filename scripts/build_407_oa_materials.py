@@ -123,10 +123,10 @@ def main():
   records.append({'oa':oa['clave_interna'],'subject':oa['asignatura'],'docx':doc.name,'pptx':ppt.name,
    'visual':png.name,'visual_kind':'original_educational_diagram','documentary_source_verified':False})
  if not args.skip_render:
-  pdfdir=out/'pdf';render(out/'docx',pdfdir);render(out/'pptx',pdfdir)
+  docpdf=out/'pdf_docx';pptpdf=out/'pdf_pptx';render(out/'docx',docpdf);render(out/'pptx',pptpdf)
   for record in records:
-   d=inspect_pdf(pdfdir/(Path(record['docx']).stem+'.pdf'),None if False else 1)
-   p=inspect_pdf(pdfdir/(Path(record['pptx']).stem+'.pdf'),3)
+   d=inspect_pdf(docpdf/(Path(record['docx']).stem+'.pdf'),None if False else 1)
+   p=inspect_pdf(pptpdf/(Path(record['pptx']).stem+'.pdf'),3)
    record['render_docx']=d;record['render_pptx']=p
    record['pass']=not d.get('error') and not p.get('error') and not d.get('issues') and not p.get('issues')
  else:
