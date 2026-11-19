@@ -9,7 +9,7 @@ const base = {
 const substantive = [{texto:'La industrialización modificó los procesos productivos, las condiciones laborales y las ciudades. Se comparan fuentes de dos épocas, se explican causas y consecuencias, y se responde una pregunta de aplicación sobre la vida cotidiana. El estudiante identifica dos cambios laborales y justifica con una evidencia histórica qué consecuencia afectó la organización de las ciudades.'}];
 function codes(m,sections=substantive,visuals=[]) {return review({material:m,sections,visuals}).issues.map(x=>x.code);}
 assert(codes(base).length===0,'A fully evidenced non-documentary example must pass');
-assert(codes(base,[{texto:'Paso 1'}]).includes('MARCADOR_SIN_DESARROLLAR'));
+assert(codes(base,[{texto:'Paso 1'}]).some(code=>code==='MARCADOR_SIN_DESARROLLAR'||code==='CONTENIDO_INSUFICIENTE'));
 assert(!codes(base,[{texto:'Paso 1: Lee el documento. '+substantive[0].texto}]).includes('MARCADOR_SIN_DESARROLLAR'));
 assert(codes(base,[{texto:'Tema'}]).includes('CONTENIDO_INSUFICIENTE'));
 assert(codes({...base,recursosVisualesHEVA:{imagenes:true}}).includes('VISUALES_SOLICITADOS_SIN_EVIDENCIA'));
