@@ -66,13 +66,20 @@ def create_ppt(oa,png,out):
  addtext(s,.8,6.35,11.8,.55,'BORRADOR NO VALIDADO · Requiere revisión docente y fuentes específicas',14,False,TEAL)
  prs.save(out)
 def create_doc(oa,png,out):
- doc=Document();sec=doc.sections[0];sec.top_margin=Cm(1.5);sec.bottom_margin=Cm(1.4)
+ doc=Document();sec=doc.sections[0];sec.top_margin=Cm(1.2);sec.bottom_margin=Cm(1.1)
  sec.left_margin=Cm(2);sec.right_margin=Cm(2)
- normal=doc.styles['Normal'];normal.font.name='Aptos';normal.font.size=Pt(10)
+ normal=doc.styles['Normal'];normal.font.name='Aptos';normal.font.size=Pt(9.5)
+ for style in doc.styles:
+  if style.type == 1 and style.name.startswith('Heading'):
+   style.paragraph_format.space_after=Pt(2)
+ for paragraph in doc.paragraphs:
+  paragraph.paragraph_format.space_after=Pt(2)
+  paragraph.paragraph_format.space_before=Pt(0)
+  paragraph.paragraph_format.line_spacing=1.0
  doc.add_heading('Guía breve de aprendizaje · OA '+str(oa['_index']).zfill(3),0)
  doc.add_paragraph(oa['asignatura']+' · '+oa['nivel'])
  doc.add_heading('Objetivo curricular',level=1);doc.add_paragraph(oa['texto_literal'])
- picture=doc.add_picture(str(png),width=Cm(12.0))
+ picture=doc.add_picture(str(png),width=Cm(10.2))
  picture._inline.docPr.set('descr','Organizador del objetivo '+str(oa['_index'])+': comprender, aplicar y revisar.')
  doc.add_heading('Comprender y aplicar',level=1)
  bp=blueprint(oa)
@@ -82,6 +89,10 @@ def create_doc(oa,png,out):
  doc.add_heading('Recurso documental por verificar',level=2);doc.add_paragraph(bp['recurso_recomendado'])
  doc.add_paragraph('Estado: BORRADOR NO VALIDADO. No se adjunta fotografía o mapa sin licencia y pertinencia comprobadas.')
  doc.add_paragraph('Fuente curricular: '+oa['marco']+' · '+oa['fuente_documento'])
+ for paragraph in doc.paragraphs:
+  paragraph.paragraph_format.space_after=Pt(2)
+  paragraph.paragraph_format.space_before=Pt(0)
+  paragraph.paragraph_format.line_spacing=1.0
  doc.save(out)
 def render(folder,output):
  output.mkdir(parents=True,exist_ok=True)
