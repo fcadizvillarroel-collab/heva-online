@@ -3,7 +3,7 @@ const {review}=require('../heva-approval-audit.js');
 const base={tipoMaterial:'GUIA',objetivoAprendizaje:'Comparar fuentes de información',paginasExportadas:4,
  revisionPedagogica:{validada:true,revisor:'Docente',fecha:'2026-11-19',oaVerificado:true,contenidoVerificado:true,actividadesVerificadas:true,respuestasVerificadas:true,accesibilidadVerificada:true},
  revisionVisual:{validada:true,revisor:'Docente',fecha:'2026-11-19',paginasRevisadas:4}};
-const sections=[{title:'Caso',text:'Contrastar dos fuentes identificadas'}];
+const sections=[{title:'Caso',text:'Contrastar dos fuentes identificadas, explicando sus autores, fechas, propósito y evidencias. El estudiante compara la información de ambas fuentes, identifica una coincidencia y una diferencia, argumenta cuál es más pertinente para el objetivo y escribe una conclusión fundamentada en los datos disponibles.'}];
 test('unreviewed generated content cannot be approved',()=>{
  const r=review({material:{tipoMaterial:'GUIA',objetivoAprendizaje:'Comparar fuentes'},sections});
  assert.equal(r.aprobado,false);
