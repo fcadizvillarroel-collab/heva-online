@@ -70,7 +70,7 @@ def create_ppt(oa,png,out):
   return s
  slide('OBJETIVO DE APRENDIZAJE · '+str(oa['_index']).zfill(3),oa['asignatura']+' · '+oa['nivel']+'\n\n'+oa['texto_literal'])
  slide('¿Qué vamos a aprender?',data['explanation'])
- slide('Fuente curricular y alcance','Marco: '+oa['marco']+'\\nPágina indicada en catálogo: '+str(oa.get('pagina_oficial','No indicada'))+'\\nReferencia oficial: '+curricular_source(oa)+'\\n\\nLos casos son originales, no citas del decreto. Las imágenes son esquemas originales y no fotografías documentales.')
+ slide('Fuente curricular y alcance','Marco: '+oa['marco']+'\nPágina indicada en catálogo: '+str(oa.get('pagina_oficial','No indicada'))+'\nReferencia oficial: '+curricular_source(oa)+'\n\nLos casos son originales, no citas del decreto. Las imágenes son esquemas originales y no fotografías documentales.')
  s=slide('Organizador para aprender','Observa las tres acciones: comprender, aplicar y revisar.')
  picture=s.shapes.add_picture(str(png),Inches(1.1),Inches(2.1),width=Inches(10.8),height=Inches(4.0))
  picture._element.nvPicPr.cNvPr.set('descr','Organizador original de comprender, aplicar y revisar.')
