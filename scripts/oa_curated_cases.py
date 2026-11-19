@@ -1252,6 +1252,106 @@ CASES = {
   "Propósito: prevenir riesgos. La instrucción establece orden temporal: cortar suministro antes de limpiar. Debe seguirse normativa de seguridad y no improvisar manipulación eléctrica.",
   "Explica qué palabra indica secuencia y qué información adicional de seguridad buscarías.",
  ),
+ "B24|BÁS|Lenguaje y Comunicación|N1|5":(
+  "Necesitas averiguar el horario de una biblioteca local.",
+  "Propósito: conocer horario. Seleccionar sitio oficial actualizado o consulta directa; registrar fecha y no inventar información. Una publicación anónima sin fecha no basta.",
+  "Escribe qué datos verificarías y cómo citarías la fuente.",
+ ),
+ "B24|BÁS|Lenguaje y Comunicación|N1|4":(
+  "Debes explicar oralmente cómo ordenar una mesa de trabajo.",
+  "Guion: propósito, pasos y cierre; usar gestos para señalar objetos sin sustituir palabras, volumen audible y pausas. La claridad depende de orden y vocabulario.",
+  "Prepara tres frases y una pauta para evaluar dicción y postura.",
+ ),
+ "B24|BÁS|Lenguaje y Comunicación|N1|3":(
+  "Escribe una nota para recordar una reunión el viernes a las 10:00.",
+  "Modelo legible: «Recuerda: reunión el viernes a las 10:00». Separar palabras, mantener tamaño de letra y verificar números. La legibilidad también se puede lograr digitalmente.",
+  "Copia un aviso con fecha y revisa si otra persona puede leerlo.",
+ ),
+ "B24|BÁS|Lenguaje y Comunicación|N1|2":(
+  "Lee: «El lunes se entregarán libros en la sala común».",
+  "Idea global: anuncio de entrega de libros. Detalles: lunes y sala común. Es un aviso informativo, no un relato de ficción.",
+  "Explica con tus palabras de qué trata y formula una pregunta.",
+ ),
+ "B24|BÁS|Lenguaje y Comunicación|N1|1":(
+  "Lee en voz alta: «Mañana tendremos una reunión breve. Traigan lápiz y cuaderno».",
+  "Hacer pausa en punto, articular palabras y entonar la primera oración como afirmación. La fluidez no equivale a leer a máxima velocidad; importa comprensión.",
+  "Marca pausas y practica dos lecturas con autoevaluación.",
+ ),
+ "D257|MED|Educación Física|Núnico|5":(
+  "En un juego, una persona reclama una decisión arbitral y eleva la voz.",
+  "Respuesta respetuosa: detenerse, escuchar la regla, expresar desacuerdo sin insultos y aceptar procedimiento de revisión. La seguridad y el respeto valen más que ganar.",
+  "Propón dos reglas de convivencia y cómo actuar ante una falta.",
+ ),
+ "D257|MED|Educación Física|Núnico|4":(
+  "Un curso organiza un torneo recreativo con cuatro equipos.",
+  "Sistema todos contra todos: cada equipo juega tres encuentros; total de partidos 4×3/2=6. Gestión: calendario, arbitraje, materiales, inclusión y evaluación del trabajo en equipo.",
+  "Diseña roles y un indicador de participación justa.",
+ ),
+ "D257|MED|Educación Física|Núnico|3":(
+  "Un grupo realiza caminata y juego de pases adaptados durante una sesión.",
+  "Caminata puede contribuir a resistencia; pases a coordinación y cooperación. Ajustar duración e intensidad a participantes, controlar espacio y respetar descanso.",
+  "Propón dos variantes inclusivas y una medida de seguridad.",
+ ),
+ "D257|MED|Educación Física|Núnico|2":(
+  "Una persona desea mejorar resistencia con caminatas de intensidad tolerable.",
+  "Principios: progresión, especificidad, recuperación y registro de esfuerzo. Ejemplo hipotético: tres caminatas de 15 minutos semanales, ajustadas a capacidad; no reemplaza evaluación médica cuando se requiera.",
+  "Diseña un registro de dos semanas y criterio de ajuste seguro.",
+ ),
+ "D257|MED|Educación Física|Núnico|1":(
+  "Una persona dispone de 20 minutos libres tres días a la semana.",
+  "Programa: 5 min movilidad y calentamiento, 10 min caminata adaptada, 5 min vuelta a calma; tres sesiones semanales. Ajustar a salud y entorno, detener ante síntomas de alarma.",
+  "Explica cómo usarías el tiempo libre para mantener adherencia sin exceder capacidades.",
+ ),
+ "D257|MED|Idioma Extranjero (Inglés Comunicativo)|Núnico|4":(
+  "Two learners need to prepare a short dialogue but disagree about roles.",
+  "Model: «Can we take turns?» «Yes. You start, and I will answer». Cooperative learning requires listening, shared participation and respectful correction.",
+  "Write a two-turn dialogue that resolves the disagreement politely.",
+ ),
+ "D257|MED|Idioma Extranjero (Inglés Comunicativo)|Núnico|3":(
+  "Classify vocabulary for greeting, workplace and instructions.",
+  "Example terms: hello, goodbye, please, thanks, tool, workshop, schedule, safety, open, close. Ten words are only a sample; the official objective requires a 100-term recognition repertoire, not satisfied by this case alone.",
+  "Create a cumulative list of 100 terms grouped by communicative function and assess recognition.",
+ ),
+ "D257|MED|Idioma Extranjero (Inglés Comunicativo)|Núnico|2":(
+  "Role-play a phone call: «Hello, is the workshop open?» «Yes, until five».",
+  "Function: request and give information. Polite forms include «please», «thank you», «sorry». For instructions: «Please wear safety glasses». Pronunciation and turn-taking matter.",
+  "Write a dialogue that includes greeting, instruction, preference and farewell.",
+ ),
+ "D257|MED|Idioma Extranjero (Inglés Comunicativo)|Núnico|1":(
+  "Listen and repeat: «Good morning. The class starts at nine».",
+  "Identify greeting and time information. «Good morning» has conventional greeting intonation; «starts at nine» communicates schedule. Listening should precede written transcription.",
+  "Explain the purpose and repeat with clear stress on «nine».",
+ ),
+ "D257|MED|Educación Artística|N2|4":(
+  "Compara una fotografía documental actual y una pintura histórica auténtica del mismo tipo de espacio.",
+  "Describir técnica, composición y contexto; cambios posibles en materiales y representación, continuidad posible en tema. La comparación requiere obras con autor y fecha identificados; no atribuir intención sin evidencia.",
+  "Diseña ficha comparativa con obra, fecha, medio y dos cambios.",
+ ),
+ "D257|MED|Educación Artística|N2|3":(
+  "Crea un afiche sobre identidad de un espacio cotidiano sin mostrar rostros de personas no autorizadas.",
+  "Propuesta: objetos y símbolos de trabajo, hogar o barrio; decidir colores y composición con propósito expresivo. Exposición comunitaria requiere consentimiento y respeto por privacidad.",
+  "Escribe ficha de obra y explica tres símbolos escogidos.",
+ ),
+ "D257|MED|Educación Artística|N2|2":(
+  "Observa sombras y luces de una calle y crea una composición con papel recortado.",
+  "Elementos: contraste, ritmo, forma y equilibrio. Evaluación: correspondencia entre intención expresiva y decisiones técnicas, no solo gusto del evaluador.",
+  "Propón dos cambios de composición y justifica su efecto.",
+ ),
+ "D257|MED|Educación Artística|N1|2":(
+  "Observa formas de hojas y piedras y diseña una obra visual original.",
+  "Ejemplo: repetir siluetas de hojas en distintos tamaños para expresar movimiento; justificar textura, contraste y composición. La evaluación debe incluir proceso y reflexión.",
+  "Describe un boceto alternativo y dos criterios de revisión.",
+ ),
+ "D257|MED|Educación Artística|N2|1":(
+  "Selecciona una obra patrimonial auténtica que represente una actividad cotidiana.",
+  "Ficha requerida: autor, título, fecha, institución y técnica. Apreciar exige describir lo visible y analizar contexto; no inventar procedencia ni historia de la obra.",
+  "Compara su representación de la vida cotidiana con una fotografía actual debidamente identificada.",
+ ),
+ "D257|MED|Estudios Sociales|N2|13":(
+  "Investiga una transformación urbana mediante un mapa fechado y una noticia identificada.",
+  "El mapa puede mostrar distribución espacial y la noticia aportar testimonios; ambos requieren fecha, autor, escala y contraste. No usar una fuente única para afirmar causalidad.",
+  "Elabora una tabla con dos datos de cada fuente y una conclusión limitada.",
+ ),
 }
 def curated_case(oa):
     return CASES.get(oa['clave_interna'])
