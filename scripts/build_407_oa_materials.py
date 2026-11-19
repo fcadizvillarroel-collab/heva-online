@@ -57,7 +57,8 @@ def create_ppt(oa,png,out):
  addtext(s,.7,2.3,11.8,3.55,txt,size)
  addtext(s,.7,6.35,12,.55,oa['marco']+' · '+oa['fuente_documento'],14,False,TEAL)
  s=slide();addtext(s,.7,.35,12,.7,'COMPRENDER · APLICAR · REVISAR',29,True)
- s.shapes.add_picture(str(png),Inches(.85),Inches(1.3),width=Inches(11.65),height=Inches(5.1))
+ picture=s.shapes.add_picture(str(png),Inches(.85),Inches(1.3),width=Inches(11.65),height=Inches(5.1))
+ picture._element._nvXxPr.cNvPr.set('descr','Esquema original del objetivo '+str(oa['_index'])+': comprender, aplicar y revisar.')
  s=slide();addtext(s,.7,.45,12,.8,'Actividad de aplicación',30,True)
  addtext(s,.8,1.65,11.7,3.8,
   '1. Explica con tus palabras qué solicita el objetivo.\n'
@@ -72,7 +73,8 @@ def create_doc(oa,png,out):
  doc.add_heading('Guía breve de aprendizaje · OA '+str(oa['_index']).zfill(3),0)
  doc.add_paragraph(oa['asignatura']+' · '+oa['nivel'])
  doc.add_heading('Objetivo curricular',level=1);doc.add_paragraph(oa['texto_literal'])
- doc.add_picture(str(png),width=Cm(15.4))
+ picture=doc.add_picture(str(png),width=Cm(15.4))
+ picture._inline.docPr.set('descr','Organizador del objetivo '+str(oa['_index'])+': comprender, aplicar y revisar.')
  doc.add_heading('Comprender y aplicar',level=1)
  for q in ('¿Qué habilidad solicita este objetivo? Explica con tus palabras.',
            'Describe un ejemplo concreto relacionado con tu vida cotidiana, laboral o ciudadana.',
