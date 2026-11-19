@@ -1452,6 +1452,106 @@ CASES = {
   "El modelo ayuda a visualizar relaciones, pero no reproduce tamaños y distancias simultáneamente a escala si no se especifica. Modelos permiten explicar y predecir dentro de supuestos, no son copias exactas.",
   "Identifica dos límites y una predicción contrastable de un modelo científico.",
  ),
+ "D257|MED|Ciencias Naturales|N2|12":(
+  "En una población hipotética de insectos hay variación heredable de color; un ambiente favorece camuflaje de algunos.",
+  "Selección natural: si individuos con rasgo heredable sobreviven y se reproducen más, su frecuencia puede aumentar entre generaciones. No es cambio voluntario individual. Evidencias incluyen fósiles, genética y biogeografía.",
+  "Explica por qué selección natural no significa que los organismos cambien por necesidad.",
+ ),
+ "D257|MED|Ciencias Naturales|N2|11":(
+  "Dos progenitores son heterocigotos Aa para un rasgo mendeliano simple.",
+  "Cruce Aa×Aa produce genotipos AA, Aa, Aa, aa, proporción 1:2:1 bajo supuestos mendelianos. La meiosis transmite alelos; recombinación y mutaciones contribuyen a variación. Muchos rasgos humanos no siguen este modelo simple.",
+  "Distingue genotipo y fenotipo y una limitación del ejemplo.",
+ ),
+ "D257|MED|Ciencias Naturales|N2|10":(
+  "Una comunidad planifica acciones de autocuidado, educación sexual responsable y reducción de residuos.",
+  "La salud y el ambiente dependen de decisiones personales y condiciones sociales. Prevención incluye información científica, consentimiento, acceso a servicios y respeto de derechos; evitar atribuir culpa individual a problemas complejos.",
+  "Propón una acción individual y una colectiva con evidencia para evaluarlas.",
+ ),
+ "D257|MED|Ciencias Naturales|N2|9":(
+  "Una enfermedad infecciosa afecta células y puede producir síntomas en varios órganos.",
+  "Un agente puede alterar funciones celulares y generar respuesta sistémica; algunas enfermedades tienen componentes genéticos y ambientales. No todas las enfermedades son hereditarias ni todas tienen causa única.",
+  "Distingue causas infecciosas, genéticas y multifactoriales mediante ejemplos generales.",
+ ),
+ "D257|MED|Ciencias Naturales|N2|8":(
+  "Compara glucosa, lípidos y proteínas como sustancias presentes en organismos.",
+  "La química orgánica estudia compuestos de carbono, entre ellos muchas biomoléculas. Glucosa C6H12O6 es carbohidrato; lípidos y proteínas tienen estructuras diversas. No todos los compuestos con carbono son orgánicos en la clasificación habitual.",
+  "Explica una función biológica de cada grupo y evita confundir estructura con función.",
+ ),
+ "D257|MED|Ciencias Naturales|N2|7":(
+  "Un átomo neutro de sodio tiene número atómico 11.",
+  "Configuración electrónica básica 1s² 2s² 2p⁶ 3s¹. Tiene un electrón de valencia y tiende a formar Na⁺ al perderlo; esto ayuda a explicar su ubicación en grupo 1 y enlaces iónicos con no metales.",
+  "Compara electrones de valencia de sodio y cloro consultando tabla periódica.",
+ ),
+ "D257|MED|Ciencias Naturales|N2|5":(
+  "Un átomo neutro de carbono-12 contiene seis protones y seis neutrones.",
+  "Tiene seis electrones. Protones carga +1, electrones −1, neutrones 0 en unidades elementales; protones y neutrones tienen masas similares y muy superiores a la del electrón. Los electrones ocupan niveles permitidos.",
+  "Explica qué cambia al formar un ion positivo sin alterar el núcleo.",
+ ),
+ "D257|MED|Ciencias Naturales|N2|4":(
+  "Compara una brújula, un generador y una lámpara eléctrica.",
+  "Brújula aprovecha interacción magnética; generador convierte energía mecánica en eléctrica mediante inducción; lámpara transforma energía eléctrica en luz y calor. El desarrollo histórico requirió investigación y tecnología acumulativas.",
+  "Elabora una línea de tiempo con tres descubrimientos auténticos y fuentes.",
+ ),
+ "D257|MED|Ciencias Naturales|N2|3":(
+  "Una resistencia de 6 ohmios recibe 12 voltios en un circuito ideal.",
+  "Ley de Ohm: I=V/R=12/6=2 amperios. Corriente eléctrica implica movimiento de cargas; un electroimán genera campo magnético al circular corriente. No manipular circuitos de red eléctrica en actividades escolares.",
+  "Calcula corriente con 9 V y 3 ohmios y explica condiciones del modelo.",
+ ),
+ "D257|MED|Ciencias Naturales|N2|2":(
+  "Un fluido ideal circula horizontalmente por un tubo que se estrecha.",
+  "Continuidad: en fluido incompresible estacionario, menor área implica mayor velocidad. Bernoulli relaciona presión, velocidad y altura a lo largo de una línea de corriente bajo supuestos; la sustentación de un ala requiere además analizar desviación de flujo y fuerzas, no solo «aire más rápido».",
+  "Explica dos supuestos y por qué una simplificación puede fallar en vuelo real.",
+ ),
+ "D257|MED|Ciencias Naturales|N2|1":(
+  "Una fuerza de 100 N actúa uniformemente sobre superficie de 0,5 m².",
+  "Presión P=F/A=100/0,5=200 Pa. Reducir área manteniendo fuerza aumenta presión. En fluidos, presión puede transmitirse y variar con profundidad según condiciones.",
+  "Calcula presión si el área se reduce a 0,25 m².",
+ ),
+ "D257|MED|Ciencias Naturales|N1|15":(
+  "Una persona afirma que una planta crece más porque recibe música, basándose en un solo ejemplar.",
+  "Una observación aislada no establece causa. Comparar grupos, controlar agua y luz, medir crecimiento y repetir. La hipótesis puede examinarse sin ridiculizar creencias personales.",
+  "Diseña una prueba controlada y explica qué resultado no sería concluyente.",
+ ),
+ "D257|MED|Ciencias Naturales|N1|14":(
+  "Compara un modelo antiguo de átomo con uno moderno basado en evidencia experimental.",
+  "Los modelos cambian cuando nuevos experimentos revelan límites de explicaciones previas. No es una simple secuencia de errores: cada modelo responde a preguntas y evidencias de su época.",
+  "Selecciona dos modelos históricos con fuentes y explica qué evidencia impulsó una revisión.",
+ ),
+ "D257|MED|Ciencias Naturales|N1|13":(
+  "Una comunidad observa disminución de especies en una zona tras cambios de uso de suelo.",
+  "Posibles factores: pérdida de hábitat, contaminación, extracción y clima; requieren evidencia local. Conservación puede incluir protección y restauración, considerando necesidades sociales.",
+  "Propón un indicador de biodiversidad y una medida con seguimiento.",
+ ),
+ "D257|MED|Ciencias Naturales|N1|12":(
+  "En una red trófica simplificada, plantas alimentan insectos y estos alimentan aves.",
+  "Las plantas son productores; insectos consumidores primarios y aves consumidores secundarios en esta cadena. Una reducción de insectos puede afectar aves, pero redes reales incluyen muchas relaciones.",
+  "Dibuja una red con un segundo consumidor y explica interdependencia.",
+ ),
+ "D257|MED|Ciencias Naturales|N1|11":(
+  "Una persona consume solo un tipo de alimento durante varios días y cree cubrir todas sus necesidades.",
+  "Una alimentación equilibrada considera variedad, energía y nutrientes adecuados a necesidades individuales. Deficiencias o excesos pueden afectar salud; no diagnosticar a partir de una descripción breve ni imponer dietas universales.",
+  "Propón criterios generales de variedad y fuentes oficiales para recomendaciones.",
+ ),
+ "D257|MED|Ciencias Naturales|N1|10":(
+  "Después de comer pan, los nutrientes pasan por digestión, absorción y metabolismo.",
+  "El sistema digestivo transforma y absorbe moléculas; el circulatorio transporta nutrientes y oxígeno; las células los utilizan en reacciones metabólicas. No confundir digestión con respiración celular.",
+  "Elabora diagrama desde ingestión hasta uso celular de glucosa.",
+ ),
+ "D257|MED|Ciencias Naturales|N1|9":(
+  "Compara una célula de cebolla con una célula animal bajo observación microscópica.",
+  "Ambas tienen membrana, citoplasma y material genético; células vegetales típicas presentan pared celular y gran vacuola, entre otras estructuras. Las células realizan funciones vitales mediante procesos coordinados.",
+  "Dibuja estructuras principales y relaciona una con su función.",
+ ),
+ "D257|MED|Ciencias Naturales|N1|8":(
+  "Dos reacciones químicas ocurren a distintas temperaturas con los demás factores controlados.",
+  "Cinética estudia rapidez de reacción y mecanismos, secuencias de pasos elementales. Aumentar temperatura suele acelerar muchas reacciones, pero no identifica por sí solo mecanismo. Catalizadores cambian vías de reacción.",
+  "Distingue rapidez, energía de activación y mecanismo en un esquema.",
+ ),
+ "D257|MED|Ciencias Naturales|N1|7":(
+  "En un recipiente cerrado ocurre la reacción reversible N₂O₄(g) ⇌ 2NO₂(g).",
+  "En equilibrio dinámico, velocidades directa e inversa son iguales; las concentraciones permanecen constantes, no necesariamente iguales. Kc=[NO₂]²/[N₂O₄] para la ecuación dada, a temperatura fija.",
+  "Explica qué error hay en afirmar que al llegar a equilibrio la reacción se detiene.",
+ ),
 }
 def curated_case(oa):
     return CASES.get(oa['clave_interna'])
