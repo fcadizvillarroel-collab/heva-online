@@ -67,6 +67,12 @@ def lesson(oa):
         worked='En presente simple afirmativo, con he/she/it suele añadirse -s al verbo: work → works.'
         transfer='Completa: «He ___ (study) every day».'
     scenario,worked,transfer=task(oa)
+    oa_text=oa['texto_literal'].strip()
+    action=oa_text.split(' ',1)[0].strip('.,:;')
+    evidence=(
+      'Criterio específico de alineación: la producción debe demostrar la acción «'+action+
+      '» respecto del contenido «'+focus+'». No basta responder sobre la asignatura en general.'
+    )
     return {
       'focus':focus,
       'explanation':('El objetivo exige trabajar de forma explícita: '+focus+
@@ -79,7 +85,7 @@ def lesson(oa):
         'Reflexión: menciona una situación de tu vida adulta, comunitaria o laboral en que aplicarías este aprendizaje.'
       ],
       'answer_guide':[
-        'Se espera identificar el concepto central del OA y usar vocabulario pertinente.',
+        evidence,
         'Criterio de aplicación: la respuesta debe abordar explícitamente el contenido y la habilidad del OA, explicar el procedimiento y justificarlo con evidencia. Orientación: '+worked,
         'Se acepta un error plausible si el estudiante explica la corrección con evidencia o un procedimiento.',
         'Respuesta abierta: evaluar pertinencia del caso, justificación y respeto por la experiencia personal.'
