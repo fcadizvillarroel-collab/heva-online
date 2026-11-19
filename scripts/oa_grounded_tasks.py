@@ -56,4 +56,29 @@ def task(oa):
     }
     scenario,worked,transfer=cases[area]
     scenario=scenario.format(o=objective)
+    # Require the actual action and subject matter of each OA in its evidence rubric.
+    verb=objective.split(' ',1)[0].strip('.,:;')
+    if area=='matematica':
+        criterion=' Evidencia exigida: operaciones o representaciones del contenido específico del OA, desarrollo verificable y unidades cuando correspondan.'
+    elif area=='ciencias':
+        criterion=' Evidencia exigida: conceptos científicos propios del OA, observaciones o datos pertinentes y explicación causal o funcional justificada.'
+    elif area=='historia':
+        criterion=' Evidencia exigida: referencias al proceso del OA, contexto, actores, relaciones causales y fuentes identificables.'
+    elif area=='lenguaje':
+        criterion=' Evidencia exigida: un texto o fragmento pertinente, interpretación o producción observable y justificación con rasgos textuales.'
+    elif area=='ingles':
+        criterion=' Required evidence: an English message or interpretation demonstrating the precise communicative function in the objective.'
+    elif area=='laboral':
+        criterion=' Evidencia exigida: secuencia de actuación propia del contenido laboral del OA y comprobación de requisitos y seguridad.'
+    elif area=='convivencia':
+        criterion=' Evidencia exigida: identificación de posiciones, necesidades o principios del OA, alternativas y consecuencias argumentadas.'
+    elif area=='economia':
+        criterion=' Evidencia exigida: comparación verificable de las variables económicas del OA y decisión fundada en datos.'
+    elif area=='arte':
+        criterion=' Evidencia exigida: producción o análisis con los recursos expresivos y criterios estéticos específicos del OA.'
+    elif area=='fisica':
+        criterion=' Evidencia exigida: demostración de la habilidad motriz del OA, adecuaciones y medidas de seguridad.'
+    else:
+        criterion=' Evidencia exigida: aplicación concreta de la habilidad y los conceptos nombrados en el OA.'
+    worked += ' Para evaluar este objetivo («'+objective+'»), se debe observar la acción «'+verb+'».'+criterion
     return scenario,worked,transfer
