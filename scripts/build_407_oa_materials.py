@@ -165,6 +165,10 @@ def main():
  report={'expected_catalog_count':407,'generated':len(records),
   'passed':sum(r['pass'] is True for r in records),'failed':sum(r['pass'] is False for r in records),
   'rendered':not args.skip_render,'records':records,
+  'documentary_sources_verified':sum(bool(r['documentary_source_verified']) for r in records),
+  'needs_documentary_verification':sum(not r['documentary_source_verified'] for r in records),
+  'human_visual_reviews_completed':0,
+  'expert_pedagogical_approvals':0,
   'limitations':['Original diagrams are not documentary photos or source-verified maps.',
    'Automated rendering cannot replace human pedagogical and visual review.']}
  (out/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
