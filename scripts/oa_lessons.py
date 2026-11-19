@@ -6,9 +6,7 @@ from oa_grounded_tasks import task
 
 def lesson(oa):
     b=blueprint(oa)
-    domain=b['dominio']
     focus=b['foco']
-    text=oa['texto_literal'].lower()
     scenario,worked,transfer=task(oa)
     # Do not replace the OA-grounded task with unrelated subject-wide stock examples.
     oa_text=oa['texto_literal'].strip()
@@ -19,8 +17,7 @@ def lesson(oa):
     )
     return {
       'focus':focus,
-      'explanation':('El objetivo exige trabajar de forma explícita: '+focus+
-         '. Para aprenderlo, primero identificamos conceptos y datos relevantes; después resolvemos un caso y explicamos cómo comprobar la respuesta.'),
+      'explanation':('Contenido curricular del objetivo: '+oa_text+'\n\nOrientación didáctica: '+worked+'\n\nEvidencia esperada: '+evidence),
       'scenario':scenario,'worked':worked,'transfer':transfer,
       'questions':[
         'Identificación del contenido: señala dos conceptos, hechos, procedimientos o criterios que correspondan específicamente a «'+focus+'» y explica su relación.',
@@ -36,5 +33,8 @@ def lesson(oa):
       ],
       'accessibility':'Lectura guiada: el docente puede leer el caso y las preguntas en voz alta; permitir respuesta oral, dictada o escrita. Evitar depender exclusivamente de la imagen.',
       'exit_ticket':'En una frase: ¿qué aprendí, dónde lo aplicaría y qué necesito practicar?',
-      'status':'BORRADOR_DIDACTICO_NO_VALIDADO'
+      'status':'BORRADOR_DIDACTICO_NO_VALIDADO',
+      'tipo_pauta':'CRITERIOS_ORIENTATIVOS_SIN_SOLUCION_UNICA',
+      'fuente_oa':'catalogo-publicado.json',
+      'advertencia':'Requiere contraste con la fuente curricular oficial y revisión disciplinar del contenido antes de uso evaluativo.'
     }
