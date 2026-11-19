@@ -1952,6 +1952,71 @@ CASES = {
   "Defensas: barreras físicas, inmunidad innata y adaptativa. Prevención puede incluir higiene, vacunación y ventilación según enfermedad. No afirmar protección absoluta ni sustituir orientación sanitaria vigente.",
   "Explica diferencia entre barrera física y respuesta inmunitaria.",
  ),
+ "D257|BÁS|Ciencias Naturales|N3|5":(
+  "Dos ampolletas ficticias de igual luminosidad consumen 60 W y 10 W durante cinco horas.",
+  "Energía primera=0,06 kW×5 h=0,30 kWh; segunda=0,01×5=0,05 kWh. Diferencia=0,25 kWh. La comparación supone igual servicio lumínico y no incorpora fabricación ni descarte.",
+  "Calcula consumo de cada una durante 20 horas y explica una medida de uso responsable.",
+ ),
+ "D257|BÁS|Ciencias Naturales|N3|4":(
+  "Una pelota cae desde cierta altura en un sistema ideal sin rozamiento.",
+  "Energía potencial gravitatoria se transforma en cinética. En sistema aislado, energía total se conserva; en situación real, parte se transfiere a calor y sonido, sin desaparecer. La energía mecánica sola puede disminuir.",
+  "Dibuja flujo de energía antes, durante y después de un rebote.",
+ ),
+ "D257|BÁS|Ciencias Naturales|N3|3":(
+  "Dos comprimidos efervescentes de igual composición reaccionan en agua a distinta temperatura.",
+  "A mayor temperatura suele aumentar velocidad de reacción por mayor frecuencia de colisiones eficaces; también influyen concentración y superficie. No comparar si se modifican simultáneamente variables.",
+  "Diseña ensayo seguro que controle volumen, cantidad y tamaño de comprimidos.",
+ ),
+ "D257|MED|Ciencias Naturales|N2|6":(
+  "Compara un trazador radiactivo médico, un reactor de fisión y la fusión estelar.",
+  "Radiactividad: transformación nuclear espontánea de núcleos inestables; fisión: división de núcleos pesados; fusión: unión de núcleos ligeros bajo condiciones extremas. Aplicaciones y riesgos difieren; la radiación ionizante requiere protección especializada.",
+  "Elabora tabla de proceso, aplicación, riesgo y fuente científica verificada.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N3|8":(
+  "Borrador: «El dia martes se realizara la reunion para revisar los materiales».",
+  "Corrección: «El día martes se realizará la reunión para revisar los materiales». Se incorporan tildes y punto final; mejorar presentación con título, párrafo legible y revisión del destinatario.",
+  "Escribe una segunda versión más breve y explica tres decisiones de edición.",
+ ),
+ "D257|BÁS|Ciencias Naturales|N2|2":(
+  "Compara agua destilada, agua de río, aire y suelo.",
+  "Agua destilada ideal se aproxima a sustancia pura H₂O; agua de río, aire y suelo son mezclas de composición variable. Preservación exige prevenir vertidos y gestionar residuos; agua natural no equivale a agua potable.",
+  "Diseña tabla de componentes y una medida preventiva para cada medio.",
+ ),
+ "D257|BÁS|Ciencias Naturales|N3|1":(
+  "Observa hielo, agua líquida y vapor en un modelo de partículas.",
+  "En sólido, partículas tienen posiciones relativamente ordenadas y vibran; en líquido se desplazan unas respecto de otras; en gas están mucho más separadas. En cambios de estado de H₂O no cambia identidad química.",
+  "Explica por qué el vapor ocupa más volumen que igual cantidad de agua líquida bajo condiciones habituales.",
+ ),
+ "D257|BÁS|Ciencias Naturales|N2|5":(
+  "Después de comer pan, el organismo procesa carbohidratos y transporta nutrientes.",
+  "Digestivo transforma y absorbe nutrientes; circulatorio los distribuye; células usan moléculas para funciones metabólicas. Hábitos saludables requieren variedad y condiciones personales, no una regla única para todos.",
+  "Dibuja ruta desde ingestión hasta uso celular y señala función de dos órganos.",
+ ),
+ "D257|BÁS|Ciencias Naturales|N2|3":(
+  "Compara Tierra, Sol, sistema solar y Vía Láctea.",
+  "La Tierra es planeta que orbita el Sol; el sistema solar forma parte de la galaxia Vía Láctea. La luz del Sol tarda aproximadamente 8 minutos 20 segundos en llegar a Tierra; un año luz es distancia, no tiempo.",
+  "Explica diferencia entre unidad astronómica y año luz consultando fuentes científicas.",
+ ),
+ "D257|BÁS|Ciencias Naturales|N2|4":(
+  "Un humedal contiene plantas, insectos, aves, agua y suelo.",
+  "Factores bióticos: organismos; abióticos: agua, luz y temperatura. Cadena simplificada: planta→insecto→ave. Disponibilidad de recursos, depredación y cambios ambientales pueden limitar poblaciones.",
+  "Construye una red trófica y explica dos consecuencias posibles de pérdida de hábitat.",
+ ),
+ "D257|BÁS|Ciencias Naturales|N2|6":(
+  "Compara explicaciones antiguas sobre enfermedades con conocimientos basados en microorganismos.",
+  "La ciencia cambia al desarrollar instrumentos, experimentos y teorías más explicativas. La teoría microbiana se consolidó mediante múltiples investigaciones históricas; no toda enfermedad es infecciosa.",
+  "Investiga dos hitos documentados y explica qué evidencia permitió mejorar la explicación.",
+ ),
+ "D257|BÁS|Ciencias Naturales|N2|7":(
+  "Un registro muestra temperaturas 18, 20, 21 y 23 °C en cuatro horas sucesivas.",
+  "Tabla de hora y temperatura; gráfico de línea con ejes y unidades. Aumento total=5 °C. La curva muestra tendencia en mediciones, no causa del cambio.",
+  "Dibuja gráfico, calcula promedio y describe una limitación de los datos.",
+ ),
+ "D257|MED|Ciencias Naturales|N1|5":(
+  "Calcula cantidad de moléculas en 0,5 mol de una sustancia molecular.",
+  "Un mol corresponde exactamente a 6,02214076×10²³ entidades especificadas. 0,5 mol contiene 3,01107038×10²³ moléculas. Mol mide cantidad de sustancia, no masa; convertir a gramos exige masa molar.",
+  "Calcula entidades en 2 mol y explica diferencia entre mol y gramo.",
+ ),
 }
 def curated_case(oa):
     return CASES.get(oa['clave_interna'])
