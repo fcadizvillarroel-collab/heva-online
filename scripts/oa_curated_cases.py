@@ -562,6 +562,106 @@ CASES = {
   "Plan autónomo: releer objetivo, intentar un ejemplo, registrar duda concreta, solicitar apoyo y volver a practicar. La colaboración no elimina responsabilidad individual; pedir ayuda a tiempo es estrategia de aprendizaje.",
   "Diseña una pauta semanal de seguimiento con meta, dificultad, apoyo y resultado.",
  ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N1|3":(
+  "Instructivo original: «Lave el recipiente. Agregue agua hasta la marca. Cierre la tapa». Noticia original: «La biblioteca inauguró una sala el lunes».",
+  "El instructivo orienta acciones en secuencia; la noticia informa un hecho. En el instructivo, primero se lava y luego se agrega agua. En la noticia, el acontecimiento es la inauguración, ocurrida el lunes. Ambos son textos no literarios con propósitos distintos.",
+  "Escribe una pregunta literal para cada texto y explica su finalidad.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N1|1":(
+  "El docente lee: «La reunión del curso será el jueves a las 11. Se revisará el préstamo de materiales».",
+  "Resumen: reunión jueves a las 11 sobre préstamo de materiales. Pregunta pertinente: «¿En qué sala se realizará?». Una escucha activa recupera datos y solicita aclaraciones sin inventar información.",
+  "Explica qué dato falta y cómo pedirías respetuosamente que se repita el horario.",
+ ),
+ "B24|MED|Responsabilidad Personal y Social|N1 y 2|4":(
+  "Una persona desea mejorar su comprensión lectora en ocho semanas y dispone de 15 minutos diarios.",
+  "Meta específica: leer un texto breve cuatro días por semana y responder tres preguntas; medir avances al final de cada semana. Fortaleza: constancia; dificultad: vocabulario. Ajuste: glosario y lectura acompañada.",
+  "Propón un indicador y una alternativa si no se logra la meta inicial.",
+ ),
+ "B24|MED|Responsabilidad Personal y Social|N1 y 2|3":(
+  "Un grupo proyecta reparar un espacio compartido y capacitar a quienes participarán.",
+  "Plan: identificar necesidad común, acordar roles, presupuesto y seguridad, fijar plazos y registrar avances. Responsabilidad significa cumplir acuerdos y reconocer impactos en otras personas; el bien común requiere participación equitativa.",
+  "Diseña una acción personal y otra colectiva con evidencias de cumplimiento.",
+ ),
+ "B24|MED|Responsabilidad Personal y Social|N1 y 2|2":(
+  "Dos personas quieren usar la misma sala a la misma hora y discuten.",
+  "Hechos: existe coincidencia de horario. Posiciones: ambas quieren la sala. Intereses: realizar actividades. Diálogo: turnos de palabra, preguntas, alternativas y acuerdo verificable; si hay amenazas, priorizar protección.",
+  "Escribe un acuerdo que especifique horario, responsables y revisión.",
+ ),
+ "B24|MED|Responsabilidad Personal y Social|N1 y 2|1":(
+  "Una persona se describe solo por un error pasado, aunque ha aprendido un oficio y ayuda a sus compañeros.",
+  "La identidad integra experiencias, capacidades, intereses y vínculos, no se reduce a un hecho. Recursos personales: habilidades y perseverancia; del contexto: redes de apoyo y oportunidades educativas. No imponer etiquetas ni exigir relatos íntimos.",
+  "Construye un mapa de fortalezas y apoyos ficticios sin revelar datos privados.",
+ ),
+ "B24|MED|Educación Financiera|N1 y 2|5":(
+  "Una persona quiere ahorrar $120.000 para comprar una herramienta en seis meses.",
+  "Meta mensual sin intereses: $120.000/6 = $20.000. Un registro de aportes permite ajustar el plan si hay imprevistos. La perseverancia incluye revisar objetivos realistas y aprender de cambios.",
+  "Si solo ahorra $15.000 al mes, calcula cuánto falta tras seis meses y plantea ajuste.",
+ ),
+ "B24|MED|Educación Financiera|N1 y 2|4":(
+  "Un prototipo de caja organizadora cuesta $8.000 y falla porque su tapa se abre durante el transporte.",
+  "Prueba: transportar con carga simulada y registrar fallos. Hipótesis: cierre insuficiente. Ajuste: añadir pestillo de $1.500; nuevo costo = $9.500. Volver a probar con criterios de seguridad, costo y satisfacción.",
+  "Diseña una tabla de pruebas antes/después y define cuándo aceptarías el prototipo.",
+ ),
+ "B24|MED|Educación Financiera|N1 y 2|3":(
+  "Un grupo planifica fabricar diez organizadores; cada uno requiere $4.000 en materiales y $1.000 en embalaje.",
+  "Costo variable por unidad = $5.000; diez unidades = $50.000, sin incluir mano de obra, herramientas, impuestos ni costos fijos. Etapas: necesidad, diseño, prototipo, presupuesto, prueba y evaluación de impacto.",
+  "Añade un costo fijo de $12.000 y calcula el costo total del lote.",
+ ),
+ "B24|MED|Educación Financiera|N1 y 2|2":(
+  "Un emprendimiento usa envases desechables y considera sustituirlos por recipientes retornables.",
+  "Alternativas: mantener envase barato o introducir retorno con depósito. Criterios: costo total, higiene, accesibilidad, residuos y aceptación. Sin datos de transporte y lavado no se puede afirmar menor impacto ambiental.",
+  "Diseña una matriz de evaluación con cuatro criterios y explica qué datos faltan.",
+ ),
+ "B24|MED|Educación Financiera|N1 y 2|1":(
+  "Una comunidad ficticia necesita reparar bicicletas; un grupo quiere ofrecer el servicio.",
+  "Investigación ética: preguntar voluntariamente por frecuencia de uso, problemas y precio aceptable sin recopilar datos sensibles. Usuarios potenciales: quienes usan bicicletas; necesidad no se demuestra solo con intuición.",
+  "Diseña cinco preguntas neutrales y explica cómo evitar sesgos de muestra.",
+ ),
+ "B24|MED|Emprendimiento y Empleabilidad|N1 y 2|5":(
+  "Una persona quiere preparar su currículum y postular a tres oportunidades laborales durante un mes.",
+  "Meta verificable: elaborar CV, revisar requisitos y registrar tres postulaciones. Indicadores: CV revisado y postulaciones pertinentes. El aprendizaje incluye solicitar retroalimentación y adaptar la búsqueda sin inventar experiencia.",
+  "Redacta un plan semanal con acciones, apoyos y evidencia.",
+ ),
+ "B24|MED|Emprendimiento y Empleabilidad|N1 y 2|4":(
+  "Un equipo prueba un servicio ficticio de mantenimiento con cinco clientes simulados; tres señalan retrasos.",
+  "Resultado: 3/5 = 60 % reporta retrasos en esta muestra pequeña, no representativa. Ajuste: calendario y confirmación previa; nueva prueba con tiempos registrados y consentimiento. Evaluar antes de afirmar mejora.",
+  "Propón indicador de puntualidad y una regla de mejora verificable.",
+ ),
+ "B24|MED|Emprendimiento y Empleabilidad|N1 y 2|3":(
+  "Un taller quiere ofrecer diez reparaciones semanales con materiales de $3.000 por reparación.",
+  "Costo variable estimado = 10×$3.000 = $30.000 semanales, sin costos fijos ni mano de obra. Plan: definir usuarios, recursos, seguridad, agenda, difusión y prueba piloto. Tecnología opcional: registro de solicitudes.",
+  "Añade un costo fijo semanal de $15.000 y calcula costo total previsto.",
+ ),
+ "B24|MED|Emprendimiento y Empleabilidad|N1 y 2|2":(
+  "Un taller considera reutilizar retazos metálicos para fabricar soportes, pero desconoce su resistencia.",
+  "La innovación aprovecha material existente; antes de comercializar, comprobar resistencia, trazabilidad y seguridad, además de costos y residuos. No afirmar que es seguro sin pruebas técnicas.",
+  "Construye una matriz de riesgos con probabilidad, impacto y medida preventiva.",
+ ),
+ "B24|MED|Emprendimiento y Empleabilidad|N1 y 2|1":(
+  "Un curso detecta que los estudiantes pierden tiempo buscando herramientas compartidas.",
+  "Necesidad: sistema de localización y préstamo. Usuarios: estudiantes, docentes y encargados. Investigar con observación y preguntas sin recolectar datos personales innecesarios. Distinguir problema observado de solución anticipada.",
+  "Diseña tres preguntas abiertas para usuarios y un indicador de tiempo de búsqueda.",
+ ),
+ "B24|MED|Inglés|N2|4":(
+  "Present a short researched topic: why a community library is useful. Use only verified facts and identify the source.",
+  "Model: «Today I will talk about our community library. It offers books and a quiet place to read. According to the library's published schedule, it opens on weekdays». The schedule claim must be checked against a real source before presentation.",
+  "Prepare a three-part presentation with introduction, two sourced details and conclusion.",
+ ),
+ "B24|MED|Inglés|N2|3":(
+  "Write a polite email in English asking about a training course.",
+  "Model: «Subject: Course information. Dear Coordinator, I would like to know the course schedule and requirements. Thank you for your help. Best regards, Alex». Uses polite request and appropriate structure.",
+  "Rewrite the message to request information about course fees and location.",
+ ),
+ "B24|MED|Inglés|N2|2":(
+  "Read: «The workshop opens at nine. Marta arrives early because she needs to prepare the tools».",
+  "Main idea: Marta prepares for work. Specific information: opens at nine. «Arrives early» means before the usual or required time; «because» introduces reason. Do not infer exact arrival time.",
+  "Answer: Why does Marta arrive early? What time does the workshop open?",
+ ),
+ "B24|MED|Inglés|N1|4":(
+  "Give a short oral introduction to a familiar hobby.",
+  "Model: «Hello. My name is Alex. I enjoy reading. I read short stories in the evening because they help me relax. Thank you». Clear order: greeting, topic, detail, closing.",
+  "Prepare a 30-second presentation about another interest and practice pronunciation.",
+ ),
 }
 def curated_case(oa):
     return CASES.get(oa['clave_interna'])
