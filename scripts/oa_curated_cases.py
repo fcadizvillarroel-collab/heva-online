@@ -862,6 +862,106 @@ CASES = {
   "Pregunta investigable: ¿las gotas provienen del vapor de agua del aire que se condensa? Comparar vaso frío y a temperatura ambiente, manteniendo entorno similar. No asumir que el vaso tiene fugas.",
   "Formula una predicción y explica qué observación la apoyaría.",
  ),
+ "B24|BÁS|Ciencias Naturales|N2|1":(
+  "Observa una piedra seca y otra húmeda sin probarlas ni manipular materiales peligrosos.",
+  "Descripción observable: una superficie puede verse más oscura cuando está húmeda. «La piedra está triste» es interpretación no científica. Registrar color, textura y condiciones antes de formular explicaciones.",
+  "Escribe tres observaciones y una hipótesis, distinguiéndolas.",
+ ),
+ "B24|MED|Educación Ciudadana|N2|5":(
+  "Un consejo comunitario debate si extender el horario de una biblioteca.",
+  "Postura favorable: mayor acceso para personas que trabajan; objeción: costo de personal. Evidencia necesaria: demanda, presupuesto y seguridad. Argumentar exige reconocer límites y no presentar preferencias como datos.",
+  "Escribe tesis, dos razones y una evidencia que consultarías.",
+ ),
+ "B24|MED|Educación Ciudadana|N2|4":(
+  "Dos barrios discuten el uso de un terreno para plaza o estacionamiento.",
+  "Perspectiva de vecinos: espacio recreativo; de conductores: accesibilidad; de municipio: costo y planificación. Una interpretación responsable compara actores, impactos y fuentes antes de concluir.",
+  "Formula dos argumentos contrapuestos y una alternativa de compromiso.",
+ ),
+ "B24|MED|Educación Ciudadana|N2|3":(
+  "Un mensaje viral afirma que un municipio cerrará todos los parques mañana, sin citar documento.",
+  "No hay prueba suficiente: verificar autor, fecha, canal oficial, documento y corroboración independiente. Compartir el mensaje como hecho sin verificar puede producir desinformación.",
+  "Redacta una respuesta respetuosa que solicite evidencia sin atacar a quien compartió el mensaje.",
+ ),
+ "B24|MED|Educación Ciudadana|N2|2":(
+  "Un mapa ficticio muestra 3 centros de salud en sector A con 12.000 habitantes y 1 en B con 2.000.",
+  "Tasa aproximada: A, 1 centro por 4.000 habitantes; B, 1 por 2.000. La cantidad absoluta no demuestra mejor acceso; faltan distancias, capacidad y población usuaria. Resguardar privacidad geográfica.",
+  "Explica qué información añadirías para comparar accesibilidad real.",
+ ),
+ "B24|MED|Educación Ciudadana|N2|1":(
+  "Compara formas de participación ciudadana antes y después de la difusión de plataformas digitales.",
+  "Continuidad: personas expresan demandas colectivas. Cambio: canales y velocidad de difusión. La tecnología amplía posibilidades pero también riesgos de exclusión y desinformación; se requieren fuentes fechadas.",
+  "Diseña una tabla de dos continuidades y dos cambios con evidencia requerida.",
+ ),
+ "B24|MED|Historia, Geografía y Ciencias Sociales|N1|5":(
+  "Analiza por qué creció una ciudad industrial en un período histórico determinado.",
+  "Explicación multicausal: empleo fabril, migración, transporte e inversión. Dimensiones: económica, social, política y ambiental. Ningún factor por sí solo explica todo; verificar lugar y período con fuentes.",
+  "Redacta una explicación que conecte dos causas y dos consecuencias, citando fuentes auténticas.",
+ ),
+ "B24|MED|Historia, Geografía y Ciencias Sociales|N1|4":(
+  "Una comunidad cambia de actividad agrícola a industrial durante varias décadas.",
+  "Posibles causas: mercados, tecnología, transporte, decisiones políticas y migración. Consecuencias pueden ser positivas o negativas para distintos actores. Sin evidencia local no se debe afirmar cuál causa predominó.",
+  "Construye un diagrama causal con al menos tres factores y señala qué documento verificaría cada uno.",
+ ),
+ "B24|MED|Historia, Geografía y Ciencias Sociales|N1|3":(
+  "Compara una fotografía antigua de una calle con un testimonio oral sobre el mismo lugar.",
+  "La fotografía evidencia elementos visibles en un momento; el testimonio aporta memoria y perspectiva. Ambos requieren autoría, fecha, contexto y corroboración. No confundir silencio de una fuente con ausencia histórica.",
+  "Propón tres preguntas críticas para cada fuente y una forma de contrastarlas.",
+ ),
+ "B24|MED|Historia, Geografía y Ciencias Sociales|N1|2":(
+  "Dos mapas ficticios representan población regional en 2000 y 2020 con escalas distintas.",
+  "Antes de comparar colores o tamaños, revisar leyenda, unidades, límites y escala. Una diferencia visual puede deberse al diseño y no a cambio real. No publicar datos individuales georreferenciados.",
+  "Explica cómo calcularías cambio porcentual con cifras verificadas.",
+ ),
+ "B24|MED|Inglés|N2|1":(
+  "Listen to: «We are running out of time. Please wrap up the meeting».",
+  "«Running out of time» means there is little time left; «wrap up» means finish. The speaker requests a conclusion, not physical wrapping. Meaning depends on context.",
+  "Write a paraphrase in plain English and use «wrap up» in a new sentence.",
+ ),
+ "B24|MED|Historia, Geografía y Ciencias Sociales|N1|1":(
+  "Compara una escuela de 1950 con una actual usando fuentes fechadas y verificadas.",
+  "Continuidad posible: enseñanza organizada y normas de convivencia. Cambios posibles: tecnología y acceso; no generalizar sin documentos específicos. Distinguir cambios materiales de cambios en derechos y experiencias.",
+  "Construye una tabla de continuidades y cambios, con una fuente para cada afirmación.",
+ ),
+ "B24|BÁS|Historia, Geografía y Ciencias Sociales|N3|6":(
+  "Explica a un compañero por qué una fuente histórica necesita fecha y autor.",
+  "Modelo: «La fecha sitúa el documento en un contexto y el autor ayuda a interpretar su perspectiva; ninguna fuente explica por sí sola todo el proceso». Es una explicación disciplinar clara y razonada.",
+  "Redacta una intervención oral de cuatro frases con conceptos «fuente», «contexto» y «evidencia».",
+ ),
+ "B24|BÁS|Historia, Geografía y Ciencias Sociales|N3|5":(
+  "Una fuente afirma «la ciudad mejoró» sin indicar indicadores ni periodo.",
+  "«Mejoró» es una valoración que requiere criterios: salud, ingresos, vivienda u otros. No basta una frase para demostrar bienestar general. Contrastar indicadores y voces de grupos distintos.",
+  "Define dos indicadores y explica qué datos permitirían evaluar la afirmación.",
+ ),
+ "B24|BÁS|Historia, Geografía y Ciencias Sociales|N3|4":(
+  "Compara una boleta de compra antigua con una fotografía de un mercado.",
+  "Boleta: evidencia precio, fecha y producto si son legibles. Fotografía: evidencia elementos visibles y prácticas en un momento, pero no precios ausentes. Clasificar por tipo y pertinencia a la pregunta.",
+  "Elabora una tabla de qué permite y qué no permite concluir cada fuente.",
+ ),
+ "B24|BÁS|Historia, Geografía y Ciencias Sociales|N3|3":(
+  "Una línea de tiempo ubica hechos ficticios en 1900, 1910 y 1915.",
+  "Sucesión: 1900 precede a 1910 y 1915. Duración entre 1900 y 1915: 15 años. Dos hechos simultáneos comparten intervalo temporal; la línea debe mostrar escala coherente.",
+  "Representa dos procesos superpuestos y explica diferencia entre sucesión y simultaneidad.",
+ ),
+ "B24|BÁS|Historia, Geografía y Ciencias Sociales|N3|2":(
+  "Un mapa tiene leyenda: azul = ríos; verde = bosques; puntos negros = ciudades.",
+  "Lectura: identificar símbolos según leyenda y orientación. Una fotografía puede mostrar paisaje local, pero no sustituye automáticamente información de escala o extensión del mapa.",
+  "Explica qué información geográfica aporta cada representación y qué dato falta.",
+ ),
+ "B24|BÁS|Historia, Geografía y Ciencias Sociales|N3|1":(
+  "Compara transporte urbano de comienzos del siglo XX y de la actualidad con imágenes fechadas.",
+  "Continuidad: desplazamiento de personas y mercancías. Cambios: tecnologías y redes de transporte. No asumir que todos los lugares evolucionaron igual; fuentes deben situarse territorialmente.",
+  "Organiza cambios y continuidades con dos evidencias por periodo.",
+ ),
+ "B24|BÁS|Historia, Geografía y Ciencias Sociales|N2|6":(
+  "Explica qué es una línea de tiempo a un compañero que no asistió a clase.",
+  "Modelo: «Es una representación ordenada de acontecimientos en el tiempo. Permite reconocer qué ocurrió antes, después o al mismo tiempo». Usar fechas, lenguaje claro y un ejemplo concreto.",
+  "Escribe una explicación de tres frases y una pregunta de comprobación.",
+ ),
+ "B24|BÁS|Historia, Geografía y Ciencias Sociales|N2|5":(
+  "Una publicación sin autor afirma que una fotografía muestra un acontecimiento de 1920.",
+  "No es fiable solo por circular en redes. Verificar archivo de origen, fecha, lugar, pie de foto y comparación con otras fuentes. La falta de autoría reduce trazabilidad.",
+  "Diseña una pauta de cuatro preguntas para comprobar procedencia.",
+ ),
 }
 def curated_case(oa):
     return CASES.get(oa['clave_interna'])
