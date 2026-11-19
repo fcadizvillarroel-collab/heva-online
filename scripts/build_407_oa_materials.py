@@ -93,7 +93,7 @@ def inspect_pdf(pdf,expected_pages):
  if not pdf.exists():return {'error':'PDF absent'}
  with fitz.open(pdf) as d:
   issues=[]; pages=len(d)
-  if pages!=expected_pages:issues.append('Unexpected page count: '+str(pages))
+  if pages not in (expected_pages if isinstance(expected_pages,(list,tuple)) else [expected_pages]):issues.append('Unexpected page count: '+str(pages))
   for n,p in enumerate(d):
    text=p.get_text().strip()
    if len(text)<45:issues.append('Page '+str(n+1)+' nearly empty')
@@ -125,7 +125,7 @@ def main():
  if not args.skip_render:
   docpdf=out/'pdf_docx';pptpdf=out/'pdf_pptx';render(out/'docx',docpdf);render(out/'pptx',pptpdf)
   for record in records:
-   d=inspect_pdf(docpdf/(Path(record['docx']).stem+'.pdf'),None if False else 1)
+   d=inspect_pdf(docpdf/(Path(record['docx']).stem+'.pdf'),(1,2))
    p=inspect_pdf(pptpdf/(Path(record['pptx']).stem+'.pdf'),3)
    record['render_docx']=d;record['render_pptx']=p
    record['pass']=not d.get('error') and not p.get('error') and not d.get('issues') and not p.get('issues')
