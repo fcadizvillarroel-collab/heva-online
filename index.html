@@ -255,7 +255,7 @@
             <p id="resumen-claves" class="text-[11px] text-emerald-800">Haz clic en cualquier texto para editarlo directamente antes de descargar.</p>
           </div>
           <div class="no-print flex gap-2 flex-wrap">
-            <button onclick="guardarEnHistorial()" id="btn-guardar-doc" disabled class="px-3 py-1.5 bg-stone-600 text-white rounded text-xs font-semibold shadow hover:bg-stone-800 disabled:opacity-50">
+            <button onclick="mostrarAuditoriaHEVA()" id="btn-auditoria" class="px-3 py-1.5 bg-stone-700 text-white rounded text-xs font-semibold shadow" type="button">🔎 Revisar calidad</button>\n            <button onclick="guardarEnHistorial()" id="btn-guardar-doc" disabled class="px-3 py-1.5 bg-stone-600 text-white rounded text-xs font-semibold shadow hover:bg-stone-800 disabled:opacity-50">
               💾 Guardar
             </button>
             <button onclick="exportarWord()" id="btn-docx" disabled class="px-3 py-1.5 bg-[#8B2635] hover:bg-[#701E2A] text-white rounded text-xs font-bold shadow flex items-center gap-1 disabled:opacity-50 cursor-not-allowed">
@@ -267,7 +267,7 @@
           </div>
         </div>
 
-        <article id="hoja-material" class="bg-white p-6 md:p-8 rounded-lg border border-stone-200 shadow-sm space-y-6">
+        <pre id="informe-auditoria-heva" class="whitespace-pre-wrap text-xs text-stone-800 bg-amber-50 rounded p-3 mb-3" aria-live="polite">Genera un material y selecciona «Revisar calidad» para ver alertas pedagógicas.</pre>\n        <article id="hoja-material" class="bg-white p-6 md:p-8 rounded-lg border border-stone-200 shadow-sm space-y-6">
           <div class="text-center border-b pb-4">
             <h2 class="text-sm md:text-base font-bold text-[#8B2635] tracking-wide">ESCUELA HÉCTOR VALENZUELA CEA — VILLARRICA</h2>
             <p class="text-xs text-stone-500">Educación de Personas Jóvenes y Adultas (EPJA)</p>
@@ -849,7 +849,18 @@
       cargarHistorial();
     }
 
-    async function exportarWord() {
+    async function mostrarAuditoriaHEVA() {
+      const el=document.getElementById('informe-auditoria-heva');
+      if(!el)return;
+      if(!materialActual){el.textContent='Primero genera un material para revisarlo.';return;}
+      try{
+        const report=window.HEVAOffice?.auditExport(materialActual);
+        if(!report){el.textContent='La auditoría no está disponible en esta versión.';return;}
+        const lines=report.issues.map(i=>'• '+i.code+': '+i.detail);
+        el.textContent='Informe heurístico de calidad'+(report.qualityScore==null?'':' · '+report.qualityScore+'/100')+'\n'+(lines.length?lines.join('\n'):'No se detectaron alertas automáticas. Se recomienda revisión docente.');
+      }catch(error){el.textContent='No fue posible auditar este material: '+error.message;}
+    }
+    function exportarWord() {
       if (!materialActual) return;
       const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
       const parrafos = [
