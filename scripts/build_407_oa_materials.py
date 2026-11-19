@@ -19,7 +19,7 @@ from oa_lessons import lesson
 
 ROOT=Path(__file__).resolve().parents[1]
 OFFICIAL_EPJA_SOURCES = {
- 'Decreto 257': 'https://epja.mineduc.cl/wp-content/uploads/sites/43/2018/10/DTO-257_19-AGO-2009-Marco-curricular-de-Educaci%C3%B3n-de-Adultos.pdf',
+ 'Decreto 257': 'https://www.bcn.cl/leychile/navegar?idNorma=1005224',
  'Bases Curriculares EPJA 2024': 'https://epja.mineduc.cl/documentos-curriculares-epja/',
 }
 def curricular_source(oa):
