@@ -11,6 +11,8 @@ on:
       - 'scripts/attest_oa407_technical.py'
       - 'scripts/audit_oa407_office_content.py'
       - 'scripts/audit_oa407_curricular_trace.py'
+      - 'scripts/inventory_oa407_evidence.py'
+      - 'scripts/contact_sheets.py'
       - '.github/workflows/oa407-render.yml'
   pull_request:
     paths:
@@ -42,6 +44,8 @@ jobs:
         run: python scripts/audit_oa407_office_content.py out/oa407 out/oa407/technical_evidence
       - name: Verify exact OA and original case traceability in all Office artifacts
         run: python scripts/audit_oa407_curricular_trace.py out/oa407 out/oa407/technical_evidence
+      - name: Inventory all pages, source metadata and readability flags
+        run: python scripts/inventory_oa407_evidence.py out/oa407 out/oa407/technical_evidence
       - name: Generate review sheets for every rendered page
         if: success()
         run: python scripts/contact_sheets.py out/oa407
