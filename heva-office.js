@@ -261,6 +261,10 @@ function auditExport(m,teacher=false){
  if(/(?:imagin(?:e|ar)|visualic(?:e|ar))\s+(?:una\s+)?balanza/i.test(text))issues.push({level:'info',code:'BALANZA_VISUAL',detail:'Conviene acompañar la metáfora de la balanza con un diagrama.'});
  if(/evaluaci[oó]n|prueba/i.test(material.tipoMaterial||'')&&!/puntaje|puntos/i.test(text))issues.push({level:'warning',code:'SIN_PUNTAJE',detail:'No se identificó un puntaje explícito en la evaluación.'});
  if(/(?:Caso\s*\d+|pregunta\s*\d+)/i.test(text)&&/\b2\s*puntos\b/i.test(text)&&/justific|comprob|represent|resuelv/i.test(text))issues.push({level:'info',code:'REVISAR_RUBRICA',detail:'Hay actividades de varios pasos con puntajes bajos; verifique la rúbrica y el desglose.'});
- const q=root.HEVAQualityGate?.inspect({material,sections:blocks.map(b=>({title:b.title,text:b.text})),visuals:presentationPages(material,teacher)}); if(q)for(const issue of q.issues)issues.push({level:'warning',code:issue.code,detail:issue.detail}); return {estimatedSlides:slides,issues,qualityScore:q?.score??null,qualityScoreIsHeuristic:true,wordAndPowerpointShareContent:true};
+ const plannedPages=presentationPages(material,teacher);
+ const withVisuals=plannedPages.filter(p=>p.image||p.chart||p.diagram).length;
+ const requested=root.HEVASlideDesign?.options(material)||{};
+ if(['PRESENTACION','GUIA','TALLER','ACCESIBLE'].includes(material.tipoMaterial)&&requested.imagenes!==false&&plannedPages.length>=10&&withVisuals/Math.max(1,plannedPages.length)<.15)issues.push({level:'warning',code:'COBERTURA_VISUAL_BAJA',detail:'Solo '+withVisuals+' de '+plannedPages.length+' páginas tienen recursos visuales planificados. Revise su pertinencia y distribución; una portada decorativa no basta.'});
+ const q=root.HEVAQualityGate?.inspect({material,sections:blocks.map(b=>({title:b.title,text:b.text})),visuals:plannedPages}); if(q)for(const issue of q.issues)issues.push({level:'warning',code:issue.code,detail:issue.detail}); return {estimatedSlides:slides,issues,qualityScore:q?.score??null,qualityScoreIsHeuristic:true,wordAndPowerpointShareContent:true};
 }
 root.HEVAOffice={word,powerpoint,download,auditExport,preview,presentationPages,paginatePresentation,classifySlide};})(typeof globalThis!=='undefined'?globalThis:this);
