@@ -23,10 +23,10 @@ def lesson(oa):
          '. Para aprenderlo, primero identificamos conceptos y datos relevantes; después resolvemos un caso y explicamos cómo comprobar la respuesta.'),
       'scenario':scenario,'worked':worked,'transfer':transfer,
       'questions':[
-        'Comprensión: explica con tus palabras qué solicita el objetivo y menciona un dato o concepto necesario.',
+        'Identificación del contenido: señala dos conceptos, hechos, procedimientos o criterios que correspondan específicamente a «'+focus+'» y explica su relación.',
         'Aplicación: '+transfer,
-        'Análisis: ¿qué error podría cometerse al resolver el caso y cómo lo corregirías?',
-        'Reflexión: menciona una situación de tu vida adulta, comunitaria o laboral en que aplicarías este aprendizaje.'
+        'Análisis crítico: explica qué evidencia, cálculo, fuente, texto o procedimiento permitiría verificar la aplicación de «'+focus+'».',
+        'Transferencia: plantea una situación nueva donde puedas demostrar la habilidad «'+action+'» vinculada con «'+focus+'», y justifica tu respuesta.'
       ],
       'answer_guide':[
         evidence,
