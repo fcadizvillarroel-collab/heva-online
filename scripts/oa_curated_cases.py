@@ -82,6 +82,71 @@ CASES = {
   'En un taller se observa una amoladora sin guarda protectora y un cable dañado.',
   'Peligros: contacto con disco y falla eléctrica. Medidas: detener uso, aislar equipo, informar y reparar por personal competente; verificar resguardos y EPP pertinente antes de reanudar. El EPP no sustituye controles técnicos.',
   'Ordena las acciones de prevención y explica por qué no basta con usar guantes.'),
+ 'D257|MED|Inserción Laboral|Núnico|3':(
+  "En un taller, una trabajadora recibe instrucciones de producción, informa un defecto y participa en una reunión de mejora.",
+  "La experiencia laboral incluye tareas, coordinación, comunicación, derechos, responsabilidades y condiciones de seguridad. El defecto debe documentarse y tratarse sin culpar anticipadamente a una persona.",
+  "Identifica dos aprendizajes y dos dificultades de esta experiencia y fundamenta una mejora.",
+ ),
+ 'D257|MED|Inserción Laboral|Núnico|4':(
+  "Dos trabajadores comparan condiciones de un contrato individual con materias negociables colectivamente: jornada, remuneración y seguridad.",
+  "El contrato individual regula condiciones de una relación laboral específica; la negociación colectiva tiene sujetos, materias y procedimientos legalmente definidos. Se deben consultar el Código del Trabajo y las reglas vigentes antes de describir plazos, requisitos o resultados.",
+  "Construye una tabla que distinga contrato individual, instrumento colectivo y fuentes oficiales para comprobar las reglas.",
+ ),
+ 'D257|MED|Inserción Laboral|Núnico|5':(
+  "Un grupo de capacitación detecta que tres personas no saben operar de forma segura una máquina nueva.",
+  "Un comité paritario de capacitación puede diagnosticar necesidades, priorizar formación, acordar actividades y evaluar resultados. No debe confundirse automáticamente con el comité paritario de higiene y seguridad, cuyas funciones son diferentes.",
+  "Propón un plan de capacitación con objetivo, responsable, fecha e indicador de logro.",
+ ),
+ 'D257|MED|Inserción Laboral|Núnico|2':(
+  "Una microempresa hipotética quiere ofrecer reparaciones por una página web y recibir solicitudes sin pago electrónico.",
+  "Debe definir servicio, público, precio, canal de contacto, condiciones de entrega y tratamiento responsable de datos. Simular el negocio no exige publicar datos personales reales ni efectuar pagos.",
+  "Diseña una ficha de producto y una respuesta al cliente que indique precio, plazo y condiciones.",
+ ),
+ 'D257|MED|Inserción Laboral|Núnico|6':(
+  "Una persona trabaja de pie y realiza movimientos repetitivos durante varias horas. Quiere preparar una rutina de 20 minutos.",
+  "Un plan prudente incluye calentamiento, movilidad y fortalecimiento progresivo ajustado a capacidad individual, pausas y recuperación. El entrenamiento no reemplaza las medidas ergonómicas del puesto ni la evaluación profesional cuando corresponda.",
+  "Propón una rutina breve con tiempos, intensidad percibida y criterio para detener el ejercicio.",
+ ),
+ 'D257|MED|Convivencia Social|Núnico|1':(
+  "Dos compañeros cooperan habitualmente, pero uno interrumpe al otro durante las reuniones.",
+  "La calidad de una relación se puede examinar mediante respeto, escucha, confianza, reciprocidad y manejo del desacuerdo. Una conducta concreta no define por sí sola toda la relación.",
+  "Evalúa la situación con tres criterios observables y propone una mejora.",
+ ),
+ 'D257|MED|Convivencia Social|Núnico|3':(
+  "Una persona nueva llega a un grupo de trabajo y nadie le explica las tareas ni la invita a participar.",
+  "Saludar, escuchar, compartir información y reconocer aportes favorece la inclusión y la confianza. Se deben evitar suposiciones sobre capacidades personales y acordar formas de participación.",
+  "Propón tres conductas concretas que mejoren el vínculo y explica cómo observar su efecto.",
+ ),
+ 'D257|MED|Convivencia Social|Núnico|4':(
+  "Dos personas discrepan sobre el uso de una sala común. Una propone resolverlo mediante amenazas.",
+  "La solución pacífica requiere respeto a la dignidad, reglas conocidas, proporcionalidad y ausencia de coerción. Una amenaza no constituye negociación legítima; deben utilizarse canales seguros y normas aplicables.",
+  "Redacta cuatro reglas de diálogo y explica qué harías si la seguridad de alguien está comprometida.",
+ ),
+ 'D257|MED|Convivencia Social|Núnico|7':(
+  "Una persona recibe amenazas graves en una disputa y duda entre negociar directamente o pedir intervención institucional.",
+  "La mediación no reemplaza la protección ante amenazas o delitos. Corresponde preservar evidencias, buscar resguardo y acudir a las autoridades competentes según el caso; procedimientos y derechos concretos deben cotejarse con normas vigentes.",
+  "Diseña una ruta de actuación que priorice seguridad, registro de hechos y orientación institucional.",
+ ),
+ 'D257|MED|Convivencia Social|Núnico|8':(
+  "Un curso observa que faltan materiales para trabajar y que los préstamos individuales generan conflictos.",
+  "La necesidad es compartida y requiere coordinación. Una solución colaborativa puede incluir inventario, turnos de préstamo, responsables y evaluación de cumplimiento, sin depender de una sola persona.",
+  "Identifica actores, recursos y dos indicadores para determinar si conviene un proyecto colaborativo.",
+ ),
+ 'D257|MED|Convivencia Social|Núnico|9':(
+  "Un grupo quiere implementar un sistema compartido de préstamo de materiales durante un mes.",
+  "Proyecto: objetivo, disponer equitativamente de materiales; acciones, inventariar, registrar préstamos y evaluar; responsables, equipo rotativo; recursos, fichas y estante; indicador, proporción de devoluciones registradas.",
+  "Construye un cronograma de cuatro semanas y explica cómo corregirías un incumplimiento.",
+ ),
+ 'D257|MED|Consumo y Calidad de Vida|Núnico|15':(
+  "Una persona reclama por un producto defectuoso y no sabe si dirigirse al vendedor, al SERNAC o a un tribunal.",
+  "El proveedor es la primera contraparte comercial. SERNAC informa y canaliza mecanismos de protección, mientras que los tribunales competentes pueden resolver controversias conforme a la legislación aplicable. Competencias y procedimientos concretos requieren comprobación en fuentes oficiales vigentes.",
+  "Dibuja una ruta de consulta con el proveedor, SERNAC y la instancia jurisdiccional que corresponda.",
+ ),
+ 'D257|MED|Consumo y Calidad de Vida|Núnico|16':(
+  "Vecinos detectan que varios comercios publican precios confusos y consideran organizarse para promover información transparente.",
+  "Una asociación de consumidores puede articular información, educación y defensa colectiva según requisitos legales. Su constitución exige revisar la normativa y los trámites vigentes; no basta una reunión informal para adquirir personalidad jurídica.",
+  "Identifica tres beneficios colectivos y tres requisitos que verificarías en una fuente oficial.",
+ ),
 }
 def curated_case(oa):
     return CASES.get(oa['clave_interna'])
