@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/oa_lessons.py'
+      - 'scripts/oa_grounded_tasks.py'
       - 'scripts/build_407_oa_materials.py'
       - '.github/workflows/oa407-render.yml'
   pull_request:
