@@ -5,12 +5,15 @@ on:
     paths:
       - 'scripts/oa_lessons.py'
       - 'scripts/oa_grounded_tasks.py'
+      - 'scripts/oa_curated_cases.py'
+      - 'scripts/oa_specific_examples.py'
       - 'scripts/build_407_oa_materials.py'
       - '.github/workflows/oa407-render.yml'
   pull_request:
     paths:
       - 'scripts/build_407_oa_materials.py'
       - 'scripts/oa_lessons.py'
+      - 'scripts/oa_curated_cases.py'
       - 'catalogo-publicado.json'
       - '.github/workflows/oa407-render.yml'
   workflow_dispatch:
