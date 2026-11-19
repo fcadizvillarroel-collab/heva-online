@@ -58,7 +58,7 @@ def create_ppt(oa,png,out):
  addtext(s,.7,6.35,12,.55,oa['marco']+' · '+oa['fuente_documento'],14,False,TEAL)
  s=slide();addtext(s,.7,.35,12,.7,'COMPRENDER · APLICAR · REVISAR',29,True)
  picture=s.shapes.add_picture(str(png),Inches(.85),Inches(1.3),width=Inches(11.65),height=Inches(5.1))
- picture._element._nvXxPr.cNvPr.set('descr','Esquema original del objetivo '+str(oa['_index'])+': comprender, aplicar y revisar.')
+ picture._element.nvPicPr.cNvPr.set('descr','Esquema original del objetivo '+str(oa['_index'])+': comprender, aplicar y revisar.')
  s=slide();addtext(s,.7,.45,12,.8,'Actividad de aplicación',30,True)
  addtext(s,.8,1.65,11.7,3.8,
   '1. Explica con tus palabras qué solicita el objetivo.\n'
