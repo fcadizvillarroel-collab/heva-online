@@ -15,6 +15,7 @@ from pptx.util import Inches, Pt as PptPt
 from pptx.dml.color import RGBColor as PPTColor
 import fitz
 from oa_blueprints import blueprint
+from oa_lessons import lesson
 
 ROOT=Path(__file__).resolve().parents[1]
 NAVY=(35,58,76); TEAL=(31,116,120); CREAM=(250,246,238)
@@ -50,49 +51,52 @@ def addtext(slide,x,y,w,h,text,size=23,bold=False,color=NAVY):
  return shape
 def create_ppt(oa,png,out):
  prs=Presentation();prs.slide_width=Inches(13.333);prs.slide_height=Inches(7.5)
- def slide(): return prs.slides.add_slide(prs.slide_layouts[6])
- s=slide();addtext(s,.7,.5,12,1,'OBJETIVO DE APRENDIZAJE · '+str(oa['_index']).zfill(3),30,True)
- addtext(s,.7,1.55,12,.5,oa['asignatura']+' · '+oa['nivel'],18,False,TEAL)
- txt=oa['texto_literal']
- size=22 if len(txt)>350 else 25 if len(txt)>220 else 29
- addtext(s,.7,2.3,11.8,3.55,txt,size)
- addtext(s,.7,6.35,12,.55,oa['marco']+' · '+oa['fuente_documento'],14,False,TEAL)
- s=slide();addtext(s,.7,.35,12,.7,'COMPRENDER · APLICAR · REVISAR',29,True)
- picture=s.shapes.add_picture(str(png),Inches(.85),Inches(1.3),width=Inches(11.65),height=Inches(5.1))
- picture._element.nvPicPr.cNvPr.set('descr','Esquema original del objetivo '+str(oa['_index'])+': comprender, aplicar y revisar.')
- s=slide();addtext(s,.7,.45,12,.8,'Actividad de aplicación',30,True)
- bp=blueprint(oa)
- addtext(s,.8,1.45,11.7,4.8,'\\n'.join(str(i)+'. '+t for i,t in enumerate(bp['actividades'],1)),17)
- addtext(s,.8,6.35,11.8,.55,'BORRADOR NO VALIDADO · Requiere revisión docente y fuentes específicas',14,False,TEAL)
+ data=lesson(oa)
+ def slide(title,body,footer='HEVA · BORRADOR DIDÁCTICO NO VALIDADO'):
+  s=prs.slides.add_slide(prs.slide_layouts[6])
+  addtext(s,.65,.38,12,.7,title,28,True)
+  size=20 if len(body)<400 else 17
+  addtext(s,.78,1.32,11.8,4.95,body,size)
+  addtext(s,.78,6.65,11.8,.45,footer,12,False,TEAL)
+  return s
+ slide('OBJETIVO DE APRENDIZAJE · '+str(oa['_index']).zfill(3),oa['asignatura']+' · '+oa['nivel']+'\n\n'+oa['texto_literal'])
+ slide('¿Qué vamos a aprender?',data['explanation'])
+ s=slide('Organizador para aprender','Observa las tres acciones: comprender, aplicar y revisar.')
+ picture=s.shapes.add_picture(str(png),Inches(1.1),Inches(2.1),width=Inches(10.8),height=Inches(4.0))
+ picture._element.nvPicPr.cNvPr.set('descr','Organizador original de comprender, aplicar y revisar.')
+ slide('Caso para pensar',data['scenario']+'\n\nPregunta: ¿cómo lo resolverías antes de ver la demostración?')
+ slide('Ejemplo resuelto, paso a paso',data['worked'])
+ slide('Practiquemos', '\n\n'.join(str(i)+'. '+q for i,q in enumerate(data['questions'][:3],1)))
+ slide('Comprobación y retroalimentación','\n\n'.join(data['answer_guide'][:3]))
+ slide('Aplicación y cierre',data['questions'][3]+'\n\n'+data['exit_ticket']+'\n\n'+data['accessibility'])
  prs.save(out)
 def create_doc(oa,png,out):
- doc=Document();sec=doc.sections[0];sec.top_margin=Cm(1.2);sec.bottom_margin=Cm(1.1)
+ doc=Document();sec=doc.sections[0];sec.top_margin=Cm(1.5);sec.bottom_margin=Cm(1.4)
  sec.left_margin=Cm(2);sec.right_margin=Cm(2)
- normal=doc.styles['Normal'];normal.font.name='Aptos';normal.font.size=Pt(9.5)
- for style in doc.styles:
-  if style.type == 1 and style.name.startswith('Heading'):
-   style.paragraph_format.space_after=Pt(2)
- for paragraph in doc.paragraphs:
-  paragraph.paragraph_format.space_after=Pt(2)
-  paragraph.paragraph_format.space_before=Pt(0)
-  paragraph.paragraph_format.line_spacing=1.0
- doc.add_heading('Guía breve de aprendizaje · OA '+str(oa['_index']).zfill(3),0)
+ normal=doc.styles['Normal'];normal.font.name='Aptos';normal.font.size=Pt(10)
+ data=lesson(oa)
+ for name in ['Heading 1','Heading 2']:
+  doc.styles[name].paragraph_format.space_after=Pt(3)
+ doc.add_heading('Guía de aprendizaje · OA '+str(oa['_index']).zfill(3),0)
  doc.add_paragraph(oa['asignatura']+' · '+oa['nivel'])
  doc.add_heading('Objetivo curricular',level=1);doc.add_paragraph(oa['texto_literal'])
+ doc.add_heading('Explicación para aprender',level=1);doc.add_paragraph(data['explanation'])
  picture=doc.add_picture(str(png),width=Cm(10.2))
- picture._inline.docPr.set('descr','Organizador del objetivo '+str(oa['_index'])+': comprender, aplicar y revisar.')
- doc.add_heading('Comprender y aplicar',level=1)
- bp=blueprint(oa)
- doc.add_heading('Foco curricular',level=2);doc.add_paragraph(bp['foco'])
- for q in bp['actividades']:
-  doc.add_paragraph(q,style='List Number')
- doc.add_heading('Recurso documental por verificar',level=2);doc.add_paragraph(bp['recurso_recomendado'])
- doc.add_paragraph('Estado: BORRADOR NO VALIDADO. No se adjunta fotografía o mapa sin licencia y pertinencia comprobadas.')
+ picture._inline.docPr.set('descr','Esquema original: comprender, aplicar y revisar.')
+ doc.add_heading('Caso de ejemplo',level=1);doc.add_paragraph(data['scenario'])
+ doc.add_heading('Ejemplo resuelto',level=1);doc.add_paragraph(data['worked'])
+ doc.add_heading('Actividades de práctica',level=1)
+ for q in data['questions']:doc.add_paragraph(q,style='List Number')
+ doc.add_heading('Pauta de respuestas y criterios',level=1)
+ for ans in data['answer_guide']:doc.add_paragraph(ans,style='List Number')
+ doc.add_heading('Apoyo de accesibilidad',level=1);doc.add_paragraph(data['accessibility'])
+ doc.add_heading('Ticket de salida',level=1);doc.add_paragraph(data['exit_ticket'])
  doc.add_paragraph('Fuente curricular: '+oa['marco']+' · '+oa['fuente_documento'])
+ doc.add_paragraph('BORRADOR DIDÁCTICO NO VALIDADO. Los ejemplos son ilustrativos y requieren cotejo docente con el OA.')
  for paragraph in doc.paragraphs:
-  paragraph.paragraph_format.space_after=Pt(2)
+  paragraph.paragraph_format.space_after=Pt(3)
   paragraph.paragraph_format.space_before=Pt(0)
-  paragraph.paragraph_format.line_spacing=1.0
+  paragraph.paragraph_format.line_spacing=1.05
  doc.save(out)
 def render(folder,output):
  output.mkdir(parents=True,exist_ok=True)
@@ -140,8 +144,8 @@ def main():
  if not args.skip_render:
   docpdf=out/'pdf_docx';pptpdf=out/'pdf_pptx';render(out/'docx',docpdf);render(out/'pptx',pptpdf)
   for record in records:
-   d=inspect_pdf(docpdf/(Path(record['docx']).stem+'.pdf'),(1,2))
-   p=inspect_pdf(pptpdf/(Path(record['pptx']).stem+'.pdf'),3)
+   d=inspect_pdf(docpdf/(Path(record['docx']).stem+'.pdf'),(1,2,3,4,5))
+   p=inspect_pdf(pptpdf/(Path(record['pptx']).stem+'.pdf'),8)
    record['render_docx']=d;record['render_pptx']=p
    record['pass']=not d.get('error') and not p.get('error') and not d.get('issues') and not p.get('issues')
  else:
