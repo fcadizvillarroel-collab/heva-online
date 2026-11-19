@@ -1552,6 +1552,106 @@ CASES = {
   "En equilibrio dinámico, velocidades directa e inversa son iguales; las concentraciones permanecen constantes, no necesariamente iguales. Kc=[NO₂]²/[N₂O₄] para la ecuación dada, a temperatura fija.",
   "Explica qué error hay en afirmar que al llegar a equilibrio la reacción se detiene.",
  ),
+ "D257|MED|Ciencias Naturales|N1|6":(
+  "Se disuelven 10 g de sal en agua hasta obtener 200 mL de disolución.",
+  "Concentración masa/volumen =10 g/200 mL=0,05 g/mL=50 g/L. La solubilidad es máxima cantidad que puede disolverse en condiciones dadas, no lo mismo que concentración de cualquier muestra.",
+  "Calcula g/L para 5 g en 250 mL e indica temperatura necesaria para comparar solubilidad.",
+ ),
+ "D257|MED|Ciencias Naturales|N1|3":(
+  "Un carrito de 2 kg se mueve a 3 m/s y luego frena.",
+  "Momentum inicial p=mv=2×3=6 kg·m/s. Energía cinética inicial Ec=1/2×2×3²=9 J. En frenado, la energía mecánica del carrito puede convertirse en calor; conservación total requiere considerar entorno.",
+  "Calcula p y Ec si velocidad aumenta a 4 m/s.",
+ ),
+ "D257|MED|Ciencias Naturales|N1|2":(
+  "Un eco se escucha 0,4 s después de emitir un sonido; supón rapidez de sonido 340 m/s.",
+  "Distancia hasta superficie reflectante =v×t/2=340×0,4/2=68 m. La división por dos considera ida y vuelta. La luz también se refleja, pero su rapidez es muy diferente.",
+  "Calcula distancia para eco de 0,2 s y explica diferencia entre reflexión y refracción.",
+ ),
+ "D257|MED|Ciencias Naturales|N1|1":(
+  "Una persona camina 120 m en línea recta en 60 s a velocidad constante.",
+  "Rapidez=120/60=2 m/s. En movimiento rectilíneo uniforme la posición varía linealmente con el tiempo. Caída libre ideal tiene aceleración aproximada 9,8 m/s² cerca de superficie terrestre, sin resistencia de aire.",
+  "Calcula distancia recorrida en 90 s a 2 m/s y compara con caída libre.",
+ ),
+ "D257|MED|Educación Matemática|N2|8":(
+  "Una investigadora utiliza funciones para modelar crecimiento y estadística para analizar mediciones.",
+  "La matemática conecta ciencias, economía y tecnología; un modelo simplifica fenómenos y se revisa con datos. Ejemplo C(x)=100+5x permite calcular costo para x=20: $200, bajo supuestos.",
+  "Explica cómo una nueva medición podría obligar a cambiar el modelo.",
+ ),
+ "D257|MED|Educación Matemática|N2|7":(
+  "Lanza una moneda equilibrada dos veces. Calcula probabilidad de dos caras y de al menos una cara.",
+  "Independencia: P(CC)=1/2×1/2=1/4. P(al menos una cara)=1−P(SS)=1−1/4=3/4. Condicional: P(segunda cara | primera cara)=1/2 si lanzamientos independientes.",
+  "Explica por qué sumar 1/2+1/2 no da la probabilidad de dos caras.",
+ ),
+ "D257|MED|Educación Matemática|N2|6":(
+  "Una muestra ficticia de cinco tiempos de traslado es 10, 12, 14, 16 y 18 minutos.",
+  "Media descriptiva=14 min. No se puede inferir media poblacional exacta a partir de cinco casos sin muestreo representativo ni incertidumbre. Estadística inferencial utiliza muestras y supuestos para estimar.",
+  "Distingue conclusión descriptiva válida de una predicción injustificada.",
+ ),
+ "D257|MED|Educación Matemática|N2|5":(
+  "Una encuesta en redes consulta a 20 voluntarios y afirma representar a todos los habitantes de una región.",
+  "Muestreo por autoselección puede sesgar resultados; tamaño pequeño y falta de marco muestral limitan inferencia. Un porcentaje calculado correctamente no corrige falta de representatividad.",
+  "Propón un diseño de muestreo mejor y dos preguntas sobre metodología.",
+ ),
+ "D257|MED|Educación Matemática|N2|4":(
+  "Una escalera de 5 m forma ángulo de 60° con suelo horizontal.",
+  "Altura ideal alcanzada =5 sen60°≈4,33 m; distancia horizontal=5 cos60°=2,5 m. Se supone triángulo rectángulo, escalera rígida y sin espesor; no usar como indicación de seguridad real.",
+  "Calcula altura con ángulo 30° y explica cuál razón trigonométrica usaste.",
+ ),
+ "D257|MED|Educación Matemática|N2|3":(
+  "Un rectángulo tiene largo x+3 y ancho x; área 40 unidades cuadradas.",
+  "Ecuación x(x+3)=40 → x²+3x−40=0 → (x+8)(x−5)=0. Soluciones x=5 o x=−8; dimensión física exige x=5. Largo=8, área=40.",
+  "Modela área 24 con largo x+2 y encuentra dimensiones positivas.",
+ ),
+ "D257|MED|Educación Matemática|N2|2":(
+  "Compara f(x)=x², g(x)=2^x y h(x)=log₂x.",
+  "Cuadrática: f(2)=4, parábola. Exponencial: g(3)=8, crecimiento multiplicativo. Logaritmo: h(8)=3, inversa de exponencial base 2; dominio x>0. Cambiar parámetros altera gráfica y valores.",
+  "Explica qué función puede modelar duplicación periódica y por qué.",
+ ),
+ "D257|MED|Educación Matemática|N2|1":(
+  "Un cuadrado tiene área 49 cm². ¿Cuánto mide el lado?",
+  "Lado positivo =√49=7 cm porque 7²=49. La raíz cuadrada principal es no negativa; resolver x²=49 da x=±7, pero una longitud no puede ser negativa.",
+  "Calcula lado para área 81 cm² y distingue √81 de soluciones de x²=81.",
+ ),
+ "D257|MED|Educación Matemática|N1|9":(
+  "Un presupuesto tiene costo fijo $4.000 y costo variable $1.500 por unidad.",
+  "Modelo C(n)=4.000+1.500n; para 6 unidades, C=$13.000. El mismo método sirve en transporte o producción bajo supuestos; no incluye impuestos u otros gastos.",
+  "Transfiere modelo a otro contexto y describe qué dato cambiarías.",
+ ),
+ "D257|MED|Educación Matemática|N1|8":(
+  "Un tanque contiene 100 litros y pierde 5 litros por hora a ritmo constante.",
+  "Modelo V(t)=100−5t, 0≤t≤20. Permite comunicar relación, regularidad y límite físico; una fórmula no explica por qué ocurre pérdida.",
+  "Dibuja tabla y gráfica para 0,5,10 horas y explica la pendiente.",
+ ),
+ "D257|MED|Educación Matemática|N1|6":(
+  "Una lista ficticia de gastos es $3.000, $5.000, $5.000 y $7.000.",
+  "Media=$5.000; mediana=$5.000; moda=$5.000; rango=$4.000. Medidas resumen distribución, pero no revelan causas ni representan población sin muestreo adecuado.",
+  "Cambia último valor a $15.000 y compara media y mediana.",
+ ),
+ "D257|MED|Educación Matemática|N1|5":(
+  "Un plano de pieza rectangular 3×4 cm se amplía por factor 2.",
+  "Semejanza: nuevo 6×8 cm; longitudes duplicadas y área cuadruplicada de 12 a 48 cm². Traslación o rotación isométrica conserva distancias y área, no las duplica.",
+  "Explica diferencia entre ampliación y rotación con un dibujo.",
+ ),
+ "D257|MED|Educación Matemática|N1|4":(
+  "Dos tipos de entrada cuestan $3.000 y $5.000. Se venden 10 y recaudan $38.000.",
+  "Sistema x+y=10; 3.000x+5.000y=38.000. Sustituir x=10−y: 30.000+2.000y=38.000→y=4, x=6. Verificar cantidad e ingreso.",
+  "Modifica recaudación a $40.000 y resuelve nuevamente.",
+ ),
+ "D257|MED|Educación Matemática|N1|3":(
+  "Una persona compra x lápices a $400 cada uno y un cuaderno a $1.200.",
+  "Expresión C(x)=400x+1.200. Para x=3, C=$2.400. Variable x representa cantidad y coeficiente 400 precio unitario. No confundir 400x con 400+x.",
+  "Expresa el costo de dos cuadernos y x lápices.",
+ ),
+ "D257|MED|Educación Matemática|N1|2":(
+  "Calcula 2³, 2⁻³ y (1/2)⁻².",
+  "2³=8; 2⁻³=1/8; (1/2)⁻²=4. Regla a⁻ⁿ=1/aⁿ para a≠0. Potencias de diez permiten notación científica, por ejemplo 0,001=10⁻³.",
+  "Expresa 0,0001 como potencia de diez y comprueba.",
+ ),
+ "D257|MED|Educación Matemática|N1|1":(
+  "La diagonal de un cuadrado de lado 1 m mide √2 m.",
+  "√2≈1,4142 no puede expresarse como fracción exacta de enteros; es irracional. Los racionales incluyen 1/2, −3 y 0,75; ambos conjuntos están dentro de reales.",
+  "Clasifica √9, √3, −1/4 y π como racionales o irracionales.",
+ ),
 }
 def curated_case(oa):
     return CASES.get(oa['clave_interna'])
