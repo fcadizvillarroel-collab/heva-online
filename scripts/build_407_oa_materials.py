@@ -18,6 +18,15 @@ from oa_blueprints import blueprint
 from oa_lessons import lesson
 
 ROOT=Path(__file__).resolve().parents[1]
+OFFICIAL_EPJA_SOURCES = {
+ 'Decreto 257': 'https://epja.mineduc.cl/wp-content/uploads/sites/43/2018/10/DTO-257_19-AGO-2009-Marco-curricular-de-Educaci%C3%B3n-de-Adultos.pdf',
+ 'Bases Curriculares EPJA 2024': 'https://epja.mineduc.cl/documentos-curriculares-epja/',
+}
+def curricular_source(oa):
+ marco = str(oa.get('marco', '')).lower()
+ if '257' in marco: return OFFICIAL_EPJA_SOURCES['Decreto 257']
+ return OFFICIAL_EPJA_SOURCES['Bases Curriculares EPJA 2024']
+
 NAVY=(35,58,76); TEAL=(31,116,120); CREAM=(250,246,238)
 def font(size=32):
  for f in ('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf','/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf'):
@@ -61,6 +70,7 @@ def create_ppt(oa,png,out):
   return s
  slide('OBJETIVO DE APRENDIZAJE · '+str(oa['_index']).zfill(3),oa['asignatura']+' · '+oa['nivel']+'\n\n'+oa['texto_literal'])
  slide('¿Qué vamos a aprender?',data['explanation'])
+ slide('Fuente curricular y alcance','Marco: '+oa['marco']+'\\nPágina indicada en catálogo: '+str(oa.get('pagina_oficial','No indicada'))+'\\nReferencia oficial: '+curricular_source(oa)+'\\n\\nLos casos son originales, no citas del decreto. Las imágenes son esquemas originales y no fotografías documentales.')
  s=slide('Organizador para aprender','Observa las tres acciones: comprender, aplicar y revisar.')
  picture=s.shapes.add_picture(str(png),Inches(1.1),Inches(2.1),width=Inches(10.8),height=Inches(4.0))
  picture._element.nvPicPr.cNvPr.set('descr','Organizador original de comprender, aplicar y revisar.')
@@ -91,7 +101,9 @@ def create_doc(oa,png,out):
  for ans in data['answer_guide']:doc.add_paragraph(ans,style='List Number')
  doc.add_heading('Apoyo de accesibilidad',level=1);doc.add_paragraph(data['accessibility'])
  doc.add_heading('Ticket de salida',level=1);doc.add_paragraph(data['exit_ticket'])
- doc.add_paragraph('Fuente curricular: '+oa['marco']+' · '+oa['fuente_documento'])
+ doc.add_paragraph('Fuente curricular: '+oa['marco']+' · '+oa['fuente_documento']+' · página registrada: '+str(oa.get('pagina_oficial','No indicada')))
+ doc.add_paragraph('Referencia oficial para cotejo: '+curricular_source(oa))
+ doc.add_paragraph('Las imágenes son esquemas originales, no documentos históricos ni fotografías verificadas.')
  doc.add_paragraph('BORRADOR DIDÁCTICO NO VALIDADO. Los ejemplos son ilustrativos y requieren cotejo docente con el OA.')
  for paragraph in doc.paragraphs:
   paragraph.paragraph_format.space_after=Pt(3)
@@ -140,12 +152,12 @@ def main():
   doc=out/'docx'/(key+'.docx');ppt=out/'pptx'/(key+'.pptx')
   create_doc(oa,png,doc);create_ppt(oa,png,ppt)
   records.append({'blueprint':blueprint(oa),'oa':oa['clave_interna'],'subject':oa['asignatura'],'docx':doc.name,'pptx':ppt.name,
-   'visual':png.name,'visual_kind':'original_educational_diagram','documentary_source_verified':False})
+   'visual':png.name,'visual_kind':'original_educational_diagram','documentary_source_verified':False,'curricular_reference_url':curricular_source(oa),'curricular_page_catalog':oa.get('pagina_oficial','')})
  if not args.skip_render:
   docpdf=out/'pdf_docx';pptpdf=out/'pdf_pptx';render(out/'docx',docpdf);render(out/'pptx',pptpdf)
   for record in records:
    d=inspect_pdf(docpdf/(Path(record['docx']).stem+'.pdf'),(1,2,3,4,5))
-   p=inspect_pdf(pptpdf/(Path(record['pptx']).stem+'.pdf'),8)
+   p=inspect_pdf(pptpdf/(Path(record['pptx']).stem+'.pdf'),9)
    record['render_docx']=d;record['render_pptx']=p
    record['pass']=not d.get('error') and not p.get('error') and not d.get('issues') and not p.get('issues')
  else:
