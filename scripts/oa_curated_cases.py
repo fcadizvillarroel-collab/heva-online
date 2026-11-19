@@ -147,6 +147,116 @@ CASES = {
   "Una asociación de consumidores puede articular información, educación y defensa colectiva según requisitos legales. Su constitución exige revisar la normativa y los trámites vigentes; no basta una reunión informal para adquirir personalidad jurídica.",
   "Identifica tres beneficios colectivos y tres requisitos que verificarías en una fuente oficial.",
  ),
+ "D257|MED|Filosofía|Núnico|2":(
+  "Lee este texto filosófico original: «Si una regla perjudica a una persona, debemos preguntar si puede justificarse ante todas». Identifica tesis y razón.",
+  "Tesis: una regla debe justificarse universalmente. Razón: el daño individual exige examen ético. Es un fragmento didáctico original, no una cita atribuida a filósofo alguno.",
+  "Compara el argumento con un texto auténtico breve de un filósofo identificado y registra autor y obra.",
+ ),
+ "D257|MED|Tecnologías de la Información y de las Telecomunicaciones|Núnico|4":(
+  "Simula que necesitas solicitar un certificado público por internet sin usar datos personales reales.",
+  "Pasos: identificar sitio oficial, comprobar dominio y conexión segura, revisar requisitos y costos, completar un formulario ficticio y guardar comprobante. Nunca compartir contraseñas ni códigos de autenticación.",
+  "Explica cómo reconocerías una página fraudulenta y qué alternativa presencial usarías.",
+ ),
+ "D257|MED|Filosofía|Núnico|1":(
+  "Pregunta: «¿Es justo aplicar la misma regla a personas con necesidades distintas?». Propón dos respuestas.",
+  "Respuesta A: sí, porque la igualdad formal exige uniformidad. Respuesta B: no siempre, porque la equidad puede requerir ajustes razonables. Ambas necesitan justificar principios y examinar consecuencias concretas.",
+  "Evalúa cuál respuesta es más coherente ante un caso de acceso para una persona con discapacidad.",
+ ),
+ "D257|MED|Filosofía|Núnico|3":(
+  "Una persona sostiene que toda norma debe cumplirse incluso cuando causa daño injustificado. Formula una posición razonada.",
+  "Posición argumentada: el cumplimiento de normas protege coordinación, pero una norma puede ser criticada mediante razones públicas y procedimientos legítimos. Distinguir legalidad, legitimidad y consecuencias evita afirmaciones absolutas.",
+  "Escribe un párrafo con tesis, dos razones y una objeción respondida.",
+ ),
+ "D257|MED|Educación Artística|N1|3":(
+  "Un grupo crea una secuencia de movimientos corporales que representa colaboración y luego la presenta a su comunidad.",
+  "Proceso: seleccionar gesto inicial individual, incorporar gesto compartido y cierre colectivo; analizar ritmo, espacio, expresión y accesibilidad. La apreciación debe vincularse con una obra patrimonial auténtica identificada, sin inventar atribuciones.",
+  "Diseña una ficha de difusión con propósito, público, consentimiento y reflexión sobre la obra apreciada.",
+ ),
+ "D257|MED|Filosofía|Núnico|4":(
+  "Debate: «¿Es siempre preferible la seguridad a la libertad?». Dos participantes defienden posturas distintas.",
+  "Un debate riguroso exige definir conceptos, exponer tesis y razones, escuchar sin interrumpir, reformular fielmente la postura contraria y responder a objeciones sin atacar personas.",
+  "Redacta un argumento, una objeción respetuosa y una respuesta que reconozca un límite de tu posición.",
+ ),
+ "D257|MED|Tecnologías de la Información y de las Telecomunicaciones|Núnico|1":(
+  "En un computador de práctica, una persona debe crear una carpeta, guardar un archivo y localizarlo después.",
+  "Procedimiento: abrir gestor de archivos, crear carpeta «Práctica», guardar «nota.txt», cerrar y reabrir desde la ruta elegida. Verificar nombre, extensión y contenido; evitar almacenar información sensible en equipos compartidos.",
+  "Explica la diferencia entre guardar un archivo y crear un acceso directo.",
+ ),
+ "D257|MED|Educación Artística|N1|1":(
+  "Observa una reproducción con autor, título, fecha y procedencia verificados de una obra patrimonial regional.",
+  "Análisis guiado: describir colores, formas, materiales y composición antes de interpretar; diferenciar observación («predominan líneas curvas») de juicio («transmite calma»). Sin obra identificada no es posible atribuir intención al autor.",
+  "Elige una obra real, cita su ficha museográfica y fundamenta una apreciación estética con dos rasgos visibles.",
+ ),
+ "D257|MED|Tecnologías de la Información y de las Telecomunicaciones|Núnico|3":(
+  "Simula redactar un correo a una biblioteca solicitando información sobre horarios; no uses cuentas reales.",
+  "Asunto: «Consulta sobre horarios». Cuerpo: saludo, pregunta concreta, agradecimiento y firma ficticia. Para buscar información, comparar fecha, autor y sitio; publicar solo datos autorizados y respetar privacidad.",
+  "Redacta el correo y una publicación breve con fuente citada, sin datos personales.",
+ ),
+ "D257|MED|Lengua Castellana y Comunicación|N1|9":(
+  "Una estudiante redacta un aviso de 70 palabras y necesita corregirlo y contrastar un dato antes de difundirlo.",
+  "Procedimiento: usar corrector ortográfico sin aceptar sugerencias ciegamente; revisar coherencia, destinatario y puntuación; contrastar el dato en fuente identificable y registrar enlace o referencia.",
+  "Reescribe un aviso breve y anota dos cambios justificados y la fuente consultada.",
+ ),
+ "D257|MED|Educación Artística|N1|4":(
+  "Compara un mural comunitario con una pieza artesanal empleada en una ceremonia, sin asignarles una función única.",
+  "El mural puede tener función estética, identitaria o social; la pieza ceremonial puede tener función simbólica, ritual y económica. Las funciones dependen del contexto documentado y de la comunidad, no solo de la apariencia.",
+  "Analiza otra expresión artística y explica dos funciones con evidencias de su contexto.",
+ ),
+ "D257|MED|Tecnologías de la Información y de las Telecomunicaciones|Núnico|2":(
+  "Crea una planilla con tres gastos ficticios: $12.000, $8.000 y $5.000; redacta un breve informe y prepara una diapositiva.",
+  "En una hoja de cálculo, escribir valores en B2:B4 y usar =SUMA(B2:B4), resultado $25.000. Guardar archivo; el informe debe indicar fuente y total; la diapositiva debe mostrar título y cifra legible.",
+  "Agrega un cuarto gasto de $3.000, actualiza fórmula y explica cómo verificar el total.",
+ ),
+ "D257|BÁS|Ciencias Naturales|N2|1":(
+  "Compara una cuchara de madera natural con una cuchara de plástico sintético en contacto con alimentos calientes.",
+  "La madera y muchos plásticos son malos conductores térmicos comparados con metales, pero sus propiedades y seguridad dependen de composición y temperatura. Natural o sintético no determina por sí solo calidad o inocuidad.",
+  "Diseña una tabla de propiedades: origen, resistencia, conductividad, reutilización y uso seguro.",
+ ),
+ "D257|BÁS|Educación Matemática|N3|9":(
+  "Una persona cree que no puede calcular el cambio de una compra sin calculadora. El producto cuesta $7.500 y paga $10.000.",
+  "Estrategia 1: 10.000 − 7.500 = $2.500. Estrategia 2: de 7.500 a 8.000 hay 500 y de 8.000 a 10.000 hay 2.000; total 2.500. Dos métodos correctos muestran que puede verificar su razonamiento.",
+  "Describe qué estrategia te resulta más clara y cómo corregirías un error sin abandonar el problema.",
+ ),
+ "D257|BÁS|Educación Matemática|N3|8":(
+  "Una feria vende 3 kilos de fruta a $1.800 por kilo. Un cliente paga $6.000. Modela el costo y el vuelto.",
+  "Costo = 3 × 1.800 = $5.400. Vuelto = 6.000 − 5.400 = $600. Estimación: 3 × 2.000 ≈ $6.000; resultado plausible. Comprobar: 5.400 + 600 = 6.000.",
+  "Explica por qué una respuesta de $6.600 de vuelto es imposible.",
+ ),
+ "D257|BÁS|Educación Matemática|N3|7":(
+  "Registra las edades ficticias 20, 20, 30, 40 y 40. Organiza frecuencias y calcula tendencia central.",
+  "Frecuencias: 20→2, 30→1, 40→2. Media = (20+20+30+40+40)/5 = 30; mediana = 30; modas = 20 y 40. Barras: alturas 2,1,2; circular: 40 %,20 %,40 %.",
+  "Dibuja ambos gráficos con títulos, ejes o porcentajes, y explica por qué la muestra no representa a toda la comunidad.",
+ ),
+ "D257|BÁS|Educación Matemática|N3|6":(
+  "Dos rectas paralelas son cortadas por una transversal. Un ángulo correspondiente mide 65°. Además, un triángulo rectángulo tiene catetos 3 y 4 cm.",
+  "El ángulo correspondiente mide 65° por paralelismo. En un triángulo, la suma de ángulos interiores es 180°. Por Pitágoras, hipotenusa = √(3²+4²) = 5 cm.",
+  "Calcula el ángulo restante de un triángulo cuyos otros ángulos son 65° y 45°.",
+ ),
+ "D257|BÁS|Educación Matemática|N3|5":(
+  "Un cilindro tiene radio 3 cm y altura 10 cm. Calcula perímetro de su base, área de base y volumen.",
+  "Perímetro circunferencia = 2πr = 6π cm; área círculo = πr² = 9π cm²; volumen cilindro = πr²h = 90π cm³. Con π≈3,14: 18,84 cm; 28,26 cm²; 282,6 cm³.",
+  "Repite con radio 2 cm y altura 5 cm, conservando unidades.",
+ ),
+ "D257|BÁS|Educación Matemática|N3|4":(
+  "Una receta para cuatro personas usa 300 g de arroz. ¿Cuánto requiere para seis personas si la proporción es directa?",
+  "Factor de escala = 6/4 = 1,5. Cantidad = 300 × 1,5 = 450 g. Verificación: 300/4 = 75 g por persona; 75 × 6 = 450 g.",
+  "Explica por qué no se debe usar proporcionalidad directa si hay una cantidad fija que no cambia con el número de personas.",
+ ),
+ "D257|BÁS|Educación Matemática|N3|3":(
+  "Representa 10.000.000 como potencia de diez y calcula 2³ y (1/2)³.",
+  "10.000.000 = 10⁷. 2³ = 2×2×2 = 8. (1/2)³ = 1/8. El exponente natural indica cantidad de factores iguales.",
+  "Escribe 100.000 como potencia de diez y calcula (3/2)².",
+ ),
+ "D257|BÁS|Educación Matemática|N3|2":(
+  "Una cuenta registra saldo −$5.000, recibe $8.000 y paga $4.000. Calcula el saldo final.",
+  "Saldo = −5.000 + 8.000 − 4.000 = −$1.000. Verificación: después del ingreso quedan $3.000; tras el pago, −$1.000. El signo negativo indica deuda o déficit.",
+  "Si recibe otros $2.500, calcula y explica el nuevo saldo.",
+ ),
+ "D257|BÁS|Educación Matemática|N3|1":(
+  "La temperatura comienza en −2 °C y sube 3,5 °C. Expresa ambos valores y el resultado.",
+  "Temperatura inicial −2 = −2/1; aumento +3,5 = 7/2. Final = −2 + 3,5 = +1,5 °C. El signo negativo indica temperatura bajo cero, no ausencia de temperatura.",
+  "Representa −1/2 y −0,5 en una recta numérica y explica su equivalencia.",
+ ),
 }
 def curated_case(oa):
     return CASES.get(oa['clave_interna'])
