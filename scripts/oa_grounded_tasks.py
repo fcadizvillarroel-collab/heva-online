@@ -4,6 +4,7 @@ This is algorithmic draft construction, not expert validation.
 import re
 from oa_blueprints import domain
 from oa_specific_examples import specific_example
+from oa_curated_cases import curated_case
 def task(oa):
     objective=oa['texto_literal'].strip()
     subject=oa['asignatura']
@@ -81,7 +82,7 @@ def task(oa):
         criterion=' Evidencia exigida: demostración de la habilidad motriz del OA, adecuaciones y medidas de seguridad.'
     else:
         criterion=' Evidencia exigida: aplicación concreta de la habilidad y los conceptos nombrados en el OA.'
-    matched = specific_example(oa)
+    matched = curated_case(oa) or specific_example(oa)
     if matched is not None:
         scenario, worked, transfer = matched
     worked += ' Para evaluar este objetivo («'+objective+'»), se debe observar la acción «'+verb+'».'+criterion
