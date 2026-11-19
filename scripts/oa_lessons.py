@@ -80,7 +80,7 @@ def lesson(oa):
       ],
       'answer_guide':[
         'Se espera identificar el concepto central del OA y usar vocabulario pertinente.',
-        'Respuesta modelo del ejemplo: '+worked+' La actividad de transferencia debe conservar un procedimiento justificado.',
+        'Criterio de aplicación: la respuesta debe abordar explícitamente el contenido y la habilidad del OA, explicar el procedimiento y justificarlo con evidencia. Orientación: '+worked,
         'Se acepta un error plausible si el estudiante explica la corrección con evidencia o un procedimiento.',
         'Respuesta abierta: evaluar pertinencia del caso, justificación y respeto por la experiencia personal.'
       ],
