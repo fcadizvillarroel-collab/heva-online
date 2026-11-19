@@ -1352,6 +1352,106 @@ CASES = {
   "El mapa puede mostrar distribución espacial y la noticia aportar testimonios; ambos requieren fecha, autor, escala y contraste. No usar una fuente única para afirmar causalidad.",
   "Elabora una tabla con dos datos de cada fuente y una conclusión limitada.",
  ),
+ "D257|MED|Estudios Sociales|N2|12":(
+  "Un municipio decide financiar alumbrado público y regular condiciones de un mercado local.",
+  "El Estado puede proveer bienes públicos, regular, recaudar impuestos y redistribuir según normas vigentes. La decisión implica presupuesto, prioridades y rendición de cuentas; no significa controlar toda actividad económica.",
+  "Explica dos funciones estatales y un posible conflicto de prioridades.",
+ ),
+ "D257|MED|Estudios Sociales|N2|11":(
+  "Compara producción artesanal familiar con una fábrica moderna.",
+  "La organización artesanal suele concentrar oficios y producción a pequeña escala; la fábrica industrial utiliza división del trabajo y maquinaria. El sistema actual combina mercados, empresas, Estados y tecnología; no hubo transición idéntica en todos los territorios.",
+  "Elabora tabla de organización del trabajo, propiedad y circulación de bienes.",
+ ),
+ "D257|MED|Estudios Sociales|N2|10":(
+  "Una empresa vende 100 unidades a $5.000 y tiene costos totales de $420.000.",
+  "Ingresos=$500.000; resultado antes de impuestos y gastos omitidos=$80.000. Buscar utilidades no exime de seguridad laboral, derechos, cumplimiento ambiental y responsabilidades con comunidad.",
+  "Propón una decisión que mejore resultados sin incumplir responsabilidades.",
+ ),
+ "D257|MED|Estudios Sociales|N2|9":(
+  "Un taller incorpora maquinaria digital que acelera parte de la producción.",
+  "La automatización puede cambiar habilidades requeridas y productividad, pero no implica necesariamente pérdida neta de empleo en todos los sectores. Analizar capacitación, nuevas tareas, condiciones y datos laborales verificables.",
+  "Distingue dos oportunidades y dos riesgos para trabajadores.",
+ ),
+ "D257|MED|Estudios Sociales|N2|8":(
+  "Una ciudad enfrenta congestión, contaminación y desigual acceso a transporte.",
+  "El problema combina infraestructura, actividad económica, salud y decisiones públicas. Una medida aislada puede tener efectos no previstos; comparar evidencia y voces de afectados.",
+  "Diseña una matriz con tres causas, dos actores y dos soluciones evaluables.",
+ ),
+ "D257|MED|Estudios Sociales|N2|7":(
+  "Una prenda se diseña en un país, se confecciona en otro y se vende en Chile.",
+  "Dimensión económica: cadenas transnacionales. Cultural: circulación de estilos. Tecnológica: coordinación digital. Beneficios posibles: variedad y empleo; riesgos: condiciones laborales y dependencia, según evidencia.",
+  "Describe un efecto positivo y uno negativo para dos actores distintos.",
+ ),
+ "D257|MED|Estudios Sociales|N2|6":(
+  "Organiza una línea de tiempo desde 1945 hasta la década de 1990.",
+  "Hitos: ONU fundada en 1945, Guerra Fría desde posguerra, descolonización en Asia y África, caída del Muro de Berlín en 1989 y disolución de URSS en 1991. Los procesos se solapan y tienen múltiples actores.",
+  "Explica relación entre dos procesos y cita una fuente histórica verificable.",
+ ),
+ "D257|MED|Estudios Sociales|N2|5":(
+  "Una cuenca abastece agua a población, agricultura e industria.",
+  "Sistema: disponibilidad hídrica afecta usos y ecosistemas; extracción, contaminación y clima pueden modificar el conjunto. No atribuir toda escasez a un actor sin datos de consumo y recarga.",
+  "Dibuja relaciones causa-efecto e identifica dos indicadores ambientales.",
+ ),
+ "D257|MED|Estudios Sociales|N2|4":(
+  "Una localidad aumenta población y se construyen nuevas viviendas en su periferia.",
+  "Urbanización puede ampliar servicios y oportunidades, pero generar expansión dispersa, congestión y desigualdad territorial. Diferenciar crecimiento demográfico de expansión física urbana.",
+  "Propón indicadores para medir dos ventajas y dos problemas.",
+ ),
+ "D257|MED|Estudios Sociales|N2|3":(
+  "Una ciudad compra alimentos de zonas rurales y ofrece servicios especializados a habitantes del campo.",
+  "Interdependencia: campo produce alimentos y materias primas; ciudad concentra servicios y mercados, aunque ambos espacios son diversos. Transporte, empleo y tecnología conectan actividades.",
+  "Elabora diagrama de dos flujos campo-ciudad y explica un cambio posible.",
+ ),
+ "D257|MED|Estudios Sociales|N2|2":(
+  "Un curso reúne expresiones culturales diferentes sobre alimentación y celebraciones.",
+  "Diversidad cultural incluye prácticas, lenguas, memorias y significados. Reconocer diferencias no implica jerarquizar culturas ni atribuir a toda persona una práctica por su origen.",
+  "Propón preguntas respetuosas para conocer una tradición sin estereotipos.",
+ ),
+ "D257|MED|Estudios Sociales|N2|1":(
+  "Población ficticia: 120 personas de 0–14 años, 260 de 15–64 y 80 de 65 o más.",
+  "Total=460. Porcentaje 65+=80/460×100≈17,4 %. Estructura etaria describe composición, no esperanza de vida ni causas. Comparar con Chile requiere datos oficiales y año equivalente.",
+  "Construye una tabla porcentual y explica qué indicador adicional necesitas.",
+ ),
+ "D257|MED|Estudios Sociales|N1|6":(
+  "Una comunidad decide entre votar en una asamblea o dejar la decisión a una sola persona.",
+  "La democracia implica participación, derechos, deliberación, reglas transparentes y control del poder; votar no basta si hay exclusión o coerción. Se pueden mejorar mecanismos de información y rendición de cuentas.",
+  "Argumenta dos mejoras democráticas y una forma de comprobar su aplicación.",
+ ),
+ "D257|MED|Estudios Sociales|N1|5":(
+  "Una persona solicita información sobre un servicio público y debe respetar el trato de otros usuarios.",
+  "Derechos y deberes se ejercen conjuntamente: pedir información y trato digno, cumplir normas legítimas y respetar derechos ajenos. Las garantías concretas deben verificarse en normas vigentes.",
+  "Distingue derecho, deber y responsabilidad en dos situaciones.",
+ ),
+ "D257|MED|Estudios Sociales|N1|4":(
+  "Un ciudadano busca protección ante una posible vulneración de derechos.",
+  "La Constitución y tratados ratificados por Chile contienen garantías; las vías de protección dependen del derecho y hechos. Consultar textos oficiales y organismos competentes; no atribuir facultades específicas sin comprobarlas.",
+  "Diseña una ficha con derecho, norma, institución y mecanismo de consulta verificados.",
+ ),
+ "D257|MED|Estudios Sociales|N1|3":(
+  "Dos historiadores interpretan de forma distinta una reforma política y citan documentos diferentes.",
+  "La historia se construye examinando fuentes, contexto y métodos; divergencia no significa que todas las interpretaciones tengan igual sustento. Contrastar autoría, evidencia y argumentos.",
+  "Propón tres preguntas para evaluar ambas interpretaciones sin inventar citas.",
+ ),
+ "D257|MED|Estudios Sociales|N1|2":(
+  "Compara Chile colonial, independencia y organización republicana temprana.",
+  "Son períodos con formas políticas y económicas distintas, pero con continuidades sociales y territoriales. Independencia iniciada en 1810 y declarada en 1818; la periodización requiere matices.",
+  "Construye una línea de tiempo y caracteriza un cambio y una continuidad.",
+ ),
+ "D257|MED|Estudios Sociales|N1|1":(
+  "Una familia relata aportes de distintas comunidades a la historia de Chile.",
+  "La experiencia histórica común resulta de pueblos originarios, migraciones, relaciones sociales y procesos políticos diversos. No implica una identidad única ni borra conflictos y desigualdades.",
+  "Escribe una explicación inclusiva y nombra dos tipos de fuentes para contrastarla.",
+ ),
+ "D257|MED|Ciencias Naturales|N2|14":(
+  "Investiga si la temperatura afecta la rapidez de disolución de azúcar.",
+  "Pregunta, hipótesis, variables, control de masa y agitación, medición y análisis son etapas del método científico. Un resultado distinto de la hipótesis no es fracaso si el procedimiento es riguroso.",
+  "Diseña un protocolo replicable y explica cómo comunicarías un resultado inesperado.",
+ ),
+ "D257|MED|Ciencias Naturales|N2|13":(
+  "Un modelo escolar representa el sistema solar con esferas y distancias comprimidas.",
+  "El modelo ayuda a visualizar relaciones, pero no reproduce tamaños y distancias simultáneamente a escala si no se especifica. Modelos permiten explicar y predecir dentro de supuestos, no son copias exactas.",
+  "Identifica dos límites y una predicción contrastable de un modelo científico.",
+ ),
 }
 def curated_case(oa):
     return CASES.get(oa['clave_interna'])
