@@ -38,10 +38,10 @@ GATES = (
 def risk_flags(oa):
     text = oa["texto_literal"].lower()
     area = oa["asignatura"].lower()
-    broad = bool(re.search(r"\\b(?:proyecto|investigaci[oó]n|350|500|100|divers[oa]s|m[uú]ltiples|conjunto|a lo largo|procesos hist[oó]ricos)\\b", text))
-    authentic = bool(re.search(r"\\b(?:fuentes|documentos|noticias|textos|obras|patrimonio|hist[oó]ric|actualizad|investigaci[oó]n|internet)\\b", text)) or any(t in area for t in ("historia", "estudios sociales", "lengua", "lenguaje", "ciudadana", "filosofía"))
-    visual = bool(re.search(r"\\b(?:mapas|gr[aá]ficos|im[aá]genes|fotograf[ií]as|diagramas|planos|obras visuales)\\b", text)) or "art" in area
-    legal = bool(re.search(r"\\b(?:ley|legal|derechos|deberes|normas|normativ|contrato|tributari|previsi[oó]n|municipal)\\b", text))
+    broad = bool(re.search(r"\b(?:proyecto|investigaci[oó]n|350|500|100|divers[oa]s|m[uú]ltiples|conjunto|a lo largo|procesos hist[oó]ricos)\b", text))
+    authentic = bool(re.search(r"\b(?:fuentes|documentos|noticias|textos|obras|patrimonio|hist[oó]ric|actualizad|investigaci[oó]n|internet)\b", text)) or any(t in area for t in ("historia", "estudios sociales", "lengua", "lenguaje", "ciudadana", "filosofía"))
+    visual = bool(re.search(r"\b(?:mapas|gr[aá]ficos|im[aá]genes|fotograf[ií]as|diagramas|planos|obras visuales)\b", text)) or "art" in area
+    legal = bool(re.search(r"\b(?:ley|legal|derechos|deberes|normas|normativ|contrato|tributari|previsi[oó]n|municipal)\b", text))
     return broad, authentic, visual, legal
 
 def run(output, reviews_path=None):
