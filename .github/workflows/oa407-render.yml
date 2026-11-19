@@ -8,6 +8,7 @@ on:
       - 'scripts/oa_curated_cases.py'
       - 'scripts/oa_specific_examples.py'
       - 'scripts/build_407_oa_materials.py'
+      - 'scripts/attest_oa407_technical.py'
       - '.github/workflows/oa407-render.yml'
   pull_request:
     paths:
@@ -33,6 +34,8 @@ jobs:
           python -m pip install --disable-pip-version-check python-docx python-pptx pillow pymupdf
       - name: Generate 407 DOCX and 407 PPTX, render all pages and audit
         run: python scripts/build_407_oa_materials.py --out out/oa407
+      - name: Certify technical evidence for 407 objectives and 1221 Office files
+        run: python scripts/attest_oa407_technical.py out/oa407/report.json out/oa407/technical_evidence
       - name: Generate review sheets for every rendered page
         if: success()
         run: python scripts/contact_sheets.py out/oa407
@@ -50,5 +53,7 @@ jobs:
           path: |
             out/oa407/heva_oa407_docx_pptx.zip
             out/oa407/report.json
+            out/oa407/technical_evidence/*.csv
+            out/oa407/technical_evidence/*.json
             out/oa407/contact_sheets/*.jpg
           retention-days: 14
