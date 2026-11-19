@@ -5,7 +5,9 @@ from PIL import Image,ImageDraw,ImageFont
 import fitz,sys,math
 root=Path(sys.argv[1] if len(sys.argv)>1 else 'out/oa407')
 out=root/'contact_sheets';out.mkdir(parents=True,exist_ok=True)
-files=sorted((root/'pdf_docx').glob('*.pdf'))+sorted((root/'pdf_pptx').glob('*.pdf'))
+files=(sorted((root/'pdf_docx').glob('*.pdf'))
+       +sorted((root/'pdf_docx_docente').glob('*.pdf'))
+       +sorted((root/'pdf_pptx').glob('*.pdf')))
 tiles=[];sheet_index=0;page_count=0
 def save_sheet(items,index):
  if not items:return
