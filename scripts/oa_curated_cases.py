@@ -1643,7 +1643,7 @@ CASES = {
   "Expresa el costo de dos cuadernos y x lápices.",
  ),
  "D257|MED|Educación Matemática|N1|2":(
-  "Calcula 2³, 2⁻³ y (1/2)⁻².",
+  "Una persona necesita calcular y comparar 2³, 2⁻³ y (1/2)⁻² para comprender exponentes enteros.",
   "2³=8; 2⁻³=1/8; (1/2)⁻²=4. Regla a⁻ⁿ=1/aⁿ para a≠0. Potencias de diez permiten notación científica, por ejemplo 0,001=10⁻³.",
   "Expresa 0,0001 como potencia de diez y comprueba.",
  ),
