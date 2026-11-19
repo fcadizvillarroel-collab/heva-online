@@ -1,0 +1,55 @@
+name: HEVA EPJA stage 2 lesson rendering smoke
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/oa_lessons.py'
+      - 'scripts/build_407_oa_materials.py'
+      - 'scripts/oa_blueprints.py'
+      - '.github/workflows/epja-stage2-smoke.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.11'
+      - name: Install rendering dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y libreoffice-writer libreoffice-impress fonts-dejavu-core
+          python -m pip install --disable-pip-version-check python-docx python-pptx pillow pymupdf
+      - name: Compile Python and validate 407 lesson records
+        run: |
+          python -m py_compile scripts/oa_lessons.py scripts/build_407_oa_materials.py
+          python - <<'PY'
+          import json,sys
+          sys.path.insert(0,'scripts')
+          from oa_lessons import lesson
+          data=json.load(open('catalogo-publicado.json'))
+          assert len(data)==407
+          for oa in data:
+              l=lesson(oa)
+              assert all(l[k] for k in ('explanation','scenario','worked','transfer','accessibility','exit_ticket'))
+              assert len(l['questions'])==4 and len(l['answer_guide'])==4
+              assert l['status']=='BORRADOR_DIDACTICO_NO_VALIDADO'
+          print('407 lesson scaffolds structurally validated')
+          PY
+      - name: Generate and render sample Office exports
+        run: python scripts/build_407_oa_materials.py --limit 12 --out out/epja-stage2-smoke
+      - name: Upload report and samples
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: heva-epja-stage2-smoke
+          path: |
+            out/epja-stage2-smoke/report.json
+            out/epja-stage2-smoke/heva_oa407_docx_pptx.zip
+          retention-days: 7
