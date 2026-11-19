@@ -114,6 +114,9 @@ def create_doc(oa,png,out,teacher=False):
   paragraph.paragraph_format.space_before=Pt(0)
   paragraph.paragraph_format.line_spacing=1.05
  doc.save(out)
+def data_answer_key_present(text,oa):
+ return lesson(oa)['answer_guide'][0] in text
+
 def render(folder,output):
  output.mkdir(parents=True,exist_ok=True)
  files=sorted(folder.glob('*.docx'))+sorted(folder.glob('*.pptx'))
@@ -158,6 +161,12 @@ def main():
   create_doc(oa,png,doc);create_ppt(oa,png,ppt)
   teacher_doc=out/'docx_docente'/(key+'_docente.docx')
   create_doc(oa,png,teacher_doc,teacher=True)
+  # Teacher answer keys must never appear in student handouts.
+  student_text='\n'.join(x.text for x in Document(doc).paragraphs)
+  teacher_text='\n'.join(x.text for x in Document(teacher_doc).paragraphs)
+  assert 'Pauta docente: soluciones y criterios de revisión' not in student_text
+  assert 'Pauta docente: soluciones y criterios de revisión' in teacher_text
+  assert data_answer_key_present(teacher_text,oa)
   records.append({'blueprint':blueprint(oa),'oa':oa['clave_interna'],'subject':oa['asignatura'],'docx':doc.name,'docx_docente':teacher_doc.name,'pptx':ppt.name,
    'visual':png.name,'visual_kind':'original_educational_diagram','documentary_source_verified':False,'curricular_reference_url':curricular_source(oa),'curricular_page_catalog':oa.get('pagina_oficial','')})
  if not args.skip_render:
