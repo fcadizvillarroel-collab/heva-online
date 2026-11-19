@@ -362,6 +362,106 @@ CASES = {
   "El poema presenta lluvia y una taza mediante imágenes sensoriales. «Una taza guarda el día» es lenguaje figurado, no descripción literal. Puede evocar refugio o memoria; la interpretación debe apoyarse en palabras del poema.",
   "Explica una interpretación distinta y cita dos expresiones que la sustenten.",
  ),
+ "D257|BÁS|Educación Matemática|N2|9":(
+  "Una persona calcula mentalmente el vuelto de $10.000 después de una compra de $7.250 y duda de su resultado.",
+  "Restar 10.000 − 7.250 = $2.750. Verificar sumando 7.250 + 2.750 = 10.000. Reconocer la capacidad de usar y comprobar dos estrategias es parte del aprendizaje.",
+  "Propón otra forma de calcular el vuelto y explica qué aprendiste de la comprobación.",
+ ),
+ "D257|BÁS|Educación Matemática|N2|8":(
+  "Una persona compra 2,5 kg de fruta a $1.600 por kilogramo y paga $5.000.",
+  "Datos: 2,5 kg y $1.600/kg. Costo = 2,5 × 1.600 = $4.000. Vuelto = 5.000 − 4.000 = $1.000. Estimación previa: alrededor de $4.000. Comprobación: 4.000 + 1.000 = 5.000.",
+  "Resuelve el caso para 3,5 kg y explica cómo anticipar si alcanza el dinero.",
+ ),
+ "D257|BÁS|Educación Matemática|N2|7":(
+  "Se registran 0,5; 1,0; 1,5 y 2,0 litros de agua consumida en cuatro días ficticios.",
+  "Tabla: día 1→0,5 L, día 2→1 L, día 3→1,5 L, día 4→2 L. Total = 5 L; media = 1,25 L. En gráfico de barras, alturas proporcionales a los litros. Fracción del total del cuarto día = 2/5.",
+  "Construye el gráfico con escala y comunica una conclusión que no generalice a toda la población.",
+ ),
+ "D257|BÁS|Educación Matemática|N2|6":(
+  "Un terreno rectangular mide 8 m por 5 m y un depósito prismático rectangular mide 2 m × 3 m × 4 m.",
+  "Perímetro terreno = 2(8+5)=26 m; área = 8×5=40 m². Volumen depósito = 2×3×4=24 m³. Perímetro, área y volumen usan unidades diferentes.",
+  "Calcula perímetro y área de un rectángulo de 6 m × 4 m y volumen de prisma 2×2×5 m.",
+ ),
+ "D257|BÁS|Educación Matemática|N2|5":(
+  "Una compra suma $9.780, $4.120 y $6.050. Estima redondeando a millares.",
+  "Redondeo a millares: 10.000 + 4.000 + 6.000 = $20.000. Total exacto = 9.780 + 4.120 + 6.050 = $19.950. Error absoluto = $50. El redondeo se declara para evitar confundir estimación y valor exacto.",
+  "Redondea cada precio a centenas y compara el error con la primera estimación.",
+ ),
+ "D257|BÁS|Educación Matemática|N2|4":(
+  "Una receta usa 3/4 de taza de leche por porción. Se preparan 2 porciones y se agregan 0,25 tazas más.",
+  "Cantidad = (3/4)×2 + 0,25 = 1,5 + 0,25 = 1,75 tazas = 7/4. Se puede verificar convirtiendo fracciones a decimales.",
+  "Calcula la cantidad para 3 porciones más 0,5 tazas y expresa como fracción.",
+ ),
+ "D257|BÁS|Educación Matemática|N2|3":(
+  "Comprueba si la conmutatividad y distributividad se mantienen con fracciones.",
+  "1/2 + 1/3 = 5/6 = 1/3 + 1/2. (1/2)×(1/3) = 1/6 = (1/3)×(1/2). (1/2)(1/3+1/6) = 1/4 = 1/6+1/12. Las propiedades se extienden a estos números.",
+  "Usa números decimales para demostrar conmutatividad y distributividad.",
+ ),
+ "D257|BÁS|Educación Matemática|N2|2":(
+  "Una jarra tiene 3/4 L de jugo; se agregan 1/2 L y luego se sirven 0,25 L.",
+  "Total antes de servir = 3/4+1/2 = 5/4 = 1,25 L. Después = 1,25−0,25=1 L. Las operaciones representan cantidades que cambian en una situación real.",
+  "Si el litro restante se divide entre cuatro vasos iguales, calcula la cantidad por vaso.",
+ ),
+ "D257|BÁS|Educación Matemática|N2|1":(
+  "Compara 0,75 kg, 3/4 kg y 1 kg de arroz.",
+  "0,75 = 75/100 = 3/4, por tanto 0,75 kg y 3/4 kg son equivalentes; ambos son menores que 1 kg. Se pueden ubicar en una recta numérica.",
+  "Ordena 1/2, 0,8 y 3/4 de menor a mayor justificando con decimales.",
+ ),
+ "D257|BÁS|Educación Matemática|N1|11":(
+  "Una persona usa cálculo escrito para comprobar cuánto necesita para tres pasajes de $1.250.",
+  "Costo = 3×1.250 = $3.750. Comprobar sumando 1.250 tres veces. La estrategia se puede explicar y revisar; el error es ocasión para mejorar el procedimiento.",
+  "Describe un error que podrías cometer y cómo lo detectarías.",
+ ),
+ "D257|BÁS|Educación Matemática|N1|10":(
+  "Se compran cuatro cuadernos a $1.500 y se dispone de $7.000. ¿Cuánto dinero queda?",
+  "Pregunta: dinero restante. Datos: cuatro cuadernos, precio unitario, presupuesto. Costo = 4×1.500 = $6.000. Saldo = 7.000−6.000 = $1.000. Verificación: 6.000+1.000=7.000.",
+  "Resuelve el mismo caso para tres cuadernos y explica por qué cambia la respuesta.",
+ ),
+ "D257|BÁS|Educación Matemática|N1|9":(
+  "Describe un dado cúbico, una señal triangular y una mesa rectangular usando vocabulario geométrico.",
+  "El dado es un cubo con seis caras cuadradas; la señal es un triángulo de tres lados y tres vértices; la mesa tiene superficie rectangular con cuatro lados y ángulos rectos. No confundir figura plana con cuerpo tridimensional.",
+  "Dibuja un cuadrilátero y nombra lados, vértices y ángulos.",
+ ),
+ "D257|BÁS|Educación Matemática|N1|8":(
+  "En un plano cuadriculado, una persona parte en (2,2), avanza tres cuadros a la derecha y dos hacia arriba.",
+  "Posición final (5,4), suponiendo eje horizontal hacia la derecha y vertical hacia arriba. Trayectoria: (2,2)→(5,2)→(5,4). La escala no es necesaria para describir el desplazamiento.",
+  "Dibuja el trayecto inverso desde (5,4) hasta (2,2).",
+ ),
+ "D257|BÁS|Educación Matemática|N1|7":(
+  "Una torta se divide en ocho partes iguales y se consumen tres. Representa la fracción.",
+  "Consumido = 3/8; restante = 5/8. Como 3/8 < 1/2 = 4/8, se consumió menos de la mitad. El denominador expresa partes iguales, no el tamaño de cada porción por sí solo.",
+  "Representa 2/5 y 1/2 en dos figuras de igual tamaño y compara.",
+ ),
+ "D257|BÁS|Educación Matemática|N1|6":(
+  "Estima el costo de 3 artículos de $1.980 cada uno antes de multiplicar exactamente.",
+  "Estimación redondeando a $2.000: 3×2.000 ≈ $6.000. Resultado exacto: 3×1.980=$5.940. Diferencia = $60. La aproximación se comunica con «aproximadamente».",
+  "Estima y calcula exactamente cinco artículos de $990 y compara.",
+ ),
+ "D257|BÁS|Educación Matemática|N1|5":(
+  "Comprueba propiedades con 4, 5 y 2 y explica qué operaciones son inversas.",
+  "4+5=5+4=9; (4+5)+2=4+(5+2)=11; 4×(5+2)=4×5+4×2=28. 7−5=2 revierte 2+5=7; 12÷3=4 revierte 4×3=12. Multiplicar por cero da cero; por uno conserva el número.",
+  "Propón un ejemplo de asociatividad y otro de operación inversa.",
+ ),
+ "D257|BÁS|Educación Matemática|N1|4":(
+  "Una persona compra tres lápices a $450 y una libreta a $1.250; paga $3.000.",
+  "Costo lápices = 3×450=$1.350. Total = 1.350+1.250=$2.600. Vuelto = 3.000−2.600=$400. Comprobación: 2.600+400=3.000.",
+  "Si compra cuatro lápices, calcula nuevo total y vuelto.",
+ ),
+ "D257|BÁS|Educación Matemática|N1|3":(
+  "Una botella contiene 1,5 litros; una cinta mide 125 cm y una actividad dura 90 minutos.",
+  "Equivalencias: 1,5 L=1.500 mL; 125 cm=1,25 m; 90 min=1 h 30 min. Las unidades deben elegirse según magnitud; una regla no mide volumen de líquido.",
+  "Indica qué instrumento usarías para cada magnitud y expresa 2,5 kg en gramos.",
+ ),
+ "D257|BÁS|Educación Matemática|N1|2":(
+  "Representa $23.450 según valor posicional en el sistema decimal.",
+  "23.450 = 2×10.000 + 3×1.000 + 4×100 + 5×10 + 0×1. Es un número del sistema decimal y un monto monetario expresado en pesos chilenos; 1 metro = 100 centímetros ejemplifica relación decimal en unidades.",
+  "Descompón 40.305 y convierte 2,5 m a centímetros.",
+ ),
+ "D257|BÁS|Educación Matemática|N1|1":(
+  "Una tabla informa asistentes: lunes 12, martes 18 y miércoles 15. Interpreta y comunica.",
+  "Mayor asistencia: martes con 18. Menor: lunes con 12. Total = 12+18+15=45 asistencias, no necesariamente 45 personas diferentes. Un gráfico de barras debe mostrar escala y días.",
+  "Calcula la diferencia entre máximo y mínimo y redacta una conclusión precisa.",
+ ),
 }
 def curated_case(oa):
     return CASES.get(oa['clave_interna'])
