@@ -1062,6 +1062,96 @@ CASES = {
   "Palabras: dos entradas al mismo precio. Operación 2×3.500=$7.000. Tabla: cantidad 1→$3.500; 2→$7.000. Cada representación comunica la misma relación.",
   "Dibuja un gráfico para cantidades 0,1,2,3 y explica su significado.",
  ),
+ "B24|BÁS|Matemática|N3|6":(
+  "Un cálculo de 15 % de $40.000 debe aplicarse luego a un presupuesto de $60.000.",
+  "Primero 0,15×40.000=$6.000. La estrategia se transfiere: 0,15×60.000=$9.000. Verificar con 10 % + 5 %. Cambia el dato, no la regla.",
+  "Aplica la estrategia a 25 % de $80.000.",
+ ),
+ "B24|BÁS|Matemática|N3|5":(
+  "Una persona resuelve 2x+8=20 y explica el procedimiento a un compañero.",
+  "Restar 8 en ambos miembros: 2x=12. Dividir por 2: x=6. Verificar: 2×6+8=20. Explicar por qué se mantiene la igualdad es más riguroso que dar solo x.",
+  "Redacta una explicación respetuosa para corregir el error x=14.",
+ ),
+ "B24|BÁS|Matemática|N3|4":(
+  "Un cilindro contiene 3 litros y se vacía 0,5 litro por minuto.",
+  "Expresión V(t)=3−0,5t, con 0≤t≤6. En t=4, V=1 litro. Las unidades y el dominio son parte del modelo.",
+  "Expresa en ecuación y palabras cuándo queda vacío.",
+ ),
+ "B24|BÁS|Matemática|N3|3":(
+  "Se usa el modelo A=πr² para una tapa circular de radio 5 cm.",
+  "Área=25π≈78,5 cm². El modelo sirve para un círculo plano, no para estimar directamente volumen de un recipiente. Identificar magnitud evita uso erróneo.",
+  "Calcula área con radio 2 cm y explica un límite del modelo.",
+ ),
+ "B24|BÁS|Matemática|N3|2":(
+  "Un gráfico de barras indica 3, 5 y 2 participantes en tres talleres.",
+  "Tabla: A=3, B=5, C=2. Total=10. Fracciones: A=3/10, B=1/2, C=1/5. El gráfico y la tabla deben concordar.",
+  "Detecta qué error habría si una barra B marcara 4.",
+ ),
+ "B24|BÁS|Matemática|N3|1":(
+  "Una feria vende 12, 8 y 10 kg de verduras en tres días.",
+  "Tabla con días y kg; total=30 kg, media=10 kg/día. Un gráfico de barras representa cantidades, no porcentaje de personas.",
+  "Expresa datos en tabla, gráfico y una conclusión prudente.",
+ ),
+ "B24|BÁS|Matemática|N2|6":(
+  "Se compran 2,5 kg de manzanas a $1.200/kg y luego 1 kg adicional.",
+  "Datos: masa y precio unitario. Costo inicial=2,5×1.200=$3.000; nuevo=3,5×1.200=$4.200. La misma estrategia sirve para cambiar cantidad.",
+  "Calcula costo para 4 kg y verifica con suma.",
+ ),
+ "B24|BÁS|Matemática|N2|5":(
+  "Explica a un compañero cómo sumar 1/2 y 1/4.",
+  "Denominador común 4: 1/2=2/4; 2/4+1/4=3/4. El denominador expresa particiones iguales. No sumar denominadores.",
+  "Corrige respetuosamente la respuesta errónea 2/6.",
+ ),
+ "B24|BÁS|Matemática|N2|4":(
+  "Una persona compra 1,5 kg a $2.000 por kg.",
+  "Modelo C=1,5×2.000=$3.000. Si compra x kg, C=2.000x; x representa kilogramos. La multiplicación modela precio proporcional.",
+  "Escribe modelo para precio de $2.400/kg y calcula 2,5 kg.",
+ ),
+ "B24|BÁS|Matemática|N2|3":(
+  "Un vehículo recorre 60 km en 2 horas a rapidez media constante.",
+  "Modelo v=d/t=60/2=30 km/h. Si la rapidez varía, el promedio no describe cada instante; distinguir modelo de realidad.",
+  "Calcula rapidez media para 90 km en 3 horas.",
+ ),
+ "B24|BÁS|Matemática|N2|2":(
+  "Representa 0,5 kg como fracción y como dibujo.",
+  "0,5=1/2; se representa sombreando una de dos partes iguales. 0,5 kg=500 g. La representación gráfica y numérica deben concordar.",
+  "Representa 0,25 kg con fracción, dibujo y gramos.",
+ ),
+ "B24|BÁS|Matemática|N2|1":(
+  "Una cuenta de tres compras registra $1.200, $800 y $1.500.",
+  "Total=$3.500. Tabla con cada gasto, expresión 1.200+800+1.500 y gráfico de barras permiten comunicar la misma información.",
+  "Dibuja gráfico y explica qué compra fue mayor.",
+ ),
+ "B24|BÁS|Matemática|N1|6":(
+  "Una compra incluye dos panes de $500 y una leche de $1.200.",
+  "Datos: 2, $500 y $1.200. Costo=2×500+1.200=$2.200. Si paga $3.000, vuelto=$800. Comprobar 2.200+800=3.000.",
+  "Aplica procedimiento a tres panes y una leche.",
+ ),
+ "B24|BÁS|Matemática|N1|5":(
+  "Una persona afirma que 8+7=14.",
+  "Comprobar con descomposición: 8+2=10; faltan 5; 10+5=15. El error se detecta mediante cálculo alternativo o recta numérica.",
+  "Explica por qué 9+6 también es 15 usando descomposición.",
+ ),
+ "B24|BÁS|Matemática|N1|4":(
+  "Se necesitan cuatro botellas de 2 litros para una actividad.",
+  "Expresión 4×2=8 litros. Es una multiplicación de grupos iguales, no una suma de cantidades sin contexto.",
+  "Representa la situación con dibujo y suma reiterada.",
+ ),
+ "B24|BÁS|Matemática|N1|3":(
+  "Una sala tiene cinco filas de cuatro sillas cada una.",
+  "Modelo multiplicativo 5×4=20 sillas. Contar de una en una también funciona pero es menos eficiente; ambos deben dar igual.",
+  "Elige modelo para seis filas de tres sillas y justifica.",
+ ),
+ "B24|BÁS|Matemática|N1|2":(
+  "Una persona dice «tres bolsas con dos manzanas cada una».",
+  "Concreto: tres grupos de dos objetos. Dibujo: tres pares de círculos. Símbolo: 3×2=6. Verbal: seis manzanas en total.",
+  "Transforma 4×3 a dibujo y oración.",
+ ),
+ "B24|BÁS|Matemática|N1|1":(
+  "Representa ocho lápices agrupados en dos paquetes iguales.",
+  "Concreto: dos grupos de cuatro. Pictórico: dos conjuntos de cuatro marcas. Simbólico: 2×4=8 o 8÷2=4. La representación mantiene cantidades y unidades.",
+  "Dibuja doce objetos en tres grupos y escribe operación.",
+ ),
 }
 def curated_case(oa):
     return CASES.get(oa['clave_interna'])
