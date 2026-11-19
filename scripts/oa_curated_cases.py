@@ -762,6 +762,106 @@ CASES = {
   "Pregunta investigable: ¿se forman gotas por vapor de agua del aire que se condensa sobre la superficie fría? Hipótesis: a menor temperatura superficial, aumenta condensación bajo condiciones apropiadas. No confundir con fuga del vaso.",
   "Propón una comparación con vaso a temperatura ambiente y registra observaciones.",
  ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N2|8":(
+  "En una explicación oral se escuchan «hipótesis», «evidencia» y «conclusión».",
+  "Hipótesis es explicación tentativa contrastable; evidencia es información que sustenta o cuestiona una afirmación; conclusión es juicio fundado en el análisis. Un diccionario disciplinar y ejemplos contextualizados ayudan a verificar significados.",
+  "Redacta una oración con cada palabra y explica la diferencia entre hipótesis y conclusión.",
+ ),
+ "B24|MED|Ciencias Naturales|N1|6":(
+  "Una planilla muestra cinco temperaturas: 18, 19, 21, 20 y 22 °C.",
+  "Media = (18+19+21+20+22)/5 = 20 °C. Un gráfico de línea puede visualizar variación, pero sin mediciones repetidas ni control no permite afirmar una causa. La conclusión debe limitarse al conjunto.",
+  "Explica cómo evaluarías la confiabilidad de los datos y qué gráfico elegirías.",
+ ),
+ "B24|MED|Ciencias Naturales|N1|5":(
+  "Dos termómetros miden una muestra y registran 22,0 y 25,5 °C.",
+  "La diferencia de 3,5 °C exige comprobar calibración, ubicación y procedimiento. La replicabilidad requiere protocolo suficientemente detallado. No escoger el resultado preferido sin criterio de calidad.",
+  "Diseña un protocolo de control y explica una aplicación tecnológica de medir temperatura con precisión.",
+ ),
+ "B24|MED|Ciencias Naturales|N1|4":(
+  "En un ensayo ficticio, una planta recibe 100 mL de agua por día y otra 50 mL; sus alturas finales son 15 y 12 cm.",
+  "Diferencia observada = 3 cm. No se puede atribuir causalidad solo al agua sin conocer alturas iniciales, luz, especie y repeticiones. Variables: volumen de agua y crecimiento.",
+  "Redacta una conclusión prudente y explica qué nuevo dato te haría revisar tu interpretación.",
+ ),
+ "B24|MED|Ciencias Naturales|N1|3":(
+  "Se registran tiempos de fusión de tres cubos de hielo: 8, 10 y 12 minutos.",
+  "Tabla: prueba 1→8 min, 2→10 min, 3→12 min. Media = 10 min. Un gráfico de barras debe tener ejes y unidad; publicar resultados exige indicar condiciones y evitar manipulación engañosa.",
+  "Elabora tabla y gráfico, y explica por qué tres observaciones no bastan para generalizar.",
+ ),
+ "B24|MED|Ciencias Naturales|N1|2":(
+  "Pregunta: ¿la temperatura del agua afecta la rapidez con que se disuelve azúcar?",
+  "Diseño: misma masa de azúcar, volumen de agua y agitación; variar temperatura y medir tiempo de disolución. Registrar °C y segundos. Cuidar riesgos térmicos y documentar procedimiento; un estudio documental puede complementar.",
+  "Escribe hipótesis, variables, instrumentos y medidas de seguridad.",
+ ),
+ "B24|MED|Ciencias Naturales|N1|1":(
+  "Al observar que una sombra cambia de posición durante el día, se plantea una investigación.",
+  "Pregunta: ¿cómo cambia la orientación de la sombra según la hora? Hipótesis: cambia por el movimiento aparente del Sol. Medir orientación y longitud en intervalos fijos, controlando objeto y lugar.",
+  "Propón una tabla de observaciones sin inventar mediciones.",
+ ),
+ "B24|BÁS|Ciencias Naturales|N3|7":(
+  "Un informe presenta crecimiento de plantas: 2, 3 y 4 cm, sin indicar días ni método.",
+  "El informe no permite replicar ni interpretar la tendencia temporal. Debe registrar fecha, unidad, instrumento y condiciones; un gráfico sin eje temporal es insuficiente para evaluar crecimiento.",
+  "Diseña una pauta de evaluación con cuatro criterios y justifica cada uno.",
+ ),
+ "B24|BÁS|Ciencias Naturales|N3|6":(
+  "Un experimento sobre germinación utiliza tres semillas en un grupo y treinta en otro.",
+  "La comparación está desequilibrada; los porcentajes pueden calcularse, pero la precisión y confiabilidad difieren. Se deben igualar condiciones, registrar tamaños muestrales y repetir. No ocultar resultados desfavorables.",
+  "Propón un diseño más replicable y explica cómo informarías limitaciones.",
+ ),
+ "B24|BÁS|Ciencias Naturales|N3|5":(
+  "En dos ensayos, un objeto recorre 10 m en 5 s y otro 10 m en 10 s.",
+  "Rapidez media del primero = 10/5 = 2 m/s; segundo = 10/10 = 1 m/s. Hay relación inversa entre tiempo y rapidez para distancia fija, pero no se infiere aceleración sin datos adicionales.",
+  "Calcula rapidez para 15 m en 5 s e interpreta la comparación.",
+ ),
+ "B24|BÁS|Ciencias Naturales|N3|4":(
+  "Se miden masas de tres objetos: 100 g, 150 g y 200 g.",
+  "Tabla con columnas objeto y masa (g). Gráfico de barras con alturas 100, 150, 200 y eje rotulado. Total = 450 g. No incluir nombres reales o datos personales innecesarios.",
+  "Diseña un gráfico y explica qué conclusión se puede y no se puede obtener.",
+ ),
+ "B24|BÁS|Ciencias Naturales|N3|3":(
+  "Investiga si una mayor inclinación de una rampa cambia el tiempo de descenso de una pelota.",
+  "Variable manipulada: inclinación; dependiente: tiempo; controles: pelota, superficie y distancia. Medir ángulo en grados y tiempo en segundos, repetir y registrar sin modificar resultados.",
+  "Propón un plan de cuatro pasos, materiales y una tabla de datos vacía.",
+ ),
+ "B24|BÁS|Ciencias Naturales|N3|2":(
+  "Una planta junto a la ventana crece diferente de otra ubicada lejos.",
+  "Pregunta: ¿influye la luz en el crecimiento? Variable manipulada: exposición lumínica; medición: altura en cm durante período definido. Controlar agua, especie y recipiente.",
+  "Explica cómo medirías sin confundir luz con otras variables.",
+ ),
+ "B24|BÁS|Ciencias Naturales|N3|1":(
+  "Un recipiente con agua se deja al sol y otro a la sombra.",
+  "Predicción razonada: el recipiente al sol puede calentarse más, bajo condiciones comparables. Es una predicción, no resultado observado; medir temperaturas permite contrastarla.",
+  "Registra dos observaciones iniciales y escribe qué dato confirmaría o refutaría tu predicción.",
+ ),
+ "B24|BÁS|Ciencias Naturales|N2|7":(
+  "Una estudiante presenta un dibujo de una planta y afirma que creció 10 cm sin mostrar mediciones.",
+  "El dibujo puede comunicar forma, pero no verifica crecimiento cuantitativo. Se requiere medición inicial y final, unidad y fecha. Una presentación debe distinguir evidencia y opinión.",
+  "Propón tres mejoras del informe y explica cómo evaluarlas.",
+ ),
+ "B24|BÁS|Ciencias Naturales|N2|6":(
+  "Al medir una mesa, un grupo anota 120 sin unidad y otro anota 1,2 m.",
+  "Sin unidad, 120 es ambiguo. Si eran centímetros, 120 cm = 1,2 m. Mejoras: anotar unidades, verificar instrumento y repetir mediciones. Corregir registros con transparencia.",
+  "Redacta un protocolo breve para evitar el mismo error.",
+ ),
+ "B24|BÁS|Ciencias Naturales|N2|5":(
+  "Predicción: el agua al sol estará más caliente. Mediciones ficticias: sol 27 °C y sombra 22 °C.",
+  "La diferencia observada es 5 °C y coincide con la predicción en este caso. No demuestra una regla universal sin controlar recipiente, hora, volumen y repeticiones.",
+  "Redacta conclusión con evidencia y una limitación.",
+ ),
+ "B24|BÁS|Ciencias Naturales|N2|4":(
+  "Se observan tres hojas: longitudes 4, 6 y 5 cm, colores verde, verde y amarillo.",
+  "Tabla: hoja 1→4 cm/verde; hoja 2→6 cm/verde; hoja 3→5 cm/amarillo. Media longitud = 5 cm. Un gráfico de barras representa longitud; el color es dato cualitativo.",
+  "Elige representación apropiada para cada variable y explica cómo protegerías datos de origen.",
+ ),
+ "B24|BÁS|Ciencias Naturales|N2|3":(
+  "Investiga cuánto tarda en disolverse una cucharadita de azúcar en agua fría y tibia.",
+  "Pregunta: ¿la temperatura afecta el tiempo de disolución? Controlar volumen, cantidad de azúcar y agitación; medir temperatura en °C y tiempo en segundos. Usar agua a temperatura segura.",
+  "Diseña una tabla con dos condiciones y tres repeticiones, sin inventar resultados.",
+ ),
+ "B24|BÁS|Ciencias Naturales|N2|2":(
+  "Al observar gotas en el exterior de un vaso frío, una persona pregunta por su origen.",
+  "Pregunta investigable: ¿las gotas provienen del vapor de agua del aire que se condensa? Comparar vaso frío y a temperatura ambiente, manteniendo entorno similar. No asumir que el vaso tiene fugas.",
+  "Formula una predicción y explica qué observación la apoyaría.",
+ ),
 }
 def curated_case(oa):
     return CASES.get(oa['clave_interna'])
