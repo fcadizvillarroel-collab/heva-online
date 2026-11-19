@@ -9,8 +9,8 @@ root=Path(__file__).resolve().parents[1]
 catalog=json.loads((root/'catalogo-publicado.json').read_text(encoding='utf-8'))
 by_id={o['clave_interna']:o for o in catalog}
 assert len(catalog)==407 and len(by_id)==407
-assert len(CASES)>=20
-assert set(CASES).issubset(by_id), 'Curated example has an unknown OA key'
+assert len(CASES)==407, f'Expected 407 exact-OA cases, got {len(CASES)}'
+assert set(CASES)==set(by_id), 'Missing or unknown exact OA case keys'
 for key, (scenario, solution, transfer) in CASES.items():
     assert all(len(t.strip())>=30 for t in (scenario,solution,transfer)), key
     l=lesson(by_id[key])
