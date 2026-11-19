@@ -63,7 +63,7 @@ def create_ppt(oa,png,out):
  s=slide();addtext(s,.7,.45,12,.8,'Actividad de aplicación',30,True)
  bp=blueprint(oa)
  addtext(s,.8,1.45,11.7,4.8,'\\n'.join(str(i)+'. '+t for i,t in enumerate(bp['actividades'],1)),17)
- addtext(s,.8,6.35,11.8,.55,'Ticket de salida: ¿qué aprendiste y qué necesitas practicar?',17,False,TEAL)
+ addtext(s,.8,6.35,11.8,.55,'BORRADOR NO VALIDADO · Requiere revisión docente y fuentes específicas',14,False,TEAL)
  prs.save(out)
 def create_doc(oa,png,out):
  doc=Document();sec=doc.sections[0];sec.top_margin=Cm(1.8);sec.bottom_margin=Cm(1.6)
