@@ -21,6 +21,9 @@ function subjectVisual(section,topic){
  {re:/construcciones metalicas|soldadura|metal|taller|especialidad|seguridad laboral|prevencion de riesgos/,title:'Aplicar un procedimiento',labels:['PREPARAR','EJECUTAR','VERIFICAR'],notes:['Revisar materiales y EPP','Seguir pasos seguros','Controlar la calidad']},
  {re:/convivencia|insercion laboral|empleabilidad|emprendimiento/,title:'Resolver una situación',labels:['SITUACIÓN','DECISIÓN','EVALUACIÓN'],notes:['Reconocer el problema','Justificar una acción','Revisar resultados']}
  ];
+ if(/globalizacion|comercio internacional|interdependencia/.test(topic)){
+  groups.unshift({re:/./,title:/proveedor|importacion|demora|dependencia|riesgo/.test(words)?'Dependencia del comercio mundial':'Globalización: conexiones',labels:/proveedor|importacion|demora|dependencia|riesgo/.test(words)?['PROVEEDOR','TRANSPORTE','NEGOCIO LOCAL']:['PRODUCCIÓN','INTERCAMBIO','CONSUMO'],notes:/proveedor|importacion|demora|dependencia|riesgo/.test(words)?['Origen de los insumos','Posibles retrasos','Efectos y decisiones']:['Bienes y servicios','Rutas y comunicaciones','Efectos cotidianos']});
+ }
  const group=groups.find(g=>g.re.test(topic))||{title:'Aprender y aplicar',labels:['CONCEPTO','EJEMPLO','APLICACIÓN'],notes:['Comprender la idea','Observar un modelo','Resolver una tarea']};
  try{
   const canvas=document.createElement('canvas');canvas.width=1000;canvas.height=550;
