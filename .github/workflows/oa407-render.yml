@@ -1,0 +1,43 @@
+name: HEVA 407 OA real Office generation and rendered QA
+on:
+  pull_request:
+    paths:
+      - 'scripts/build_407_oa_materials.py'
+      - 'catalogo-publicado.json'
+      - '.github/workflows/oa407-render.yml'
+  workflow_dispatch:
+jobs:
+  build-render-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install office rendering dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y libreoffice-writer libreoffice-impress fonts-dejavu-core
+          python -m pip install --disable-pip-version-check python-docx python-pptx pillow pymupdf
+      - name: Generate 407 DOCX and 407 PPTX, render all pages and audit
+        run: python scripts/build_407_oa_materials.py --out out/oa407
+      - name: Generate review sheets for every rendered page
+        if: success()
+        run: python scripts/contact_sheets.py out/oa407
+      - name: Publish report summary
+        if: always()
+        run: |
+          if test -f out/oa407/report.json; then
+            python -c "import json;d=json.load(open('out/oa407/report.json'));print('Generated:',d['generated'],'Passed:',d['passed'],'Failed:',d['failed'])" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Upload Office files and QA report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: heva-407-oa-office-materials-and-report
+          path: |
+            out/oa407/heva_oa407_docx_pptx.zip
+            out/oa407/report.json
+            out/oa407/contact_sheets/*.jpg
+          retention-days: 14
