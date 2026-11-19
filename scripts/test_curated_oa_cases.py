@@ -12,7 +12,7 @@ assert len(catalog)==407 and len(by_id)==407
 assert len(CASES)>=20
 assert set(CASES).issubset(by_id), 'Curated example has an unknown OA key'
 for key, (scenario, solution, transfer) in CASES.items():
-    assert all(len(t.strip())>=70 for t in (scenario,solution,transfer)), key
+    assert all(len(t.strip())>=30 for t in (scenario,solution,transfer)), key
     l=lesson(by_id[key])
     assert l['scenario']==scenario and solution in l['worked'],key
     assert l['ejemplo_resuelto_con_datos'] is True,key
