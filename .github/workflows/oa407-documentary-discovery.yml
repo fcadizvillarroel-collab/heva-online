@@ -1,0 +1,30 @@
+name: HEVA 407 OA documentary candidate discovery
+on:
+  workflow_dispatch:
+    inputs:
+      count:
+        description: 'OA to search (1-407)'
+        default: '407'
+        required: true
+  pull_request:
+    paths:
+      - scripts/find_documentary_candidates.py
+      - .github/workflows/oa407-documentary-discovery.yml
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Search Commons for concrete media and licenses
+        run: |
+          COUNT="${{ github.event.inputs.count || '407' }}"
+          python scripts/find_documentary_candidates.py --limit "$COUNT" --out out/oa407_documentary_candidates.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oa407-documentary-candidates-for-human-review
+          path: out/oa407_documentary_candidates.json
+          retention-days: 30
