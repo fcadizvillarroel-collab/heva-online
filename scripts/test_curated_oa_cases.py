@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+"""Guardrails for curated OA lessons: exact catalog IDs and worked-example evidence."""
+import json
+from pathlib import Path
+from oa_curated_cases import CASES
+from oa_specific_examples import specific_example
+from oa_lessons import lesson
+root=Path(__file__).resolve().parents[1]
+catalog=json.loads((root/'catalogo-publicado.json').read_text(encoding='utf-8'))
+by_id={o['clave_interna']:o for o in catalog}
+assert len(catalog)==407 and len(by_id)==407
+assert len(CASES)>=20
+assert set(CASES).issubset(by_id), 'Curated example has an unknown OA key'
+for key, (scenario, solution, transfer) in CASES.items():
+    assert all(len(t.strip())>=70 for t in (scenario,solution,transfer)), key
+    l=lesson(by_id[key])
+    assert l['scenario']==scenario and solution in l['worked'],key
+    assert l['ejemplo_resuelto_con_datos'] is True,key
+    assert l['status']=='BORRADOR_DIDACTICO_NO_VALIDADO',key
+n_topic=sum(bool(specific_example(o)) for o in catalog)
+print(json.dumps({'catalog':len(catalog),'curated_exact_oa':len(CASES),'topic_rule_matches':n_topic,'expert_approved':0},ensure_ascii=False))
