@@ -64,9 +64,9 @@ def create_ppt(oa,png,out):
  def slide(title,body,footer='HEVA · BORRADOR DIDÁCTICO NO VALIDADO'):
   s=prs.slides.add_slide(prs.slide_layouts[6])
   addtext(s,.65,.38,12,.7,title,28,True)
-  size=20 if len(body)<260 else (17 if len(body)<500 else (15 if len(body)<750 else 13))
+  size=20 if len(body)<260 else (17 if len(body)<500 else (15 if len(body)<750 else 14))
   addtext(s,.78,1.32,11.8,4.95,body,size)
-  addtext(s,.78,6.65,11.8,.45,footer,12,False,TEAL)
+  addtext(s,.78,6.65,11.8,.45,footer,14,False,TEAL)
   return s
  slide('OBJETIVO DE APRENDIZAJE · '+str(oa['_index']).zfill(3),oa['asignatura']+' · '+oa['nivel']+'\n\n'+oa['texto_literal'])
  slide('¿Qué vamos a aprender?',data['explanation'])
