@@ -962,6 +962,106 @@ CASES = {
   "No es fiable solo por circular en redes. Verificar archivo de origen, fecha, lugar, pie de foto y comparación con otras fuentes. La falta de autoría reduce trazabilidad.",
   "Diseña una pauta de cuatro preguntas para comprobar procedencia.",
  ),
+ "B24|BÁS|Historia, Geografía y Ciencias Sociales|N2|4":(
+  "Investiga cómo cambió el uso de una plaza mediante fotografía fechada y acta municipal.",
+  "La fotografía aporta rasgos visibles y el acta puede documentar decisiones, siempre que ambas sean auténticas. Seleccionar por pertinencia, autoría y fecha; no inferir uso social completo de una imagen aislada.",
+  "Escribe dos datos que extraerías de cada fuente y una pregunta pendiente.",
+ ),
+ "B24|BÁS|Historia, Geografía y Ciencias Sociales|N2|3":(
+  "Ordena hitos ficticios de 1901, 1915, 1920 y 1935 en una línea de tiempo.",
+  "Orden cronológico 1901→1915→1920→1935. 1901 y 1915 pertenecen al siglo XX; de 1901 a 1935 transcurren 34 años. Una década equivale a diez años; marcar escala regular.",
+  "Representa una actividad que duró de 1915 a 1920 y distingue período de hito.",
+ ),
+ "B24|BÁS|Historia, Geografía y Ciencias Sociales|N2|2":(
+  "Un plano indica hospital al norte, plaza al centro y escuela al sur.",
+  "Leer orientación, leyenda y ubicación relativa: hospital al norte de plaza, escuela al sur. Una fotografía puede confirmar fachada, pero no distancia exacta sin escala o coordenadas.",
+  "Dibuja un plano simple con leyenda y explica una limitación.",
+ ),
+ "B24|BÁS|Historia, Geografía y Ciencias Sociales|N2|1":(
+  "Compara Edad Media y Edad Moderna en Europa mediante hitos y procesos generales.",
+  "Edad Media se sitúa convencionalmente entre 476 y 1453/1492 según criterio; Edad Moderna hasta 1789 en periodización escolar frecuente. Los límites son convenciones y no describen cambios simultáneos en todo el mundo.",
+  "Elabora una tabla de dos procesos por período y explica una limitación de estas fechas.",
+ ),
+ "B24|MED|Matemática|N2|8":(
+  "Una solución afirma que 3x+4=19 implica x=6.",
+  "Comprobación: 3×6+4=22, no 19. Corregir: 3x=15; x=5. Sustitución: 3×5+4=19. El error fue despejar sin mantener equivalencia.",
+  "Revisa una solución de 4x−2=18 y justifica cada paso.",
+ ),
+ "B24|MED|Matemática|N2|7":(
+  "El costo de un servicio se modela C(n)=5.000+2.000n pesos para n unidades.",
+  "Con n=3, C=11.000; con n=5, C=15.000. Aumentar n en 2 aumenta costo $4.000. Si cambia tarifa variable, cambia pendiente, no necesariamente cargo fijo.",
+  "Compara C(n)=5.000+2.500n con el modelo inicial para n=4.",
+ ),
+ "B24|MED|Matemática|N2|6":(
+  "Alguien afirma que la suma de dos números pares siempre es par, pero omite justificación.",
+  "Demostración: pares 2a y 2b, con a,b enteros. Suma 2a+2b=2(a+b), múltiplo de 2; por tanto par. Un solo ejemplo no demuestra el caso general.",
+  "Encuentra el error en «2+4=6, luego todas las sumas de pares son pares» como prueba completa.",
+ ),
+ "B24|MED|Matemática|N2|5":(
+  "Un equipo conjetura que la suma de tres enteros consecutivos es múltiplo de 3.",
+  "Sea n el primero: n+(n+1)+(n+2)=3n+3=3(n+1). Es múltiplo de 3 para cualquier entero n. Verificar con 4+5+6=15 es apoyo, no sustituto de demostración.",
+  "Propón una conjetura nueva y distingue ejemplo de prueba.",
+ ),
+ "B24|MED|Matemática|N2|4":(
+  "Dos modelos estiman costo de taxi: A=1.000+800k y B=1.500+700k, k kilómetros.",
+  "Para k=5, A=$5.000 y B=$5.000. Para k=10, A=$9.000 y B=$8.500. Ambos omiten espera, tráfico y tarifas reales; no deben usarse como precios oficiales.",
+  "Determina punto de igualdad y una limitación adicional.",
+ ),
+ "B24|MED|Matemática|N2|3":(
+  "Una cuenta eléctrica ficticia tiene cargo fijo $2.000 y $150 por unidad consumida.",
+  "Modelo lineal C(x)=2.000+150x, con x≥0. Para 20 unidades, C=$5.000. Si se incorpora impuesto u otra tarifa, debe ajustarse el modelo; no atribuirlo a facturación real.",
+  "Calcula C(35) y explica cuándo el modelo dejaría de ser apropiado.",
+ ),
+ "B24|MED|Matemática|N2|2":(
+  "Representa la relación y=2x+1 con tabla, ecuación y gráfico.",
+  "Para x=0,1,2, y=1,3,5. Los puntos (0,1),(1,3),(2,5) están sobre una recta. La ecuación expresa regla, tabla casos y gráfico relación espacial.",
+  "Explica qué representa la pendiente y predice y para x=4.",
+ ),
+ "B24|MED|Matemática|N2|1":(
+  "Comunica cómo crece una deuda ficticia que aumenta $1.000 cada mes desde $3.000.",
+  "Tabla meses 0,1,2: $3.000,$4.000,$5.000. Expresión D(m)=3.000+1.000m; gráfico lineal con intercepto 3.000 y pendiente 1.000. Las tres formas describen lo mismo.",
+  "Explica el modelo en lenguaje cotidiano y dibuja tres puntos.",
+ ),
+ "B24|MED|Matemática|N1|8":(
+  "Un cálculo propone que 25 % de $80.000 es $25.000.",
+  "25 %=0,25; 0,25×80.000=$20.000. Comprobación: un cuarto de 80.000 es 20.000. Error: confundir porcentaje con monto o aplicar operación incorrecta.",
+  "Comprueba 15 % de $40.000 usando dos métodos.",
+ ),
+ "B24|MED|Matemática|N1|7":(
+  "Una compra de cuatro unidades a $2.000 cada una cambia a seis unidades.",
+  "Costo inicial $8.000; nuevo $12.000; variación $4.000. Si el precio unitario sube a $2.500, seis unidades cuestan $15.000. Comparar parámetros permite interpretar cambios.",
+  "Elabora tabla para 3,4,5 unidades y dos precios unitarios.",
+ ),
+ "B24|MED|Matemática|N1|6":(
+  "Un estudiante afirma que el producto de dos números negativos es positivo y da solo un ejemplo.",
+  "Ejemplo (−2)×(−3)=6, pero no es demostración general. Usando distributividad: 0=(−2)×(3+(−3))=(−6)+(−2)(−3); luego (−2)(−3)=6. La igualdad justifica este caso.",
+  "Identifica qué paso requiere justificar y explica diferencia entre ejemplo y demostración.",
+ ),
+ "B24|MED|Matemática|N1|5":(
+  "Conjetura: al duplicar el lado de un cuadrado, se duplica su área.",
+  "La conjetura es falsa: lado 3 cm, área 9 cm²; lado 6 cm, área 36 cm², cuatro veces mayor. En general (2l)²=4l². Un contraejemplo refuta la afirmación.",
+  "Formula la conjetura correcta y justifícala algebraicamente.",
+ ),
+ "B24|MED|Matemática|N1|4":(
+  "Dos personas estiman gasto semanal mediante C=7p, donde p es gasto diario constante.",
+  "Si p=$2.000, C=$14.000. El modelo supone gasto igual todos los días y no considera días sin compras; comparar con registros reales permite evaluar su límite.",
+  "Propón otro modelo con cinco días de gasto y dos sin gasto.",
+ ),
+ "B24|MED|Matemática|N1|3":(
+  "Una persona necesita estimar consumo de pintura según superficie rectangular.",
+  "Área A=ancho×alto; pared 4 m×3 m tiene 12 m². Si rendimiento hipotético es 6 m²/L, se necesitan 2 L antes de pérdidas y capas extra. Ajustar modelo según cobertura real.",
+  "Calcula litros para pared de 5×3 m con rendimiento de 5 m²/L.",
+ ),
+ "B24|MED|Matemática|N1|2":(
+  "Representa la fracción 3/4 con dibujo, decimal y porcentaje.",
+  "Dividir una unidad en cuatro partes iguales y sombrear tres. 3÷4=0,75; 0,75×100=75 %. Las tres expresiones son equivalentes.",
+  "Representa 2/5 con figura, decimal y porcentaje.",
+ ),
+ "B24|MED|Matemática|N1|1":(
+  "Explica el costo de dos entradas de $3.500 cada una mediante palabras, operación y tabla.",
+  "Palabras: dos entradas al mismo precio. Operación 2×3.500=$7.000. Tabla: cantidad 1→$3.500; 2→$7.000. Cada representación comunica la misma relación.",
+  "Dibuja un gráfico para cantidades 0,1,2,3 y explica su significado.",
+ ),
 }
 def curated_case(oa):
     return CASES.get(oa['clave_interna'])
