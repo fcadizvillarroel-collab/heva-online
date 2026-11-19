@@ -4,6 +4,7 @@
 These are reproducible measurements, NOT claims of human inspection or source fact-checking.
 """
 import argparse, csv, json, hashlib
+from collections import Counter
 from pathlib import Path
 import fitz
 
@@ -56,7 +57,8 @@ def run(root, output):
     for name,data in (("procedencia_curricular_407.csv",rows),("inventario_visual_paginas_407.csv",pages)):
         with (output/name).open("w",encoding="utf-8-sig",newline="") as f:
             w=csv.DictWriter(f,fieldnames=list(data[0]));w.writeheader();w.writerows(data)
-    summary={"objetivos":len(rows),"paginas_pdf_inventariadas":len(pages),
+    visual_counts=Counter(flag for p in pages for flag in p["hallazgos"].split("|") if flag)
+    summary={"alertas_visuales_por_tipo":dict(sorted(visual_counts.items())),"objetivos":len(rows),"paginas_pdf_inventariadas":len(pages),
              "paginas_con_alertas_visuales_automaticas":sum(bool(p["hallazgos"]) for p in pages),
              "objetivos_con_metadatos_incompletos":sum(bool(r["hallazgos_metadatos"]) for r in rows),
              "cotejos_oficiales_independientes":0,"revisiones_visuales_humanas":0,
