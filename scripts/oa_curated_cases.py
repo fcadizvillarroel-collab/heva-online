@@ -31,8 +31,8 @@ CASES = {
   'Ahorro de emergencia: $10.000 × 4 = $40.000; ahorro para meta: $15.000 × 4 = $60.000. El primero cubre imprevistos y el segundo una compra planificada. Total acumulado: $100.000, sin considerar intereses.',
   'Calcula cuánto debe ahorrar al mes para reunir $90.000 en seis meses sin intereses.'),
  'D257|MED|Consumo y Calidad de Vida|Núnico|12':(
-  'Una cocina se ofrece en 12 cuotas fijas de $18.000. Su precio al contado es $180.000. Se supone que no hay cargos adicionales.',
-  'Total en cuotas = 12 × $18.000 = $216.000. Diferencia con contado = $36.000. No puede deducirse una tasa de interés exacta sin conocer el calendario y demás condiciones.',
+  'Una cocina se ofrece en 12 cuotas fijas de $18.000, más un cargo único explícito de $6.000 por gestión. Su precio al contado es $180.000. Se supone que no hay otros cargos.',
+  'Total en cuotas = 12 × $18.000 = $216.000; con cargo anexo = $222.000. Diferencia con contado = $42.000. No puede deducirse una tasa de interés exacta sin conocer el calendario y demás condiciones.',
   'Calcula el costo total de 10 cuotas de $22.000 y compáralo con $195.000 al contado.'),
  'D257|MED|Consumo y Calidad de Vida|Núnico|17':(
   'Una persona recibe un producto distinto del anunciado y conserva boleta, captura de la oferta y mensajes del vendedor.',
@@ -47,8 +47,8 @@ CASES = {
   'El porcentaje es una afirmación cuantitativa que requiere precio de referencia comprobable. La urgencia y el tamaño de la cifra buscan captar atención; sin datos no se confirma la conveniencia.',
   'Reescribe el anuncio con información necesaria para una comparación responsable.'),
  'D257|MED|Consumo y Calidad de Vida|Núnico|9':(
-  'Una persona solicita $300.000 y acuerda devolver 10 cuotas de $35.000, sin otros cargos.',
-  'El prestamista entrega capital y el deudor se obliga a pagar. Total = $350.000; diferencia = $50.000. No es posible identificar todos los componentes del costo sin el contrato.',
+  'Una persona solicita $300.000 a una institución financiera que evalúa ingresos y capacidad de pago, y ofrece devolver 10 cuotas de $35.000, sin otros cargos.',
+  'El sistema crediticio canaliza recursos desde quienes ahorran hacia quienes necesitan financiamiento, a través de intermediarios sujetos a regulación. En el ejemplo, el prestamista entrega capital y el deudor se obliga a pagar. Total = $350.000; diferencia = $50.000. No se pueden identificar todos los componentes del costo sin el contrato.',
   'Explica qué documentos y condiciones deben revisarse antes de aceptar el crédito.'),
  'D257|MED|Consumo y Calidad de Vida|Núnico|1':(
   'Dos marcas venden productos semejantes. Una campaña destaca características; otra usa una figura conocida para asociar el producto con prestigio.',
@@ -59,8 +59,8 @@ CASES = {
   'Actúa informadamente al contrastar condiciones y conservar respaldo de la compra. Sus responsabilidades incluyen leer términos y aportar información correcta; los derechos exigibles dependen de la normativa vigente.',
   'Prepara una lista de documentos que guardarías y explica para qué sirven.'),
  'D257|MED|Consumo y Calidad de Vida|Núnico|13':(
-  'Compara un crédito con seis cuotas de $50.000 y otro con cuatro cuotas de $72.000. Se supone que no existen otros cargos.',
-  'Primer total = $300.000; segundo total = $288.000. El segundo cuesta $12.000 menos pero exige una cuota mensual $22.000 mayor. Deben evaluarse costo y capacidad de pago, además de condiciones contractuales.',
+  'Compara tres finalidades: crédito hipotecario para financiar una vivienda con garantía real, crédito de consumo para adquirir bienes o servicios, y financiamiento para estudios superiores. Para ilustrar costo y capacidad de pago, compara además un préstamo de seis cuotas de $50.000 con otro de cuatro cuotas de $72.000, sin otros cargos.',
+  'El crédito hipotecario suele ser de largo plazo y está respaldado por una garantía sobre el inmueble; el de consumo suele tener menor plazo; los créditos para estudios superiores tienen condiciones propias que deben verificarse según el instrumento vigente. En el cálculo ilustrativo, primer total = $300.000 y segundo total = $288.000: el segundo cuesta $12.000 menos pero exige una cuota mensual $22.000 mayor. Comparar siempre costo total, plazos, garantías y capacidad de pago.',
   '¿Qué elegirías si solo puedes destinar $60.000 mensuales? Justifica y verifica otros costos.'),
  'D257|MED|Convivencia Social|Núnico|5':(
   'Dos compañeros discuten porque uno utiliza una herramienta común durante toda la jornada.',
