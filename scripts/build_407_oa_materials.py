@@ -14,6 +14,7 @@ from pptx import Presentation
 from pptx.util import Inches, Pt as PptPt
 from pptx.dml.color import RGBColor as PPTColor
 import fitz
+from oa_blueprints import blueprint
 
 ROOT=Path(__file__).resolve().parents[1]
 NAVY=(35,58,76); TEAL=(31,116,120); CREAM=(250,246,238)
@@ -60,10 +61,8 @@ def create_ppt(oa,png,out):
  picture=s.shapes.add_picture(str(png),Inches(.85),Inches(1.3),width=Inches(11.65),height=Inches(5.1))
  picture._element.nvPicPr.cNvPr.set('descr','Esquema original del objetivo '+str(oa['_index'])+': comprender, aplicar y revisar.')
  s=slide();addtext(s,.7,.45,12,.8,'Actividad de aplicación',30,True)
- addtext(s,.8,1.65,11.7,3.8,
-  '1. Explica con tus palabras qué solicita el objetivo.\n'
-  '2. Propón una situación de tu vida adulta, ciudadana o laboral en que se aplique.\n'
-  '3. Describe cómo comprobarías que lo lograste.',24)
+ bp=blueprint(oa)
+ addtext(s,.8,1.45,11.7,4.8,'\\n'.join(str(i)+'. '+t for i,t in enumerate(bp['actividades'],1)),17)
  addtext(s,.8,6.35,11.8,.55,'Ticket de salida: ¿qué aprendiste y qué necesitas practicar?',17,False,TEAL)
  prs.save(out)
 def create_doc(oa,png,out):
@@ -76,10 +75,12 @@ def create_doc(oa,png,out):
  picture=doc.add_picture(str(png),width=Cm(15.4))
  picture._inline.docPr.set('descr','Organizador del objetivo '+str(oa['_index'])+': comprender, aplicar y revisar.')
  doc.add_heading('Comprender y aplicar',level=1)
- for q in ('¿Qué habilidad solicita este objetivo? Explica con tus palabras.',
-           'Describe un ejemplo concreto relacionado con tu vida cotidiana, laboral o ciudadana.',
-           '¿Qué evidencia permitiría comprobar que lograste el objetivo?'):
+ bp=blueprint(oa)
+ doc.add_heading('Foco curricular',level=2);doc.add_paragraph(bp['foco'])
+ for q in bp['actividades']:
   doc.add_paragraph(q,style='List Number')
+ doc.add_heading('Recurso documental por verificar',level=2);doc.add_paragraph(bp['recurso_recomendado'])
+ doc.add_paragraph('Estado: BORRADOR NO VALIDADO. No se adjunta fotografía o mapa sin licencia y pertinencia comprobadas.')
  doc.add_paragraph('Fuente curricular: '+oa['marco']+' · '+oa['fuente_documento'])
  doc.save(out)
 def render(folder,output):
@@ -122,7 +123,7 @@ def main():
   png=out/'assets'/(key+'.png');diagram(oa,png)
   doc=out/'docx'/(key+'.docx');ppt=out/'pptx'/(key+'.pptx')
   create_doc(oa,png,doc);create_ppt(oa,png,ppt)
-  records.append({'oa':oa['clave_interna'],'subject':oa['asignatura'],'docx':doc.name,'pptx':ppt.name,
+  records.append({'blueprint':blueprint(oa),'oa':oa['clave_interna'],'subject':oa['asignatura'],'docx':doc.name,'pptx':ppt.name,
    'visual':png.name,'visual_kind':'original_educational_diagram','documentary_source_verified':False})
  if not args.skip_render:
   docpdf=out/'pdf_docx';pptpdf=out/'pdf_pptx';render(out/'docx',docpdf);render(out/'pptx',pptpdf)
