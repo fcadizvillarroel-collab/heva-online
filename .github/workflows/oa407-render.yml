@@ -1,8 +1,15 @@
 name: HEVA 407 OA real Office generation and rendered QA
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/oa_lessons.py'
+      - 'scripts/build_407_oa_materials.py'
+      - '.github/workflows/oa407-render.yml'
   pull_request:
     paths:
       - 'scripts/build_407_oa_materials.py'
+      - 'scripts/oa_lessons.py'
       - 'catalogo-publicado.json'
       - '.github/workflows/oa407-render.yml'
   workflow_dispatch:
