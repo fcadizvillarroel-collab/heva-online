@@ -1,0 +1,26 @@
+name: HEVA stage 3 EPJA subject specialization
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/stage3_epja_specialization.py'
+      - 'scripts/oa_lessons.py'
+      - 'scripts/oa_curated_cases.py'
+      - '.github/workflows/stage3-epja.yml'
+  workflow_dispatch:
+jobs:
+  review-matrix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Build all subject-specific EPJA review records
+        run: python scripts/stage3_epja_specialization.py out/etapa3
+      - name: Upload individual review matrix
+        uses: actions/upload-artifact@v4
+        with:
+          name: heva-stage3-407-individual-epja-review-records
+          path: out/etapa3/*
+          retention-days: 30
