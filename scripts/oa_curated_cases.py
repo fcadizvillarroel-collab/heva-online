@@ -257,6 +257,111 @@ CASES = {
   "Temperatura inicial −2 = −2/1; aumento +3,5 = 7/2. Final = −2 + 3,5 = +1,5 °C. El signo negativo indica temperatura bajo cero, no ausencia de temperatura.",
   "Representa −1/2 y −0,5 en una recta numérica y explica su equivalencia.",
  ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N3|10":(
+  "Una persona dice «¿Podrías cerrar la puerta?» y otra afirma «La reunión comienza a las diez». Identifica funciones.",
+  "La primera expresión cumple función apelativa porque solicita una acción; la segunda cumple función referencial porque informa un hecho. Una misma expresión puede combinar funciones según el contexto.",
+  "Escribe un ejemplo de función expresiva y otro de función apelativa en un contexto laboral.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N3|9":(
+  "Texto A: «El taller abrió el lunes». Texto B: «Es el mejor taller de la ciudad». Distingue hecho y opinión.",
+  "A es una afirmación factual contrastable mediante registro de apertura. B es una valoración no demostrada por la frase. Una noticia puede contener información implícita, pero debe justificarse con indicios del texto.",
+  "Redacta un titular informativo y otro persuasivo sobre el mismo acontecimiento.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N3|7":(
+  "Un escrito tiene un solo bloque de 250 palabras, sin márgenes ni separación de párrafos. Debe presentarse como solicitud formal.",
+  "Revisar legibilidad, márgenes, encabezado, destinatario, párrafos separados y firma. En procesador de texto, usar estilos y sangría de párrafo, no espacios repetidos; mantener coherencia entre formato y propósito.",
+  "Organiza una solicitud breve con encabezado, dos párrafos y cierre.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N3|6":(
+  "Escribe un microrrelato original que explore cómo cambia una comunidad cuando abre una biblioteca.",
+  "Ejemplo: «La puerta estuvo cerrada años. El lunes, Ana entró y encontró una mesa vacía. El martes llevó un libro. El viernes, ya nadie leía solo». La secuencia presenta situación inicial, transformación y sentido social.",
+  "Reescribe el final desde la perspectiva de otra persona y explica el cambio de voz narrativa.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N3|5":(
+  "Una persona debe redactar una solicitud de permiso y una nota informativa sobre la misma actividad.",
+  "Solicitud: destinatario, motivo, petición, fecha y firma. Nota informativa: qué, quién, cuándo, dónde y datos verificables. Cambian propósito, registro y estructura; no basta copiar el mismo texto.",
+  "Escribe ambos textos y subraya dos diferencias de lenguaje y organización.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N3|4":(
+  "Lee este relato original: «Marta encontró una llave junto al portón. La guardó hasta saber de quién era». ¿Qué conflicto se anticipa?",
+  "El texto plantea una decisión sobre propiedad y responsabilidad. Inferencia plausible: Marta buscará al dueño; no es un hecho explícito. Debe distinguirse interpretación de información literal.",
+  "Propón dos finales posibles y cita una pista del relato que los haga plausibles.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N3|3":(
+  "Aviso: «El consultorio atenderá de 9:00 a 12:00 el viernes. Lleve identificación». Identifica información y propósito.",
+  "Información explícita: día, horario y documento requerido. Propósito: informar requisitos de atención. Inferencia razonable: quien vaya después de las 12:00 podría no recibir atención ese día; requiere cautela.",
+  "Escribe dos preguntas cuya respuesta sea literal y una inferencial, explicando la diferencia.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N3|2":(
+  "Debate: ¿debería una biblioteca comunitaria ampliar su horario? Una persona apoya y otra discrepa.",
+  "Argumento favorable: facilita acceso a quienes trabajan; objeción: requiere personal y presupuesto. Respuesta razonada: probar horario piloto y medir asistencia. Respetar postura contraria exige responder a razones, no descalificar.",
+  "Redacta tesis, evidencia que necesitarías y una respuesta respetuosa a una objeción.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N3|1":(
+  "Debes presentar en un minuto una propuesta de mejorar el orden de herramientas en un taller.",
+  "Modelo: saludo, problema concreto, propuesta de inventario y responsables, beneficio y cierre. La coherencia depende de secuencia lógica, volumen audible y registro adecuado; evitar muletillas que dificulten comprensión.",
+  "Elabora un guion de cinco frases y marca dónde harías una pausa.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N2|9":(
+  "Corrige: «Las persona trabaja ayer y mañana fueron al taller».",
+  "Versión coherente: «Las personas trabajaron ayer y mañana volverán al taller». Se corrigen concordancia nominal y tiempos verbales de acuerdo con los adverbios temporales.",
+  "Escribe dos oraciones con sujeto plural y verifica concordancia de verbo y adjetivo.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N2|7":(
+  "Compara «Estoy preocupado por el examen» y «Entregue el formulario antes del viernes».",
+  "La primera cumple función expresiva porque manifiesta estado personal; la segunda es apelativa porque busca una acción. En un texto real puede coexistir la función referencial.",
+  "Redacta un aviso con función informativa y una petición cortés con función apelativa.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N2|6":(
+  "Anuncio: «Este producto cambiará tu vida». Noticia: «La feria abrirá el sábado, según la organización».",
+  "El anuncio contiene promesa persuasiva no demostrada; la noticia atribuye una información verificable a una fuente. La credibilidad exige comprobar fecha, autor y evidencia.",
+  "Transforma la promesa publicitaria en una afirmación comprobable o explica por qué no se puede verificar.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N2|5":(
+  "Borrador: «Necesito herramienta porque trabajo y quiero». Debe convertirse en solicitud clara.",
+  "Planificar: destinatario y propósito. Escribir: «Solicito autorización para utilizar la herramienta el jueves durante la práctica». Revisar: precisión, tono, fecha y ortografía. Reescribir después de recibir observaciones.",
+  "Presenta un borrador y una versión corregida, identificando tres cambios.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N2|3":(
+  "Relato original: «El bus llegó vacío, pero Elena prefirió caminar. Quería pensar antes de la entrevista».",
+  "Información explícita: el bus llegó vacío y Elena caminó. Inferencia sustentada: estaba preocupada o deseaba prepararse; no se puede afirmar cuál era su emoción exacta. La comprensión exige separar dato e interpretación.",
+  "Formula una pregunta literal y otra inferencial con respuestas justificadas.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N2|2":(
+  "Expón a tus compañeros cómo ordenar una mesa de trabajo de manera segura.",
+  "Guion: introducción con propósito; desarrollo con tres pasos en secuencia; conclusión con recordatorio de seguridad. Hablar con volumen suficiente, frases completas y contacto con el público si es posible.",
+  "Ensaya una exposición de un minuto y evalúala con claridad, orden y pertinencia.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N2|1":(
+  "Escucha este mensaje leído: «La actividad comenzará a las nueve, durará una hora y requiere lápiz y cuaderno».",
+  "Datos esenciales: inicio 9:00, duración una hora, materiales lápiz y cuaderno. Una respuesta adecuada resume sin agregar información no escuchada y puede pedir aclaración sobre el lugar.",
+  "Resume el mensaje en una oración y formula una pregunta pertinente.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N1|8":(
+  "Compara «El estudiante leyó la guía» y «Los estudiantes leyeron las guías».",
+  "El sustantivo, artículo y verbo cambian para mantener concordancia de número. Ambas oraciones expresan una acción completa con sujeto y predicado.",
+  "Transforma dos oraciones singulares a plural conservando su sentido.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N1|7":(
+  "Aprende las palabras «preciso», «aproximado» y «verificar» en una tarea de medición.",
+  "«Preciso» indica exactitud o claridad según contexto; «aproximado» indica estimación; «verificar» es comprobar. Ejemplo: «Medí aproximadamente 10 cm; verificaré con una regla».",
+  "Escribe una oración con cada palabra y explica por qué no son sinónimos.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N1|6":(
+  "Redacta una nota para avisar que la reunión se trasladó del martes al miércoles.",
+  "Modelo: «Aviso: la reunión prevista para el martes se realizará el miércoles a las 10:00 en la sala común». Incluye cambio, día, hora y lugar, con frases claras y sin información superflua.",
+  "Escribe un aviso de dos oraciones para comunicar otro cambio de horario.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N1|5":(
+  "Corrige: «mañana los alumno traera sus cuaderno».",
+  "Versión: «Mañana los alumnos traerán sus cuadernos». Se corrigen mayúscula inicial, concordancia nominal, conjugación verbal y acentuación.",
+  "Explica tres correcciones y revisa otra oración con una pauta ortográfica.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N1|4":(
+  "Lee el poema original: «Cae la lluvia en el patio; una taza guarda el día». ¿Qué imagen transmite?",
+  "El poema presenta lluvia y una taza mediante imágenes sensoriales. «Una taza guarda el día» es lenguaje figurado, no descripción literal. Puede evocar refugio o memoria; la interpretación debe apoyarse en palabras del poema.",
+  "Explica una interpretación distinta y cita dos expresiones que la sustenten.",
+ ),
 }
 def curated_case(oa):
     return CASES.get(oa['clave_interna'])
