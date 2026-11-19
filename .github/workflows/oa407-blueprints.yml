@@ -1,0 +1,28 @@
+name: HEVA OA specific content and documentary sourcing
+on:
+  pull_request:
+    paths:
+      - 'scripts/oa_blueprints.py'
+      - 'scripts/validate_oa_blueprints.py'
+      - 'scripts/documentary_manifest.py'
+      - 'scripts/build_407_oa_materials.py'
+      - '.github/workflows/oa407-blueprints.yml'
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python scripts/validate_oa_blueprints.py
+          python scripts/documentary_manifest.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: heva-407-oa-blueprints-and-documentary-briefs
+          path: |
+            out/oa407_blueprints.json
+            out/oa407_documentary_manifest.json
+          retention-days: 14
