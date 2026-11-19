@@ -11,7 +11,7 @@ function review({material={},sections=[],visuals=[]}={}){
  const oa=plain(material.objetivoAprendizaje||material.oaTexto);
  const sectionsText=sections.map(s=>typeof s==='string'?s:JSON.stringify(s||{})).join(' ').trim();
  if(teaching&&sectionsText.length<180)add('CONTENIDO_INSUFICIENTE','El material requiere desarrollo disciplinar concreto; una estructura o títulos aislados no bastan.');
- if(teaching&&/\b(paso [123]|ejemplo pendiente|contenido por desarrollar|lorem ipsum)\b/i.test(sectionsText))add('MARCADOR_SIN_DESARROLLAR','Hay marcadores o actividades sin desarrollar.');
+ if(teaching&&/(?:\b(?:ejemplo pendiente|contenido por desarrollar|lorem ipsum)\b|\bpaso [123]\s*(?:[:.\-]?\s*$|[:.\-]?\s*(?=paso [123]\b)))/i.test(sectionsText))add('MARCADOR_SIN_DESARROLLAR','Hay marcadores o actividades sin desarrollar.');
  if(teaching&&!oa)add('OA_SIN_TEXTO','No consta el objetivo curricular literal.');
  if(teaching&&!(review.validada===true&&plain(review.revisor)&&isDate(review.fecha)&&review.oaVerificado===true&&review.contenidoVerificado===true&&review.actividadesVerificadas===true&&review.respuestasVerificadas===true&&review.accesibilidadVerificada===true))
    add('EVIDENCIA_PEDAGOGICA_INCOMPLETA','Se requiere firma y fecha, más verificación explícita de OA, contenidos, actividades, respuestas y accesibilidad.');
