@@ -1752,6 +1752,106 @@ CASES = {
   "Contexto de producción influye en temas, lenguaje y recepción, pero no determina una única interpretación. Evitar juzgar personajes sin situar normas y conflictos históricos.",
   "Elige una obra con autor y fecha verificados y explica un vínculo entre contexto y representación.",
  ),
+ "D257|MED|Lengua Castellana y Comunicación|N2|6":(
+  "Relato original: «Nora volvió a estudiar después de muchos años. En la primera página escribió: todavía puedo aprender».",
+  "La literatura permite explorar perseverancia e identidad, pero cada lector puede interpretarla de modo diferente. Evidencia: «todavía puedo aprender» muestra una valoración del aprendizaje.",
+  "Escribe una reflexión que vincule el texto con una experiencia ficticia, respetando privacidad.",
+ ),
+ "D257|MED|Lengua Castellana y Comunicación|N2|5":(
+  "Noticia didáctica: «El municipio habilitó dos puntos de reciclaje. El horario se publicará la próxima semana».",
+  "Hechos expresos: dos puntos habilitados; horario aún no informado. No se puede afirmar ubicación ni horarios. El tema contemporáneo requiere contrastar con fuente real si se usa como noticia documental.",
+  "Formula dos preguntas literales y una inferencia prudente.",
+ ),
+ "D257|MED|Lengua Castellana y Comunicación|N2|4":(
+  "Corrige «Los estudiante escribio un informe claro y ordenada».",
+  "Versión: «Los estudiantes escribieron un informe claro y ordenado». Se corrigen concordancia de número, conjugación y género del adjetivo.",
+  "Redacta un párrafo y revisa concordancia, tildes y puntuación.",
+ ),
+ "D257|MED|Lengua Castellana y Comunicación|N2|3":(
+  "Una persona afirma que las guías impresas son mejores; otra prefiere materiales digitales.",
+  "Ambas posturas pueden tener razones: disponibilidad sin conexión frente a actualización y accesibilidad digital. Valorar divergencia exige evaluar evidencia y reconocer condiciones, no descalificar.",
+  "Escribe una objeción respetuosa y una concesión fundada.",
+ ),
+ "D257|MED|Lengua Castellana y Comunicación|N2|2":(
+  "Crea un texto informativo y un microrrelato sobre una biblioteca comunitaria.",
+  "Informativo: «La biblioteca ofrecerá préstamos durante la semana», sujeto a verificación. Literario original: «El libro que nadie abría guardaba una carta para todos». Difieren propósito, verificabilidad y recursos.",
+  "Escribe ambos géneros y explica una decisión estilística.",
+ ),
+ "D257|MED|Lengua Castellana y Comunicación|N2|1":(
+  "Argumenta si una escuela debería ampliar horarios de biblioteca.",
+  "Tesis: ampliar acceso; argumento: beneficia a estudiantes con otros horarios; objeción: requiere recursos. Estructura: tesis, razones, evidencia, contraargumento y conclusión. No confundir ejemplo hipotético con estadística real.",
+  "Redacta un párrafo argumentativo con conector y refutación.",
+ ),
+ "D257|MED|Lengua Castellana y Comunicación|N1|8":(
+  "Un mensaje viral dice «todos están de acuerdo» sin encuesta ni fuente.",
+  "Generalización no acreditada. Evaluar emisor, propósito, evidencia y lenguaje emocional. La ausencia de prueba no demuestra falsedad absoluta, pero impide afirmar unanimidad.",
+  "Reescribe la afirmación como pregunta verificable.",
+ ),
+ "D257|MED|Lengua Castellana y Comunicación|N1|7":(
+  "Compara un titular, una entrevista y una infografía sobre el mismo servicio.",
+  "Titular resume y atrae; entrevista presenta respuestas atribuidas; infografía organiza datos visualmente. Cada formato puede omitir contexto y requiere fuentes.",
+  "Explica cuál usarías para conocer horarios exactos y por qué.",
+ ),
+ "D257|MED|Lengua Castellana y Comunicación|N1|6":(
+  "Escribe un poema breve original sobre volver a aprender.",
+  "Ejemplo: «Abro la página / y el tiempo que creía perdido / se convierte en camino». Metáfora: tiempo convertido en camino. Revisar ritmo, imagen y coherencia; el proceso incluye reescritura.",
+  "Cambia una metáfora y explica su efecto expresivo.",
+ ),
+ "D257|MED|Lengua Castellana y Comunicación|N1|5":(
+  "Relato original: «Rosa dejó una luz encendida para quien aún no había llegado».",
+  "Puede interpretarse como espera, cuidado o esperanza; no se sabe quién falta. Distinguir lo explícito de visión de mundo inferida y sustentar con «luz encendida».",
+  "Compara esta imagen con un texto auténtico identificado y explica una diferencia.",
+ ),
+ "D257|MED|Lengua Castellana y Comunicación|N1|4":(
+  "Investiga cómo reducir desperdicio de papel en un curso.",
+  "Pregunta delimitada, registro de consumo, búsqueda de fuentes confiables y síntesis. Exposición escrita con párrafos y referencias; oral con inicio, datos y cierre, evitando estadísticas inventadas.",
+  "Elabora una ficha de dos fuentes y un guion oral de un minuto.",
+ ),
+ "D257|MED|Lengua Castellana y Comunicación|N1|3":(
+  "Un docente explica una instrucción técnica usando palabras desconocidas para su público.",
+  "Emisor, receptor, mensaje, canal, código y contexto afectan eficacia. Reformular con vocabulario conocido y ejemplo; verificar comprensión con pregunta, no solo repetir más fuerte.",
+  "Reescribe la instrucción para una persona principiante.",
+ ),
+ "D257|MED|Lengua Castellana y Comunicación|N1|2":(
+  "Explica en texto expositivo qué es un presupuesto doméstico.",
+  "Modelo: «Un presupuesto registra ingresos y gastos previstos durante un período. Ayuda a comparar recursos y obligaciones». Es exposición informativa, no relato ni argumento persuasivo.",
+  "Agrega ejemplo numérico simple y dos conectores explicativos.",
+ ),
+ "D257|MED|Lengua Castellana y Comunicación|N1|1":(
+  "En una reunión, una persona informa cambio de horario y otra solicita aclaración.",
+  "Emisor transmite: «La actividad será el jueves a las diez». Receptor pregunta: «¿En qué sala?». La retroalimentación completa información y reduce malentendidos.",
+  "Escribe un diálogo con emisor, receptor y confirmación del mensaje.",
+ ),
+ "D257|MED|Ciencias Naturales|N1|4":(
+  "Una cuchara metálica se calienta al dejarla en una bebida caliente.",
+  "Transferencia de energía por conducción desde bebida hacia cuchara; temperatura y calor no son sinónimos. Convección puede ocurrir en líquido y radiación en intercambio con entorno.",
+  "Distingue conducción, convección y radiación en tres ejemplos seguros.",
+ ),
+ "D257|BÁS|Estudios Sociales|N3|11":(
+  "Una cooperativa ficticia produce diez objetos y vende ocho a $5.000 cada uno.",
+  "Producción=10 unidades; ventas=8; ingresos=$40.000, sin equivaler a utilidad. Consumo es uso o adquisición de bienes; costos y distribución afectan resultado.",
+  "Distingue producción, consumo, ingreso y utilidad en una tabla.",
+ ),
+ "D257|BÁS|Estudios Sociales|N3|10":(
+  "Una persona trabaja reparando herramientas y registra horas, materiales y servicio.",
+  "Su aporte productivo incluye trabajo, conocimientos y valor de uso; riqueza social no se reduce al salario. Desafíos éticos: seguridad, honestidad y trato justo.",
+  "Describe dos contribuciones y una decisión ética en el trabajo.",
+ ),
+ "D257|BÁS|Estudios Sociales|N3|8":(
+  "Compara una fábrica de comienzos del siglo XX con un taller actual automatizado.",
+  "Cambios: maquinaria, organización y habilidades. Continuidades: necesidad de coordinación y seguridad. El proceso no fue igual para todas las ocupaciones ni territorios.",
+  "Construye una línea de tiempo con dos hitos auténticos y fuentes.",
+ ),
+ "D257|BÁS|Estudios Sociales|N3|7":(
+  "Un municipio consulta a vecinos sobre prioridades de inversión.",
+  "Actores: autoridades, organizaciones y ciudadanía. Democracia exige participación, derechos, deliberación y control; una consulta aislada no garantiza representación completa.",
+  "Propón dos mejoras de transparencia y participación.",
+ ),
+ "D257|BÁS|Estudios Sociales|N3|5":(
+  "Un producto usado en Chile incorpora componentes fabricados en otros países.",
+  "Interconectividad global facilita comercio y circulación de ideas; también puede generar dependencia y desigualdad. Analizar efectos personales y nacionales con fuentes verificadas.",
+  "Explica una ventaja y un riesgo de esta interdependencia.",
+ ),
 }
 def curated_case(oa):
     return CASES.get(oa['clave_interna'])
