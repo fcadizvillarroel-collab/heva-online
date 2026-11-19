@@ -1152,6 +1152,106 @@ CASES = {
   "Concreto: dos grupos de cuatro. Pictórico: dos conjuntos de cuatro marcas. Simbólico: 2×4=8 o 8÷2=4. La representación mantiene cantidades y unidades.",
   "Dibuja doce objetos en tres grupos y escribe operación.",
  ),
+ "B24|MED|Lenguaje y Comunicación|N2|5":(
+  "Investiga cómo reconocer información fiable sobre horarios de un servicio público.",
+  "Procedimiento: pregunta delimitada, consulta a fuente institucional y contraste de fecha y autoría. Registrar referencias y sintetizar en informe breve, no copiar párrafos sin atribución.",
+  "Elabora un resumen con dos fuentes verificadas y una limitación de la investigación.",
+ ),
+ "B24|MED|Lenguaje y Comunicación|N2|4":(
+  "Debate: ¿debe un curso utilizar más textos digitales que impresos?",
+  "Tesis A: digitales facilitan actualización; tesis B: impresos permiten uso sin conexión. La calidad argumentativa depende de evidencia de acceso, costo y comprensión, no de preferencias aisladas.",
+  "Redacta una réplica que reconozca un argumento válido de la otra postura.",
+ ),
+ "B24|MED|Lenguaje y Comunicación|N2|3":(
+  "Escribe un aviso para estudiantes y una carta formal para una institución sobre una actividad.",
+  "Aviso: título, fecha, lugar y acción requerida. Carta: destinatario, propósito, argumentos, despedida y firma. Ambos deben mantener coherencia y registro apropiado a audiencia.",
+  "Revisa conectores y elimina dos expresiones ambiguas.",
+ ),
+ "B24|MED|Lenguaje y Comunicación|N2|2":(
+  "Relato original A: «Una puerta se abrió después de años». Afiche original B: «Abre oportunidades con la lectura».",
+  "Relación intertextual posible: la puerta como metáfora de oportunidad. No afirmar influencia directa de un texto sobre otro sin evidencia de producción. Interpretar con elementos textuales.",
+  "Explica otra relación posible y cita dos indicios.",
+ ),
+ "B24|MED|Lenguaje y Comunicación|N2|1":(
+  "Un mensaje institucional y un anuncio comercial comunican la apertura de un servicio.",
+  "El primero puede priorizar requisitos y horarios; el segundo, persuasión. Analizar quién emite, a quién se dirige, medio y contexto. La forma de enunciar afecta selección de información.",
+  "Escribe dos preguntas sobre sesgos o intereses de cada emisor.",
+ ),
+ "B24|MED|Lenguaje y Comunicación|N1|5":(
+  "Dos sitios publican cifras distintas sobre una actividad y uno no identifica fecha.",
+  "La confiabilidad exige autor, fecha, fuente de datos, método y contraste. Sin fecha no se puede asegurar vigencia. No confundir apariencia profesional con veracidad.",
+  "Diseña una tabla de comparación y explica cuál dato falta para decidir.",
+ ),
+ "B24|MED|Lenguaje y Comunicación|N1|4":(
+  "Un video muestra imágenes alegres mientras una voz advierte de un problema grave.",
+  "La música e imágenes pueden crear contraste irónico o minimizar la gravedad; interpretar exige relacionar sonido, imagen y palabras, sin atribuir intención no demostrada.",
+  "Explica cómo cambiaría el sentido si se eliminara la música.",
+ ),
+ "B24|MED|Lenguaje y Comunicación|N1|3":(
+  "Redacta una invitación a una charla de seguridad para un público adulto.",
+  "Planificar: destinatarios, propósito y datos. Modelo: «Invitamos a la charla de seguridad el jueves a las 10:00 en la sala común». Revisar claridad, ortografía y accesibilidad antes de publicar.",
+  "Escribe una versión formal y otra oral manteniendo la misma información.",
+ ),
+ "B24|MED|Lenguaje y Comunicación|N1|2":(
+  "Relato original: «Ana guardó la carta sin abrirla. Al amanecer decidió leerla».",
+  "Conflicto posible: duda ante una información importante. Narrador en tercera persona. El texto no revela contenido de la carta; toda interpretación debe distinguir indicios de invención.",
+  "Propón un motivo posible para la duda y justifícalo con palabras del relato.",
+ ),
+ "B24|MED|Lenguaje y Comunicación|N1|1":(
+  "Anuncio: «El mejor curso del país. Inscríbete ahora», sin criterios de comparación.",
+  "«Mejor» es valoración no acreditada; «ahora» apela a urgencia. Verificar datos sobre contenidos, costos y resultados. La ausencia de evidencia impide aceptar superioridad como hecho.",
+  "Reescribe el anuncio con información comprobable y explica su propósito.",
+ ),
+ "B24|BÁS|Lenguaje y Comunicación|N3|5":(
+  "Escucha: «La biblioteca abrirá el lunes. Los préstamos durarán siete días y habrá un registro de devoluciones».",
+  "Síntesis: apertura lunes, plazo de siete días y registro. Ordenar por tema permite recordar lo esencial sin repetir cada palabra.",
+  "Escribe una nota de tres puntos y una pregunta que falta responder.",
+ ),
+ "B24|BÁS|Lenguaje y Comunicación|N3|4":(
+  "Dos estudiantes discrepan sobre la distribución de materiales.",
+  "Diálogo constructivo: escuchar, reformular «entiendo que necesitas el material primero», explicar interés propio y proponer turnos. No equivale a ceder siempre, sino buscar acuerdos viables.",
+  "Redacta cuatro intervenciones alternadas que culminen en acuerdo.",
+ ),
+ "B24|BÁS|Lenguaje y Comunicación|N3|3":(
+  "Borrador: «Mañana actividad todos deben llegar». Debe convertirse en aviso.",
+  "Planificar audiencia y datos. Versión revisada: «Mañana, a las 10:00, se realizará una actividad en la sala de clases. Se solicita puntualidad». Se añaden hora, lugar, puntuación y claridad.",
+  "Escribe borrador y versión final de un aviso diferente con cambios señalados.",
+ ),
+ "B24|BÁS|Lenguaje y Comunicación|N3|2":(
+  "Relato original: «Pedro cerró el taller y volvió por la caja que alguien había olvidado».",
+  "Personaje: Pedro. Narrador externo en tercera persona. Conflicto potencial: decidir qué hacer con un objeto ajeno. La frase no confirma propietario ni desenlace.",
+  "Explica dos finales y cómo cada uno cambia el sentido ético del relato.",
+ ),
+ "B24|BÁS|Lenguaje y Comunicación|N3|1":(
+  "Un cartel muestra un símbolo de reloj y el texto «Atención hasta las 16:00».",
+  "El reloj refuerza la información temporal y el texto precisa el horario. Propósito: informar límite de atención; no hay evidencia de horarios en otros días.",
+  "Diseña otro cartel y explica función de imagen y texto.",
+ ),
+ "B24|BÁS|Lenguaje y Comunicación|N2|5":(
+  "Fuente A: «El taller abre a las 9». Fuente B: «El préstamo de herramientas termina a las 12».",
+  "Síntesis: el taller funciona desde las 9 y el préstamo finaliza a las 12. No se puede afirmar que el taller cierre a las 12. Integrar fuentes exige respetar su alcance.",
+  "Escribe un resumen de dos frases y una duda que requiere otra fuente.",
+ ),
+ "B24|BÁS|Lenguaje y Comunicación|N2|4":(
+  "Expón brevemente cómo separar residuos de papel y plástico en una sala.",
+  "Guion: propósito, dos instrucciones concretas, motivo y cierre. Evitar afirmar que todo plástico es reciclable; comprobar reglas locales. Hablar con claridad y vocabulario preciso.",
+  "Prepara tres tarjetas de apoyo y una pregunta para el público.",
+ ),
+ "B24|BÁS|Lenguaje y Comunicación|N2|3":(
+  "Escribe una solicitud de préstamo de un libro.",
+  "Modelo: «Solicito el préstamo del libro indicado para trabajar durante esta semana. Me comprometo a devolverlo en la fecha acordada». Revisar destinatario, fecha y tono respetuoso.",
+  "Reescribe para pedir información, no préstamo, y explica cambios.",
+ ),
+ "B24|BÁS|Lenguaje y Comunicación|N2|2":(
+  "Texto A original: «La lluvia golpeaba la ventana y Julia esperaba». Texto B: «Julia corrió bajo la lluvia para alcanzar el bus».",
+  "Ambos comparten personaje y lluvia; A enfatiza espera y atmósfera, B acción y urgencia. Una preferencia razonada cita recursos y efectos, no solo «me gusta».",
+  "Explica cuál prefieres y cita una expresión que justifique tu elección.",
+ ),
+ "B24|BÁS|Lenguaje y Comunicación|N2|1":(
+  "Instructivo: «Corte el suministro eléctrico antes de limpiar el equipo».",
+  "Propósito: prevenir riesgos. La instrucción establece orden temporal: cortar suministro antes de limpiar. Debe seguirse normativa de seguridad y no improvisar manipulación eléctrica.",
+  "Explica qué palabra indica secuencia y qué información adicional de seguridad buscarías.",
+ ),
 }
 def curated_case(oa):
     return CASES.get(oa['clave_interna'])
