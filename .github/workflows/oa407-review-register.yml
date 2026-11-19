@@ -1,0 +1,25 @@
+name: HEVA OA407 editorial review register
+on:
+  pull_request:
+    paths:
+      - 'scripts/oa407_review_register.py'
+      - 'heva-approval-audit.js'
+      - 'tests/approval-audit.test.cjs'
+      - '.github/workflows/oa407-review-register.yml'
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python scripts/oa407_review_register.py
+          node --test tests/approval-audit.test.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: heva-407-oa-review-register
+          path: out/oa407_registro_validacion.csv
+          retention-days: 30
