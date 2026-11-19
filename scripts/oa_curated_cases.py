@@ -1652,6 +1652,106 @@ CASES = {
   "√2≈1,4142 no puede expresarse como fracción exacta de enteros; es irracional. Los racionales incluyen 1/2, −3 y 0,75; ambos conjuntos están dentro de reales.",
   "Clasifica √9, √3, −1/4 y π como racionales o irracionales.",
  ),
+ "D257|MED|Idioma Extranjero Inglés|N2|7":(
+  "A worker reads an English safety notice: «Wear eye protection before using this machine».",
+  "Knowing English can support workplace safety and access to technical information. Translation: «Use protección ocular antes de utilizar esta máquina». Comprehension must be checked against actual equipment instructions.",
+  "Explain how to verify an unfamiliar technical term without guessing.",
+ ),
+ "D257|MED|Idioma Extranjero Inglés|N2|6":(
+  "Read a fictional account: «In our town, people share bicycles to travel to work».",
+  "Main idea: shared bicycles as transport. It describes one town, not every country or culture. Reading foreign-language texts broadens perspectives when interpretation avoids stereotypes.",
+  "Compare this practice with another verified example and cite its source.",
+ ),
+ "D257|MED|Idioma Extranjero Inglés|N2|5":(
+  "Recognize terms from workplace and daily-life categories: schedule, invoice, receipt, safety, delivery.",
+  "These five words mean horario, factura, comprobante, seguridad y entrega. They are illustrative only; meeting the 500-word target requires a cumulative list, varied contexts and recognition assessment.",
+  "Build and assess a 500-item vocabulary bank by topic, including audio and written recognition.",
+ ),
+ "D257|MED|Idioma Extranjero Inglés|N2|4":(
+  "Complete a fictional job application: name Alex Soto, occupation technician, availability mornings.",
+  "Model: «Name: Alex Soto. Occupation: Technician. Availability: Mornings». Answer: «I am available in the morning». Use invented data to protect privacy and check grammar.",
+  "Write two short answers about work experience without inventing credentials for a real application.",
+ ),
+ "D257|MED|Idioma Extranjero Inglés|N2|3":(
+  "A customer asks: «Could you tell me when the workshop opens?»",
+  "Model reply: «It opens at nine. How can I help you?» The exchange uses polite request and simple present for schedules.",
+  "Role-play a change of appointment with greeting, request and thanks.",
+ ),
+ "D257|MED|Idioma Extranjero Inglés|N2|2":(
+  "Listen: «First turn off the device. Then disconnect the power. Finally tell the supervisor».",
+  "Purpose: safety instructions. Sequence first→then→finally. The text does not authorize actual electrical work; follow workplace procedures.",
+  "Put instructions in order and explain which word signals final action.",
+ ),
+ "D257|MED|Idioma Extranjero Inglés|N2|1":(
+  "Read: «After the inspection, Marta recorded the results and informed the supervisor. The equipment remained offline until the repair was completed».",
+  "Main idea: safety inspection and reporting. Details: results recorded, supervisor informed, equipment offline until repair. «After» and «until» mark sequence; passive «was completed» focuses on repair.",
+  "Write a two-sentence summary and identify two time connectors.",
+ ),
+ "D257|MED|Estudios Sociales|N1|7":(
+  "Compara una ley publicada en fuente oficial y una noticia sobre su aplicación.",
+  "La ley aporta texto normativo; la noticia interpreta hechos o reacciones. Registrar fecha, autor y ámbito; no confundir norma vigente con opinión periodística.",
+  "Elabora una tabla de información obtenida y dos límites de cada fuente.",
+ ),
+ "D257|MED|Educación Matemática|N1|7":(
+  "Una moneda equilibrada se lanza una vez y se compara con sumar 2+3.",
+  "La suma 2+3=5 es determinista; el lanzamiento tiene dos resultados equiprobables, P(cara)=1/2. Si se lanzan dos monedas, espacio muestral CC, CS, SC, SS, con P(dos caras)=1/4.",
+  "Calcula probabilidad de al menos una cara en dos lanzamientos.",
+ ),
+ "D257|MED|Idioma Extranjero Inglés|N1|7":(
+  "Read: «Our community celebrates different traditions. We listen and learn from one another».",
+  "Main idea: respect for cultural diversity. The text does not specify a single culture or imply all members share one practice. «One another» signals reciprocity.",
+  "Write a respectful question to learn about a tradition without making assumptions.",
+ ),
+ "D257|MED|Idioma Extranjero Inglés|N1|6":(
+  "Read a fictional travel note: «In this city, many people use trains to reach the market».",
+  "It introduces a transport practice in one place. Translation: «En esta ciudad, muchas personas usan trenes para llegar al mercado». Do not generalize from one text to a whole country.",
+  "Compare with local transport and state which facts need verification.",
+ ),
+ "D257|MED|Idioma Extranjero Inglés|N1|5":(
+  "Recognize daily vocabulary: family, friend, market, school, help, work, time, home.",
+  "Meanings: familia, amigo, mercado, escuela, ayuda/ayudar, trabajo/trabajar, tiempo/hora, hogar. These eight examples do not meet the 350-word objective; assessment must cover the full target.",
+  "Develop a 350-word recognition inventory and practice in short dialogues.",
+ ),
+ "D257|MED|Idioma Extranjero Inglés|N1|4":(
+  "Write two sentences giving fictional personal information.",
+  "Model: «My name is Alex. I live in Chile». Subject-verb order and capitalization are correct; «I» is always capitalized.",
+  "Write a short answer to «What do you do?» using a fictional occupation.",
+ ),
+ "D257|MED|Idioma Extranjero Inglés|N1|3":(
+  "Two people meet: «Hello, my name is Ana». «Nice to meet you. I am Ben».",
+  "Functions: greeting and introducing. Appropriate follow-up: «Where are you from?» and response «I am from Chile». Politeness and turn-taking are part of oral expression.",
+  "Write a four-turn dialogue asking and giving information.",
+ ),
+ "D257|MED|Idioma Extranjero Inglés|N1|2":(
+  "Listen: «Open your book, please. Read page ten. Thank you».",
+  "Instructions: open book and read page ten. «Please» marks politeness; «thank you» gratitude. Demonstrating comprehension requires following sequence, not only translating isolated words.",
+  "Respond to a greeting and two classroom instructions in English.",
+ ),
+ "D257|MED|Idioma Extranjero Inglés|N1|1":(
+  "Read a 300-word instructional or narrative passage selected from an appropriate authentic source.",
+  "The objective requires a text of at least 300 words; a short model alone is insufficient. For a sample sentence «First check the label», «first» marks sequence and «check» is imperative. Full assessment needs main idea, details and ordered instructions.",
+  "Choose a 300-word text with source and build literal and inferential questions.",
+ ),
+ "D257|MED|Lengua Castellana y Comunicación|N2|10":(
+  "Una persona redacta un informe y encuentra dos sitios con datos contradictorios.",
+  "Usar procesador de textos para revisión, formato y referencias; comprobar autoría, fecha y procedencia de datos antes de citar. El corrector ortográfico no verifica verdad factual.",
+  "Escribe un párrafo con fuente identificada y registra dos cambios de edición.",
+ ),
+ "D257|MED|Lengua Castellana y Comunicación|N2|9":(
+  "Un anuncio afirma: «Quien no compre hoy perderá una oportunidad única».",
+  "Estrategia persuasiva: urgencia y temor a pérdida. No presenta evidencia de beneficio real. Una opinión crítica distingue dato, argumento y recurso emotivo, considerando intereses propios.",
+  "Reescribe como mensaje informativo con condiciones verificables.",
+ ),
+ "D257|MED|Lengua Castellana y Comunicación|N2|8":(
+  "Compara un soneto renacentista auténtico y un poema vanguardista auténtico con fichas bibliográficas.",
+  "El soneto suele usar estructura métrica fija; la vanguardia puede experimentar con disposición y lenguaje. No todos los textos de una época comparten rasgos idénticos; verificar autores, fechas y contexto.",
+  "Selecciona dos obras reales y fundamenta diferencias con versos breves y fuentes.",
+ ),
+ "D257|MED|Lengua Castellana y Comunicación|N2|7":(
+  "Una obra literaria representa relaciones sociales de una época distinta a la actual.",
+  "Contexto de producción influye en temas, lenguaje y recepción, pero no determina una única interpretación. Evitar juzgar personajes sin situar normas y conflictos históricos.",
+  "Elige una obra con autor y fecha verificados y explica un vínculo entre contexto y representación.",
+ ),
 }
 def curated_case(oa):
     return CASES.get(oa['clave_interna'])
