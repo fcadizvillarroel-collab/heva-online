@@ -20,14 +20,14 @@ function review({material={},sections=[],visuals=[]}={}){
    add('REVISION_VISUAL_NO_EXHAUSTIVA','Falta inspección firmada y fechada de todas las páginas exportadas.');
  const documentary=visuals.filter(v=>v?.documentary===true||v?.fuenteDocumental||v?.sourceUrl);
  const refs=Array.isArray(material.fuentesVisualesVerificadas)?material.fuentesVisualesVerificadas:[];
- if(teaching&&material.recursosVisualesHEVA?.imagenes===true&&refs.length===0)add('SIN_FUENTES_VERIFICADAS','La selección de imágenes requiere evidencias verificables.');
+ if(teaching&&material.recursosVisualesHEVA?.imagenes===true&&documentary.length>0&&refs.length===0)add('SIN_FUENTES_VERIFICADAS','Las imágenes documentales utilizadas requieren evidencias verificables.');
  for(const v of documentary){
   const match=refs.find(r=>(v.id&&r.id===v.id)||(v.sourceUrl&&r.url===v.sourceUrl)||(v.fuenteDocumental&&r.url===v.fuenteDocumental));
   if(!match||!plain(match.titulo)||!plain(match.autorInstitucion)||!/^https?:\/\//.test(plain(match.url))||!plain(match.licencia)||!plain(match.pertinenciaOA)||!plain(match.fechaConsulta)||!isDate(match.fechaConsulta)||match.verificada!==true||!plain(match.revisor)||!isDate(match.fechaVerificacion)||match.derechosVerificados!==true)
    add('RECURSO_DOCUMENTAL_SIN_CURADURIA','Un recurso documental no tiene atribución, licencia, pertinencia, derechos y revisión fechada completos.');
  }
- if(teaching&&material.recursosVisualesHEVA?.imagenes===true&&documentary.length===0)
-   add('VISUALES_SOLICITADOS_SIN_EVIDENCIA','Se solicitaron imágenes, pero no hay recursos documentales identificados para verificar.');
+ if(teaching&&material.recursosVisualesHEVA?.imagenes===true&&visuals.length===0)
+   add('VISUALES_SOLICITADOS_SIN_EVIDENCIA','Se solicitaron imágenes, pero no se entregó ninguna imagen o ilustración para revisar.');
  if(teaching&&sections.length===0)add('SIN_SECCIONES','No se entregaron secciones para revisar.');
  return {aprobado:teaching&&issues.length===0,issues,teaching,documentaryChecked:documentary.length,
   notice:'Una aprobación documental declara revisión, pero no garantiza por sí sola precisión factual.'};
