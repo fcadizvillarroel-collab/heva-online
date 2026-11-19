@@ -21,7 +21,7 @@ jobs:
           python-version: '3.11'
       - name: Search Commons for concrete media and licenses
         run: |
-          COUNT="${{ github.event.inputs.count || '3' }}"
+          COUNT="${{ github.event.inputs.count || '407' }}"
           python scripts/find_documentary_candidates.py --limit "$COUNT" --out out/oa407_documentary_candidates.json
       - uses: actions/upload-artifact@v4
         with:
