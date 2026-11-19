@@ -2,7 +2,7 @@
 """Find real Commons file candidates and retain their source/license metadata.
 This is discovery, NOT a license/legal review or curricular approval.
 """
-import argparse,json,re,time,urllib.parse,urllib.request,html
+import argparse,json,re,time,urllib.parse,urllib.request,urllib.error,html
 from pathlib import Path
 from oa_blueprints import blueprint
 ROOT=Path(__file__).resolve().parents[1]
@@ -18,7 +18,14 @@ def terms(oa):
 def request(params):
  url=API+'?'+urllib.parse.urlencode(params)
  req=urllib.request.Request(url,headers={'User-Agent':'HEVA-EPJA-documentary-research/1.0 (educational curriculum source research)'})
- with urllib.request.urlopen(req,timeout=25) as r:return json.load(r)
+ for attempt in range(4):
+  try:
+   with urllib.request.urlopen(req,timeout=25) as r:return json.load(r)
+  except urllib.error.HTTPError as e:
+   if e.code not in (429,503) or attempt==3:raise
+   delay=min(90,10*(2**attempt))
+   print('Rate limited; pausing',delay,'seconds',flush=True)
+   time.sleep(delay)
 def clean(s):
  return re.sub(r'<[^>]+>','',html.unescape(s or '')).strip()
 def candidates(oa,limit=3):
@@ -39,17 +46,21 @@ def candidates(oa,limit=3):
    'historical_scientific_accuracy_verified':False,'human_review_required':True})
  return items
 def main():
- ap=argparse.ArgumentParser();ap.add_argument('--limit',type=int,default=407);ap.add_argument('--delay',type=float,default=.4)
+ ap=argparse.ArgumentParser();ap.add_argument('--offset',type=int,default=0);ap.add_argument('--limit',type=int,default=25);ap.add_argument('--delay',type=float,default=2.0)
  ap.add_argument('--out',default='out/oa407_documentary_candidates.json');args=ap.parse_args()
  catalog=json.loads((ROOT/'catalogo-publicado.json').read_text())
  result=[]
- for i,oa in enumerate(catalog[:args.limit],1):
+ for i,oa in enumerate(catalog[args.offset:args.offset+args.limit],1):
   row={'oa':oa['clave_interna'],'asignatura':oa['asignatura'],'query':terms(oa),
        'candidates':[],'status':'REQUIRES_HUMAN_DOCUMENTARY_AND_PEDAGOGICAL_REVIEW'}
   try:row['candidates']=candidates(oa)
+  except urllib.error.HTTPError as e:
+   row['error']=str(e)[:250]
+   if e.code==429:
+    row['status']='RATE_LIMITED_RETRY_LATER'
   except Exception as e:row['error']=str(e)[:250]
   result.append(row)
-  if i%25==0:print('Processed',i,'/',min(args.limit,len(catalog)),flush=True)
+  if i%25==0:print('Processed',i,'/',min(args.limit,len(catalog)-args.offset),flush=True)
   time.sleep(args.delay)
  out=Path(args.out);out.parent.mkdir(parents=True,exist_ok=True)
  out.write_text(json.dumps({'source':'Wikimedia Commons API','count':len(result),
