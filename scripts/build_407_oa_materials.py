@@ -32,7 +32,7 @@ def diagram(oa,path):
  verb=oa['texto_literal'].split(' ',1)[0].strip('.:,').upper()
  phases=[('COMPRENDER','¿Qué pide el objetivo?'),('APLICAR','¿Cómo se demuestra?'),('REVISAR','¿Qué evidencia lo prueba?')]
  for i,(name,subtitle) in enumerate(phases):
-  x=60+i*390
+  x=60+i*370
   d.rounded_rectangle((x,180,x+350,430),radius=18,fill=(231,241,239),outline=TEAL,width=3)
   d.text((x+20,215),name,font=font(34),fill=NAVY)
   for j,line in enumerate(wrap(subtitle,27)): d.text((x+20,290+j*34),line,font=font(23),fill=NAVY)
