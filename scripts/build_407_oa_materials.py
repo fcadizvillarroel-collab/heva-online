@@ -160,5 +160,7 @@ def main():
   for sub in ('docx','pptx'):
    for file in (out/sub).iterdir():z.write(file,sub+'/'+file.name)
  print(json.dumps({k:v for k,v in report.items() if k!='records'},ensure_ascii=False))
- if report['failed']:sys.exit(1)
+ if report['failed']:
+  print('FAILED RECORDS:',json.dumps([r for r in records if r['pass'] is False],ensure_ascii=False))
+  sys.exit(1)
 if __name__=='__main__':main()
