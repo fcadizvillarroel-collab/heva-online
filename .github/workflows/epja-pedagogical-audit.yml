@@ -5,6 +5,7 @@ on:
     paths:
       - 'scripts/audit_stage2_pedagogy.py'
       - 'scripts/oa_lessons.py'
+      - 'scripts/oa_grounded_tasks.py'
       - 'scripts/audit_stage2_pedagogy.py'
       - 'catalogo-publicado.json'
       - '.github/workflows/epja-pedagogical-audit.yml'
