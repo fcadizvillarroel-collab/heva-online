@@ -77,17 +77,17 @@ def create_ppt(oa,png,out):
  slide('Caso para pensar',data['scenario']+'\n\nPregunta: ¿cómo lo resolverías antes de ver la demostración?')
  slide('Orientación para resolver el OA',data['worked'])
  slide('Practiquemos', '\n\n'.join(str(i)+'. '+q for i,q in enumerate(data['questions'][:3],1)))
- slide('Criterios de revisión y retroalimentación','\n\n'.join(data['answer_guide'][:3]))
+ slide('Cómo revisar tu trabajo','Comprueba que respondiste al objetivo, justificaste tus decisiones y verificaste el procedimiento. Compara tus resultados con la explicación trabajada en clase.')
  slide('Aplicación y cierre',data['questions'][3]+'\n\n'+data['exit_ticket']+'\n\n'+data['accessibility'])
  prs.save(out)
-def create_doc(oa,png,out):
+def create_doc(oa,png,out,teacher=False):
  doc=Document();sec=doc.sections[0];sec.top_margin=Cm(1.5);sec.bottom_margin=Cm(1.4)
  sec.left_margin=Cm(2);sec.right_margin=Cm(2)
- normal=doc.styles['Normal'];normal.font.name='Aptos';normal.font.size=Pt(10)
+ normal=doc.styles['Normal'];normal.font.name='Aptos';normal.font.size=Pt(12)
  data=lesson(oa)
  for name in ['Heading 1','Heading 2']:
   doc.styles[name].paragraph_format.space_after=Pt(3)
- doc.add_heading('Guía de aprendizaje · OA '+str(oa['_index']).zfill(3),0)
+ doc.add_heading(('Pauta docente · OA ' if teacher else 'Guía de aprendizaje · OA ')+str(oa['_index']).zfill(3),0)
  doc.add_paragraph(oa['asignatura']+' · '+oa['nivel'])
  doc.add_heading('Objetivo curricular',level=1);doc.add_paragraph(oa['texto_literal'])
  doc.add_heading('Explicación para aprender',level=1);doc.add_paragraph(data['explanation'])
@@ -97,8 +97,12 @@ def create_doc(oa,png,out):
  doc.add_heading('Orientación para resolver el OA',level=1);doc.add_paragraph(data['worked'])
  doc.add_heading('Actividades de práctica',level=1)
  for q in data['questions']:doc.add_paragraph(q,style='List Number')
- doc.add_heading('Criterios orientativos de revisión',level=1)
- for ans in data['answer_guide']:doc.add_paragraph(ans,style='List Number')
+ if teacher:
+  doc.add_heading('Pauta docente: soluciones y criterios de revisión',level=1)
+  for ans in data['answer_guide']:doc.add_paragraph(ans,style='List Number')
+ else:
+  doc.add_heading('Autoevaluación',level=1)
+  doc.add_paragraph('¿Expliqué el procedimiento, justifiqué la respuesta y revisé mis resultados?')
  doc.add_heading('Apoyo de accesibilidad',level=1);doc.add_paragraph(data['accessibility'])
  doc.add_heading('Ticket de salida',level=1);doc.add_paragraph(data['exit_ticket'])
  doc.add_paragraph('Fuente curricular: '+oa['marco']+' · '+oa['fuente_documento']+' · página registrada: '+str(oa.get('pagina_oficial','No indicada')))
@@ -145,26 +149,31 @@ def main():
  assert len(catalog)==407 and len({x['clave_interna'] for x in catalog})==407
  out=Path(args.out).resolve();(out/'docx').mkdir(parents=True,exist_ok=True)
  (out/'pptx').mkdir(exist_ok=True);(out/'assets').mkdir(exist_ok=True)
+ (out/'docx_docente').mkdir(exist_ok=True)
  count=args.limit or len(catalog);records=[]
  for i,oa in enumerate(catalog[:count],1):
   oa=dict(oa,_index=i);key=str(i).zfill(3)+'_'+hashlib.sha256(oa['clave_interna'].encode()).hexdigest()[:10]
   png=out/'assets'/(key+'.png');diagram(oa,png)
   doc=out/'docx'/(key+'.docx');ppt=out/'pptx'/(key+'.pptx')
   create_doc(oa,png,doc);create_ppt(oa,png,ppt)
-  records.append({'blueprint':blueprint(oa),'oa':oa['clave_interna'],'subject':oa['asignatura'],'docx':doc.name,'pptx':ppt.name,
+  teacher_doc=out/'docx_docente'/(key+'_docente.docx')
+  create_doc(oa,png,teacher_doc,teacher=True)
+  records.append({'blueprint':blueprint(oa),'oa':oa['clave_interna'],'subject':oa['asignatura'],'docx':doc.name,'docx_docente':teacher_doc.name,'pptx':ppt.name,
    'visual':png.name,'visual_kind':'original_educational_diagram','documentary_source_verified':False,'curricular_reference_url':curricular_source(oa),'curricular_page_catalog':oa.get('pagina_oficial','')})
  if not args.skip_render:
-  docpdf=out/'pdf_docx';pptpdf=out/'pdf_pptx';render(out/'docx',docpdf);render(out/'pptx',pptpdf)
+  docpdf=out/'pdf_docx';pptpdf=out/'pdf_pptx';teacherpdf=out/'pdf_docx_docente';render(out/'docx',docpdf);render(out/'pptx',pptpdf);render(out/'docx_docente',teacherpdf)
   for record in records:
    d=inspect_pdf(docpdf/(Path(record['docx']).stem+'.pdf'),(1,2,3,4,5))
+   t=inspect_pdf(teacherpdf/(Path(record['docx_docente']).stem+'.pdf'),(1,2,3,4,5,6))
    p=inspect_pdf(pptpdf/(Path(record['pptx']).stem+'.pdf'),9)
-   record['render_docx']=d;record['render_pptx']=p
-   record['pass']=not d.get('error') and not p.get('error') and not d.get('issues') and not p.get('issues')
+   record['render_docx']=d;record['render_docx_docente']=t;record['render_pptx']=p
+   record['pass']=not any(z.get('error') or z.get('issues') for z in (d,t,p))
  else:
   for record in records:record['pass']=None
  report={'expected_catalog_count':407,'generated':len(records),
   'passed':sum(r['pass'] is True for r in records),'failed':sum(r['pass'] is False for r in records),
   'rendered':not args.skip_render,'records':records,
+  'separate_teacher_keys':len(records),
   'documentary_sources_verified':sum(bool(r['documentary_source_verified']) for r in records),
   'needs_documentary_verification':sum(not r['documentary_source_verified'] for r in records),
   'human_visual_reviews_completed':0,
@@ -173,7 +182,7 @@ def main():
    'Automated rendering cannot replace human pedagogical and visual review.']}
  (out/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
  with zipfile.ZipFile(out/'heva_oa407_docx_pptx.zip','w',compression=zipfile.ZIP_DEFLATED,compresslevel=5) as z:
-  for sub in ('docx','pptx'):
+  for sub in ('docx','docx_docente','pptx'):
    for file in (out/sub).iterdir():z.write(file,sub+'/'+file.name)
  print(json.dumps({k:v for k,v in report.items() if k!='records'},ensure_ascii=False))
  if report['failed']:
