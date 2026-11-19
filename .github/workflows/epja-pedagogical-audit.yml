@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/audit_stage2_pedagogy.py'
+      - 'scripts/close_stage2_evidence.py'
       - 'scripts/oa_lessons.py'
       - 'scripts/oa_grounded_tasks.py'
       - 'scripts/oa_curated_cases.py'
@@ -28,6 +29,8 @@ jobs:
         run: python scripts/test_curated_oa_cases.py
       - name: Run individual curriculum evidence audit
         run: python scripts/audit_stage2_pedagogy.py out/etapa2_revision
+      - name: Produce evidence-gated closure matrix for all 407 objectives
+        run: python scripts/close_stage2_evidence.py out/etapa2_revision
       - name: Upload 407 individual pedagogical review records
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
