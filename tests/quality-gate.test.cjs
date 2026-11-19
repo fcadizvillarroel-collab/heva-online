@@ -16,3 +16,13 @@ test('flags unbalanced answer keys and duplicated paragraphs',()=>{
  assert.ok(result.issues.some(i=>i.code==='CLAVES_DESEQUILIBRADAS'));
  assert.ok(result.issues.some(i=>i.code==='SECCIONES_DUPLICADAS'));
 });
+
+test('finds repeated question wording even with different answer keys',()=>{
+ const questions=[{pregunta:'¿Qué ocurre cuando se interrumpe la llegada de insumos importados?',clave:'A'},{pregunta:'¿Qué ocurre cuando se interrumpe la llegada de insumos importados?',clave:'B'}];
+ const result=Q.inspect({material:{tipoMaterial:'EVALUACION',preguntasAlternativas:questions}});
+ assert.ok(result.issues.some(i=>i.code==='PREGUNTAS_DUPLICADAS'));
+});
+test('diagrams enabled without images still require visual evidence',()=>{
+ const result=Q.inspect({material:{tipoMaterial:'GUIA',objetivoAprendizaje:'Analizar la globalización',recursosVisualesHEVA:{imagenes:false,diagramas:true,graficos:false}},sections:[{text:'La globalización es un proceso. Ejemplo: comercio. Actividad: analiza.'}]});
+ assert.ok(result.issues.some(i=>i.code==='VISUALES_AUSENTES'));
+});
