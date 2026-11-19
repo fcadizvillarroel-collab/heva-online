@@ -55,7 +55,7 @@ def create_ppt(oa,png,out):
  def slide(title,body,footer='HEVA · BORRADOR DIDÁCTICO NO VALIDADO'):
   s=prs.slides.add_slide(prs.slide_layouts[6])
   addtext(s,.65,.38,12,.7,title,28,True)
-  size=20 if len(body)<400 else 17
+  size=20 if len(body)<260 else (17 if len(body)<500 else (15 if len(body)<750 else 13))
   addtext(s,.78,1.32,11.8,4.95,body,size)
   addtext(s,.78,6.65,11.8,.45,footer,12,False,TEAL)
   return s
