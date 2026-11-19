@@ -1852,6 +1852,106 @@ CASES = {
   "Interconectividad global facilita comercio y circulación de ideas; también puede generar dependencia y desigualdad. Analizar efectos personales y nacionales con fuentes verificadas.",
   "Explica una ventaja y un riesgo de esta interdependencia.",
  ),
+ "D257|BÁS|Estudios Sociales|N3|4":(
+  "Una comunidad presenta una tradición culinaria y otra una celebración con significado distinto.",
+  "Caracterizar cultura exige conocer prácticas y sentidos mediante fuentes o testimonios voluntarios, sin reducir grupos a estereotipos. Respeto significa reconocer igual dignidad y diversidad interna.",
+  "Formula tres preguntas abiertas y una norma de trato respetuoso.",
+ ),
+ "D257|BÁS|Estudios Sociales|N3|6":(
+  "Una persona es excluida de una actividad pública por un prejuicio injustificado.",
+  "La dignidad, igualdad y no discriminación son fundamentos de derechos humanos y democracia. Los mecanismos de protección dependen de normas y hechos; deberes incluyen respetar derechos ajenos.",
+  "Relaciona principio, institución y vía de consulta usando fuente oficial vigente.",
+ ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N1|2":(
+  "Debes explicar una actividad a un compañero y luego a una autoridad institucional.",
+  "Con compañero puede usarse registro cercano; con autoridad, presentación formal y solicitud precisa. Ambos mensajes deben mantener claridad, respeto y contenido verificable.",
+  "Escribe dos versiones de la misma petición y justifica diferencias.",
+ ),
+ "D257|BÁS|Estudios Sociales|N3|3":(
+  "Una ciudad enfrenta circulación de drogas ilegales y vulnerabilidad social.",
+  "El problema tiene dimensiones locales y transnacionales: redes, demanda, desigualdad y políticas públicas. Evitar estigmatizar personas; respuestas requieren prevención, protección, justicia y cooperación internacional basadas en evidencia.",
+  "Distingue una medida comunitaria y una de cooperación entre países.",
+ ),
+ "D257|BÁS|Estudios Sociales|N3|2":(
+  "Organiza hitos: 1914, 1939, 1945, 1989 y 1991.",
+  "1914 inicio Primera Guerra Mundial; 1939 inicio Segunda; 1945 fin de Segunda y fundación ONU; 1989 caída del Muro de Berlín; 1991 disolución URSS. Estos procesos influyeron en orden internacional posterior.",
+  "Explica una continuidad y un cambio entre 1945 y 1991.",
+ ),
+ "D257|BÁS|Estudios Sociales|N3|9":(
+  "Compara un empleo con contrato y cotizaciones declaradas con una actividad informal sin registro.",
+  "El empleo formal suele contar con obligaciones laborales y previsionales verificables; la informalidad puede limitar protección, aunque situaciones legales concretas varían. Seguridad social incluye protección ante contingencias conforme a reglas vigentes.",
+  "Elabora tabla de derechos, obligaciones y fuentes oficiales para verificar cotizaciones.",
+ ),
+ "D257|BÁS|Estudios Sociales|N2|6":(
+  "Ubica Chile en un mapa político de América del Sur.",
+  "Chile se sitúa en el extremo occidental y austral de Sudamérica; limita por tierra con Perú, Bolivia y Argentina. Organización político-administrativa incluye regiones, provincias y comunas, según normativa vigente.",
+  "Dibuja esquema con países limítrofes y distingue región de comuna.",
+ ),
+ "D257|BÁS|Estudios Sociales|N2|7":(
+  "Compara una zona cordillerana y una zona costera de Chile.",
+  "Variables naturales: relieve y clima; demográficas: distribución de población; económicas: actividades productivas. No inferir igual población o empleo en todas las zonas sin datos censales y económicos.",
+  "Construye tabla de variables y dos fuentes oficiales para verificarlas.",
+ ),
+ "D257|BÁS|Estudios Sociales|N2|8":(
+  "Una lluvia intensa provoca crecida de un río próximo a viviendas.",
+  "El fenómeno natural se transforma en riesgo según exposición, vulnerabilidad y medidas de prevención. Evitar atribuir una inundación específica a una sola causa sin datos meteorológicos.",
+  "Dibuja esquema amenaza-exposición-vulnerabilidad y dos medidas de reducción de riesgo.",
+ ),
+ "D257|BÁS|Estudios Sociales|N3|1":(
+  "Ordena periodización escolar: Antigüedad, Edad Media, Edad Moderna y Contemporánea.",
+  "Fechas convencionales europeas: 476 como inicio medieval; 1453 o 1492 como transición moderna; 1789 como inicio contemporáneo. Son convenciones y no representan simultáneamente toda la historia mundial.",
+  "Construye línea de tiempo y ubica tu año de nacimiento sin revelar datos personales.",
+ ),
+ "D257|BÁS|Estudios Sociales|N2|4":(
+  "Una fotografía antigua muestra un edificio donde hoy funciona una escuela.",
+  "La fuente ayuda a preguntar por cambios de uso, pero no explica causas sin registros adicionales. La historia permite reconocer procesos y comparar interpretaciones para decisiones actuales.",
+  "Formula una hipótesis y nombra dos fuentes para contrastarla.",
+ ),
+ "D257|BÁS|Estudios Sociales|N2|5":(
+  "Dos mapas muestran la misma región a escalas 1:100.000 y 1:1.000.000.",
+  "En 1:100.000, 1 cm representa 1 km; en 1:1.000.000, 1 cm representa 10 km. El primero ofrece mayor detalle local; ambos simplifican realidad y dependen de proyección y propósito.",
+  "Calcula distancia representada por 3 cm en ambas escalas.",
+ ),
+ "D257|BÁS|Estudios Sociales|N2|3":(
+  "Compara cambios del siglo XX en Chile: urbanización y ampliación de participación política.",
+  "Ambos procesos tuvieron ritmos, actores y consecuencias diferentes. No atribuir un cambio a un único hito; situar fechas, legislación y datos de población en fuentes oficiales.",
+  "Elabora una línea de tiempo con dos hitos comprobados y una proyección al presente.",
+ ),
+ "D257|BÁS|Estudios Sociales|N2|1":(
+  "Un barrio cambia por migraciones, construcción de viviendas y nuevas actividades.",
+  "La sociedad chilena es producto de múltiples actores y procesos históricos. Habitantes actuales participan mediante trabajo, organización y decisiones; evitar presentar una identidad homogénea.",
+  "Explica dos aportes distintos y cómo documentarlos respetuosamente.",
+ ),
+ "D257|BÁS|Estudios Sociales|N2|2":(
+  "Una persona construye línea de tiempo familiar ficticia junto a hechos nacionales.",
+  "Ejemplo: nacimiento ficticio 1980, cambio de residencia 1995, actualidad 2026. Los hechos personales pueden relacionarse con procesos nacionales, pero no se debe afirmar causalidad sin evidencia.",
+  "Relaciona un hito local con uno nacional usando fechas y fuentes.",
+ ),
+ "D257|BÁS|Ciencias Naturales|N3|2":(
+  "Se quema metano con oxígeno en una reacción ideal completa.",
+  "Ecuación balanceada CH₄+2O₂→CO₂+2H₂O. Se reorganizan enlaces y conservan átomos; romper enlaces requiere energía y formar enlaces libera energía. El balance energético depende de ambos procesos.",
+  "Cuenta átomos antes y después y explica por qué la masa se conserva en sistema cerrado.",
+ ),
+ "D257|BÁS|Ciencias Naturales|N3|9":(
+  "Compara hipótesis históricas sobre origen de vida y teoría de evolución biológica.",
+  "Origen de la vida estudia aparición inicial de sistemas vivos; evolución explica diversificación posterior. Selección natural actúa sobre variación heredable. Hipótesis de origen requieren evidencia y no deben confundirse con evolución.",
+  "Elabora tabla de preguntas, evidencias y límites de ambos campos.",
+ ),
+ "D257|BÁS|Ciencias Naturales|N3|7":(
+  "Compara reproducción asexual por división celular con reproducción sexual.",
+  "Asexual puede generar descendencia genéticamente muy semejante salvo mutaciones; sexual combina material genético mediante meiosis y fecundación, aumentando combinaciones heredables. La diversidad no se reduce a una sola causa.",
+  "Dibuja esquema de transmisión y explica dos fuentes de variación.",
+ ),
+ "D257|BÁS|Ciencias Naturales|N3|8":(
+  "Una clase analiza factores que influyen en decisiones sobre relaciones afectivas.",
+  "Dimensiones biológicas, psicológicas y sociales interactúan; responsabilidad incluye consentimiento, información fiable, respeto y acceso a orientación. Evitar suposiciones sobre experiencias privadas o identidades.",
+  "Propón un caso ficticio que muestre comunicación respetuosa y decisión informada.",
+ ),
+ "D257|BÁS|Ciencias Naturales|N3|6":(
+  "En una comunidad se promueve lavado de manos y vacunación según recomendaciones oficiales.",
+  "Defensas: barreras físicas, inmunidad innata y adaptativa. Prevención puede incluir higiene, vacunación y ventilación según enfermedad. No afirmar protección absoluta ni sustituir orientación sanitaria vigente.",
+  "Explica diferencia entre barrera física y respuesta inmunitaria.",
+ ),
 }
 def curated_case(oa):
     return CASES.get(oa['clave_interna'])
