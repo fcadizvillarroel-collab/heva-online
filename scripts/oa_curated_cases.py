@@ -662,6 +662,106 @@ CASES = {
   "Model: «Hello. My name is Alex. I enjoy reading. I read short stories in the evening because they help me relax. Thank you». Clear order: greeting, topic, detail, closing.",
   "Prepare a 30-second presentation about another interest and practice pronunciation.",
  ),
+ "D257|BÁS|Lengua Castellana y Comunicación|N2|4":(
+  "Escribe un relato breve sobre una herramienta extraviada y una nota formal para comunicar el hallazgo.",
+  "Relato original: «Al terminar el turno, Leo encontró una llave inglesa. Buscó al dueño y la dejó en el inventario». Nota: «Se informa que se encontró una llave inglesa en la sala de práctica. Está registrada en el inventario». El primero narra hechos; el segundo informa.",
+  "Reescribe ambos textos cambiando destinatario y explica dos diferencias.",
+ ),
+ "B24|MED|Inglés|N1|3":(
+  "Write a short email to request a meeting with a teacher.",
+  "Model: «Dear Teacher, I would like to ask for a meeting about the assignment. Are you available on Tuesday? Thank you. Best regards, Alex». Uses polite request, question form and coherent closing.",
+  "Write a short message to thank someone after the meeting.",
+ ),
+ "B24|MED|Inglés|N1|2":(
+  "Read: «Luis took an umbrella. The sky was dark and the forecast mentioned rain».",
+  "Explicit: Luis took an umbrella; the sky was dark. Reasonable inference: he expected rain. «Forecast» means prediction of weather. The text does not say that rain actually fell.",
+  "Write one explicit fact and one inference, citing the relevant words.",
+ ),
+ "B24|MED|Inglés|N1|1":(
+  "Listen to this teacher-read dialogue: «A: Is the workshop open? B: Not yet. It opens in ten minutes».",
+  "Explicit: workshop is not open now; it opens in ten minutes. Inference: the speakers may be waiting to enter, but their exact location is not stated. «Not yet» means an event has not happened at the present time.",
+  "Answer: Is the workshop open now? What can be inferred and what cannot?",
+ ),
+ "B24|BÁS|Inglés|N3|4":(
+  "Give a one-minute presentation with a picture of a community garden.",
+  "Model: «This is a community garden. People grow vegetables here. They work together and share tools». The picture supports meaning, but the student must explain rather than simply point.",
+  "Present a different place using three complete sentences and one visual aid.",
+ ),
+ "B24|BÁS|Inglés|N3|3":(
+  "Write a short story about a trip to a library.",
+  "Model: «Yesterday I went to the library. I borrowed a book. I read it at home». Uses simple past verbs and logical order; the story has beginning, action and end.",
+  "Write three sentences about another visit, checking verb forms.",
+ ),
+ "B24|BÁS|Inglés|N3|2":(
+  "Read: «The library is open from Monday to Friday. It closes at five».",
+  "Topic: library opening hours. Explicit details: Monday to Friday; closes at five. «Open» and «closes» describe availability; there is no information about weekends beyond the stated schedule.",
+  "Answer: When is the library open? What time does it close?",
+ ),
+ "B24|BÁS|Inglés|N3|1":(
+  "Listen to: «Hello, I am Ana. I work in a bakery. I start at eight».",
+  "Main idea: Ana introduces herself and her work. Details: bakery and start time eight. Common expression: «I start at» introduces starting time.",
+  "Answer: Where does Ana work? When does she start?",
+ ),
+ "B24|BÁS|Inglés|N2|4":(
+  "Ask a classmate politely to lend a pencil.",
+  "Model: «Excuse me, can I borrow your pencil, please?» Response: «Yes, of course» or «Sorry, I need it». Politeness includes respectful tone and accepting refusal.",
+  "Role-play a request for a notebook and an appropriate response.",
+ ),
+ "B24|BÁS|Inglés|N2|3":(
+  "Write a short introduction following a model.",
+  "Model: «My name is Alex. I live in Chile. I like music». Grammar: subject «I» with base verb «like», simple present; capital letters and full stops.",
+  "Write three sentences about a fictional person using «he» or «she» correctly.",
+ ),
+ "B24|BÁS|Inglés|N2|2":(
+  "Read: «Please wash your hands before cooking. Use clean water».",
+  "Purpose: instruction. Topic: hygiene before cooking. «Before» marks sequence and «clean» describes water. Imperatives «wash» and «use» direct actions.",
+  "Explain the purpose and write another short instruction with «please».",
+ ),
+ "B24|BÁS|Inglés|N2|1":(
+  "Listen to: «Good morning. The bus leaves at seven. Please arrive early».",
+  "Topic: bus schedule. Main idea: arrive before departure. Detail: departure at seven. «Leaves» here means departs, not foliage.",
+  "Answer: What time does the bus leave? What should passengers do?",
+ ),
+ "B24|MED|Ciencias Naturales|N2|8":(
+  "Una investigación hipotética registra temperatura del agua: 20, 22 y 24 °C en tres momentos.",
+  "Una planilla permite graficar tiempo y temperatura; cambio total = 4 °C. La conclusión «aumentó en estas mediciones» está apoyada, pero no se puede atribuir causa sin controlar variables.",
+  "Propón un gráfico con ejes y una limitación del registro.",
+ ),
+ "B24|MED|Ciencias Naturales|N2|7":(
+  "Una comunidad discute instalar una planta industrial cerca de un humedal; hay informes con datos y opiniones.",
+  "Separar evidencia sobre emisiones, biodiversidad y empleo de valoraciones y promesas. Considerar beneficios y riesgos ambientales y sociales, derechos y participación. Sin datos verificados no se puede afirmar impacto nulo ni inevitable.",
+  "Construye una matriz de argumentos y evidencia requerida para una decisión responsable.",
+ ),
+ "B24|MED|Ciencias Naturales|N2|6":(
+  "Dos grupos miden una muestra de agua y obtienen 6,8 y 8,1 unidades de pH bajo condiciones supuestamente iguales.",
+  "La discrepancia obliga a revisar calibración, contaminación, temperatura, registro y replicación. No promediar automáticamente mediciones incompatibles ni declarar una verdadera sin evidencia.",
+  "Diseña un procedimiento de repetición con controles y criterio de calidad.",
+ ),
+ "B24|MED|Ciencias Naturales|N2|5":(
+  "En un experimento ficticio, semillas germinadas: grupo A 8 de 10 y grupo B 6 de 10.",
+  "Proporciones: A = 80 %, B = 60 %; diferencia = 20 puntos porcentuales. Los datos muestran diferencia en la muestra, pero no prueban causa ni significación estadística sin diseño y replicación.",
+  "Escribe una conclusión limitada a los datos y nombra dos variables de control.",
+ ),
+ "B24|MED|Ciencias Naturales|N2|4":(
+  "Se desea modelar cómo cambia el nivel de agua en un recipiente al agregar volúmenes iguales.",
+  "Modelo simple: nivel aumenta proporcionalmente al volumen solo si el recipiente tiene sección transversal constante. En recipiente irregular la relación cambia; un modelo debe revisarse con mediciones.",
+  "Dibuja un modelo para recipiente cilíndrico y otro cónico y predice diferencias.",
+ ),
+ "B24|MED|Ciencias Naturales|N2|3":(
+  "Un curso quiere investigar si la luz influye en la germinación de semillas.",
+  "Pregunta: ¿cambia la proporción de germinación con luz? Variable independiente: exposición a luz; dependiente: germinación; controles: especie, agua, temperatura y tiempo. Registrar cantidades, consentimiento y seguridad.",
+  "Redacta hipótesis, materiales, procedimiento y criterio para revisar resultados.",
+ ),
+ "B24|MED|Ciencias Naturales|N2|2":(
+  "Se preparan dos grupos de diez semillas con igual agua y temperatura; uno recibe luz y otro permanece oscuro.",
+  "Hipótesis contrastable: la luz cambia la germinación. Medir semillas germinadas cada día y registrar condiciones. Si difieren otros factores, no puede atribuirse el resultado solo a la luz.",
+  "Diseña tabla de datos y explica cómo reducir sesgos de medición.",
+ ),
+ "B24|MED|Ciencias Naturales|N2|1":(
+  "Al observar condensación en un vaso frío, una persona pregunta de dónde provienen las gotas.",
+  "Pregunta investigable: ¿se forman gotas por vapor de agua del aire que se condensa sobre la superficie fría? Hipótesis: a menor temperatura superficial, aumenta condensación bajo condiciones apropiadas. No confundir con fuga del vaso.",
+  "Propón una comparación con vaso a temperatura ambiente y registra observaciones.",
+ ),
 }
 def curated_case(oa):
     return CASES.get(oa['clave_interna'])
