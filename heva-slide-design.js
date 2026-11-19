@@ -21,9 +21,26 @@ function subjectVisual(section,topic){
  {re:/construcciones metalicas|soldadura|metal|taller|especialidad|seguridad laboral|prevencion de riesgos/,title:'Aplicar un procedimiento',labels:['PREPARAR','EJECUTAR','VERIFICAR'],notes:['Revisar materiales y EPP','Seguir pasos seguros','Controlar la calidad']},
  {re:/convivencia|insercion laboral|empleabilidad|emprendimiento/,title:'Resolver una situación',labels:['SITUACIÓN','DECISIÓN','EVALUACIÓN'],notes:['Reconocer el problema','Justificar una acción','Revisar resultados']}
  ];
- if(/globalizacion|comercio internacional|interdependencia/.test(topic)){
-  groups.unshift({re:/./,title:/proveedor|importacion|demora|dependencia|riesgo/.test(words)?'Dependencia del comercio mundial':'Globalización: conexiones',labels:/proveedor|importacion|demora|dependencia|riesgo/.test(words)?['PROVEEDOR','TRANSPORTE','NEGOCIO LOCAL']:['PRODUCCIÓN','INTERCAMBIO','CONSUMO'],notes:/proveedor|importacion|demora|dependencia|riesgo/.test(words)?['Origen de los insumos','Posibles retrasos','Efectos y decisiones']:['Bienes y servicios','Rutas y comunicaciones','Efectos cotidianos']});
- }
+ // Elegir el esquema por el contenido y la habilidad del OA, no por una asignatura fija.
+ const subject=norm(topic),content=norm([section.title,section.text].join(' '));
+ const patterns=[
+  {re:/globalizacion|comercio internacional|interdependencia|importacion|exportacion/,title:'Intercambios e interdependencia',labels:['ORIGEN','CONEXIÓN','IMPACTO'],notes:['Producción o proveedor','Intercambio y transporte','Consecuencias locales']},
+  {re:/guerra|revolucion|independencia|ocupacion|conflicto historico/,title:'Interpretar un proceso histórico',labels:['ANTECEDENTES','DESARROLLO','CONSECUENCIAS'],notes:['Factores y contexto','Actores y acontecimientos','Cambios y permanencias']},
+  {re:/derechos humanos|democracia|ciudadania|estado|constitucion/,title:'Analizar ciudadanía y derechos',labels:['PRINCIPIO','SITUACIÓN','ARGUMENTO'],notes:['Derecho o institución','Caso de la vida social','Fundamentar una posición']},
+  {re:/registro de habla|registro formal|registro informal|comunicacion oral/,title:'Adecuar el lenguaje',labels:['CONTEXTO','REGISTRO','EFECTO'],notes:['Interlocutor y propósito','Elección de expresiones','Claridad y adecuación']},
+  {re:/argumentacion|tesis|evidencia|opinion|fuente/,title:'Construir argumentos',labels:['AFIRMACIÓN','EVIDENCIA','CONCLUSIÓN'],notes:['Qué se sostiene','Datos y razones','Justificar la postura']},
+  {re:/comprension lectora|cuento|fabula|noticia|texto informativo/,title:'Comprender un texto',labels:['LEER','INTERPRETAR','FUNDAMENTAR'],notes:['Identificar información','Inferir significados','Usar evidencia textual']},
+  {re:/ecuacion|algebra|incognita|despej/,title:'Resolver ecuaciones',labels:['PLANTEAR','RESOLVER','VERIFICAR'],notes:['Datos e incógnita','Operaciones equivalentes','Comprobar el resultado']},
+  {re:/porcentaje|proporcion|fraccion|estadistica|grafico/,title:'Interpretar cantidades',labels:['DATOS','CÁLCULO','SENTIDO'],notes:['Identificar unidades','Operar y representar','Interpretar resultados']},
+  {re:/ecosistema|cadena alimentaria|biodiversidad/,title:'Relaciones en el ambiente',labels:['ELEMENTOS','INTERACCIONES','CAMBIOS'],notes:['Organismos y factores','Relaciones y energía','Efectos en el sistema']},
+  {re:/experimento|metodo cientifico|hipotesis|reaccion quimica/,title:'Investigar un fenómeno',labels:['PREGUNTA','EVIDENCIA','EXPLICACIÓN'],notes:['Formular hipótesis','Observar o medir','Concluir con datos']},
+  {re:/soldadura|construcciones metalicas|corte|trazado|estructura metalica/,title:'Procedimiento técnico seguro',labels:['PREPARAR','EJECUTAR','CONTROLAR'],notes:['Materiales y EPP','Secuencia de trabajo','Calidad y seguridad']},
+  {re:/contrato|prevision|empleabilidad|entrevista laboral|emprendimiento/,title:'Tomar decisiones laborales',labels:['REQUISITOS','ACCIÓN','EVALUACIÓN'],notes:['Identificar obligaciones','Aplicar al caso','Verificar consecuencias']},
+  {re:/convivencia|resolucion de conflictos|mediacion|comunicacion asertiva/,title:'Resolver conflictos',labels:['PERSONAS','PROCESO','PROBLEMA'],notes:['Intereses y emociones','Diálogo y acuerdos','Necesidades de fondo']},
+  {re:/english|ingles|vocabulary|dialogue|conversation|present simple/,title:'Use English in context',labels:['SITUATION','LANGUAGE','PRACTICE'],notes:['Who and where','Words and structure','Apply in a dialogue']}
+ ];
+ const matched=patterns.find(p=>p.re.test(content))||patterns.find(p=>p.re.test(subject));
+ if(matched)groups.unshift({...matched,re:/./});
  const group=groups.find(g=>g.re.test(topic))||{title:'Aprender y aplicar',labels:['CONCEPTO','EJEMPLO','APLICACIÓN'],notes:['Comprender la idea','Observar un modelo','Resolver una tarea']};
  try{
   const canvas=document.createElement('canvas');canvas.width=1000;canvas.height=550;
