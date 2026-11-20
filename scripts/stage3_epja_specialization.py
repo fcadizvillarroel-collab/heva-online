@@ -55,6 +55,8 @@ for oa in catalog:
  "alertas":"|".join(warnings),"verificacion_disciplinar":"PENDIENTE_REVISION_INDEPENDIENTE",
  "verificacion_documental":"PENDIENTE_REVISION_INDEPENDIENTE",
  "verificacion_visual":"PENDIENTE_INSPECCION_HUMANA",
+ "tipo_alertas":"REQUISITO_DE_VERIFICACION" if warnings else "SIN_ALERTAS_HEURISTICAS",
+ "cantidad_alertas":len(warnings),"prioridad":"ALTA" if (auth or legal or visual) else ("MEDIA" if warnings else "NORMAL"),
  "version_material_revisada":"","evidencia_de_contraste":"","revisor":"","fecha":"","decision":""})
 out=Path(sys.argv[1] if len(sys.argv)>1 else ROOT/"out"/"etapa3")
 out.mkdir(parents=True,exist_ok=True)
@@ -63,6 +65,8 @@ with (out/"matriz_especializacion_epja_407.csv").open("w",encoding="utf-8-sig",n
 summary={"objetivos":len(rows),"familias":{k:sum(x["familia_disciplinar"]==k for x in rows) for k in SUBJECT_RULES},
 "casos_con_modelamiento_y_transferencia":sum(bool(x["caso"] and x["modelamiento"] and x["transferencia"]) for x in rows),
 "objetivos_con_alertas":sum(bool(x["alertas"]) for x in rows),
+"alertas_por_tipo":{k:sum(k in x["alertas"].split("|") for x in rows) for k in ("CASO_BREVE","MODELADO_BREVE","SIN_TRANSFERENCIA","COTEJAR_FUENTE_AUTENTICA","COTEJAR_NORMATIVA_VIGENTE","COTEJAR_RECURSO_VISUAL","COTEJAR_COBERTURA_DEL_OA")},
+"objetivos_por_prioridad":{k:sum(x["prioridad"]==k for x in rows) for k in ("ALTA","MEDIA","NORMAL")},
 "validaciones_independientes":0,"etapa3_cerrada":False,
 "alcance":"Matriz de especialización EPJA por disciplina con textos individuales; no reemplaza verificación de fuentes y revisión experta."}
 (out/"resumen_etapa3.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
