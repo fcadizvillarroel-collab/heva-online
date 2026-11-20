@@ -1,0 +1,27 @@
+name: HEVA 407 OA official PDF source contrast
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/verify_407_official_pdfs.py'
+      - '.github/workflows/oa407-official-source-contrast.yml'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install PDF text parser
+        run: python -m pip install pypdf==5.9.0
+      - name: Compare every OA against downloaded original official PDFs
+        run: python scripts/verify_407_official_pdfs.py out/contraste_fuentes
+      - name: Preserve individual matches and original PDF checksums
+        uses: actions/upload-artifact@v4
+        with:
+          name: heva-407-oa-original-mineduc-pdf-source-contrast
+          path: out/contraste_fuentes/*
+          retention-days: 30
