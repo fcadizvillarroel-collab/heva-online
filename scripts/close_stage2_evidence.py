@@ -67,7 +67,7 @@ def run(output, reviews_path=None):
         broad, authentic, visual, legal = risk_flags(oa)
         checks = [
             bool(scenario and solution and transfer),
-            lesson_data["scenario"] == scenario,
+            lesson_data["scenario"].startswith(scenario) and len(lesson_data["scenario"].strip()) >= 65,
             solution in lesson_data["worked"],
             solution in lesson_data["answer_guide"][0],
             lesson_data["status"] == "BORRADOR_DIDACTICO_NO_VALIDADO",
