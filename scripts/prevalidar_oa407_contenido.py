@@ -127,6 +127,7 @@ def screen(oa, case):
     overlap = sorted(required & explicit)
     # Paraphrases and inflected forms can legitimately give low overlap.
     if len(required) >= 3 and not overlap:
+        # A lexical mismatch is weak evidence: paraphrases are common across subjects.
         alerts.append("ALINEACION_TEMATICA_A_COTEJAR")
     if LEGAL.search(scenario + " " + answer) or LEGAL.search(objective):
         alerts.append("NORMATIVA_A_COTEJAR")
@@ -143,7 +144,7 @@ def screen(oa, case):
     if len(answer.strip()) < 85:
         alerts.append("PAUTA_ORIGINAL_BREVE")
     risk = ("CRITICO_VERIFICAR" if faults else "ALTA_REVISION"
-            if any(a in alerts for a in ("ALINEACION_TEMATICA_A_COTEJAR", "NORMATIVA_A_COTEJAR"))
+            if any(a in alerts for a in ("NORMATIVA_A_COTEJAR", "FECHA_O_CIFRA_A_COTEJAR", "FUENTES_AUTENTICAS_A_COTEJAR"))
             else "REVISION_FOCALIZADA" if alerts else "SIN_ALERTAS_DE_CRIBADO")
     return {"clave_interna": oa["clave_interna"],
             "asignatura": oa["asignatura"], "nivel": oa["nivel"],
