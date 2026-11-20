@@ -21,4 +21,6 @@ for oa in rows:
  else:
   assert material["ejemplo_resuelto_con_datos"] is False
   assert material["tipo_pauta"]=="CRITERIOS_ORIENTATIVOS_SIN_SOLUCION_UNICA"
+  assert material["questions"][0].startswith("Caso guiado:")
+  assert material["answer_guide"][0].startswith("Orientación para el caso guiado:")
 print(json.dumps({"oa":len(rows),"casos_especificos_coherentes":curated,"pautas_sin_solucion_inventada":len(rows)-curated},ensure_ascii=False))
