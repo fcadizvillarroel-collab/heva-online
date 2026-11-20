@@ -15,4 +15,8 @@ with tempfile.TemporaryDirectory() as temp:
  assert all(r["verificacion_disciplinar"]=="PENDIENTE_REVISION_INDEPENDIENTE" for r in rows)
  assert all(not r["decision"] and not r["revisor"] for r in rows)
  assert summary["etapa3_cerrada"] is False
+ assert sum(summary["objetivos_por_prioridad"].values())==407
+ assert sum(bool(r["alertas"]) for r in rows)==summary["objetivos_con_alertas"]
+ assert all(r["tipo_alertas"]=="REQUISITO_DE_VERIFICACION" for r in rows if r["alertas"])
+ assert all(r["prioridad"] in ("ALTA","MEDIA","NORMAL") for r in rows)
  print("PASS: 407 unique OA, six subject checklists, no fabricated reviewer approval")
