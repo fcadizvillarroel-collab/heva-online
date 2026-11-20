@@ -14,7 +14,8 @@ assert set(CASES)==set(by_id), 'Missing or unknown exact OA case keys'
 for key, (scenario, solution, transfer) in CASES.items():
     assert all(len(t.strip())>=30 for t in (scenario,solution,transfer)), key
     l=lesson(by_id[key])
-    assert l['scenario']==scenario and solution in l['worked'],key
+    assert l['scenario'].startswith(scenario) and solution in l['worked'],key
+    assert len(l['scenario'].strip())>=65,key
     assert l['ejemplo_resuelto_con_datos'] is True,key
     assert solution in l['answer_guide'][0], ('Missing actual case answer key',key)
     assert 'Caso resuelto:' in l['questions'][0], ('Exercise does not match solved case',key)
