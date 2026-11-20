@@ -14,7 +14,7 @@ from pptx import Presentation
 from pptx.util import Inches, Pt as PptPt
 from pptx.dml.color import RGBColor as PPTColor
 import fitz
-from oa_blueprints import blueprint
+from oa_blueprints import blueprint, domain
 from oa_lessons import lesson
 from oa_case_sources import sources_for
 
@@ -51,6 +51,49 @@ def diagram(oa,path):
  d.text((55,485),'Habilidad inicial del OA: '+verb[:45],font=font(27),fill=NAVY)
  im.save(path,optimize=True)
  return path
+def evidence_diagram(oa,path):
+ # A second, meaningfully different didactic graphic. No documentary imagery is implied.
+ area,_=domain(oa)
+ pathways={
+  'matematica':(('DATOS','Cantidades y unidades'),('MODELO','Operación y representación'),('COMPROBAR','Verifica el resultado')),
+  'ciencias':(('FENÓMENO','Observa o compara'),('EVIDENCIA','Datos y variables'),('EXPLICAR','Modelo y conclusión')),
+  'historia':(('CONTEXTO','Tiempo, lugar, actores'),('FUENTES','Procedencia y contraste'),('ARGUMENTAR','Causas y consecuencias')),
+  'lenguaje':(('TEXTO','Propósito y destinatario'),('EVIDENCIAS','Palabras e ideas clave'),('REVISAR','Coherencia y claridad')),
+  'ingles':(('CONTEXT','Who speaks and why?'),('LANGUAGE','Useful vocabulary'),('CHECK','Meaning and clarity')),
+  'laboral':(('SITUACIÓN','Condiciones de trabajo'),('PROCEDER','Pasos y seguridad'),('EVALUAR','Riesgos y evidencias')),
+  'convivencia':(('PERSONAS','Escuchar perspectivas'),('PROBLEMA','Reconocer necesidades'),('ACUERDO','Evaluar consecuencias')),
+  'economia':(('OPCIONES','Costos y condiciones'),('COMPARAR','Datos verificables'),('DECIDIR','Justificar la elección')),
+  'arte':(('OBSERVAR','Elementos expresivos'),('CREAR','Propuesta y técnica'),('EXPLICAR','Fundamentar decisiones')),
+  'fisica':(('PREPARAR','Capacidades y entorno'),('PRACTICAR','Progresión segura'),('REGISTRAR','Esfuerzo y ajustes'))
+ }
+ steps=pathways.get(area,(('IDENTIFICAR','Tema y situación'),('APLICAR','Acción observable'),('JUSTIFICAR','Evidencia del OA')))
+ im=Image.new('RGB',(1200,600),CREAM)
+ d=ImageDraw.Draw(im)
+ d.rounded_rectangle((24,24,1176,576),radius=24,outline=NAVY,width=5)
+ d.text((54,48),'RUTA DE EVIDENCIAS · '+area.upper(),font=font(29),fill=NAVY)
+ for i,(name,subtitle) in enumerate(steps):
+  x=52+380*i
+  d.rounded_rectangle((x,145,x+350,435),radius=17,fill=(227,239,236) if i%2==0 else (245,231,215),outline=TEAL,width=3)
+  d.text((x+19,185),name,font=font(27),fill=NAVY)
+  for j,line in enumerate(wrap(subtitle,25)[:3]):
+   d.text((x+19,265+40*j),line,font=font(22),fill=NAVY)
+ topic='Tema del OA: '+oa['texto_literal'].strip()
+ for j,line in enumerate(wrap(topic,90)[:2]):
+  d.text((55,466+34*j),line,font=font(22),fill=NAVY)
+ im.save(path,optimize=True)
+ return path
+
+def split_slide_body(value,limit=620):
+ text=str(value).strip()
+ result=[]
+ while len(text)>limit:
+  cut=text.rfind(' ',0,limit)
+  if cut<limit//2:cut=limit
+  result.append(text[:cut].strip())
+  text=text[cut:].lstrip()
+ if text:result.append(text)
+ return result or ['']
+
 def addtext(slide,x,y,w,h,text,size=23,bold=False,color=NAVY):
  shape=slide.shapes.add_textbox(Inches(x),Inches(y),Inches(w),Inches(h))
  tf=shape.text_frame;tf.word_wrap=True
@@ -59,16 +102,20 @@ def addtext(slide,x,y,w,h,text,size=23,bold=False,color=NAVY):
   p=tf.paragraphs[0] if i==0 else tf.add_paragraph()
   p.text=line;p.font.name='Aptos';p.font.size=PptPt(size);p.font.bold=bold;p.font.color.rgb=PPTColor(*color)
  return shape
-def create_ppt(oa,png,out):
+def create_ppt(oa,png,png_evidence,out):
  prs=Presentation();prs.slide_width=Inches(13.333);prs.slide_height=Inches(7.5)
  data=lesson(oa)
  def slide(title,body,footer='HEVA · BORRADOR DIDÁCTICO NO VALIDADO'):
-  s=prs.slides.add_slide(prs.slide_layouts[6])
-  addtext(s,.65,.38,12,.7,title,28,True)
-  size=20 if len(body)<260 else (17 if len(body)<500 else (15 if len(body)<750 else 14))
-  addtext(s,.78,1.32,11.8,4.95,body,size)
-  addtext(s,.78,6.65,11.8,.45,footer,14,False,TEAL)
-  return s
+  parts=split_slide_body(body)
+  first=None
+  for idx,part in enumerate(parts):
+   s=prs.slides.add_slide(prs.slide_layouts[6])
+   if first is None:first=s
+   page_title=title if len(parts)==1 else title+' · '+str(idx+1)+'/'+str(len(parts))
+   addtext(s,.65,.38,12,.7,page_title,28,True)
+   addtext(s,.78,1.32,11.8,4.95,part,22 if len(part)<360 else 20)
+   addtext(s,.78,6.65,11.8,.45,footer,14,False,TEAL)
+  return first
  slide('OBJETIVO DE APRENDIZAJE · '+str(oa['_index']).zfill(3),oa['asignatura']+' · '+oa['nivel']+'\n\n'+oa['texto_literal'])
  slide('¿Qué vamos a aprender?',data['explanation'])
  sources=sources_for(oa)
@@ -80,9 +127,12 @@ def create_ppt(oa,png,out):
  slide('Caso para pensar',data['scenario']+'\n\nPregunta: ¿cómo lo resolverías antes de ver la demostración?')
  slide('Orientación para resolver el OA',data['worked'])
  slide('Practiquemos', '\n\n'.join(str(i)+'. '+q for i,q in enumerate(data['questions'][:3],1)))
- slide('Cómo revisar tu trabajo','Comprueba que respondiste al objetivo, justificaste tus decisiones y verificaste el procedimiento. Compara tus resultados con la explicación trabajada en clase.')
+ s=slide('Cómo revisar tu trabajo','Comprueba la respuesta al objetivo, justifica con evidencia y verifica los procedimientos. Utiliza la ruta visual siguiente.')
+ picture=s.shapes.add_picture(str(png_evidence),Inches(1.1),Inches(2.25),width=Inches(10.8),height=Inches(3.95))
+ picture._element.nvPicPr.cNvPr.set('descr','Ruta original de evidencias adaptada al área curricular y vinculada con el objetivo.')
  slide('Aplicación y cierre',data['questions'][3]+'\n\n'+data['exit_ticket']+'\n\n'+data['accessibility'])
  prs.save(out)
+ return len(prs.slides)
 def create_doc(oa,png,out,teacher=False):
  doc=Document();sec=doc.sections[0];sec.top_margin=Cm(1.5);sec.bottom_margin=Cm(1.4)
  sec.left_margin=Cm(2);sec.right_margin=Cm(2)
@@ -162,8 +212,9 @@ def main():
  for i,oa in enumerate(catalog[:count],1):
   oa=dict(oa,_index=i);key=str(i).zfill(3)+'_'+hashlib.sha256(oa['clave_interna'].encode()).hexdigest()[:10]
   png=out/'assets'/(key+'.png');diagram(oa,png)
+  png_evidence=out/'assets'/(key+'_evidencia.png');evidence_diagram(oa,png_evidence)
   doc=out/'docx'/(key+'.docx');ppt=out/'pptx'/(key+'.pptx')
-  create_doc(oa,png,doc);create_ppt(oa,png,ppt)
+  create_doc(oa,png,doc);slide_count=create_ppt(oa,png,png_evidence,ppt)
   teacher_doc=out/'docx_docente'/(key+'_docente.docx')
   create_doc(oa,png,teacher_doc,teacher=True)
   # Teacher answer keys must never appear in student handouts.
@@ -173,14 +224,15 @@ def main():
   assert 'Pauta docente: soluciones y criterios de revisión' in teacher_text
   assert data_answer_key_present(teacher_text,oa)
   records.append({'blueprint':blueprint(oa),'oa':oa['clave_interna'],'subject':oa['asignatura'],'docx':doc.name,'docx_docente':teacher_doc.name,'pptx':ppt.name,
-   'visual':png.name,'visual_kind':'original_educational_diagram','documentary_source_verified':False,
+   'visual':png.name,'visual_kind':'original_educational_diagram','secondary_visual':png_evidence.name,
+   'diapositivas_esperadas':slide_count,'documentary_source_verified':False,
    'fuentes_cotejadas_para_hechos_puntuales':sources_for(oa),'curricular_reference_url':curricular_source(oa),'curricular_page_catalog':oa.get('pagina_oficial','')})
  if not args.skip_render:
   docpdf=out/'pdf_docx';pptpdf=out/'pdf_pptx';teacherpdf=out/'pdf_docx_docente';render(out/'docx',docpdf);render(out/'pptx',pptpdf);render(out/'docx_docente',teacherpdf)
   for record in records:
    d=inspect_pdf(docpdf/(Path(record['docx']).stem+'.pdf'),(1,2,3,4,5))
    t=inspect_pdf(teacherpdf/(Path(record['docx_docente']).stem+'.pdf'),(1,2,3,4,5,6))
-   p=inspect_pdf(pptpdf/(Path(record['pptx']).stem+'.pdf'),9)
+   p=inspect_pdf(pptpdf/(Path(record['pptx']).stem+'.pdf'),record['diapositivas_esperadas'])
    record['render_docx']=d;record['render_docx_docente']=t;record['render_pptx']=p
    record['pass']=not any(z.get('error') or z.get('issues') for z in (d,t,p))
  else:
