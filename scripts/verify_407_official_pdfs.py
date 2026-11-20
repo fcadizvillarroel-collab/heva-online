@@ -33,7 +33,9 @@ def run(out):
    data=fetch(url)
    pdf=PdfReader(io.BytesIO(data))
    pages=[normalize(p.extract_text(extraction_mode="layout") or "") for p in pdf.pages]
-   docs[framework]={"id":sid,"url":url,"sha256":hashlib.sha256(data).hexdigest(),"pages":pages}
+   # Some objectives cross a PDF page break. Search adjacent pages without inventing a page number.
+   page_pairs=[pages[i]+(pages[i+1] if i+1<len(pages) else "") for i in range(len(pages))]
+   docs[framework]={"id":sid,"url":url,"sha256":hashlib.sha256(data).hexdigest(),"pages":pages,"page_pairs":page_pairs}
   except Exception as e:
    issues.append({"fuente":framework,"problema":type(e).__name__+": "+str(e)[:160]})
  rows=[]
@@ -42,16 +44,18 @@ def run(out):
   doc=docs.get(framework)
   literal=normalize(oa["texto_literal"])
   hits=[i+1 for i,p in enumerate(doc["pages"]) if literal and literal in p] if doc else []
+  cross=[i+1 for i,p in enumerate(doc["page_pairs"][:-1]) if literal and literal in p and (i+1) not in hits] if doc and not hits else []
   # PDF extraction can split words across page boundaries; do not treat absence as factual contradiction.
-  status="COINCIDENCIA_LITERAL_PDF" if hits else ("NO_LOCALIZADO_EN_EXTRACCION" if doc else "PDF_NO_DISPONIBLE")
+  status="COINCIDENCIA_LITERAL_PDF" if hits else ("COINCIDENCIA_ENTRE_PAGINAS" if cross else ("NO_LOCALIZADO_EN_EXTRACCION" if doc else "PDF_NO_DISPONIBLE"))
   rows.append({"clave_interna":oa["clave_interna"],"marco":framework,"asignatura":oa["asignatura"],
-   "pagina_catalogo":oa.get("pagina_oficial",""),"paginas_pdf_coincidentes":"|".join(map(str,hits)),
+   "pagina_catalogo":oa.get("pagina_oficial",""),"paginas_pdf_coincidentes":"|".join(map(str,hits or cross)),
    "resultado":status,"url_original":doc["url"] if doc else SOURCES.get(framework,("", ""))[1],
    "sha256_pdf_original":doc["sha256"] if doc else "",
    "texto_objetivo":oa["texto_literal"]})
  with (out/"contraste_oa_fuentes_originales_407.csv").open("w",newline="",encoding="utf-8-sig") as f:
   w=csv.DictWriter(f,fieldnames=list(rows[0]));w.writeheader();w.writerows(rows)
  summary={"objetivos":len(rows),"coincidencia_literal_pdf":sum(r["resultado"]=="COINCIDENCIA_LITERAL_PDF" for r in rows),
+ "coincidencia_entre_paginas":sum(r["resultado"]=="COINCIDENCIA_ENTRE_PAGINAS" for r in rows),
  "no_localizados_en_texto_extraido":sum(r["resultado"]=="NO_LOCALIZADO_EN_EXTRACCION" for r in rows),
  "pdf_no_disponible":sum(r["resultado"]=="PDF_NO_DISPONIBLE" for r in rows),
  "fuentes":[{"marco":k,"id":v["id"],"url":v["url"],"sha256":v["sha256"],"paginas":len(v["pages"])} for k,v in docs.items()],
