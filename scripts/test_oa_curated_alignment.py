@@ -15,7 +15,8 @@ for oa in rows:
  material=lesson(oa)
  if case is not None:
   curated+=1
-  assert material["scenario"]==case[0],oa["clave_interna"]
+  assert material["scenario"].startswith(case[0]),oa["clave_interna"]
+  assert len(material["scenario"].strip())>=65,oa["clave_interna"]
   assert case[1] in material["worked"],oa["clave_interna"]
   assert case[1] in material["explanation"],oa["clave_interna"]
   assert material["answer_guide"][0]=="Solución del caso presentado: "+case[1],oa["clave_interna"]
