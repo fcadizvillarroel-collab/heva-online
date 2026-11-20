@@ -32,8 +32,10 @@ def audit(root, output):
             problems.append("MISSING_CURRICULAR_REFERENCE_DOCX")
         if "Referencia oficial:" not in ppt_text:
             problems.append("MISSING_CURRICULAR_REFERENCE_PPTX")
-        if len(slides.slides) != 9:
+        if len(slides.slides) < 9 or len(slides.slides) != rec.get("diapositivas_esperadas", len(slides.slides)):
             problems.append("UNEXPECTED_SLIDE_COUNT")
+        if sum(any(shape.shape_type == 13 for shape in slide.shapes) for slide in slides.slides) < 2:
+            problems.append("INSUFFICIENT_DIAGRAM_VARIETY")
         if not any(p.text.startswith("Apoyo de accesibilidad") for p in student.paragraphs):
             problems.append("MISSING_ACCESSIBILITY_SUPPORT")
         if not any(p.text.startswith("Actividades de práctica") for p in student.paragraphs):
@@ -48,7 +50,7 @@ def audit(root, output):
             "guia_estudiante": rec["docx"],
             "pauta_docente": rec["docx_docente"],
             "presentacion": rec["pptx"],
-            "revisiones_automatizadas": 10,
+            "revisiones_automatizadas": 11,
             "resultado": "APROBADO_TECNICAMENTE" if not problems else "REVISAR",
             "hallazgos": "|".join(problems),
             "revision_pedagogica_experta": "NO_ACREDITADA",
