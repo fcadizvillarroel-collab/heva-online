@@ -6,6 +6,7 @@ on:
       - 'scripts/oa_lessons.py'
       - 'scripts/oa_grounded_tasks.py'
       - 'scripts/oa_curated_cases.py'
+      - 'scripts/oa_case_sources.py'
       - 'scripts/oa_specific_examples.py'
       - 'scripts/build_407_oa_materials.py'
       - 'scripts/attest_oa407_technical.py'
