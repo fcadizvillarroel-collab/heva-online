@@ -12,6 +12,7 @@ on:
       - 'scripts/audit_oa407_office_content.py'
       - 'scripts/audit_oa407_curricular_trace.py'
       - 'scripts/inventory_oa407_evidence.py'
+      - 'scripts/audit_oa407_ppt_legibilidad.py'
       - 'scripts/issue_stage2_technical_record.py'
       - 'scripts/contact_sheets.py'
       - '.github/workflows/oa407-render.yml'
@@ -47,6 +48,8 @@ jobs:
         run: python scripts/audit_oa407_curricular_trace.py out/oa407 out/oa407/technical_evidence
       - name: Inventory all pages, source metadata and readability flags
         run: python scripts/inventory_oa407_evidence.py out/oa407 out/oa407/technical_evidence
+      - name: Audit legibility and illustrative-image coverage of all 407 actual PowerPoints
+        run: python scripts/audit_oa407_ppt_legibilidad.py out/oa407 out/oa407/technical_evidence
       - name: Issue consolidated evidence-based stage 2 technical record
         run: python scripts/issue_stage2_technical_record.py out/oa407 out/oa407/technical_evidence
       - name: Generate review sheets for every rendered page
