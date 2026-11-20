@@ -34,8 +34,16 @@ def inspect(root, output):
             bodies = [shape for shape in slide.shapes
                       if shape.has_text_frame and Inches(1.1) <= shape.top < Inches(6.45)]
             content = "\n".join(shape.text for shape in bodies)
-            sizes = [run.font.size.pt for shape in bodies for paragraph in shape.text_frame.paragraphs
-                     for run in paragraph.runs if run.text.strip() and run.font.size is not None]
+            # The exporter sets font on the paragraph; runs often inherit that size.
+            # Check both explicit run and inherited paragraph sizes to avoid false 0-alert reports.
+            sizes = []
+            for shape in bodies:
+                for paragraph in shape.text_frame.paragraphs:
+                    for run in paragraph.runs:
+                        if run.text.strip():
+                            effective_size = run.font.size or paragraph.font.size
+                            if effective_size is not None:
+                                sizes.append(effective_size.pt)
             pictures = sum(1 for shape in slide.shapes if shape.shape_type == 13)
             picture_slides += int(pictures > 0)
             slide_flags = []
