@@ -14,6 +14,22 @@ def lesson(oa):
     specific_record = specific_example(oa) if curated_record is None else None
     solved_record = curated_record or specific_record
     curated = solved_record is not None
+    # Expand terse case prompts with an evidence-focused classroom instruction.
+    # Keep the original scenario intact so its verified solution remains applicable.
+    if len(scenario.strip()) < 65:
+        subject = oa['asignatura'].lower()
+        if 'matem' in subject:
+            scenario += ' Muestra el procedimiento, comprueba el resultado y señala qué datos utilizaste.'
+        elif 'ciencia' in subject:
+            scenario += ' Distingue observaciones de explicaciones e indica qué evidencia sustenta tu respuesta.'
+        elif 'historia' in subject or 'sociales' in subject or 'ciudadana' in subject:
+            scenario += ' Ubica el contexto y justifica tu interpretación con hechos o fuentes pertinentes.'
+        elif 'ingl' in subject or 'idioma extranjero' in subject:
+            scenario += ' Explain the communicative purpose and support your answer with language from the example.'
+        elif 'lengua' in subject or 'lenguaje' in subject:
+            scenario += ' Identifica el propósito comunicativo y fundamenta tu respuesta con elementos del texto.'
+        else:
+            scenario += ' Justifica tu respuesta utilizando información del caso y explica cómo la comprobarías.'
     # task() already selects a curated or specific example when available.
     # Never overwrite a verified OA-specific example with a generic template.
     # Do not replace the OA-grounded task with unrelated subject-wide stock examples.
