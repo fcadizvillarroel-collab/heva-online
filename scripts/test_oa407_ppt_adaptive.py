@@ -5,6 +5,7 @@ import tempfile
 from pathlib import Path
 from pptx import Presentation
 from pptx.util import Inches
+from audit_oa407_curricular_trace import normalize
 from build_407_oa_materials import diagram, evidence_diagram, create_ppt, split_slide_body
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -37,5 +38,8 @@ with tempfile.TemporaryDirectory() as temp:
                             "Small slide body font", font.pt if font else None)
     assert picture_slides>=2,picture_slides
     all_text=" ".join(s.text for slide in slides.slides for s in slide.shapes if s.has_text_frame)
+    body_text=normalize(" ".join(s.text for slide in slides.slides for s in slide.shapes
+                                 if s.has_text_frame and Inches(1.1)<=s.top<Inches(6.45)))
+    assert normalize(oa["texto_literal"]) in body_text, "Long curricular OA lost across slide split"
     assert "Referencia oficial:" in all_text
 print("PASS: adaptive long-lesson PPT, 20pt+ body and 2 distinct visuals")
