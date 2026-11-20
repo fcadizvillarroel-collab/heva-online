@@ -1,0 +1,28 @@
+name: HEVA 407 OA didactic quality matrix
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/audit_oa407_didactic_quality.py'
+      - 'scripts/oa_lessons.py'
+      - 'scripts/oa_curated_cases.py'
+      - 'scripts/oa_specific_examples.py'
+      - 'catalogo-publicado.json'
+      - '.github/workflows/oa407-didactic-quality.yml'
+  workflow_dispatch:
+jobs:
+  didactic-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check 407 lessons for duplicates and answer-key coherence
+        run: python scripts/audit_oa407_didactic_quality.py out/calidad_didactica
+      - name: Upload per-OA findings
+        uses: actions/upload-artifact@v4
+        with:
+          name: heva-407-oa-didactic-quality-matrix
+          path: out/calidad_didactica/*
+          retention-days: 30
