@@ -25,6 +25,14 @@ ARITHMETIC = re.compile(
     rf"\s*=\s*(?P<c>{NUMBER})(?![\w\d])"
 )
 TOKEN = re.compile(rf"{NUMBER}|[+\-−–×*÷/]")
+FRACTION_PERCENT = re.compile(
+    rf"(?<![\w\d])(?P<a>{NUMBER})\s*/\s*(?P<b>{NUMBER})\s*=\s*"
+    rf"(?P<pct>\d+(?:,\d+)?)\s*%"
+)
+DECIMAL_PERCENT = re.compile(
+    rf"(?<![\w\d])(?P<a>{NUMBER})\s*[×*]\s*100\s*=\s*"
+    rf"(?P<pct>\d+(?:,\d+)?)\s*%"
+)
 STOP = set("""desarrollar comprender analizar reconocer identificar aplicar evaluar
 utilizar explicar participar demostrar conocer relacionar comunicar resolver
 interpretar describir formular establecer construir proponer reflexionar
@@ -84,6 +92,21 @@ def arithmetic_errors(text):
                 problems.append(match.group(0).strip() + " [calculado: " + str(calculated) + "]")
         except (InvalidOperation, ZeroDivisionError, IndexError):
             problems.append(match.group(0).strip() + " [operación no válida]")
+    # Percent statements can be mathematically checked without an external source.
+    for match in FRACTION_PERCENT.finditer(text):
+        try:
+            predicted = number(match.group("a")) / number(match.group("b")) * 100
+            if abs(predicted - number(match.group("pct"))) > Decimal("0.11"):
+                problems.append(match.group(0).strip() + " [porcentaje calculado: " + str(predicted) + "]")
+        except (InvalidOperation, ZeroDivisionError):
+            problems.append(match.group(0).strip() + " [porcentaje no válido]")
+    for match in DECIMAL_PERCENT.finditer(text):
+        try:
+            predicted = number(match.group("a")) * 100
+            if abs(predicted - number(match.group("pct"))) > Decimal("0.11"):
+                problems.append(match.group(0).strip() + " [porcentaje calculado: " + str(predicted) + "]")
+        except InvalidOperation:
+            problems.append(match.group(0).strip() + " [porcentaje no válido]")
     return problems
 
 def words(text):
@@ -107,7 +130,11 @@ def screen(oa, case):
         alerts.append("ALINEACION_TEMATICA_A_COTEJAR")
     if LEGAL.search(scenario + " " + answer) or LEGAL.search(objective):
         alerts.append("NORMATIVA_A_COTEJAR")
-    if DATE.search(answer) or STAT.search(answer):
+    # Invented measurements and classroom computations are not external statistics.
+    area = oa["asignatura"].lower()
+    is_history = "historia" in area or "estudios sociales" in area
+    invented = bool(re.search(r"fictici|simulad|ejemplo inventado", scenario, re.I))
+    if is_history and not invented and (DATE.search(answer) or STAT.search(answer)):
         alerts.append("FECHA_O_CIFRA_A_COTEJAR")
     if REFERENCES.search(objective):
         alerts.append("FUENTES_AUTENTICAS_A_COTEJAR")
