@@ -7,6 +7,7 @@ import argparse, csv, json, hashlib, re
 from pathlib import Path
 from docx import Document
 from pptx import Presentation
+from pptx.util import Inches
 
 def normalize(s):
     return re.sub(r"\s+", " ", str(s)).strip()
@@ -32,7 +33,12 @@ def run(root, output):
         ppt=Presentation(root/"pptx"/record["pptx"])
         student_text=normalize(" ".join(p.text for p in student.paragraphs))
         teacher_text=normalize(" ".join(p.text for p in teacher.paragraphs))
-        ppt_text=normalize(" ".join(shape.text for slide in ppt.slides for shape in slide.shapes if shape.has_text_frame))
+        # A long OA or worked case may span several editable slide bodies. Omit
+        # titles and footers when reconstructing that contiguous original text.
+        ppt_text=normalize(" ".join(
+            shape.text for slide in ppt.slides for shape in slide.shapes
+            if shape.has_text_frame and Inches(1.1)<=shape.top<Inches(6.45)
+        ))
         checks={
           "objetivo_literal_guia": normalize(oa["texto_literal"]) in student_text,
           "objetivo_literal_ppt": normalize(oa["texto_literal"]) in ppt_text,
