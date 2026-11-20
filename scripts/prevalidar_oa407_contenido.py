@@ -18,12 +18,12 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from oa_curated_cases import CASES
 
 # Check complete expressions (including multi-term budgets), not misleading sub-expressions.
-NUMBER = r"\\$?(?:\\d{1,3}(?:\\.\\d{3})+|\\d+)(?:,\\d+)?"
+NUMBER = r"\$?(?:\d{1,3}(?:\.\d{3})+|\d+)(?:,\d+)?"
 ARITHMETIC = re.compile(
-    rf"(?<![\\w\\d])(?P<expr>{NUMBER}(?:\\s*[+\\-−–×*÷/]\\s*{NUMBER}){{1,7}})"
-    rf"\\s*=\\s*(?P<c>{NUMBER})(?![\\w\\d])"
+    rf"(?<![\w\d])(?P<expr>{NUMBER}(?:\s*[+\-−–×*÷/]\s*{NUMBER}){{1,7}})"
+    rf"\s*=\s*(?P<c>{NUMBER})(?![\w\d])"
 )
-TOKEN = re.compile(rf"{NUMBER}|[+\\-−–×*÷/]")
+TOKEN = re.compile(rf"{NUMBER}|[+\-−–×*÷/]")
 STOP = set("""desarrollar comprender analizar reconocer identificar aplicar evaluar
 utilizar explicar participar demostrar conocer relacionar comunicar resolver
 interpretar describir formular establecer construir proponer reflexionar
