@@ -6,6 +6,7 @@ on:
       - 'scripts/prevalidar_oa407_contenido.py'
       - 'scripts/test_prevalidar_oa407_contenido.py'
       - 'scripts/oa_curated_cases.py'
+      - 'scripts/oa_case_sources.py'
       - 'catalogo-publicado.json'
       - '.github/workflows/oa407-prevalidacion-disciplinar.yml'
   workflow_dispatch:
