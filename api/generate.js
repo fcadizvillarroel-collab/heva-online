@@ -53,11 +53,12 @@ module.exports = async function handler(req, res) {
   const OPENAI_API_KEY = process.env.ALLOW_PAID_AI === 'true' ? (process.env.OPENAI_API_KEY || '').trim() : '';
   const GEMINI_API_KEY = (process.env.GEMINI_API_KEY || '').trim();
   const GROQ_API_KEY = (process.env.GROQ_API_KEY || '').trim();
+  const ZAI_API_KEY = (process.env.ZAI_API_KEY || '').trim();
 
-  if (!OPENAI_API_KEY && !GEMINI_API_KEY && !GROQ_API_KEY) {
+  if (!OPENAI_API_KEY && !GEMINI_API_KEY && !GROQ_API_KEY && !ZAI_API_KEY) {
     return res.status(400).json({
       error: 'No hay proveedor habilitado',
-      detalle: 'Configura GEMINI_API_KEY o GROQ_API_KEY en Vercel. OpenAI requiere ALLOW_PAID_AI=true explícito. El uso gratuito depende de la cuota y facturación del proveedor.'
+      detalle: 'Configura ZAI_API_KEY, GEMINI_API_KEY o GROQ_API_KEY en Vercel. OpenAI requiere ALLOW_PAID_AI=true explícito. El uso gratuito depende de la cuota y facturación del proveedor.'
     });
   }
 
