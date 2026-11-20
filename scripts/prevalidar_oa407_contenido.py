@@ -17,11 +17,13 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from oa_curated_cases import CASES
 
-NUMBER = r"\$?\s*(?:\d{1,3}(?:\.\d{3})+|\d+)(?:,\d+)?"
+# Check complete expressions (including multi-term budgets), not misleading sub-expressions.
+NUMBER = r"\\$?(?:\\d{1,3}(?:\\.\\d{3})+|\\d+)(?:,\\d+)?"
 ARITHMETIC = re.compile(
-    rf"(?<![\w\d])(?P<a>{NUMBER})\s*(?P<op>[+\-−–×*÷/])\s*"
-    rf"(?P<b>{NUMBER})\s*=\s*(?P<c>{NUMBER})(?![\w\d])"
+    rf"(?<![\\w\\d])(?P<expr>{NUMBER}(?:\\s*[+\\-−–×*÷/]\\s*{NUMBER}){{1,7}})"
+    rf"\\s*=\\s*(?P<c>{NUMBER})(?![\\w\\d])"
 )
+TOKEN = re.compile(rf"{NUMBER}|[+\\-−–×*÷/]")
 STOP = set("""desarrollar comprender analizar reconocer identificar aplicar evaluar
 utilizar explicar participar demostrar conocer relacionar comunicar resolver
 interpretar describir formular establecer construir proponer reflexionar
@@ -42,27 +44,44 @@ def number(value):
     raw = value.replace("$", "").replace(" ", "").replace(".", "").replace(",", ".")
     return Decimal(raw)
 
+def compute_expression(expression):
+    """Evaluate only simple written arithmetic: no code, variables or parentheses."""
+    tokens = TOKEN.findall(expression)
+    values = [number(x) for x in tokens[::2]]
+    operators = tokens[1::2]
+    if len(values) != len(operators) + 1:
+        raise InvalidOperation("Unexpected arithmetic expression")
+    i = 0
+    while i < len(operators):
+        op = operators[i]
+        if op in ("×", "*", "÷", "/"):
+            values[i:i+2] = [values[i] * values[i+1] if op in ("×", "*")
+                             else values[i] / values[i+1]]
+            operators.pop(i)
+        else:
+            i += 1
+    result = values[0]
+    for op, value in zip(operators, values[1:]):
+        result = result + value if op == "+" else result - value
+    return result
+
 def arithmetic_errors(text):
-    """Only check literal binary arithmetic equality; do not infer missing data."""
+    """Check complete equalities; omit embedded terms, fractions and percent notation."""
     problems = []
     for match in ARITHMETIC.finditer(text):
+        before = text[:match.start()].rstrip()
+        after = text[match.end():].lstrip()
+        if before and before[-1] in "+−–-×*/,.":
+            continue  # inside a longer expression or a decimal
+        if after and after[0] in "+−–-×*/%":
+            continue  # equation continues, fraction or percent unit
         try:
-            a, b, c = (number(match.group(p)) for p in ("a", "b", "c"))
-            op = match.group("op")
-            calculated = {
-                "+": lambda: a + b,
-                "-": lambda: a - b,
-                "−": lambda: a - b,
-                "–": lambda: a - b,
-                "×": lambda: a * b,
-                "*": lambda: a * b,
-                "÷": lambda: a / b,
-                "/": lambda: a / b,
-            }[op]()
-            tolerance = max(Decimal("0.011"), abs(c) * Decimal("0.0001"))
-            if abs(calculated - c) > tolerance:
+            calculated = compute_expression(match.group("expr"))
+            expected = number(match.group("c"))
+            tolerance = max(Decimal("0.011"), abs(expected) * Decimal("0.0001"))
+            if abs(calculated - expected) > tolerance:
                 problems.append(match.group(0).strip() + " [calculado: " + str(calculated) + "]")
-        except (InvalidOperation, ZeroDivisionError):
+        except (InvalidOperation, ZeroDivisionError, IndexError):
             problems.append(match.group(0).strip() + " [operación no válida]")
     return problems
 
@@ -75,7 +94,7 @@ def screen(oa, case):
     scenario, answer, transfer = case
     objective = oa["texto_literal"]
     alerts = []
-    faults = arithmetic_errors(scenario + " " + answer)
+    faults = arithmetic_errors(answer)  # Student prompts can intentionally contain mistakes to correct.
     if faults:
         alerts.append("CALCULO_A_VERIFICAR")
     required = words(objective)
