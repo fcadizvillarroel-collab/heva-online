@@ -18,6 +18,11 @@ def run(root,output):
     assert d[2]["sin_fallas_de_trazabilidad"]==407 and d[2]["casos_identicos_repetidos"]==0
     assert d[3]["paginas_pdf_inventariadas"]>0
     assert d[3]["paginas_con_alertas_visuales_automaticas"]==0
+    ppt_file=evidence/"resumen_legibilidad_ppt_407.json"
+    ppt=json.loads(ppt_file.read_text(encoding="utf-8")) if ppt_file.exists() else None
+    if ppt is not None:
+      assert ppt["objetivos"]==407
+      sources.append("resumen_legibilidad_ppt_407.json")
     report={
       "etapa":"2",
       "estado":"CONTROLES_TECNICOS_COMPLETOS_VALIDACION_EXPERTA_PENDIENTE",
@@ -28,6 +33,8 @@ def run(root,output):
       "revisiones_documentales_independientes":0,
       "revisiones_visuales_humanas":0,
       "aprobaciones_pedagogicas_expertas":0,
+      "alertas_legibilidad_ppt":ppt["diapositivas_con_cuerpo_menor_20_pt"] if ppt else None,
+      "ppt_con_poca_evidencia_visual":ppt["presentaciones_con_pocos_visuales"] if ppt else None,
       "etapa2_cerrada":False,
       "fuentes_de_evidencia":sources,
       "nota":"El resultado automático no acredita revisión de fuentes originales, exactitud disciplinar ni firma de revisores."
