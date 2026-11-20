@@ -381,10 +381,19 @@
     let zoomActual = 16;
     let leyendo = false;
 
-    window.onload = function() {
-      actualizarTodoElCurriculo();
-      cargarHistorial();
-    };
+    // Inicio robusto: no depender de window.onload, que otras bibliotecas pueden sobrescribir.
+    function iniciarHEVASeleccionCurricular() {
+      try { actualizarTodoElCurriculo(); }
+      catch (error) {
+        console.error('HEVA: no fue posible inicializar la selección curricular', error);
+        const aviso=document.getElementById('contador-oas');
+        if(aviso) aviso.textContent='Error al iniciar currículo; recarga la página';
+      }
+      try { cargarHistorial(); }
+      catch (error) { console.warn('HEVA: historial local no disponible', error); }
+    }
+    if(document.readyState==='complete') iniciarHEVASeleccionCurricular();
+    else window.addEventListener('load',iniciarHEVASeleccionCurricular,{once:true});
 
     function zoomLetra(delta) {
       zoomActual = Math.min(Math.max(zoomActual + delta, 13), 22);
@@ -602,14 +611,27 @@
       HEVA_TP_APRENDIZAJES.forEach(([i,texto],j)=>{if(modulosActivos.includes(i))lista.push({tipo:'Aprendizaje esperado · programa TP',codigo:'AE-'+(i+1)+'-'+(j+1),texto})});
       return lista;
     }
+    // Respaldo local publicado: usar únicamente si falla la consulta o devuelve
+    // cero coincidencias. No presenta el respaldo como verificación en vivo.
+    let solicitudOA=0;
+    async function obtenerObjetivosLocales(marco,nivel,asignatura) {
+      const resp=await fetch('/catalogo-publicado.json',{cache:'no-cache'});
+      if(!resp.ok)throw new Error('Catálogo local HTTP '+resp.status);
+      const rows=await resp.json();
+      if(!Array.isArray(rows))throw new Error('Formato del catálogo local inválido');
+      const filtrados=window.HEVA?.catalog
+        ? window.HEVA.catalog(rows,{marco,nivel,asignatura})
+        : rows.filter(o=>String(o.asignatura).toLowerCase()===String(asignatura).toLowerCase());
+      return filtrados.filter(o=>o.texto_literal&&o.estado!=='RECHAZADO'&&o.vigente!==false);
+    }
     async function actualizarObjetivosYEstrategias() {
       const marco = document.getElementById('marco-curricular').value;
       const nivel = document.getElementById('nivel-epja').value;
       const asig = document.getElementById('asignatura').value;
       const selectOA = document.getElementById('select-oa');
       const contadorOAs = document.getElementById('contador-oas');
-
-      selectOA.innerHTML = '';
+      const solicitud=++solicitudOA;
+      selectOA.replaceChildren();
       if (/Construcciones Metálicas/i.test(asig)) {
         const lista=objetivosConstruccionesMetalicas(nivel);
         contadorOAs.innerText=lista.length+' referencias documentales · OFT y módulos (sin verificación en Supabase)';
@@ -618,39 +640,48 @@
         cargarOATexto();
         return;
       }
-      contadorOAs.innerText = 'Consultando Supabase...';
-
-      try {
-        const res = await fetch(`/api/curriculum/admin?action=verified&marco=${marco}&nivel=${nivel}&asignatura=${encodeURIComponent(asig)}`);
-        const data = await res.json();
-        const lista = data.objetivos || [];
-
-        contadorOAs.innerText = `${lista.length} verificados`;
-
-        if (lista.length === 0) {
-          const opt = document.createElement('option');
-          opt.value = '';
-          opt.innerText = '-- Sin objetivos verificados aún en Supabase (Revisar en pestaña Staging) --';
-          selectOA.appendChild(opt);
-        } else {
-          lista.forEach(o => {
-            const opt = document.createElement('option');
-            opt.value = o.texto_literal;
-            opt.innerText = `[${o.tipo}] [${o.codigo_oficial}] ${o.texto_literal.substring(0, 95)}... (Pág. ${o.pagina_oficial})`;
-            selectOA.appendChild(opt);
-          });
-        }
-
-        const optLibre = document.createElement('option');
-        optLibre.value = 'CUSTOM';
-        optLibre.innerText = '✍️ [PERSONALIZADO] Redactar o pegar mi propio objetivo...';
-        selectOA.appendChild(optLibre);
-
-        cargarOATexto();
-
-      } catch (e) {
-        contadorOAs.innerText = 'Error de consulta';
+      if(!asig){contadorOAs.textContent='Selecciona una asignatura';return;}
+      contadorOAs.textContent='Cargando objetivos...';
+      let lista=[],origen='Supabase';
+      try{
+        const params=new URLSearchParams({action:'verified',marco,nivel,asignatura:asig});
+        const res=await fetch('/api/curriculum/admin?'+params.toString(),{cache:'no-store'});
+        if(!res.ok)throw new Error('Respuesta curricular HTTP '+res.status);
+        const data=await res.json();
+        if(!Array.isArray(data.objetivos))throw new Error('Respuesta curricular inválida');
+        lista=data.objetivos;
+      }catch(error){
+        console.warn('HEVA: Supabase no disponible; se intenta respaldo local',error);
+        origen='copia local';
       }
+      if(!lista.length){
+        try{
+          const locales=await obtenerObjetivosLocales(marco,nivel,asig);
+          if(locales.length){lista=locales;origen='copia local';}
+        }catch(error){console.warn('HEVA: respaldo curricular no disponible',error);}
+      }
+      // Impide que una respuesta antigua sobrescriba el nivel/asignatura actual.
+      if(solicitud!==solicitudOA)return;
+      contadorOAs.textContent=lista.length+(origen==='Supabase'?' objetivos de Supabase':' objetivos · respaldo local');
+      if(!lista.length){
+        const opt=document.createElement('option');
+        opt.value='';
+        opt.textContent='-- No hay objetivos para esta selección; puedes ingresar uno manualmente --';
+        selectOA.appendChild(opt);
+      }else{
+        for(const o of lista){
+          const opt=document.createElement('option');
+          opt.value=o.texto_literal;
+          const codigo=o.codigo_oficial||o.clave_interna||'OA';
+          opt.textContent='['+(o.tipo||'OA')+'] ['+codigo+'] '+o.texto_literal.slice(0,115)+(o.pagina_oficial?' (Pág. '+o.pagina_oficial+')':'');
+          selectOA.appendChild(opt);
+        }
+      }
+      const libre=document.createElement('option');
+      libre.value='CUSTOM';
+      libre.textContent='✍️ [PERSONALIZADO] Redactar o pegar mi propio objetivo...';
+      selectOA.appendChild(libre);
+      cargarOATexto();
     }
 
     function cargarOATexto() {
