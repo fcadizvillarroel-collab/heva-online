@@ -44,6 +44,6 @@ def lesson(oa):
       'status':'BORRADOR_DIDACTICO_NO_VALIDADO',
       'tipo_pauta':'EJEMPLO_RESUELTO_Y_CRITERIOS' if curated else 'CRITERIOS_ORIENTATIVOS_SIN_SOLUCION_UNICA',
       'ejemplo_resuelto_con_datos':curated,
-      'fuente_oa':'catalogo-publicado.json',
-      'advertencia':'Requiere contraste con la fuente curricular oficial y revisión disciplinar del contenido antes de uso evaluativo.'
+      'fuente_oa':'Supabase public.curriculo_publicado (copia publicada: catalogo-publicado.json)',
+      'advertencia':'El OA procede de la copia publicada del catálogo de Supabase. Las explicaciones, ejemplos y soluciones son borradores didácticos: requieren verificación disciplinar independiente antes de su uso evaluativo.'
     }
