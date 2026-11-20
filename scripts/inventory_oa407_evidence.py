@@ -32,7 +32,8 @@ def run(root, output):
              "pagina_catalogo":page,"enlace_referencia":source,
              "cotejo_literal_con_documento_oficial":"NO_ACREDITADO",
              "cotejo_exactitud_disciplinar":"NO_ACREDITADO",
-             "fuentes_especificas_del_caso":"NO_ACREDITADAS",
+             "fuentes_especificas_del_caso":"COTEJO_FOCALIZADO_DE_HECHOS_NO_EXHAUSTIVO" if rec.get("fuentes_cotejadas_para_hechos_puntuales") else "NO_ACREDITADAS",
+             "enlaces_de_cotejo_focalizado":" | ".join(item["url"] for item in rec.get("fuentes_cotejadas_para_hechos_puntuales",[])),
              "hallazgos_metadatos":"|".join(notes)}
         for folder,filename in (("pdf_docx",rec["docx"]),("pdf_docx_docente",rec["docx_docente"]),("pdf_pptx",rec["pptx"])):
             path=root/folder/(Path(filename).stem+".pdf")
@@ -61,7 +62,9 @@ def run(root, output):
     summary={"alertas_visuales_por_tipo":dict(sorted(visual_counts.items())),"objetivos":len(rows),"paginas_pdf_inventariadas":len(pages),
              "paginas_con_alertas_visuales_automaticas":sum(bool(p["hallazgos"]) for p in pages),
              "objetivos_con_metadatos_incompletos":sum(bool(r["hallazgos_metadatos"]) for r in rows),
-             "cotejos_oficiales_independientes":0,"revisiones_visuales_humanas":0,
+             "cotejos_oficiales_independientes":0,
+             "casos_con_cotejo_focalizado_de_hechos":sum(bool(r.get("fuentes_cotejadas_para_hechos_puntuales")) for r in report["records"]),
+             "revisiones_visuales_humanas":0,
              "advertencia":"Mediciones por página y enlaces oficiales no acreditan revisión documental ni juicio pedagógico."}
     (output/"resumen_inventario_visual_y_fuentes.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
     print(json.dumps(summary,ensure_ascii=False))
