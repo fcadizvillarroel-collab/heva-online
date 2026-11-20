@@ -11,6 +11,10 @@ def lesson(oa):
     scenario,worked,transfer=task(oa)
     curated_record = curated_case(oa)
     curated = curated_record is not None
+    if curated:
+        # Keep the worked answer and transfer attached to the exact concrete case.
+        # Previously a generic scenario was paired with an unrelated curated solution.
+        scenario, transfer = curated_record[0], curated_record[2]
     # Do not replace the OA-grounded task with unrelated subject-wide stock examples.
     oa_text=oa['texto_literal'].strip()
     action=oa_text.split(' ',1)[0].strip('.,:;')
