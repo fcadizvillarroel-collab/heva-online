@@ -43,6 +43,7 @@ assert "CALCULO_A_VERIFICAR" not in misconception["alertas"]
 with TemporaryDirectory() as temp:
     summary = audit(Path(temp))
     assert summary["objetivos"] == 407
+    assert summary["casos_con_cotejo_focalizado_de_hechos"] == 3
     assert summary["aprobaciones_expertas"] == 0
     assert (Path(temp)/"prevalidacion_disciplinar_407.csv").exists()
 print("Pruebas de prevalidación: controles aritméticos y 407 filas completos")
