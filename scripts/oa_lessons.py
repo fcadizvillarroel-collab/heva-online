@@ -4,13 +4,16 @@ Never claim these are individual expert-approved lessons.
 from oa_blueprints import blueprint
 from oa_grounded_tasks import task
 from oa_curated_cases import curated_case
+from oa_specific_examples import specific_example
 
 def lesson(oa):
     b=blueprint(oa)
     focus=b['foco']
     scenario,worked,transfer=task(oa)
     curated_record = curated_case(oa)
-    curated = curated_record is not None
+    specific_record = specific_example(oa) if curated_record is None else None
+    solved_record = curated_record or specific_record
+    curated = solved_record is not None
     # task() already selects a curated or specific example when available.
     # Never overwrite a verified OA-specific example with a generic template.
     # Do not replace the OA-grounded task with unrelated subject-wide stock examples.
@@ -31,7 +34,7 @@ def lesson(oa):
         'Transferencia: plantea una situación nueva donde puedas demostrar la habilidad «'+action+'» vinculada con «'+focus+'», y justifica tu respuesta.'
       ],
       'answer_guide':[
-        ('Solución del caso presentado: '+curated_record[1]) if curated else ('Orientación para el caso guiado: '+worked+' No se proporciona una respuesta numérica o factual única cuando el enunciado no incluye datos suficientes.'),
+        ('Solución del caso presentado: '+solved_record[1]) if curated else ('Orientación para el caso guiado: '+worked+' No se proporciona una respuesta numérica o factual única cuando el enunciado no incluye datos suficientes.'),
         'Pauta para la transferencia: verificar que el estudiante aplique el mismo concepto o procedimiento a la nueva situación; contrastar cálculos, fuentes y conclusiones con los datos del enunciado. No hay respuesta única si la consigna es abierta.',
         'Verificación: exigir evidencia explícita y una comprobación independiente. Un error solo se considera corregido cuando se identifica, explica y rectifica.',
         'Respuesta abierta: evaluar pertinencia del caso, justificación y respeto por la experiencia personal.'
