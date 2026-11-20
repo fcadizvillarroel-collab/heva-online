@@ -7,6 +7,7 @@ PDF page labels in the catalog may differ from zero-based PDF page indices.
 import csv,hashlib,io,json,re,sys,unicodedata,urllib.request
 from pathlib import Path
 from pypdf import PdfReader
+import fitz
 ROOT=Path(__file__).resolve().parents[1]
 SOURCES={
  "Decreto 257":("D257","https://aprendoenlinea.mineduc.gob.cl/sites/default/files/newtenberg/614/articles-332178_recurso_pdf.pdf"),
@@ -32,7 +33,12 @@ def run(out):
   try:
    data=fetch(url)
    pdf=PdfReader(io.BytesIO(data))
-   pages=[normalize(p.extract_text(extraction_mode="layout") or "") for p in pdf.pages]
+   # Prefer PyMuPDF for layout and fall back to pypdf for encrypted PDFs.
+   try:
+    with fitz.open(stream=data,filetype="pdf") as f:
+     pages=[normalize(page.get_text(sort=True)) for page in f]
+   except Exception:
+    pages=[normalize(p.extract_text() or "") for p in pdf.pages]
    # Some objectives cross a PDF page break. Search adjacent pages without inventing a page number.
    page_pairs=[pages[i]+(pages[i+1] if i+1<len(pages) else "") for i in range(len(pages))]
    docs[framework]={"id":sid,"url":url,"sha256":hashlib.sha256(data).hexdigest(),"pages":pages,"page_pairs":page_pairs}
@@ -43,6 +49,7 @@ def run(out):
   framework=oa["marco"]
   doc=docs.get(framework)
   literal=normalize(oa["texto_literal"])
+  # Compare with both engines when PDF text order differs from printed order.
   hits=[i+1 for i,p in enumerate(doc["pages"]) if literal and literal in p] if doc else []
   cross=[i+1 for i,p in enumerate(doc["page_pairs"][:-1]) if literal and literal in p and (i+1) not in hits] if doc and not hits else []
   # PDF extraction can split words across page boundaries; do not treat absence as factual contradiction.
