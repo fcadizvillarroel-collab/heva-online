@@ -891,7 +891,7 @@
         el.textContent='Informe heurístico de calidad'+(report.qualityScore==null?'':' · '+report.qualityScore+'/100')+'\n'+(lines.length?lines.join('\n'):'No se detectaron alertas automáticas. Se recomienda revisión docente.');
       }catch(error){el.textContent='No fue posible auditar este material: '+error.message;}
     }
-    function exportarWord() {
+    async function exportarWord() {
       if (!materialActual) return;
       const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
       const parrafos = [
