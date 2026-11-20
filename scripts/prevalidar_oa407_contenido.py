@@ -16,6 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from oa_curated_cases import CASES
+from oa_case_sources import sources_for
 
 # Check complete expressions (including multi-term budgets), not misleading sub-expressions.
 NUMBER = r"\$?(?:\d{1,3}(?:\.\d{3})+|\d+)(?:,\d+)?"
@@ -92,6 +93,7 @@ def words(text):
 
 def screen(oa, case):
     scenario, answer, transfer = case
+    refs = sources_for(oa)
     objective = oa["texto_literal"]
     alerts = []
     faults = arithmetic_errors(answer)  # Student prompts can intentionally contain mistakes to correct.
@@ -124,7 +126,8 @@ def screen(oa, case):
             "comprobaciones_aritmeticas_pendientes": " | ".join(faults),
             "enunciado_original": scenario, "solucion_propuesta": answer,
             "actividad_transferencia": transfer,
-            "fuente_especifica_verificada": "NO_ACREDITADA",
+            "fuente_especifica_verificada": "COTEJO_FOCALIZADO_DE_HECHOS" if refs else "NO_ACREDITADA",
+            "referencias_de_cotejo": " | ".join(r["titulo"] + ": " + r["url"] for r in refs),
             "revision_disciplinar_independiente": "PENDIENTE",
             "aprobacion_institucional": "PENDIENTE"}
 
@@ -146,6 +149,7 @@ def audit(output):
                "alertas_por_tipo": dict(sorted(counts.items())),
                "con_alertas": sum(bool(r["alertas"]) for r in rows),
                "calculos_sospechosos": counts["CALCULO_A_VERIFICAR"],
+               "casos_con_cotejo_focalizado_de_hechos": sum(r["fuente_especifica_verificada"] == "COTEJO_FOCALIZADO_DE_HECHOS" for r in rows),
                "aprobaciones_expertas": 0,
                "alcance": "Cribado de cálculos explícitos, alineación léxica y riesgo documental. No certifica veracidad factual ni calidad pedagógica."}
     (output / "resumen_prevalidacion_disciplinar.json").write_text(
