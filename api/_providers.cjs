@@ -8,6 +8,36 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
   const timeoutFor=provider=>{const remaining=deadline-Date.now();const reserve=provider==='gemini'&&groqKey&&!exclude.includes('groq')?14000:0;return Math.max(1,Math.min(provider==='gemini'&&reserve?12000:20000,remaining-reserve));};
   const remember=(e,provider)=>{if(e?.name==='TimeoutError'||e?.name==='AbortError'){timedOut=true;providerStatus.push({proveedor:provider,estado:'tiempo_agotado'});}if(String(e?.code||'').startsWith('AI_RESPONSE_')){responseErrors.push(e.code);providerStatus.push({proveedor:provider,estado:e.code});}};
 
+  // HEVA B: Z.ai GLM-4.7 como tercer proveedor, prioritario SOLO en rama experimental.
+  // No envía la clave al navegador; sin ZAI_API_KEY conserva Gemini/Groq.
+  const zaiKey=(process.env.ZAI_API_KEY||'').trim();
+  if(zaiKey&&!exclude.includes('zai')&&deadline-Date.now()>1500){
+    const model=(process.env.ZAI_MODEL||'glm-4.7').trim();
+    try{
+      const resp=await fetch('https://api.z.ai/api/paas/v4/chat/completions',{
+        method:'POST',
+        signal:AbortSignal.timeout(Math.max(1,Math.min(25000,deadline-Date.now()-1000))),
+        headers:{Authorization:'Bearer '+zaiKey,'Content-Type':'application/json'},
+        body:JSON.stringify({
+          model,
+          messages:[
+            {role:'system',content:'Eres especialista en educación chilena de personas jóvenes y adultas (EPJA). Devuelve exclusivamente un objeto JSON válido y completo, sin texto adicional.'},
+            {role:'user',content:prompt}
+          ],
+          temperature:0.35,
+          max_tokens:options.maxOutputTokens||12000,
+          stream:false
+        })
+      });
+      track(resp,'zai');
+      const data=await resp.json();
+      if(resp.ok&&data.choices?.[0]?.message?.content){
+        try{return {value:parseAIJSON(data.choices[0].message.content,data.choices[0].finish_reason),provider:'zai',model};}
+        catch(e){remember(e,'zai');errores.push('Z.ai: respuesta JSON inválida o incompleta.');}
+      } else errores.push('Z.ai: proveedor no disponible ('+resp.status+').');
+    }catch(e){remember(e,'zai');errores.push('Z.ai: '+(e.code||e.name||'sin conexión'));}
+  }
+
   // 1. ChatGPT (OpenAI - si está configurado)
   if (process.env.ALLOW_PAID_AI === 'true' && openAiKey && !exclude.includes('openai')) {
     try {
