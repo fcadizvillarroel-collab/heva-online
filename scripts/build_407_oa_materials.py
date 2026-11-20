@@ -16,6 +16,7 @@ from pptx.dml.color import RGBColor as PPTColor
 import fitz
 from oa_blueprints import blueprint
 from oa_lessons import lesson
+from oa_case_sources import sources_for
 
 ROOT=Path(__file__).resolve().parents[1]
 OFFICIAL_EPJA_SOURCES = {
@@ -70,7 +71,9 @@ def create_ppt(oa,png,out):
   return s
  slide('OBJETIVO DE APRENDIZAJE · '+str(oa['_index']).zfill(3),oa['asignatura']+' · '+oa['nivel']+'\n\n'+oa['texto_literal'])
  slide('¿Qué vamos a aprender?',data['explanation'])
- slide('Fuente curricular y alcance','Marco: '+oa['marco']+'\nPágina indicada en catálogo: '+str(oa.get('pagina_oficial','No indicada'))+'\nReferencia oficial: '+curricular_source(oa)+'\n\nLos casos son originales, no citas del decreto. Las imágenes son esquemas originales y no fotografías documentales.')
+ sources=sources_for(oa)
+ citas='\n'.join(r['titulo']+': '+r['url'] for r in sources)
+ slide('Fuente curricular y alcance','Marco: '+oa['marco']+'\nPágina indicada en catálogo: '+str(oa.get('pagina_oficial','No indicada'))+'\nReferencia oficial: '+curricular_source(oa)+('\n\nCotejo focalizado de hechos (no validación total):\n'+citas if sources else '')+'\n\nLos casos son originales, no citas del decreto. Las imágenes son esquemas originales y no fotografías documentales.')
  s=slide('Organizador para aprender','Observa las tres acciones: comprender, aplicar y revisar.')
  picture=s.shapes.add_picture(str(png),Inches(1.1),Inches(2.1),width=Inches(10.8),height=Inches(4.0))
  picture._element.nvPicPr.cNvPr.set('descr','Organizador original de comprender, aplicar y revisar.')
@@ -107,6 +110,8 @@ def create_doc(oa,png,out,teacher=False):
  doc.add_heading('Ticket de salida',level=1);doc.add_paragraph(data['exit_ticket'])
  doc.add_paragraph('Fuente curricular: '+oa['marco']+' · '+oa['fuente_documento']+' · página registrada: '+str(oa.get('pagina_oficial','No indicada')))
  doc.add_paragraph('Referencia oficial para cotejo: '+curricular_source(oa))
+ for source in sources_for(oa):
+  doc.add_paragraph('Cotejo focalizado de hechos, no validación completa: '+source['titulo']+' · '+source['url']+' · Hecho: '+source['hecho_contrastado'])
  doc.add_paragraph('Las imágenes son esquemas originales, no documentos históricos ni fotografías verificadas.')
  doc.add_paragraph('BORRADOR DIDÁCTICO NO VALIDADO. Los ejemplos son ilustrativos y requieren cotejo docente con el OA.')
  for paragraph in doc.paragraphs:
@@ -168,7 +173,8 @@ def main():
   assert 'Pauta docente: soluciones y criterios de revisión' in teacher_text
   assert data_answer_key_present(teacher_text,oa)
   records.append({'blueprint':blueprint(oa),'oa':oa['clave_interna'],'subject':oa['asignatura'],'docx':doc.name,'docx_docente':teacher_doc.name,'pptx':ppt.name,
-   'visual':png.name,'visual_kind':'original_educational_diagram','documentary_source_verified':False,'curricular_reference_url':curricular_source(oa),'curricular_page_catalog':oa.get('pagina_oficial','')})
+   'visual':png.name,'visual_kind':'original_educational_diagram','documentary_source_verified':False,
+   'fuentes_cotejadas_para_hechos_puntuales':sources_for(oa),'curricular_reference_url':curricular_source(oa),'curricular_page_catalog':oa.get('pagina_oficial','')})
  if not args.skip_render:
   docpdf=out/'pdf_docx';pptpdf=out/'pdf_pptx';teacherpdf=out/'pdf_docx_docente';render(out/'docx',docpdf);render(out/'pptx',pptpdf);render(out/'docx_docente',teacherpdf)
   for record in records:
