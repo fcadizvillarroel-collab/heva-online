@@ -19,6 +19,14 @@ SUBJECT_RULES={
  "IDIOMAS":r"comunic|comprensi[oó]n|pronunci|vocabular|oral|escrit",
  "TP_LABORAL":r"seguridad|procedimiento|prevenci[oó]n|trabajo|empresa|laboral|t[eé]cnic"
 }
+CHECKLIST={
+ "MATEMATICA":"Comprobar datos y unidades; resolver el ejemplo independientemente; verificar operaciones, interpretación y respuesta de transferencia.",
+ "CIENCIAS":"Separar observación, inferencia e hipótesis; contrastar conceptos con fuente científica; comprobar seguridad, variables y evidencias.",
+ "LENGUAJE":"Verificar presencia y autoría del texto; comprobar inferencias contra pasajes; revisar coherencia de consignas y criterios de producción.",
+ "HISTORIA_CIUDADANIA":"Contrastar cronología y conceptos con fuentes históricas o normativas; distinguir hechos de interpretaciones; verificar contexto y pluralidad.",
+ "IDIOMAS":"Revisar precisión léxica y gramatical; comprobar equivalencia de traducciones; asegurar contexto comunicativo y producción observable.",
+ "TP_LABORAL":"Comprobar procedimientos, normativa y seguridad vigente; distinguir simulación de práctica real; verificar factibilidad y riesgos."
+}
 def area(a):
  s=a.lower()
  if "matem" in s:return "MATEMATICA"
@@ -43,7 +51,7 @@ for oa in catalog:
  if broad:warnings.append("COTEJAR_COBERTURA_DEL_OA")
  rows.append({"clave_interna":oa["clave_interna"],"asignatura":oa["asignatura"],"nivel":oa["nivel"],
  "familia_disciplinar":category,"objetivo":focus,"caso":l["scenario"],"modelamiento":l["worked"],
- "transferencia":l["transfer"],"criterio_especifico_para_revisor":SUBJECT_RULES[category],
+ "transferencia":l["transfer"],"criterio_especifico_para_revisor":CHECKLIST[category],
  "alertas":"|".join(warnings),"verificacion_disciplinar":"PENDIENTE_REVISION_INDEPENDIENTE",
  "verificacion_documental":"PENDIENTE_REVISION_INDEPENDIENTE",
  "verificacion_visual":"PENDIENTE_INSPECCION_HUMANA",
