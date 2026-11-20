@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install PDF text parser
-        run: python -m pip install pypdf==5.9.0
+        run: python -m pip install pypdf==5.9.0 'cryptography>=42,<47'
       - name: Compare every OA against downloaded original official PDFs
         run: python scripts/verify_407_official_pdfs.py out/contraste_fuentes
       - name: Preserve individual matches and original PDF checksums
