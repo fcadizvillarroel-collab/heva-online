@@ -1,0 +1,36 @@
+name: HEVA prevalidacion disciplinar 407 OA
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/prevalidar_oa407_contenido.py'
+      - 'scripts/test_prevalidar_oa407_contenido.py'
+      - 'scripts/oa_curated_cases.py'
+      - 'catalogo-publicado.json'
+      - '.github/workflows/oa407-prevalidacion-disciplinar.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  prevalidar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Test independent numerical checks and integrity
+        run: python scripts/test_prevalidar_oa407_contenido.py
+      - name: Produce individual interdisciplinary 407-OA screening matrix
+        run: python scripts/prevalidar_oa407_contenido.py out/prevalidacion_disciplinar
+      - name: Report unresolved evidence risks
+        run: |
+          python -c "import json; d=json.load(open('out/prevalidacion_disciplinar/resumen_prevalidacion_disciplinar.json')); print('407 OA analyzed; flagged:',d['con_alertas'],'arithmetic concerns:',d['calculos_sospechosos'],'expert approvals:',d['aprobaciones_expertas'])" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload individual checks and source verification queue
+        uses: actions/upload-artifact@v4
+        with:
+          name: heva-407-oa-prevalidacion-disciplinar
+          path: out/prevalidacion_disciplinar/*
+          retention-days: 30
