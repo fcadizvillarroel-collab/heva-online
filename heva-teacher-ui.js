@@ -58,8 +58,8 @@ function mountVisualForm(){
  const textbookLine=element('label');textbookLine.style.cssText='display:flex;align-items:flex-start;gap:8px;margin:12px 0';
  const textbookInput=element('input',null,{type:'checkbox',id:'heva-use-textbooks'});
  textbookInput.checked=textbookSaved;
- textbookLine.append(textbookInput,document.createTextNode('Consultar referencias de textos escolares de educación regular solo si se relacionan con el tema y OA EPJA'));
- const textbookNotice=element('p','Esta opción ofrece libros candidatos y enlaces a los catálogos. El contenido de cada PDF solo puede usarse como evidencia cuando se haya recuperado y verificado. No equipara automáticamente los niveles de educación regular y EPJA.');
+ textbookLine.append(textbookInput,document.createTextNode('Consultar textos complementarios de Chile (Mineduc) y México (SEP) cuando coincidan con tema y OA EPJA'));
+ const textbookNotice=element('p','Permite consultar catálogos educativos de Chile y México. No equipara cursos o campos formativos con niveles EPJA. Solo se usa contenido de documentos PDF efectivamente recuperados, pertinentes y verificados; nunca se copian libros completos.');
  textbookNotice.style.cssText='font-size:.83rem;color:#57534e';
  textbookInput.addEventListener('change',()=>{try{localStorage.setItem('heva-usar-textos-escolares-v1',String(textbookInput.checked))}catch{}});
  panel.append(textbookLine,textbookNotice,fields.box,position.box,cover.box,button('Con recursos para el material nuevo',()=>fields.set(true)),button('Solo texto para el material nuevo',()=>fields.set(false)));
@@ -147,9 +147,9 @@ function showTextbookCandidates(bar){
  const status=record.status==='candidata_por_tema_oa_pendiente_libro_y_pagina'?'Coincidencia preliminar por tema y OA, pendiente de verificar PDF, capítulos, páginas y equivalencia pedagógica.':'No se identificó una coincidencia documental suficiente para esta asignatura y OA.';
  refs.replaceChildren(element('summary','Textos escolares de apoyo · referencias para revisar'),element('p',status));
  for(const item of Array.isArray(record.items)?record.items:[]){
-  if(!['https://www.librosdelmineduc.cl/educacion-basica/','https://www.librosdelmineduc.cl/educacion-media/','https://www.curriculumnacional.cl/textos_escolares','https://aprendoenlinea.mineduc.gob.cl/','https://aprendoenlinea.mineduc.gob.cl/recursos/historia-geografia-ciencias-sociales-1-medio-santillana-texto-estudiante','https://aprendoenlinea.mineduc.gob.cl/recursos/matematica-7o-basico-sm-texto-estudiante'].includes(item.url))continue;
+  if(!['https://www.librosdelmineduc.cl/educacion-basica/','https://www.librosdelmineduc.cl/educacion-media/','https://www.curriculumnacional.cl/textos_escolares','https://aprendoenlinea.mineduc.gob.cl/','https://aprendoenlinea.mineduc.gob.cl/recursos/historia-geografia-ciencias-sociales-1-medio-santillana-texto-estudiante','https://aprendoenlinea.mineduc.gob.cl/recursos/matematica-7o-basico-sm-texto-estudiante','https://libros.conaliteg.gob.mx/primaria_2024.html','https://libros.conaliteg.gob.mx/secundaria_2024.html','https://libros.conaliteg.gob.mx/telesecundaria_2024.html'].includes(item.url))continue;
   const para=element('p'),link=element('a',item.title||'Referencia',{href:item.url,target:'_blank',rel:'noopener noreferrer'});
-  para.append(link,document.createTextNode(' · '+(['indice_oficial','ficha_texto_oficial'].includes(item.role)?'Ficha o catálogo ministerial':'Catálogo de terceros, no acredita autoría de los archivos')));refs.append(para);
+  para.append(link,document.createTextNode(' · '+(item.country==='MX'?'Catálogo oficial SEP México · libro y página pendientes de verificación':['indice_oficial','ficha_texto_oficial'].includes(item.role)?'Ficha o catálogo ministerial Chile':'Catálogo de terceros, no acredita autoría de los archivos')));refs.append(para);
  }
  refs.append(element('p','No se ha copiado ni reproducido contenido del libro. Las fuentes oficiales efectivamente recuperadas por HEVA se registran por separado.'));
 }
