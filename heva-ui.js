@@ -1,7 +1,67 @@
 const hevaEscape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let catalogRequest=0;
 let previousSubject='', topicBySubject={};
-actualizarObjetivosYEstrategias=async function(){let serial=++catalogRequest,sel=document.getElementById('select-oa'),counter=document.getElementById('contador-oas'),oa=document.getElementById('texto-oa'),filter={marco:document.getElementById('marco-curricular').value,nivel:document.getElementById('nivel-epja').value,asignatura:document.getElementById('asignatura').value};if(previousSubject&&previousSubject!==filter.asignatura){topicBySubject[previousSubject]=document.getElementById('tema-especifico').value;document.getElementById('tema-especifico').value=topicBySubject[filter.asignatura]||''}previousSubject=filter.asignatura;sel.innerHTML='<option>Cargando catálogo…</option>';sel.disabled=true;oa.value='';let list=[],source='Supabase';try{let r=await fetch('/api/curriculum/admin?action=verified&'+new URLSearchParams(filter));let d=await r.json();if(!r.ok||!Array.isArray(d.objetivos))throw Error();list=d.objetivos;try{localStorage.setItem('heva_catalog_'+JSON.stringify(filter),JSON.stringify(list))}catch{}}catch{source='copia local del catálogo';try{let r=await fetch('/catalogo-publicado.json');if(!r.ok)throw Error();list=HEVA.catalog(await r.json(),filter)}catch{list=JSON.parse(localStorage.getItem('heva_catalog_'+JSON.stringify(filter))||'[]')}}if(serial!==catalogRequest)return;sel.innerHTML='';for(let o of list){let option=document.createElement('option');option.value=o.texto_literal;option.textContent=`${o.tipo} · ${o.clave_interna||o.codigo_oficial} · ${o.texto_literal.slice(0,110)}`;option.dataset.key=o.clave_interna||'';sel.appendChild(option)}if(!list.length)sel.add(new Option('No hay objetivos publicados para esta combinación',''));sel.add(new Option('Objetivo propio (opcional, no oficial)','CUSTOM'));sel.disabled=false;counter.textContent=list.length+' publicados · '+source;oa.value=sel.value==='CUSTOM'?'':sel.value;const strategies=['Análisis de fuentes y evidencias','Ejemplo guiado y aplicación progresiva','Estudio de casos y toma de decisiones','Comprensión lectora y explicación oral'];document.getElementById('estrategia-didactica').innerHTML=strategies.map(t=>`<option>${t}</option>`).join('')};
+actualizarObjetivosYEstrategias=async function(){
+ const serial=++catalogRequest,sel=document.getElementById('select-oa'),counter=document.getElementById('contador-oas'),oa=document.getElementById('texto-oa');
+ const filter={marco:document.getElementById('marco-curricular').value,nivel:document.getElementById('nivel-epja').value,asignatura:document.getElementById('asignatura').value};
+ if(previousSubject&&previousSubject!==filter.asignatura){
+  topicBySubject[previousSubject]=document.getElementById('tema-especifico').value;
+  document.getElementById('tema-especifico').value=topicBySubject[filter.asignatura]||'';
+ }
+ previousSubject=filter.asignatura;
+ sel.replaceChildren(new Option('Cargando catálogo…',''));sel.disabled=true;oa.value='';
+ const usable=rows=>(Array.isArray(rows)?rows:[]).filter(o=>o&&typeof o.texto_literal==='string'&&o.texto_literal.trim()&&o.estado!=='RECHAZADO'&&o.vigente!==false);
+ const savedKey='heva_catalog_'+JSON.stringify(filter);
+ const localList=async()=>{
+  try{
+   const response=await fetch('/catalogo-publicado.json',{cache:'no-cache'});
+   if(!response.ok)throw Error('Catálogo local HTTP '+response.status);
+   if(typeof HEVA?.catalog!=='function')throw Error('Filtro curricular no disponible');
+   return usable(HEVA.catalog(await response.json(),filter));
+  }catch(error){
+   console.warn('HEVA: catálogo local no disponible',error);
+   try{return usable(JSON.parse(localStorage.getItem(savedKey)||'[]'))}catch{return []}
+  }
+ };
+ let list=[],source='Supabase',documental=false;
+ try{
+  if(/Construcciones Metálicas/i.test(filter.asignatura)&&typeof objetivosConstruccionesMetalicas==='function'){
+   documental=true;
+   list=usable(objetivosConstruccionesMetalicas(filter.nivel).map(o=>({tipo:o.tipo,clave_interna:o.codigo,texto_literal:o.texto})));
+   source='referencias documentales';
+  }else{
+   try{
+    const response=await fetch('/api/curriculum/admin?action=verified&'+new URLSearchParams(filter),{cache:'no-store'});
+    if(!response.ok)throw Error('Supabase HTTP '+response.status);
+    const data=await response.json();
+    if(!Array.isArray(data.objetivos))throw Error('Respuesta curricular inválida');
+    list=usable(data.objetivos);
+    try{localStorage.setItem(savedKey,JSON.stringify(list))}catch{}
+   }catch(error){source='copia local del catálogo';list=await localList()}
+   if(!list.length&&source==='Supabase'){const backup=await localList();if(backup.length){list=backup;source='copia local del catálogo'}}
+  }
+  if(serial!==catalogRequest)return;
+  sel.replaceChildren();
+  for(const item of list){
+   const option=new Option('',item.texto_literal);
+   const raw=String(item.codigo_oficial||item.clave_interna||'');
+   const code=raw.includes('|')?'Referencia interna':(raw||'OA');
+   option.textContent=(item.tipo||'OA')+' · '+code+' · '+item.texto_literal.slice(0,115);
+   option.dataset.key=item.clave_interna||'';
+   sel.add(option);
+  }
+  if(!list.length)sel.add(new Option('Sin objetivos publicados para esta combinación',''));
+  sel.add(new Option(documental?'Pegar aprendizaje esperado del módulo':'Objetivo propio (no oficial)','CUSTOM'));
+  counter.textContent=documental?list.length+' referencias documentales (TP)':list.length+' objetivos · '+source;
+  oa.value=sel.value==='CUSTOM'?'':sel.value;
+  const strategies=['Análisis de fuentes y evidencias','Ejemplo guiado y aplicación progresiva','Estudio de casos y toma de decisiones','Comprensión lectora y explicación oral'];
+  const strategy=document.getElementById('estrategia-didactica');
+  if(strategy)strategy.replaceChildren(...strategies.map(x=>new Option(x,x)));
+ }catch(error){
+  console.error('HEVA: error al cargar objetivos',error);
+  if(serial===catalogRequest){sel.replaceChildren(new Option('No se pudo cargar el catálogo',''));sel.add(new Option('Objetivo propio (no oficial)','CUSTOM'));counter.textContent='Catálogo temporalmente no disponible';}
+ }finally{if(serial===catalogRequest)sel.disabled=false}
+};
 let originalGenerate=generarMaterialReal;
 generarMaterialReal=async function(mode='GENERADOR_ESTANDAR'){
  if(!document.getElementById('tema-especifico').value.trim()){alert('Escribe el tema específico de esta clase para no mezclar contenidos.');return}
