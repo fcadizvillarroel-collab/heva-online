@@ -12,6 +12,14 @@ function checkpoint(){const m=current();guardarEnHistorial(false);undo.push(stru
 const visualLabels={imagenes:'Imágenes de apoyo (portada e interiores)',diagramas:'Diagramas y líneas de tiempo',graficos:'Gráficos de datos',recuadros:'Recuadros y resaltados'};
 function visualFields(initial,prefix,changed=()=>{}){const box=element('div'),inputs={};box.style.cssText='display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0';const selected=HEVASlideDesign.options({recursosVisualesHEVA:initial});for(const [key,label]of Object.entries(visualLabels)){const row=element('label'),input=element('input',null,{type:'checkbox',id:prefix+'-'+key,'aria-label':label});input.checked=selected[key];row.append(input,document.createTextNode(' '+label));box.append(row);inputs[key]=input;}const read=()=>Object.fromEntries(Object.entries(inputs).map(([k,x])=>[k,x.checked]));const set=value=>{Object.values(inputs).forEach(x=>x.checked=value);changed(read());};Object.values(inputs).forEach(x=>x.onchange=()=>changed(read()));return{box,read,set};}
 const placementNames={inicio:'Después de la activación inicial',explicacion:'Junto a la explicación del tema',actividad:'Junto a la primera actividad',final:'En el cierre del material'};
+function imageCoverControl(value,id){
+ const label=element('label');
+ label.style.cssText='display:flex;align-items:center;gap:8px;margin:10px 0';
+ const input=element('input',null,{type:'checkbox',id});
+ input.checked=value===true;
+ label.append(input,document.createTextNode('Permitir fotografía decorativa en portada (desactivado por defecto)'));
+ return{box:label,read:()=>input.checked};
+}
 function imagePlacementControl(value,changed=()=>{},id='heva-image-placement'){
  const box=element('div');box.style.cssText='display:grid;gap:6px;margin:12px 0';
  const label=element('label','¿Dónde ubicar la imagen principal?',{for:id});
@@ -27,8 +35,9 @@ function visualOptionsDialog(){
  d.append(element('p','Elige imágenes, diagramas, gráficos y recuadros. La imagen principal se coloca donde indiques, cuando haya una imagen pertinente incorporada o disponible. Sin imagen, no se añade un espacio vacío.'));
  const fields=visualFields(HEVASlideDesign.options(m),'heva-visual-material');
  const position=imagePlacementControl(m.ubicacionImagenHEVA,()=>{},'heva-visual-placement-material');
- d.append(fields.box,position.box,button('Con recursos visuales',()=>fields.set(true)),button('Solo texto',()=>fields.set(false)),button('Aplicar y guardar opciones',()=>{
-  checkpoint();m.recursosVisualesHEVA=fields.read();m.ubicacionImagenHEVA=position.read();setMaterial(m);d.close();
+ const cover=imageCoverControl(m.imagenPortadaHEVA,'heva-image-cover-material');
+ d.append(fields.box,position.box,cover.box,button('Con recursos visuales',()=>fields.set(true)),button('Solo texto',()=>fields.set(false)),button('Aplicar y guardar opciones',()=>{
+  checkpoint();m.recursosVisualesHEVA=fields.read();m.ubicacionImagenHEVA=position.read();m.imagenPortadaHEVA=cover.read();setMaterial(m);d.close();
  }));
  d.showModal();
 }
@@ -43,7 +52,9 @@ function mountVisualForm(){
   try{localStorage.setItem('heva-recursos-visuales-v1',JSON.stringify(value))}catch{}
  });
  const position=imagePlacementControl(savedPlacement,value=>{try{localStorage.setItem('heva-imagen-ubicacion-v1',value)}catch{}},'heva-image-placement-new');
- panel.append(fields.box,position.box,button('Con recursos para el material nuevo',()=>fields.set(true)),button('Solo texto para el material nuevo',()=>fields.set(false)));
+ let coverSaved=false;try{coverSaved=localStorage.getItem('heva-imagen-portada-v1')==='true'}catch{}
+ const cover=imageCoverControl(coverSaved,'heva-image-cover-new');cover.box.querySelector('input').addEventListener('change',()=>{try{localStorage.setItem('heva-imagen-portada-v1',String(cover.read()))}catch{}});
+ panel.append(fields.box,position.box,cover.box,button('Con recursos para el material nuevo',()=>fields.set(true)),button('Solo texto para el material nuevo',()=>fields.set(false)));
  const anchor=byId('studio-documents');if(anchor)anchor.after(panel);else byId('panel-crear')?.append(panel);
  const previous=window.studioGenerationExtras;
  window.studioGenerationExtras=()=>({...previous?.(),recursosVisualesHEVA:fields.read()});
@@ -129,6 +140,7 @@ const oldGenerate=generarMaterialReal;generarMaterialReal=async function(...args
 if(navigator.onLine===false){const form=[...document.querySelectorAll('#panel-crear input[id],#panel-crear select[id],#panel-crear textarea[id]')].filter(x=>!['password','file','hidden'].includes(x.type)&&!/key|token|secret|clave/i.test(x.id)).map(x=>({id:x.id,value:x.value,checked:x.checked}));try{localStorage.setItem('heva-solicitud-pendiente-v1',JSON.stringify({fecha:new Date().toISOString(),form}));alert('Sin conexión: el encargo quedó guardado como solicitud pendiente, aún no generada. Al volver internet, recupera el encargo y pulsa Crear material. El material anterior se conserva.');}catch{alert('Sin conexión y sin espacio para guardar el encargo. Conserva los campos abiertos y vuelve a intentar al recuperar internet.');}pending();return;}const result=await oldGenerate(...args);
  if(materialActual&&materialActual!==priorMaterial&&['GUIA','TALLER','ACCESIBLE','PRESENTACION'].includes(materialActual.tipoMaterial)){
   materialActual.ubicacionImagenHEVA=placementNames[requestedPlace]?requestedPlace:'explicacion';
+  try{materialActual.imagenPortadaHEVA=localStorage.getItem('heva-imagen-portada-v1')==='true'}catch{materialActual.imagenPortadaHEVA=false}
   guardarEnHistorial(false);
  }
  return result};
