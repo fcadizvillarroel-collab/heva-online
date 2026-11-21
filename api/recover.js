@@ -1,4 +1,5 @@
 const Skills=require('../heva-skills.js');
+const DeepMaterials=require('../heva-deep-materials.cjs');
 const Textbooks=require('../lib/textbook-reference-catalog.cjs');
 const {call}=require('./_providers.cjs'),R=require('../lib/recovery.cjs'),S=require('../lib/document-sources.cjs'),P=require('../heva-pedagogy.js'),H=require('../heva-core.js');
 module.exports=async(req,res)=>{
@@ -25,7 +26,8 @@ module.exports=async(req,res)=>{
    if(issues.length)return res.status(422).json({error:'Los bloques requieren corrección. Se conserva el material anterior.',detalle:issues.join('; '),reparacion:R.repair(base,parts,plan,issues),reintentable:true});
    material=P.finalize(material,plan);material.autoriaIA=autor;material.planGeneracion=plan;material.fuentesDocumentales=fuentesDocumentales;material.textosEscolaresComplementarios=librosRegulares;
    const evidence=S.validateEvidence(material.respaldoDocumental,fuentesDocumentales);material.respaldoDocumental=evidence.valid;material.incidenciasDocumentales=evidence.invalid;material=Skills.prepare(material,plan,fuentesDocumentales,evidence);
-   material=require('../heva-studio.js').link(material,plan);material.auditoriaExperimental=require('../experimental/quality-audit.cjs').inspect(material,plan);material.auditoriaDisciplinar=require('../experimental/subject-audit.cjs').inspectAll(material,plan);return res.status(200).json({exito:true,material});
+   material=require('../heva-studio.js').link(material,plan);material.auditoriaExperimental=require('../experimental/quality-audit.cjs').inspect(material,plan);material.auditoriaDisciplinar=require('../experimental/subject-audit.cjs').inspectAll(material,plan);
+    material.controlProfundidadHEVA=DeepMaterials.advisory(material,plan);return res.status(200).json({exito:true,material});
   }
   const keys=[process.env.ALLOW_PAID_AI==='true'?process.env.OPENAI_API_KEY:'',process.env.GEMINI_API_KEY,process.env.GROQ_API_KEY].map(k=>(k||'').trim());
   // Permitir respaldo entre proveedores en bloques: una caída del autor inicial no debe bloquear todo el documento.
