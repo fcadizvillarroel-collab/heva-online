@@ -14,7 +14,7 @@ test('Tema soldadura ofrece módulo chileno y referencias extranjeras de unión'
  assert.ok(a.sources.some(x=>x.country==='ES'));
  assert.ok(a.sources.some(x=>x.country==='CO'));
  assert.ok(a.sources.some(x=>x.country==='EC'));
- assert.ok(a.sources.every(x=>x.country==='CL'||x.estado==='fuente_indice_verificada_contenido_no_recuperado'));
+ assert.ok(a.sources.every(x=>x.country==='CL'||x.estado==='enlace_candidato_contenido_no_recuperado'));
  assert.match(TP.prompt(a),/PROPUESTAS DIDÁCTICAS ORIGINALES/);
  assert.match(TP.prompt(a),/NO constituye homologación/);
 });
@@ -51,4 +51,27 @@ test('Rutas de generación directa y por bloques usan el banco técnico',()=>{
   assert.match(s,/TPInternational\.prompt\(referenciasMetalmecanica\)/);
   assert.match(s,/material\.referenciasMetalmecanica=referenciasMetalmecanica/);
  }
+});
+
+test('Mapeo oficial: protección incluye OA7 y OA8, cubicación OA9',()=>{
+ const p=TP.chile.modules.find(x=>x.id==='M07');
+ const c=TP.chile.modules.find(x=>x.id==='M08');
+ assert.deepEqual(p.oa,['7','8']);assert.deepEqual(c.oa,['9']);
+});
+test('Trazabilidad solo si el servidor extrajo fragmentos con página y SHA',()=>{
+ const b=TP.bibliography(norm('Soldadura SMAW'));
+ const empty=TP.documentEvidence(b,{documents:[],fragments:[]});
+ assert.equal(empty.status,'sin_fragmentos_tecnicos_recuperados');
+ const f={id:'TP_CONSTRUCCIONES_METALICAS-P45-T0',documentId:'TP_CONSTRUCCIONES_METALICAS',page:45,pageEnd:45,title:'Programa docente',sha256:'a'.repeat(64),checkedAt:'2026-11-21',url:'https://aprendoenlinea.mineduc.gob.cl/test.pdf#page=45',text:'Soldadura y seguridad. Fragmento de prueba, no fuente real.'};
+ const evidence=TP.documentEvidence(b,{documents:[{id:'TP_CONSTRUCCIONES_METALICAS',status:'consultada',url:'https://aprendoenlinea.mineduc.gob.cl/test.pdf',sha256:'a'.repeat(64)}],fragments:[f,{...f,id:'invalid',sha256:''},{...f,id:'outside',documentId:'NOT_REGISTERED'}]});
+ assert.equal(evidence.fragments.length,1);
+ assert.equal(evidence.fragments[0].status,'fragmento_extraido_no_aprobado_por_especialista');
+ assert.equal(evidence.status,'fragmentos_localizados_por_servidor');
+});
+test('El plan visual no simula imágenes descargadas ni derechos verificados',()=>{
+ const visual=TP.visualPlan(TP.bibliography(norm('Soldadura SMAW')));
+ assert.equal(visual.enabled,true);
+ assert.deepEqual(visual.sourcedImages,[]);
+ assert.ok(visual.items.some(x=>x.moduleId==='M05'));
+ assert.ok(visual.items.every(x=>x.license==='verificar_si_fotografia_externa'));
 });
