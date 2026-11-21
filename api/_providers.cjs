@@ -47,10 +47,10 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
      let tryNextModel=false;
      for(let attempt=0;attempt<2&&deadline-Date.now()>(groqKey&&!exclude.includes('groq')?15500:1500);attempt++){
       try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${mod}:generateContent?key=${geminiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${mod}:generateContent`;
         const resp = await fetch(url, {
           method: 'POST', signal: AbortSignal.timeout(timeoutFor('gemini')),
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': geminiKey },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt+(attempt?'\nREINTENTO: entrega el documento COMPLETO como un solo objeto JSON válido, sin comas finales, comentarios ni texto fuera del JSON. Conserva objetivo, secciones y cantidades solicitadas.':'') }] }],
             generationConfig: {
