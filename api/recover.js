@@ -30,6 +30,7 @@ module.exports=async(req,res)=>{
     material.referenciasMetalmecanica=referenciasMetalmecanica;
     material.trazabilidadDocumentalTP=TPInternational.documentEvidence(referenciasMetalmecanica,fuentesDocumentales);
     material.planVisualTP=TPInternational.visualPlan(referenciasMetalmecanica,material.trazabilidadDocumentalTP);
+    material.controlCalidadTP=TPInternational.qualityReview(material,referenciasMetalmecanica,material.trazabilidadDocumentalTP);
    const evidence=S.validateEvidence(material.respaldoDocumental,fuentesDocumentales);material.respaldoDocumental=evidence.valid;material.incidenciasDocumentales=evidence.invalid;material=Skills.prepare(material,plan,fuentesDocumentales,evidence);
    material=require('../heva-studio.js').link(material,plan);material.auditoriaExperimental=require('../experimental/quality-audit.cjs').inspect(material,plan);material.auditoriaDisciplinar=require('../experimental/subject-audit.cjs').inspectAll(material,plan);
     material.controlProfundidadHEVA=DeepMaterials.advisory(material,plan);return res.status(200).json({exito:true,material});
