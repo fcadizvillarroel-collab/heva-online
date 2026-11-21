@@ -170,6 +170,26 @@ function showMetalSources(bar){
  }
  panel.append(element('p','La correspondencia es orientativa: NO constituye homologación de títulos, niveles ni OA. No sustituye procedimientos de seguridad ni la revisión de un docente especialista.'));
 }
+function showTPDocumentEvidence(bar){
+ let panel=byId('heva-tp-document-evidence');
+ const data=materialActual?.trazabilidadDocumentalTP;
+ if(!data||data.status==='no_aplica'){if(panel)panel.remove();return;}
+ if(!panel){panel=element('details',null,{id:'heva-tp-document-evidence'});bar.append(panel);}
+ const items=Array.isArray(data.fragments)?data.fragments:[];
+ panel.replaceChildren(element('summary','Evidencia documental · Construcciones Metálicas ('+items.length+' fragmentos recuperados)'));
+ panel.append(element('p',items.length?'Fragmentos extraídos automáticamente; requieren contrastar contenido con página original y validación docente.':'No se recuperó contenido técnico citables en esta consulta. Los catálogos no sustituyen la evidencia.'));
+ for(const f of items){
+  const para=element('p');
+  para.append(document.createTextNode((f.title||'Documento')+' · PDF pág. '+f.page+(f.pageEnd&&f.pageEnd!==f.page?'–'+f.pageEnd:'')+' · '+(f.status||'Por revisar')));
+  if(typeof f.url==='string'&&/^https:\/\/(aprendoenlinea\.mineduc\.gob\.cl|www\.curriculumnacional\.cl)\//.test(f.url)){
+   const link=element('a',' · Abrir fuente',{href:f.url,target:'_blank',rel:'noopener noreferrer'});para.append(link);
+  }
+  panel.append(para);
+ }
+ const visuals=materialActual?.planVisualTP;
+ if(visuals?.items?.length)panel.append(element('p','Propuestas de diagramas ('+visuals.items.length+'): '+visuals.items.map(x=>x.description).join(' · ')+'. No son imágenes extraídas de los libros. Licencias de imágenes externas pendientes.'));
+ panel.append(element('p','Este panel no certifica revisión visual de los PDF, licencias ni aprobación de un especialista.'));
+}
 function showTextbookCandidates(bar){
  let refs=byId('heva-textbook-references');
  const record=materialActual?.textosEscolaresComplementarios;
@@ -184,7 +204,7 @@ function showTextbookCandidates(bar){
  }
  refs.append(element('p','No se ha copiado ni reproducido contenido del libro. Las fuentes oficiales efectivamente recuperadas por HEVA se registran por separado.'));
 }
-function mount(){let bar=byId('heva-teacher-tools');if(!bar){bar=element('section',null,{id:'heva-teacher-tools',class:'no-print'});bar.append(element('h3','Revisar y adaptar el material'),button('Vista previa PPT',preview),button('Recursos visuales · con o sin',visualOptionsDialog),button('Asignar puntajes · 1, 2 o 3',scoring),button('Equilibrar claves A–D',balanceAnswerKeys),button('Editar y ordenar bloques',edit),guideImageButton(),button('Comparar versiones',compare),button('Deshacer último cambio',()=>{if(!undo.length)return;const previous=undo.at(-1),m=current();if(previous.materialId!==m.materialId)throw Error('El último cambio corresponde a otro material. Abre su historial para recuperarlo.');undo.pop();guardarEnHistorial(false);setMaterial(previous)}),button('Accesibilidad',accessibility),button('Escuchar',speak));byId('hoja-material').before(bar);}bar.hidden=!materialActual;showTextbookCandidates(bar);showMetalSources(bar);showDepthAdvisories(bar);renderGuideResources();const guideAction=byId('heva-guide-image-action');if(guideAction)guideAction.hidden=!HEVAGuideVisuals.enabled(materialActual||{});const buttons=[...bar.querySelectorAll('button')];const scoreButton=buttons.find(b=>b.textContent.includes('Asignar puntajes'));if(scoreButton)scoreButton.hidden=materialActual?.tipoMaterial!=='EVALUACION';const balanceButton=buttons.find(b=>b.textContent.includes('Equilibrar claves'));if(balanceButton)balanceButton.hidden=!['GUIA','EVALUACION','ACCESIBLE'].includes(materialActual?.tipoMaterial)||!(materialActual?.preguntasAlternativas?.length>=4);const previewButton=buttons.find(b=>b.textContent.includes('Vista previa PPT'));if(previewButton)previewButton.hidden=materialActual?.tipoMaterial!=='PRESENTACION';applyAccess();
+function mount(){let bar=byId('heva-teacher-tools');if(!bar){bar=element('section',null,{id:'heva-teacher-tools',class:'no-print'});bar.append(element('h3','Revisar y adaptar el material'),button('Vista previa PPT',preview),button('Recursos visuales · con o sin',visualOptionsDialog),button('Asignar puntajes · 1, 2 o 3',scoring),button('Equilibrar claves A–D',balanceAnswerKeys),button('Editar y ordenar bloques',edit),guideImageButton(),button('Comparar versiones',compare),button('Deshacer último cambio',()=>{if(!undo.length)return;const previous=undo.at(-1),m=current();if(previous.materialId!==m.materialId)throw Error('El último cambio corresponde a otro material. Abre su historial para recuperarlo.');undo.pop();guardarEnHistorial(false);setMaterial(previous)}),button('Accesibilidad',accessibility),button('Escuchar',speak));byId('hoja-material').before(bar);}bar.hidden=!materialActual;showTextbookCandidates(bar);showMetalSources(bar);showTPDocumentEvidence(bar);showDepthAdvisories(bar);renderGuideResources();const guideAction=byId('heva-guide-image-action');if(guideAction)guideAction.hidden=!HEVAGuideVisuals.enabled(materialActual||{});const buttons=[...bar.querySelectorAll('button')];const scoreButton=buttons.find(b=>b.textContent.includes('Asignar puntajes'));if(scoreButton)scoreButton.hidden=materialActual?.tipoMaterial!=='EVALUACION';const balanceButton=buttons.find(b=>b.textContent.includes('Equilibrar claves'));if(balanceButton)balanceButton.hidden=!['GUIA','EVALUACION','ACCESIBLE'].includes(materialActual?.tipoMaterial)||!(materialActual?.preguntasAlternativas?.length>=4);const previewButton=buttons.find(b=>b.textContent.includes('Vista previa PPT'));if(previewButton)previewButton.hidden=materialActual?.tipoMaterial!=='PRESENTACION';applyAccess();
  if(materialActual){const report=T.inspect(materialActual);let summary=byId('heva-teaching-report');if(!summary){summary=element('details',null,{id:'heva-teaching-report'});bar.append(summary);}summary.replaceChildren(element('summary','Desempeño del OA y actividades · orientación docente'),element('p',report.alcance));for(const x of report.actividades)summary.append(element('p',x.ref+' · '+(x.cognicion?.nivel||'Nivel no inferido: revisar desempeño')));for(const issue of report.issues)summary.append(element('p',issue.detail));}}
 const oldRender=renderizarDocumentoEnPantalla;renderizarDocumentoEnPantalla=function(){oldRender();mount()};
 const oldGenerate=generarMaterialReal;generarMaterialReal=async function(...args){
