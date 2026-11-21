@@ -66,7 +66,7 @@ function subjectVisual(section,topic,subject){
  {re:/convivencia|insercion laboral|empleabilidad|emprendimiento/,title:'Resolver una situación',labels:['SITUACIÓN','DECISIÓN','EVALUACIÓN'],notes:['Reconocer el problema','Justificar una acción','Revisar resultados']}
  ];
  // Elegir el esquema por el contenido y la habilidad del OA, no por una asignatura fija.
- const subject=norm(topic),content=norm([section.title,section.text].join(' '));
+ // La selección final se realiza exclusivamente mediante diagramPlan.
  const patterns=[
   {re:/globalizacion|comercio internacional|interdependencia|importacion|exportacion/,title:'Intercambios e interdependencia',labels:['ORIGEN','CONEXIÓN','IMPACTO'],notes:['Producción o proveedor','Intercambio y transporte','Consecuencias locales']},
   {re:/guerra|revolucion|independencia|ocupacion|conflicto historico/,title:'Interpretar un proceso histórico',labels:['ANTECEDENTES','DESARROLLO','CONSECUENCIAS'],notes:['Factores y contexto','Actores y acontecimientos','Cambios y permanencias']},
