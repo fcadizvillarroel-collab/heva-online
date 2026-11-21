@@ -147,9 +147,9 @@ function showTextbookCandidates(bar){
  const status=record.status==='candidata_por_tema_oa_pendiente_libro_y_pagina'?'Coincidencia preliminar por tema y OA, pendiente de verificar PDF, capítulos, páginas y equivalencia pedagógica.':'No se identificó una coincidencia documental suficiente para esta asignatura y OA.';
  refs.replaceChildren(element('summary','Textos escolares de apoyo · referencias para revisar'),element('p',status));
  for(const item of Array.isArray(record.items)?record.items:[]){
-  if(!['https://www.librosdelmineduc.cl/educacion-basica/','https://www.librosdelmineduc.cl/educacion-media/','https://www.curriculumnacional.cl/textos_escolares','https://aprendoenlinea.mineduc.gob.cl/'].includes(item.url))continue;
+  if(!['https://www.librosdelmineduc.cl/educacion-basica/','https://www.librosdelmineduc.cl/educacion-media/','https://www.curriculumnacional.cl/textos_escolares','https://aprendoenlinea.mineduc.gob.cl/','https://aprendoenlinea.mineduc.gob.cl/recursos/historia-geografia-ciencias-sociales-1-medio-santillana-texto-estudiante','https://aprendoenlinea.mineduc.gob.cl/recursos/matematica-7o-basico-sm-texto-estudiante'].includes(item.url))continue;
   const para=element('p'),link=element('a',item.title||'Referencia',{href:item.url,target:'_blank',rel:'noopener noreferrer'});
-  para.append(link,document.createTextNode(' · '+(item.role==='indice_oficial'?'Catálogo ministerial':'Catálogo de terceros, no acredita autoría de los archivos')));refs.append(para);
+  para.append(link,document.createTextNode(' · '+(['indice_oficial','ficha_texto_oficial'].includes(item.role)?'Ficha o catálogo ministerial':'Catálogo de terceros, no acredita autoría de los archivos')));refs.append(para);
  }
  refs.append(element('p','No se ha copiado ni reproducido contenido del libro. Las fuentes oficiales efectivamente recuperadas por HEVA se registran por separado.'));
 }
