@@ -1,6 +1,7 @@
 const {call} = require('./_providers.cjs');
 const Skills=require('../heva-skills.js');
 const Sources=require('../lib/document-sources.cjs');
+const Textbooks=require('../lib/textbook-reference-catalog.cjs');
 const Pedagogy = require('../heva-pedagogy.js');
 const HEVA = require('../heva-core.js');
 // api/generate.js — Motor Multi-IA Suite: ChatGPT / Gemini con Prosa Andragógica y RAG
@@ -163,13 +164,14 @@ Responde ÚNICAMENTE en JSON:
     // Cada material tiene un contrato propio y una estrategia observable en sus tareas.
     if (!Object.hasOwn(Pedagogy.contracts, tipoMaterial)) return res.status(400).json({error:'Tipo de material no admitido.'});
     if (!objetivoAprendizaje.trim()) return res.status(400).json({error:'Selecciona un objetivo curricular antes de generar.'});
-    const plan = {...Object.fromEntries(["documentosBase","plantillaVisual","derivacion","usarNoticias","noticiaDidacticaModo","instrumentosEvaluacion","planificacionClase"].filter(k=>req.body[k]!=null).map(k=>[k,req.body[k]])),asignatura,nivel,marcoCurricular,objetivoAprendizaje,temaEspecifico,estrategiaDidactica,instruccionesDocente,disenoPedagogico,planIntegrado,textoReferencia,modoReferencia,adecuacionesPIE,tipoMaterial,...cantidadesEfectivas,incluirTicketSalida};
+    const plan = {...Object.fromEntries(["documentosBase","plantillaVisual","derivacion","usarNoticias","noticiaDidacticaModo","instrumentosEvaluacion","planificacionClase","usarTextosEscolares"].filter(k=>req.body[k]!=null).map(k=>[k,req.body[k]])),asignatura,nivel,marcoCurricular,objetivoAprendizaje,temaEspecifico,estrategiaDidactica,instruccionesDocente,disenoPedagogico,planIntegrado,textoReferencia,modoReferencia,adecuacionesPIE,tipoMaterial,...cantidadesEfectivas,incluirTicketSalida};
     const extraIssues=require('../heva-studio.js').validateExtras(plan);if(extraIssues.length)return res.status(400).json({error:extraIssues.join('; ')});
     const designIssues=require('../heva-design.js').validate(disenoPedagogico,plan);
     if(designIssues.length)return res.status(400).json({error:designIssues.join('; ')});
     const fuentesDocumentales=await Sources.retrieve(plan);
+    const librosRegulares=Textbooks.recommendations(plan);
     const presentationGuidance=tipoMaterial==='PRESENTACION'?'\nMODO PRESENTACIÓN: genera 14 a 24 diapositivas completas en una respuesta JSON. Incluye objetivos, explicación progresiva, ejemplo modelado, actividades de aplicación y cierre. Cada diapositiva requiere título, función, contenido desarrollado y notas docentes. Crea una trazabilidadEstrategia con una referencia DIAPO-1, DIAPO-2, etc. para CADA diapositiva real, con habilidad, evidencia observable y criterio específicos. Incluye además las referencias de otras tareas reales si existen; no inventes referencias ni agregues preguntas por encima de las cantidades solicitadas. REGLA DE COHERENCIA DISCIPLINAR: desarrolla exclusivamente la asignatura, el tema y el objetivo seleccionados. No mezcles Matemática y Lenguaje ni otras asignaturas salvo que el docente solicite explícitamente una integración interdisciplinaria. AUTOSUFICIENCIA: toda actividad que mencione un segundo texto, fuente, noticia, tabla, gráfico, caso o párrafo debe incluir el estímulo completo en la misma diapositiva o en otra diapositiva identificada; nunca remitas a un material inexistente. Evita fuentes inventadas o nombres de empresas ficticias presentadas como reales; etiqueta ejemplos simulados. Diseña diapositivas con 2-4 ideas explicadas y ejemplos específicos, no instrucciones genéricas de relleno. Las notas docentes deben desarrollar lo que no cabe visualmente.':'';
-    const promptRedactor = Pedagogy.prompt(plan)+presentationGuidance+Sources.evidencePrompt(fuentesDocumentales);
+    const promptRedactor = Pedagogy.prompt(plan)+presentationGuidance+Sources.evidencePrompt(fuentesDocumentales)+Textbooks.instruction(librosRegulares);
     const metadata = {objetivoAprendizaje,asignatura,nivel,marcoCurricular,temaEspecifico,tipoMaterial,estrategiaDidactica:Pedagogy.strategy(estrategiaDidactica).name};
     let author;
     const draft = async prompt => { const r = await call(prompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY,[],{deadline:generationDeadline}); author={proveedor:r.provider,modelo:r.model,fecha:new Date().toISOString()}; return r.value; };
@@ -218,6 +220,7 @@ Responde ÚNICAMENTE en JSON:
     material.autoriaIA=author;
     material.planGeneracion=plan;
     material.fuentesDocumentales=fuentesDocumentales;
+    material.textosEscolaresComplementarios=librosRegulares;
     const evidence=Sources.validateEvidence(material.respaldoDocumental,fuentesDocumentales);
     material.respaldoDocumental=evidence.valid;material.incidenciasDocumentales=evidence.invalid;
     material=Skills.prepare(material,plan,fuentesDocumentales,evidence);
