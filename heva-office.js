@@ -69,10 +69,10 @@ function paginatePresentation(section,large=false){
 function addChrome(ppt,theme,section,num,total){
  const slide=ppt.addSlide();slide.background={color:theme.background};
  if(section==='activity')theme={...theme,main:'FFFFFF',ink:'FFFFFF'};
- slide.addShape(ppt.ShapeType.rect,{x:0,y:0,w:13.333,h:.06,line:{color:theme.main},fill:{color:theme.main}});
+ slide.addShape(ppt.ShapeType.rect,{x:0,y:0,w:13.333,h:theme.layout==='editorial'?.12:.07,line:{color:theme.main},fill:{color:theme.main}});
 
- slide.addText('HEVA  /  EDUCACIÓN DE PERSONAS JÓVENES Y ADULTAS',{x:.72,y:.33,w:10.7,h:.25,fontSize:10,bold:true,color:theme.main,margin:0});
- slide.addShape(ppt.ShapeType.line,{x:.72,y:6.96,w:11.88,h:0,line:{color:'DDCDBE',width:1}});
+ slide.addText('HEVA  /  EDUCACIÓN DE PERSONAS JÓVENES Y ADULTAS',{x:.72,y:.33,w:10.7,h:.25,fontFace:theme.font||'Aptos',fontSize:10,bold:true,color:theme.main,margin:0,charSpacing:theme.layout==='editorial'?1.2:0});
+ slide.addShape(ppt.ShapeType.line,{x:.72,y:6.96,w:11.88,h:0,line:{color:theme.soft||'DDCDBE',width:1}});
  slide.addText('ESCUELA HÉCTOR VALENZUELA CEA · VILLARRICA',{x:.72,y:7.06,w:9.9,h:.18,fontSize:9,color:theme.ink,margin:0});
  slide.addText(String(num)+' / '+String(total),{x:11.45,y:7.04,w:1.1,h:.2,fontSize:10,color:theme.main,bold:true,align:'right',margin:0});
  return slide;
@@ -134,7 +134,7 @@ function addContent(ppt,theme,slide,title,lines,section,index=0,scene={}){
  const activity=scene.design==='activity'||kind==='activity',activityStyle=activity&&resources.recuadros,ink=activityStyle?'FFFFFF':theme.ink,main=activityStyle?'FFFFFF':theme.main;
  // A single canvas: no nested cards, decorative counters or repeated panel grids.
  if(activityStyle)slide.background={color:theme.main};
- const text=(value,x,y,w,h,size,color,bold=false)=>slide.addText(String(value),{x,y,w,h,fontFace:'Arial',fontSize:size,color,bold,margin:0,breakLine:false,valign:'top',fit:'shrink',paraSpaceAfterPt:12});
+ const text=(value,x,y,w,h,size,color,bold=false)=>slide.addText(String(value),{x,y,w,h,fontFace:theme.font||'Aptos',fontSize:size,color,bold,margin:0,breakLine:false,valign:'top',fit:'shrink',paraSpaceAfterPt:12});
  const relation=resources.diagramas&&!activity?root.HEVASlideDesign?.relation(clean):null;
  const chart=resources.graficos&&scene.allowDataChart!==false&&!activity&&fitsText([clean.join('\n')],5.15,3.9,26)?root.HEVASlideDesign?.dataChart(clean):null;
  const titleSize=title.length>85?28:title.length>60?32:36;
@@ -149,7 +149,7 @@ function addContent(ppt,theme,slide,title,lines,section,index=0,scene={}){
  if(relation){
   const nodeX=illustration ? .85 : 1.15,nodeW=illustration?6.7:11.0,innerW=nodeW-.5;
   const heights=clean.map(t=>lineCount(t,innerW,26)*26*1.28/72+.3),height=heights.reduce((a,n)=>a+n,0)+(clean.length-1)*.25;
-  if(height<=4.05){let y=2.35+(4.05-height)/2;clean.forEach((line,j)=>{const h=heights[j],dark=j===0&&theme.main!=='111111';slide.addShape(ppt.ShapeType.roundRect,{x:nodeX,y,w:nodeW,h,rectRadius:.1,line:{color:theme.main,width:1},fill:{color:dark?theme.main:'FFFFFF'}});text(line,nodeX+.25,y+.15,innerW,h-.3,26,dark?'FFFFFF':ink);y+=h;if(j<clean.length-1){slide.addShape(ppt.ShapeType.downArrow,{x:nodeX+nodeW/2-.175,y:y+.025,w:.35,h:.2,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});y+=.25;}});if(illustration)addPicture();slide.hevaVisualType='diagram';return;}
+  if(height<=4.05){let y=2.35+(4.05-height)/2;clean.forEach((line,j)=>{const h=heights[j],dark=j===0&&theme.main!=='111111';slide.addShape(ppt.ShapeType.roundRect,{x:nodeX,y,w:nodeW,h,rectRadius:.1,line:{color:theme.main,width:1},fill:{color:dark?theme.main:(theme.panel||'FFFFFF')}});text(line,nodeX+.25,y+.15,innerW,h-.3,26,dark?'FFFFFF':ink);y+=h;if(j<clean.length-1){slide.addShape(ppt.ShapeType.downArrow,{x:nodeX+nodeW/2-.175,y:y+.025,w:.35,h:.2,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});y+=.25;}});if(illustration)addPicture();slide.hevaVisualType='diagram';return;}
  }
  if(illustration){addPicture();text(clean.join('\n\n'),.86,2.35,6.7,4.1,26,ink);return;}
  if(!resources.recuadros){text(clean.join('\n\n'),.86,2.4,11.0,4.05,26,ink);return;}
@@ -172,20 +172,20 @@ function addContent(ppt,theme,slide,title,lines,section,index=0,scene={}){
  const mid=Math.ceil(clean.length/2),halves=[clean.slice(0,mid),clean.slice(mid)];
  if(kind==='compare'&&clean.length>=2&&halves.every(x=>fitsText(x,4.9,3.3,26))){
   const panelHeight=Math.min(4.15,Math.max(2.6,...halves.map(part=>lineCount(part.join('\n\n'),4.9,26)*26*1.28/72+.75))),panelY=2.3+(4.15-panelHeight)/2;
-  halves.forEach((part,j)=>{const x=.86+j*6.03;slide.addShape(ppt.ShapeType.roundRect,{x,y:panelY,w:5.6,h:panelHeight,rectRadius:.12,line:{color:theme.accent,width:1},fill:{color:theme.main==='111111'?'FFFFFF':j?'F1E7DB':'FFFFFF'}});text(part.join('\n\n'),x+.35,panelY+.35,4.9,panelHeight-.7,26,ink);});
+  halves.forEach((part,j)=>{const x=.86+j*6.03;slide.addShape(ppt.ShapeType.roundRect,{x,y:panelY,w:5.6,h:panelHeight,rectRadius:.12,line:{color:theme.accent,width:1},fill:{color:theme.main==='111111'?'FFFFFF':j?(theme.soft||'F1E7DB'):(theme.panel||'FFFFFF')}});text(part.join('\n\n'),x+.35,panelY+.35,4.9,panelHeight-.7,26,ink);});
  }else{
   // Every remaining interior receives a real composition, including legacy
   // decks without role metadata and topics with no matching illustration.
   const mono=theme.main==='111111';
   if(!activity&&clean.length===2&&clean.every(t=>fitsText([t],4.9,3.35,26))){
-   clean.forEach((line,j)=>{const x=.85+j*6.03,dark=j===0&&!mono;slide.addShape(ppt.ShapeType.roundRect,{x,y:2.3,w:5.6,h:4.15,rectRadius:.12,line:{color:theme.main,width:1,transparency:dark?100:75},fill:{color:dark?theme.main:'FFFFFF'}});text(line,x+.35,2.72,4.9,3.35,26,dark?'FFFFFF':ink);});
+   clean.forEach((line,j)=>{const x=.85+j*6.03,dark=j===0&&!mono;slide.addShape(ppt.ShapeType.roundRect,{x,y:2.3,w:5.6,h:4.15,rectRadius:.12,line:{color:theme.main,width:1,transparency:dark?100:75},fill:{color:dark?theme.main:(theme.panel||'FFFFFF')}});text(line,x+.35,2.72,4.9,3.35,26,dark?'FFFFFF':ink);});
   }else{
    const heights=clean.map(t=>lineCount(t,10.9,26)*26*1.28/72+.34),total=heights.reduce((a,n)=>a+n,0)+Math.max(0,clean.length-1)*.17;
    if(!activity&&clean.length>=2&&clean.length<=3&&total<=4.05){
-    let y=2.35+(4.05-total)/2;clean.forEach((line,j)=>{const h=heights[j];slide.addShape(ppt.ShapeType.roundRect,{x:.85,y,w:11.65,h,rectRadius:.08,line:{color:theme.accent,width:.8},fill:{color:mono||j%2===0?'FFFFFF':theme.background}});slide.addShape(ppt.ShapeType.rect,{x:.85,y,w:.1,h,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});text(line,1.2,y+.17,10.9,h-.34,26,ink);y+=h+.17;});
+    let y=2.35+(4.05-total)/2;clean.forEach((line,j)=>{const h=heights[j];slide.addShape(ppt.ShapeType.roundRect,{x:.85,y,w:11.65,h,rectRadius:.08,line:{color:theme.accent,width:.8},fill:{color:mono||j%2===0?(theme.panel||'FFFFFF'):(theme.soft||theme.background)}});slide.addShape(ppt.ShapeType.rect,{x:.85,y,w:.1,h,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});text(line,1.2,y+.17,10.9,h-.34,26,ink);y+=h+.17;});
    }else{
     const y=activity?2.55:2.2,h=activity?3.95:4.4;
-    slide.addShape(ppt.ShapeType.roundRect,{x:.8,y,w:11.73,h,rectRadius:.12,line:{color:activity?'FFFFFF':theme.accent,width:1},fill:{color:activity?theme.main:'FFFFFF'}});
+    slide.addShape(ppt.ShapeType.roundRect,{x:.8,y,w:11.73,h,rectRadius:.12,line:{color:activity?'FFFFFF':theme.accent,width:1},fill:{color:activity?theme.main:(theme.panel||'FFFFFF')}});
     slide.addShape(ppt.ShapeType.rect,{x:.8,y,w:.12,h,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});
     const size=!activity&&clean.length===1&&fitsText(clean,11.0,4.05,28)?28:26;
     text(clean.join('\n\n'),1.15,activity?2.7:2.4,11.0,activity?3.65:4.05,size,ink);
@@ -221,13 +221,22 @@ function presentationPages(material,teacher=false){
 }
 function renderCover(ppt,theme,material,total){
  const cover=ppt.addSlide(),contrast=theme.background==='FFFFFF'&&theme.main==='111111';
- const image=root.HEVASlideDesign?.options(material).imagenes===false?null:root.HEVAVisualAssets?.cover;
- cover.background={color:contrast?'FFFFFF':theme.main};
+ const editorial=theme.layout==='editorial',clean=theme.layout==='clean',warm=theme.layout==='warm';
+ // La fotografía genérica nunca debe definir el tema de una asignatura.
+ const image=!editorial&&!clean&&root.HEVASlideDesign?.options(material).imagenes!==false?root.HEVAVisualAssets?.cover:null;
+ cover.background={color:contrast?'FFFFFF':editorial?theme.background:(theme.cover||theme.main)};
  if(image&&!contrast)cover.addImage({data:image,x:0,y:0,w:13.333,h:7.5,altText:'Cuaderno y materiales de estudio. Imagen decorativa generada.'});
- const color=contrast?'111111':'FFFFFF',title=String(material.titulo||'Presentación educativa');
- const size=title.length>100?32:title.length>65?38:44;
- cover.addText('HEVA  /  APRENDER Y APLICAR',{x:.85,y:.7,w:7,h:.4,fontSize:14,bold:true,color,margin:0});
- cover.addText(title,{x:.85,y:2,w:image&&!contrast?6.25:11.6,h:2.8,fontFace:'Arial',fontSize:size,bold:true,color,margin:0,valign:'mid',fit:'shrink'});
+ const color=contrast?'111111':editorial?theme.main:'FFFFFF',title=String(material.titulo||'Presentación educativa');
+ const size=title.length>100?30:title.length>65?35:editorial?43:44;
+ if(editorial){
+  cover.addShape(ppt.ShapeType.rect,{x:0,y:0,w:.22,h:7.5,line:{color:theme.main,transparency:100},fill:{color:theme.main}});
+  cover.addShape(ppt.ShapeType.rect,{x:.85,y:1.56,w:2.25,h:.07,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});
+ }else if(clean){
+  cover.addShape(ppt.ShapeType.rect,{x:0,y:0,w:13.333,h:.12,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});
+  cover.addShape(ppt.ShapeType.roundRect,{x:9.9,y:1.1,w:2.35,h:4.35,rectRadius:.18,line:{color:theme.accent,transparency:100},fill:{color:theme.accent,transparency:18}});
+ }
+ cover.addText('HEVA  /  APRENDER Y APLICAR',{x:.85,y:.7,w:7,h:.4,fontFace:theme.font||'Aptos',fontSize:14,bold:true,color,margin:0});
+ cover.addText(title,{x:.85,y:2,w:image&&!contrast?6.25:11.6,h:2.8,fontFace:theme.font||'Aptos',fontSize:size,bold:true,color,margin:0,valign:'mid',fit:'shrink'});
  cover.addText([material.asignatura,material.nivel].filter(Boolean).join(' · '),{x:.85,y:5.3,w:image&&!contrast?6.2:11.6,h:.65,fontSize:20,color,margin:0,fit:'shrink'});
  cover.addText('ESCUELA HÉCTOR VALENZUELA CEA · VILLARRICA',{x:.85,y:6.85,w:10.5,h:.3,fontSize:10,color,margin:0});
  if(typeof cover.addNotes==='function'&&image&&!contrast)cover.addNotes('Imagen de portada decorativa generada para HEVA. No constituye una fuente ni evidencia curricular.');
@@ -244,7 +253,7 @@ async function powerpoint(m,teacher=false){
  if(!root.PptxGenJS)throw Error('No se cargó el exportador PowerPoint. Recarga la página.');
  const material=HEVA.material(m),visual=root.HEVATemplates.layout(material),theme=visual.theme;
  const ppt=new root.PptxGenJS();ppt.layout='LAYOUT_WIDE';ppt.author='Escuela Héctor Valenzuela CEA';ppt.subject=material.objetivoAprendizaje||'';ppt.title=material.titulo;
- ppt.lang='es-CL';ppt.theme={headFontFace:'Aptos Display',bodyFontFace:'Aptos',lang:'es-CL'};
+ ppt.lang='es-CL';ppt.theme={headFontFace:theme.font||'Aptos Display',bodyFontFace:theme.font||'Aptos',lang:'es-CL'};
  const pages=presentationPages(material,teacher);
  const total=pages.length+1;
  renderCover(ppt,theme,material,total);
