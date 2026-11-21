@@ -28,5 +28,29 @@ function normalizeChoice(q){
 function material(raw={},meta={}){const m={...raw,...meta};m.titulo=String(m.titulo||'Material sin título');for(let k of ['preguntasAlternativas','preguntasDesarrollo','casosEstudio','diapositivas','listaCotejoTP','glosario','actividadesGuiadas','planClase','procedimientoTaller','trazabilidadEstrategia','recursos','apoyosAcceso'])if(!Array.isArray(m[k]))m[k]=[];m.introduccionLectura=String(m.introduccionLectura||'');m.preguntasAlternativas=m.preguntasAlternativas.map(normalizeChoice);return m}
 function validate(m,counts={}){let issues=[];for(let [field,count]of [['preguntasAlternativas',counts.cantAlternativas],['preguntasDesarrollo',counts.cantDesarrollo],['casosEstudio',counts.cantCasos]]){if(Number.isInteger(count)&&m[field].length!==count)issues.push(`${field}: se solicitaron ${count} y llegaron ${m[field].length}`)}m.preguntasAlternativas.forEach((p,i)=>{if(!Array.isArray(p.alternativas)||p.alternativas.length!==4||new Set(p.alternativas.map(a=>a.letra)).size!==4||!p.alternativas.every(a=>a&&['A','B','C','D'].includes(a.letra)&&typeof a.texto==='string'&&a.texto.trim())||!p.alternativas.some(a=>a.letra===p.claveCorrecta))issues.push(`Alternativas o clave inválidas en pregunta ${i+1}`)});m.preguntasDesarrollo.forEach((p,i)=>{if(!p.enunciado||!p.criterioEvaluacion)issues.push(`Desarrollo ${i+1} sin pregunta o criterio`)});m.casosEstudio.forEach((p,i)=>{if(!p.contextoReal||!p.preguntaReflexion)issues.push(`Caso ${i+1} incompleto`)});if(m.tipoMaterial==='PRESENTACION'&&!m.diapositivas.length)issues.push('Presentación sin diapositivas');return issues}
 function distribution(m){let counts={A:0,B:0,C:0,D:0};m.preguntasAlternativas.forEach(p=>{if(p.claveCorrecta in counts)counts[p.claveCorrecta]++});let a=Object.values(counts);return{counts,balanced:Math.max(...a)-Math.min(...a)<=1}}
+// Redistribuye posiciones de las claves sin cambiar enunciados, textos de opciones
+// ni la explicación. No reordena si la justificación referencia letras explícitas.
+function balanceChoices(input){
+ const m=material(input),questions=m.preguntasAlternativas;
+ if(questions.length<4)return {...m,equilibrioClaves:{aplicadas:0,omitidas:0}};
+ const result={...m,preguntasAlternativas:questions.map(q=>({...q,alternativas:Array.isArray(q.alternativas)?q.alternativas.map(x=>({...x})):q.alternativas}))};
+ const totals={A:0,B:0,C:0,D:0};let applied=0,skipped=0;
+ const fixed=q=>/\b(?:alternativa|opci[oó]n|letra|respuesta)\s*(?:correcta\s*(?:es|:)?\s*)?[ABCD]\b/i.test(String(q.justificacion||''));
+ for(const q of result.preguntasAlternativas){
+  if(!Array.isArray(q.alternativas)||q.alternativas.length!==4||!['A','B','C','D'].includes(q.claveCorrecta)||fixed(q)){
+   if(totals[q.claveCorrecta]!=null)totals[q.claveCorrecta]++;skipped++;continue;
+  }
+  const original=q.claveCorrecta,answer=q.alternativas.find(a=>a.letra===original);
+  if(!answer){skipped++;totals[original]++;continue;}
+  const target=['A','B','C','D'].sort((a,b)=>totals[a]-totals[b]||'ABCD'.indexOf(a)-'ABCD'.indexOf(b))[0];
+  if(original!==target){
+   const other=q.alternativas.find(a=>a.letra===target);
+   if(!other){skipped++;totals[original]++;continue;}
+   answer.letra=target;other.letra=original;q.alternativas.sort((a,b)=>'ABCD'.indexOf(a.letra)-'ABCD'.indexOf(b.letra));q.claveCorrecta=target;applied++;
+  }
+  totals[q.claveCorrecta]++;
+ }
+ return {...result,equilibrioClaves:{aplicadas:applied,omitidas:skipped,conteo:totals}};
+}
 function blocks(m,teacher=false){if(m.versionPedagogica===3){const p=typeof module==='object'&&module.exports?require('./heva-pedagogy.js'):globalThis.HEVAPedagogy;if(p)return p.blocks(m,teacher)}let out=[{title:m.titulo,text:[m.nivel,m.asignatura,m.temaEspecifico].filter(Boolean).join(' · ')},{title:'Objetivo curricular',text:m.objetivoAprendizaje||'Sin objetivo vinculado'},{title:'Lectura',text:m.introduccionLectura}];m.diapositivas.forEach(s=>out.push({title:s.titulo||'Diapositiva',text:Array.isArray(s.contenido)?s.contenido.join('\n'):s.contenido||''}));m.casosEstudio.forEach((c,i)=>out.push({title:`Situación ${i+1}: ${c.titulo||''}`,text:(c.contextoReal||'')+'\n'+(c.preguntaReflexion||'')}));m.preguntasAlternativas.forEach((p,i)=>out.push({title:`Pregunta ${i+1}`,text:(p.enunciado||'')+'\n'+(p.alternativas||[]).map(a=>`${a.letra}) ${a.texto}`).join('\n')}));m.preguntasDesarrollo.forEach((p,i)=>out.push({title:`Desarrollo ${i+1}`,text:p.enunciado+'\nRespuesta: ____________________________________________________'}));if(m.ticketSalida)out.push({title:'Ticket de salida',text:Object.values(m.ticketSalida).join('\n')});if(m.listaCotejoTP.length)out.push({title:'Lista de cotejo',text:m.listaCotejoTP.map(x=>x.criterio+': '+x.indicador).join('\n')});if(m.ajustes)out.push({title:'Ajustes de acceso',text:m.ajustes});if(teacher){out.push({title:'PAUTA DOCENTE · USO EXCLUSIVO',text:m.preguntasAlternativas.map((p,i)=>`${i+1}. ${p.claveCorrecta} · ${p.justificacion||''}`).join('\n')});m.preguntasDesarrollo.forEach((p,i)=>out.push({title:`Criterio desarrollo ${i+1}`,text:p.criterioEvaluacion||''}))}return out.filter(b=>b.text)}
-return {norm,marco,subject,matches,catalog,material,validate,distribution,blocks};});
+return {norm,marco,subject,matches,catalog,material,validate,distribution,balanceChoices,blocks};});
