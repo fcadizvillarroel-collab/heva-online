@@ -1,3 +1,4 @@
+const TPInternational=require('../lib/tp-metal-international.cjs');
 const Skills=require('../heva-skills.js');
 const DeepMaterials=require('../heva-deep-materials.cjs');
 const Textbooks=require('../lib/textbook-reference-catalog.cjs');
@@ -15,6 +16,7 @@ module.exports=async(req,res)=>{
   if(fase!=='base'&&(!base||!['gemini','groq','openai'].includes(autor?.proveedor)))return res.status(400).json({error:'Falta el documento base o su autoría.'});
   let fuentesDocumentales;try{fuentesDocumentales=await S.retrieve(plan)}catch(e){console.error('HEVA document sources:',e.stack||e);fuentesDocumentales=[];}
   const librosRegulares=Textbooks.recommendations(plan);
+    const referenciasMetalmecanica=TPInternational.bibliography(plan);
   if(fase==='finalizar'){
    const metadata={objetivoAprendizaje:plan.objetivoAprendizaje,asignatura:plan.asignatura,nivel:plan.nivel,marcoCurricular:plan.marcoCurricular,temaEspecifico:plan.temaEspecifico,tipoMaterial:plan.tipoMaterial,estrategiaDidactica:P.strategy(plan.estrategiaDidactica).name};
    const assembled=P.normalizeStrategyPlan(R.merge(base,parts,plan),plan);
@@ -25,6 +27,7 @@ module.exports=async(req,res)=>{
    let issues=R.validate(material,plan);
    if(issues.length)return res.status(422).json({error:'Los bloques requieren corrección. Se conserva el material anterior.',detalle:issues.join('; '),reparacion:R.repair(base,parts,plan,issues),reintentable:true});
    material=P.finalize(material,plan);material.autoriaIA=autor;material.planGeneracion=plan;material.fuentesDocumentales=fuentesDocumentales;material.textosEscolaresComplementarios=librosRegulares;
+    material.referenciasMetalmecanica=referenciasMetalmecanica;
    const evidence=S.validateEvidence(material.respaldoDocumental,fuentesDocumentales);material.respaldoDocumental=evidence.valid;material.incidenciasDocumentales=evidence.invalid;material=Skills.prepare(material,plan,fuentesDocumentales,evidence);
    material=require('../heva-studio.js').link(material,plan);material.auditoriaExperimental=require('../experimental/quality-audit.cjs').inspect(material,plan);material.auditoriaDisciplinar=require('../experimental/subject-audit.cjs').inspectAll(material,plan);
     material.controlProfundidadHEVA=DeepMaterials.advisory(material,plan);return res.status(200).json({exito:true,material});
@@ -48,7 +51,7 @@ module.exports=async(req,res)=>{
    const preserved=R.normalizePart(borradorBloque,batch),pending=R.partIssues(preserved,plan,batch,parts);
    if(pending.length&&!R.traceIssuesOnly(pending))return res.status(400).json({error:'El borrador no puede repararse solo con trazabilidad.',detalle:pending.join('; '),reintentable:false});
    result={value:preserved,provider:autor.proveedor,model:autor.modelo};
-  }else result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true})+Textbooks.instruction(librosRegulares),...keys,exclude,{deadline,fallbackPrompt:fallback,fallbackMaxOutputTokens:fase==='base'?4096:3000,maxOutputTokens:fase==='base'?(plan.tipoMaterial==='PRESENTACION'?2600:10000):batch?.formato?8000:batch?.tipo==='diapositivas'?6500:5000});
+  }else result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true})+Textbooks.instruction(librosRegulares)+TPInternational.prompt(referenciasMetalmecanica),...keys,exclude,{deadline,fallbackPrompt:fallback,fallbackMaxOutputTokens:fase==='base'?4096:3000,maxOutputTokens:fase==='base'?(plan.tipoMaterial==='PRESENTACION'?2600:10000):batch?.formato?8000:batch?.tipo==='diapositivas'?6500:5000});
   if(fase==='items'){result.value=R.normalizePart(result.value,batch);if(duplicateOriginal)result.value=R.mergeDuplicateRepair(duplicateOriginal,result.value,plan,batch,parts);}
   let issues=R.partIssues(result.value,plan,fase==='items'?batch:null,parts);
   if(fase==='items'&&!duplicateOriginal&&R.duplicateItems(result.value,plan,batch,parts).length&&issues.every(x=>/repite literalmente/.test(x)))duplicateOriginal=result.value;
