@@ -54,10 +54,18 @@ function mountVisualForm(){
  const position=imagePlacementControl(savedPlacement,value=>{try{localStorage.setItem('heva-imagen-ubicacion-v1',value)}catch{}},'heva-image-placement-new');
  let coverSaved=false;try{coverSaved=localStorage.getItem('heva-imagen-portada-v1')==='true'}catch{}
  const cover=imageCoverControl(coverSaved,'heva-image-cover-new');cover.box.querySelector('input').addEventListener('change',()=>{try{localStorage.setItem('heva-imagen-portada-v1',String(cover.read()))}catch{}});
- panel.append(fields.box,position.box,cover.box,button('Con recursos para el material nuevo',()=>fields.set(true)),button('Solo texto para el material nuevo',()=>fields.set(false)));
+ let textbookSaved=false;try{textbookSaved=localStorage.getItem('heva-usar-textos-escolares-v1')==='true'}catch{}
+ const textbookLine=element('label');textbookLine.style.cssText='display:flex;align-items:flex-start;gap:8px;margin:12px 0';
+ const textbookInput=element('input',null,{type:'checkbox',id:'heva-use-textbooks'});
+ textbookInput.checked=textbookSaved;
+ textbookLine.append(textbookInput,document.createTextNode('Consultar referencias de textos escolares de educación regular solo si se relacionan con el tema y OA EPJA'));
+ const textbookNotice=element('p','Esta opción ofrece libros candidatos y enlaces a los catálogos. El contenido de cada PDF solo puede usarse como evidencia cuando se haya recuperado y verificado. No equipara automáticamente los niveles de educación regular y EPJA.');
+ textbookNotice.style.cssText='font-size:.83rem;color:#57534e';
+ textbookInput.addEventListener('change',()=>{try{localStorage.setItem('heva-usar-textos-escolares-v1',String(textbookInput.checked))}catch{}});
+ panel.append(textbookLine,textbookNotice,fields.box,position.box,cover.box,button('Con recursos para el material nuevo',()=>fields.set(true)),button('Solo texto para el material nuevo',()=>fields.set(false)));
  const anchor=byId('studio-documents');if(anchor)anchor.after(panel);else byId('panel-crear')?.append(panel);
  const previous=window.studioGenerationExtras;
- window.studioGenerationExtras=()=>({...previous?.(),recursosVisualesHEVA:fields.read()});
+ window.studioGenerationExtras=()=>({...previous?.(),recursosVisualesHEVA:fields.read(),usarTextosEscolares:textbookInput.checked});
 }
 function balanceAnswerKeys(){
  const m=current();
