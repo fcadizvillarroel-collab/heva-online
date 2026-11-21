@@ -22,6 +22,12 @@ function inspect(material,plan={}){
   const key=String(q?.claveCorrecta||'').trim().toUpperCase();
   const keyed=opts.find(o=>String(o?.letra||'').toUpperCase()===key);
   if(opts.length!==4||new Set(opts.map(o=>String(o?.letra||'').toUpperCase())).size!==4||!keyed)incidencias.push({tipo:'estructura',referencia:'ALT-'+(i+1),detalle:'Alternativas o clave incompletas'});
+  const promptText=normalize(String(q?.enunciado||''));
+  // A diagnosis question must show the student's actual step, not only a wrong result.
+  // Advisory only: does not presume which operation the pupil performed.
+  if(/\berror\b/.test(promptText)&&/(obtiene|afirma|llega|concluye)/.test(promptText)&&/en que consiste|cual (?:es|fue) el error|error principal|error cometido/.test(promptText)&&!/\b(?:paso|procedimiento seguido|desarrollo siguiente|realizo|escribio|transformo|resto|sumo|dividio|multiplico)\b/.test(promptText)){
+    incidencias.push({tipo:'ambiguedad',referencia:'ALT-'+(i+1),detalle:'Se solicita identificar el error de un estudiante sin mostrar el procedimiento que produjo su resultado. Añade sus pasos o pregunta solo si el resultado es correcto.'});
+  }
   const text=String(q?.enunciado||'');const match=/^\s*(?:calcula|resuelve|evalua|cuanto es|¿cuanto es)\s*[:¿]?\s*([0-9+*/().,×÷·\s-]+)\s*[?¿.]?\s*$/i.exec(normalize(text));
   if(!match||!keyed)return;
   const expected=evaluateSimple(match[1]);if(expected===null)return;
