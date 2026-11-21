@@ -62,6 +62,21 @@ actualizarObjetivosYEstrategias=async function(){
   if(serial===catalogRequest){sel.replaceChildren(new Option('No se pudo cargar el catálogo',''));sel.add(new Option('Objetivo propio (no oficial)','CUSTOM'));counter.textContent='Catálogo temporalmente no disponible';}
  }finally{if(serial===catalogRequest)sel.disabled=false}
 };
+function hevaPptTheme(){
+ const value=document.getElementById('heva-ppt-estilo')?.value||'auto';
+ return ['auto','azul','gemini_calido','editorial_calido','calida','institucional'].includes(value)?value:'auto';
+}
+function hevaApplyPptTheme(material){
+ if(!material||typeof material!=='object')return material;
+ const selected=hevaPptTheme();
+ material.plantillaVisual=selected;
+ return material;
+}
+document.getElementById('heva-ppt-estilo')?.addEventListener('change',()=>{
+ try{localStorage.setItem('heva_ppt_estilo',hevaPptTheme())}catch{}
+ if(materialActual){hevaApplyPptTheme(materialActual);guardarEnHistorial(false)}
+});
+try{const saved=localStorage.getItem('heva_ppt_estilo');const selector=document.getElementById('heva-ppt-estilo');if(selector&&[...selector.options].some(o=>o.value===saved))selector.value=saved}catch{}
 let originalGenerate=generarMaterialReal;
 generarMaterialReal=async function(mode='GENERADOR_ESTANDAR'){
  if(!document.getElementById('tema-especifico').value.trim()){alert('Escribe el tema específico de esta clase para no mezclar contenidos.');return}
@@ -70,7 +85,7 @@ generarMaterialReal=async function(mode='GENERADOR_ESTANDAR'){
  const snapshot={objetivoAprendizaje:document.getElementById('texto-oa').value,marcoCurricular:document.getElementById('marco-curricular').value,temaEspecifico:document.getElementById('tema-especifico').value,tipoMaterial:document.getElementById('tipo-material').value,objetivoId:document.getElementById('select-oa').selectedOptions[0]?.dataset.key||'',ajustes:[...document.querySelectorAll('input[id^="pie-"]:checked')].map(el=>el.parentElement.textContent.trim()).join('; ')};
  const previousMaterial=materialActual;
  await originalGenerate(mode);
- if(materialActual&&materialActual!==previousMaterial){materialActual=HEVA.material({...snapshot,...materialActual,objetivoId:snapshot.objetivoId,ajustes:snapshot.ajustes});renderizarDocumentoEnPantalla();guardarEnHistorial(false)}
+ if(materialActual&&materialActual!==previousMaterial){materialActual=hevaApplyPptTheme(HEVA.material({...snapshot,...materialActual,objetivoId:snapshot.objetivoId,ajustes:snapshot.ajustes}));renderizarDocumentoEnPantalla();guardarEnHistorial(false)}
 };
 function editText(text,path){return `<div contenteditable="true" data-heva-path="${path}" class="border rounded p-2 whitespace-pre-line">${hevaEscape(text)}</div>`}
 function syncEdits(){if(!materialActual)return;materialActual.titulo=document.getElementById('doc-titulo').innerText;materialActual.introduccionLectura=document.getElementById('doc-lectura').innerText;document.querySelectorAll('[data-heva-path]').forEach(el=>{let keys=el.dataset.hevaPath.split('.'),obj=materialActual;for(let k of keys.slice(0,-1))obj=obj[k];obj[keys.at(-1)]=el.innerText})}
@@ -78,7 +93,7 @@ renderizarDocumentoEnPantalla=function(){if(!materialActual)return;materialActua
 function readHistory(){try{let h=JSON.parse(localStorage.getItem('heva_historial')||'[]');return Array.isArray(h)?h:[]}catch{alert('El historial no se pudo leer. Descarga un respaldo antes de modificarlo.');return null}}
 guardarEnHistorial=function(notify=true){if(!materialActual)return;syncEdits();let h=readHistory();if(!h)return;try{if(!materialActual.materialId)materialActual.materialId=crypto.randomUUID();const old=h.find(x=>x.data.materialId===materialActual.materialId);materialActual.version=(old?.data.version||0)+1;h.unshift({id:crypto.randomUUID(),fecha:new Date().toLocaleString('es-CL'),data:structuredClone(materialActual)});localStorage.setItem('heva_historial',JSON.stringify(h));cargarHistorial();if(notify)alert('Versión '+materialActual.version+' guardada en este navegador.')}catch(e){alert('No se pudo guardar: '+e.message+'. Descarga un respaldo JSON.')}};
 cargarHistorial=function(){let h=readHistory(),c=document.getElementById('lista-guardados');if(!h)return;c.innerHTML=h.length?h.map((x,i)=>`<div class="border rounded p-3"><b>${hevaEscape(x.data.titulo)}</b> · ${hevaEscape(x.data.nivel)} · v${x.data.version||1} · ${hevaEscape(x.fecha)} <button class="border rounded px-2" onclick="recuperarHistorial(${i})">Abrir</button></div>`).join(''):'No hay materiales guardados.'};
-exportarWord=async function(){if(!materialActual)return;syncEdits();try{await HEVAOffice.word(materialActual,document.getElementById('incluir-pauta')?.checked)}catch(e){alert('No se pudo exportar Word: '+e.message)}};exportarPowerPoint=async function(){if(!materialActual)return;syncEdits();try{await HEVAOffice.powerpoint(materialActual,document.getElementById('incluir-pauta')?.checked)}catch(e){alert('No se pudo exportar PowerPoint: '+e.message)}};
+exportarWord=async function(){if(!materialActual)return;syncEdits();try{await HEVAOffice.word(materialActual,document.getElementById('incluir-pauta')?.checked)}catch(e){alert('No se pudo exportar Word: '+e.message)}};exportarPowerPoint=async function(){if(!materialActual)return;syncEdits();try{await HEVAOffice.powerpoint(hevaApplyPptTheme(materialActual),document.getElementById('incluir-pauta')?.checked)}catch(e){alert('No se pudo exportar PowerPoint: '+e.message)}};
 function respaldoHEVA(){syncEdits();HEVAOffice.download(new Blob([JSON.stringify({schema:'heva-online-v2',historial:readHistory()||[],materialActual},null,2)],{type:'application/json'}),'HEVA_online_respaldo.json')}
 function importOnlineJSON(file){if(!file)return;file.text().then(t=>{let d=JSON.parse(t);if(d.schema==='heva-online-v2'&&Array.isArray(d.historial)){respaldoHEVA();let old=readHistory()||[];localStorage.setItem('heva_historial',JSON.stringify([...d.historial,...old]));cargarHistorial();return}materialActual=HEVA.material(d.material||d);renderizarDocumentoEnPantalla();guardarEnHistorial();cambiarHerramienta('crear')}).catch(e=>alert('No se pudo importar: '+e.message))}
 const toolbar=document.getElementById('btn-pptx').parentElement;toolbar.insertAdjacentHTML('beforeend','<label class="text-xs"><input type="checkbox" id="incluir-pauta"> Incluir pauta docente en exportación</label><button class="border rounded px-2" onclick="respaldoHEVA()">Respaldo JSON</button><label class="border rounded px-2">Importar JSON<input type="file" accept=".json" style="display:none" onchange="importOnlineJSON(this.files[0])"></label>');
