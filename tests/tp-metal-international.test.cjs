@@ -53,10 +53,14 @@ test('Rutas de generación directa y por bloques usan el banco técnico',()=>{
  }
 });
 
-test('Mapeo oficial: protección incluye OA7 y OA8, cubicación OA9',()=>{
- const p=TP.chile.modules.find(x=>x.id==='M07');
- const c=TP.chile.modules.find(x=>x.id==='M08');
- assert.deepEqual(p.oa,['7','8']);assert.deepEqual(c.oa,['9']);
+test('El catálogo técnico regular no comunica números de OA como si fueran EPJA',()=>{
+ assert.ok(TP.chile.modules.every(m=>!Object.hasOwn(m,'oa')));
+ const p={...norm('Soldadura SMAW'),objetivoAprendizaje:'OA EPJA literal proporcionado por el catálogo',marcoCurricular:'Bases Curriculares EPJA 2024'};
+ const b=TP.bibliography(p);
+ assert.equal(b.prioridadCurricular,'EPJA_CHILE');
+ assert.equal(b.objetivoEPJASeleccionado,p.objetivoAprendizaje);
+ assert.ok(b.modules.every(m=>!Object.hasOwn(m,'oaReferenciales')));
+ assert.match(TP.prompt(b),/NUNCA cites o transfieras los OA del programa TP regular/);
 });
 test('Trazabilidad solo si el servidor extrajo fragmentos con página y SHA',()=>{
  const b=TP.bibliography(norm('Soldadura SMAW'));
