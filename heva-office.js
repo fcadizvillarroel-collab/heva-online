@@ -221,7 +221,7 @@ function presentationPages(material,teacher=false){
 }
 function renderCover(ppt,theme,material,total){
  const cover=ppt.addSlide(),contrast=theme.background==='FFFFFF'&&theme.main==='111111';
- const image=root.HEVASlideDesign?.options(material).imagenes===false?null:root.HEVAVisualAssets?.cover;
+ const image=material.imagenPortadaHEVA===true&&root.HEVASlideDesign?.options(material).imagenes!==false?root.HEVAVisualAssets?.cover:null;
  cover.background={color:contrast?'FFFFFF':theme.main};
  if(image&&!contrast)cover.addImage({data:image,x:0,y:0,w:13.333,h:7.5,altText:'Cuaderno y materiales de estudio. Imagen decorativa generada.'});
  const color=contrast?'111111':'FFFFFF',title=String(material.titulo||'Presentación educativa');
