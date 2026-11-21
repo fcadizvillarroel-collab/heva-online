@@ -136,6 +136,20 @@
           </select>
         </div>
 
+        <div id="heva-ppt-temas" class="border border-amber-200 bg-amber-50/40 rounded-lg p-3 space-y-2">
+          <label for="heva-ppt-estilo" class="block text-xs font-bold uppercase text-stone-700">Diseño visual del PowerPoint</label>
+          <select id="heva-ppt-estilo" class="w-full rounded border border-stone-300 bg-white p-2 text-sm" aria-describedby="heva-ppt-estilo-ayuda">
+            <option value="auto">Automático según asignatura</option>
+            <option value="azul">Gemini · institucional azul</option>
+            <option value="gemini_calido">Gemini · cálido</option>
+            <option value="editorial_calido">Z.ai · editorial cálido</option>
+            <option value="calida">HEVA · cálida clásica</option>
+            <option value="institucional">HEVA · verde institucional</option>
+          </select>
+          <div class="flex gap-2" aria-hidden="true"><span class="h-3 w-12 rounded" style="background:#254B84"></span><span class="h-3 w-12 rounded" style="background:#975C3D"></span><span class="h-3 w-12 rounded" style="background:#782F40"></span></div>
+          <p id="heva-ppt-estilo-ayuda" class="text-xs text-stone-600">Cambia la apariencia sin alterar el OA. También puedes cambiar el estilo antes de descargar un material ya generado.</p>
+        </div>
+
         <div>
           <label class="block text-xs font-bold uppercase text-stone-600 mb-1">Marco Curricular</label>
           <select id="marco-curricular" onchange="actualizarTodoElCurriculo()" class="w-full border rounded p-2 text-xs bg-amber-50 font-bold text-amber-950 border-amber-300">
