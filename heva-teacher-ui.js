@@ -73,8 +73,45 @@ function stopSpeech(){speechToken++;globalThis.speechSynthesis?.cancel();reading
 function speak(){if(!globalThis.speechSynthesis||!globalThis.SpeechSynthesisUtterance){alert('Este navegador no dispone de lectura en voz alta.');return;}const m=current(),d=dialog('Escuchar el material');d.append(element('p','Lee solo el ejemplar del estudiante. La disponibilidad de voces y su funcionamiento sin conexión dependen del equipo.'));
  const voice=element('select',null,{'aria-label':'Voz'}),rate=element('input',null,{type:'number',min:'.5',max:'1.5',step:'.1',value:'.9','aria-label':'Velocidad'});function voices(){voice.replaceChildren();const list=speechSynthesis.getVoices().filter(x=>/^es/i.test(x.lang));for(const v of list)voice.append(new Option(v.name+' · '+v.lang,v.voiceURI));const cl=list.find(x=>/^es[-_]CL$/i.test(x.lang));if(cl)voice.value=cl.voiceURI;}voices();speechSynthesis.addEventListener('voiceschanged',voices);d.addEventListener('close',()=>{stopSpeech();speechSynthesis.removeEventListener('voiceschanged',voices)},{once:true});
  const status=element('p','Listo para leer.',{role:'status'});d.append(voice,rate,button('Leer desde el inicio',()=>{stopSpeech();const token=speechToken;reading=HEVAPedagogy.blocks(m,false).flatMap(x=>[x.title,x.text]).join('. ').match(/[^.!?]+[.!?]?/g)?.flatMap(x=>x.match(/.{1,220}(?:\s|$)|.{1,220}/g)||[])||[];speechIndex=0;const next=()=>{if(token!==speechToken)return;if(speechIndex>=reading.length){status.textContent='Lectura terminada.';return;}const u=new SpeechSynthesisUtterance(reading[speechIndex++]);u.lang='es-CL';u.rate=Math.min(1.5,Math.max(.5,Number(rate.value)||.9));u.voice=speechSynthesis.getVoices().find(v=>v.voiceURI===voice.value)||null;u.onend=next;u.onerror=()=>{status.textContent='La voz no pudo continuar. Prueba otra voz del equipo.';};status.textContent='Leyendo fragmento '+speechIndex+' de '+reading.length;speechSynthesis.speak(u);};next();}),button('Pausar',()=>speechSynthesis.pause()),button('Continuar',()=>speechSynthesis.resume()),button('Detener',()=>{stopSpeech();status.textContent='Lectura detenida.';}),status);d.showModal();}
-function mount(){let bar=byId('heva-teacher-tools');if(!bar){bar=element('section',null,{id:'heva-teacher-tools',class:'no-print'});bar.append(element('h3','Revisar y adaptar el material'),button('Vista previa PPT',preview),button('Recursos visuales · con o sin',visualOptionsDialog),button('Asignar puntajes · 1, 2 o 3',scoring),button('Editar y ordenar bloques',edit),guideImageButton(),button('Comparar versiones',compare),button('Deshacer último cambio',()=>{if(!undo.length)return;const previous=undo.at(-1),m=current();if(previous.materialId!==m.materialId)throw Error('El último cambio corresponde a otro material. Abre su historial para recuperarlo.');undo.pop();guardarEnHistorial(false);setMaterial(previous)}),button('Accesibilidad',accessibility),button('Escuchar',speak));byId('hoja-material').before(bar);}bar.hidden=!materialActual;renderGuideResources();const guideAction=byId('heva-guide-image-action');if(guideAction)guideAction.hidden=!HEVAGuideVisuals.enabled(materialActual||{});applyAccess();
- if(materialActual){const report=T.inspect(materialActual);let summary=byId('heva-teaching-report');if(!summary){summary=element('details',null,{id:'heva-teaching-report'});bar.append(summary);}summary.replaceChildren(element('summary','Desempeño del OA y actividades · orientación docente'),element('p',report.alcance));for(const x of report.actividades)summary.append(element('p',x.ref+' · '+(x.cognicion?.nivel||'Nivel no inferido: revisar desempeño')));for(const issue of report.issues)summary.append(element('p',issue.detail));}}
+function mount(){
+ let bar=byId('heva-teacher-tools');
+ if(!bar){
+  bar=element('section',null,{id:'heva-teacher-tools',class:'no-print'});
+  const title=element('h3','Herramientas del material');
+  const actions=element('div',null,{id:'heva-teacher-actions'});
+  bar.append(title,actions);
+  byId('hoja-material').before(bar);
+ }
+ bar.hidden=!materialActual;
+ if(!materialActual)return;
+ const m=materialActual,type=String(m.tipoMaterial||'').toUpperCase();
+ const isEvaluation=['EVALUACION','PRUEBA'].includes(type);
+ const isGuide=['GUIA','ACCESIBLE','TALLER'].includes(type);
+ const isPresentation=type==='PRESENTACION';
+ const actions=byId('heva-teacher-actions');
+ actions.replaceChildren();
+ const add=(label,fn)=>actions.append(button(label,fn));
+ if(isPresentation)add('Vista previa del PowerPoint',preview);
+ if(isPresentation||isGuide)add('Recursos visuales · con o sin',visualOptionsDialog);
+ if(isEvaluation)add('Asignar puntajes · 1, 2 o 3',scoring);
+ add(isPresentation?'Editar contenido de las diapositivas':isEvaluation?'Editar y ordenar preguntas':'Editar y ordenar bloques',edit);
+ if(isGuide){const guideAction=guideImageButton();actions.append(guideAction);}
+ add('Comparar versiones',compare);
+ if(undo.length)add('Deshacer último cambio',()=>{const previous=undo.at(-1),currentMaterial=current();if(previous.materialId!==currentMaterial.materialId)throw Error('El último cambio corresponde a otro material. Abre su historial para recuperarlo.');undo.pop();guardarEnHistorial(false);setMaterial(previous)});
+ add('Accesibilidad',accessibility);
+ add('Escuchar',speak);
+ renderGuideResources();
+ const guideAction=byId('heva-guide-image-action');
+ if(guideAction)guideAction.hidden=!HEVAGuideVisuals.enabled(materialActual||{});
+ applyAccess();
+ const report=T.inspect(m);
+ let summary=byId('heva-teaching-report');
+ if(!summary){summary=element('details',null,{id:'heva-teaching-report'});bar.append(summary);}
+ summary.replaceChildren(element('summary','Desempeño del OA y actividades · orientación docente'),element('p',report.alcance));
+ for(const entry of report.actividades)summary.append(element('p',entry.ref+' · '+(entry.cognicion?.nivel||'Nivel no inferido: revisar desempeño')));
+ for(const issue of report.issues)summary.append(element('p',issue.detail));
+}
+
 const oldRender=renderizarDocumentoEnPantalla;renderizarDocumentoEnPantalla=function(){oldRender();mount()};
 const oldGenerate=generarMaterialReal;generarMaterialReal=async function(...args){if(navigator.onLine===false){const form=[...document.querySelectorAll('#panel-crear input[id],#panel-crear select[id],#panel-crear textarea[id]')].filter(x=>!['password','file','hidden'].includes(x.type)&&!/key|token|secret|clave/i.test(x.id)).map(x=>({id:x.id,value:x.value,checked:x.checked}));try{localStorage.setItem('heva-solicitud-pendiente-v1',JSON.stringify({fecha:new Date().toISOString(),form}));alert('Sin conexión: el encargo quedó guardado como solicitud pendiente, aún no generada. Al volver internet, recupera el encargo y pulsa Crear material. El material anterior se conserva.');}catch{alert('Sin conexión y sin espacio para guardar el encargo. Conserva los campos abiertos y vuelve a intentar al recuperar internet.');}pending();return;}return oldGenerate(...args)};
 function pending(){let box=byId('heva-pending-request');let saved;try{saved=JSON.parse(localStorage.getItem('heva-solicitud-pendiente-v1')||'null')}catch{}if(!saved?.form)return;if(!box){box=element('aside',null,{id:'heva-pending-request',class:'no-print'});byId('panel-crear').prepend(box);}box.replaceChildren(element('p','Solicitud pendiente guardada. La generación requiere conexión y disponibilidad de IA.'),button('Recuperar encargo pendiente',async()=>{const fields=saved.form;for(const id of ['marco-curricular','nivel-epja']){const x=fields.find(f=>f.id===id);if(x&&byId(id))byId(id).value=x.value;}await actualizarTodoElCurriculo();const subject=fields.find(f=>f.id==='asignatura');if(subject){if(![...byId('asignatura').options].some(o=>o.value===subject.value))throw Error('La asignatura guardada no está disponible para este marco y nivel. Revisa el encargo; no se ha generado material.');byId('asignatura').value=subject.value;}await actualizarObjetivosYEstrategias();for(const x of fields){const el=byId(x.id);if(el){el.value=x.value;if(el.type==='checkbox'||el.type==='radio')el.checked=x.checked;}}byId('tipo-material').dispatchEvent(new Event('change'));mostrarContratoPedagogico();alert('Encargo recuperado. Revisa la selección y pulsa Crear material para generar.');}));}
