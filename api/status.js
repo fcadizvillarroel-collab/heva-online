@@ -1,7 +1,8 @@
 // Diagnostic-only connectivity checks. Never expose credentials or provider response bodies.
 module.exports=async function status(req,res){
+ require('./_cors.cjs').applyCors(req,res,{methods:'GET,OPTIONS'});
+
  res.setHeader('Cache-Control','no-store, max-age=0');
- res.setHeader('Access-Control-Allow-Origin','*');
  if(req.method!=='GET')return res.status(405).json({error:'Utilice GET.'});
  const checks=[
   {name:'gemini',key:process.env.GEMINI_API_KEY,url:'https://generativelanguage.googleapis.com/v1beta/models',headers:k=>({'x-goog-api-key':k})},
