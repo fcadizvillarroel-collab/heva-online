@@ -26,3 +26,21 @@ test('No se toma 7.º básico regular como OA o nivel EPJA oficial',()=>{
  assert.ok(r.items.some(x=>x.title.includes('7.º básico')));
  assert.match(r.scope,/no constituye equivalencia curricular EPJA/);
 });
+
+test('El fragmento de muestra del texto escolar no se ofrece cuando no procede',()=>{
+ const S=require('../lib/document-sources.cjs');
+ const sample=S.registry.find(x=>x.id==='TEXTO_REG_HIST1_MUESTRA');
+ assert.ok(sample);
+ assert.ok(sample.url.startsWith('https://aprendoenlinea.mineduc.gob.cl/'));
+ assert.equal(S.applicable(sample,{...history,usarTextosEscolares:false}),false);
+ assert.equal(S.applicable(sample,{...history,usarTextosEscolares:true}),true);
+ assert.equal(S.applicable(sample,{...history,asignatura:'Lenguaje y Comunicación',usarTextosEscolares:true}),false);
+});
+test('El código incluye la misma decisión tanto en generación directa como por bloques',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ for(const filename of ['api/generate.js','api/recover.js']){
+  const code=fs.readFileSync(path.join(__dirname,'..',filename),'utf8');
+  assert.match(code,/Textbooks\.recommendations\(plan\)/);
+  assert.match(code,/textosEscolaresComplementarios/);
+ }
+});
