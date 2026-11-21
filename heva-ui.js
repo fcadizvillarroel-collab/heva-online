@@ -1,7 +1,62 @@
 const hevaEscape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let catalogRequest=0;
 let previousSubject='', topicBySubject={};
-actualizarObjetivosYEstrategias=async function(){let serial=++catalogRequest,sel=document.getElementById('select-oa'),counter=document.getElementById('contador-oas'),oa=document.getElementById('texto-oa'),filter={marco:document.getElementById('marco-curricular').value,nivel:document.getElementById('nivel-epja').value,asignatura:document.getElementById('asignatura').value};if(previousSubject&&previousSubject!==filter.asignatura){topicBySubject[previousSubject]=document.getElementById('tema-especifico').value;document.getElementById('tema-especifico').value=topicBySubject[filter.asignatura]||''}previousSubject=filter.asignatura;sel.innerHTML='<option>Cargando catálogo…</option>';sel.disabled=true;oa.value='';let list=[],source='Supabase';try{let r=await fetch('/api/curriculum/admin?action=verified&'+new URLSearchParams(filter));let d=await r.json();if(!r.ok||!Array.isArray(d.objetivos))throw Error();list=d.objetivos;try{localStorage.setItem('heva_catalog_'+JSON.stringify(filter),JSON.stringify(list))}catch{}}catch{source='copia local del catálogo';try{let r=await fetch('/catalogo-publicado.json');if(!r.ok)throw Error();list=HEVA.catalog(await r.json(),filter)}catch{list=JSON.parse(localStorage.getItem('heva_catalog_'+JSON.stringify(filter))||'[]')}}if(serial!==catalogRequest)return;sel.innerHTML='';for(let o of list){let option=document.createElement('option');option.value=o.texto_literal;option.textContent=`${o.tipo} · ${o.clave_interna||o.codigo_oficial} · ${o.texto_literal.slice(0,110)}`;option.dataset.key=o.clave_interna||'';sel.appendChild(option)}if(!list.length)sel.add(new Option('No hay objetivos publicados para esta combinación',''));sel.add(new Option('Objetivo propio (opcional, no oficial)','CUSTOM'));sel.disabled=false;counter.textContent=list.length+' publicados · '+source;oa.value=sel.value==='CUSTOM'?'':sel.value;const strategies=['Análisis de fuentes y evidencias','Ejemplo guiado y aplicación progresiva','Estudio de casos y toma de decisiones','Comprensión lectora y explicación oral'];document.getElementById('estrategia-didactica').innerHTML=strategies.map(t=>`<option>${t}</option>`).join('')};
+actualizarObjetivosYEstrategias=async function(){
+ const serial=++catalogRequest;
+ const sel=document.getElementById('select-oa'),counter=document.getElementById('contador-oas'),oa=document.getElementById('texto-oa');
+ const filter={marco:document.getElementById('marco-curricular').value,nivel:document.getElementById('nivel-epja').value,asignatura:document.getElementById('asignatura').value};
+ if(previousSubject&&previousSubject!==filter.asignatura){
+  topicBySubject[previousSubject]=document.getElementById('tema-especifico').value;
+  document.getElementById('tema-especifico').value=topicBySubject[filter.asignatura]||'';
+ }
+ previousSubject=filter.asignatura;
+ sel.replaceChildren(new Option('Cargando catálogo…',''));sel.disabled=true;oa.value='';
+ const usable=rows=>(Array.isArray(rows)?rows:[]).filter(o=>o&&typeof o.texto_literal==='string'&&o.texto_literal.trim()&&o.estado!=='RECHAZADO'&&o.vigente!==false);
+ const key='heva_catalog_'+JSON.stringify(filter);
+ const local=async()=>{try{
+   const r=await fetch('/catalogo-publicado.json',{cache:'no-cache'});
+   if(!r.ok)throw Error('Catálogo local HTTP '+r.status);
+   return usable(HEVA.catalog(await r.json(),filter));
+  }catch(e){console.warn('Catálogo local no disponible',e);try{return usable(JSON.parse(localStorage.getItem(key)||'[]'))}catch{return []}}};
+ try{
+  let list=[],source='Supabase';
+  try{
+   const r=await fetch('/api/curriculum/admin?action=verified&'+new URLSearchParams(filter),{cache:'no-store'});
+   if(!r.ok)throw Error('Respuesta HTTP '+r.status);
+   const data=await r.json();
+   if(!Array.isArray(data.objetivos))throw Error('Respuesta sin objetivos');
+   list=usable(data.objetivos);
+   if(list.length)try{localStorage.setItem(key,JSON.stringify(list))}catch{}
+  }catch(e){source='catálogo local EPJA';list=await local();}
+  if(!list.length&&source==='Supabase'){const backup=await local();if(backup.length){list=backup;source='catálogo local EPJA'}}
+  if(serial!==catalogRequest)return;
+  sel.replaceChildren();
+  for(const item of list){
+   const op=new Option('',item.texto_literal);
+   const codigo=String(item.codigo_oficial||'').trim();
+   op.textContent=(item.tipo||'OA')+' · '+(codigo||'OA EPJA')+' · '+item.texto_literal.slice(0,115);
+   op.dataset.key=item.clave_interna||'';
+   sel.add(op);
+  }
+  if(!list.length)sel.add(new Option('No hay OA EPJA publicados para esta combinación',''));
+  sel.add(new Option('Objetivo propio (no oficial)','CUSTOM'));
+  oa.value=sel.value==='CUSTOM'?'':sel.value;
+  counter.textContent=list.length+' objetivos EPJA · '+source;
+  const strategies=['Análisis de fuentes y evidencias','Ejemplo guiado y aplicación progresiva','Estudio de casos y toma de decisiones','Comprensión lectora y explicación oral'];
+  const control=document.getElementById('estrategia-didactica');
+  if(control)control.replaceChildren(...strategies.map(v=>new Option(v,v)));
+ }catch(e){
+  console.error('Error al cargar catálogo curricular',e);
+  if(serial===catalogRequest){sel.replaceChildren(new Option('Catálogo temporalmente no disponible',''));sel.add(new Option('Objetivo propio (no oficial)','CUSTOM'));counter.textContent='Catálogo EPJA no disponible'}
+ }finally{if(serial===catalogRequest)sel.disabled=false}
+};
+function hevaPptTheme(){const value=document.getElementById('heva-ppt-estilo')?.value||'auto';return ['auto','azul','gemini_calido','editorial_calido','calida','institucional','contraste'].includes(value)?value:'auto'}
+function hevaApplyPptTheme(material){if(material&&typeof material==='object')material.plantillaVisual=hevaPptTheme();return material}
+document.getElementById('heva-ppt-estilo')?.addEventListener('change',()=>{
+ try{localStorage.setItem('heva_ppt_estilo',hevaPptTheme())}catch{}
+ if(materialActual){hevaApplyPptTheme(materialActual);guardarEnHistorial(false)}
+});
+try{const saved=localStorage.getItem('heva_ppt_estilo'),selector=document.getElementById('heva-ppt-estilo');if(selector&&[...selector.options].some(o=>o.value===saved))selector.value=saved}catch{}
 let originalGenerate=generarMaterialReal;
 generarMaterialReal=async function(mode='GENERADOR_ESTANDAR'){
  if(!document.getElementById('tema-especifico').value.trim()){alert('Escribe el tema específico de esta clase para no mezclar contenidos.');return}
@@ -10,7 +65,7 @@ generarMaterialReal=async function(mode='GENERADOR_ESTANDAR'){
  const snapshot={objetivoAprendizaje:document.getElementById('texto-oa').value,marcoCurricular:document.getElementById('marco-curricular').value,temaEspecifico:document.getElementById('tema-especifico').value,tipoMaterial:document.getElementById('tipo-material').value,objetivoId:document.getElementById('select-oa').selectedOptions[0]?.dataset.key||'',ajustes:[...document.querySelectorAll('input[id^="pie-"]:checked')].map(el=>el.parentElement.textContent.trim()).join('; ')};
  const previousMaterial=materialActual;
  await originalGenerate(mode);
- if(materialActual&&materialActual!==previousMaterial){materialActual=HEVA.material({...snapshot,...materialActual,objetivoId:snapshot.objetivoId,ajustes:snapshot.ajustes});renderizarDocumentoEnPantalla();guardarEnHistorial(false)}
+ if(materialActual&&materialActual!==previousMaterial){materialActual=hevaApplyPptTheme(HEVA.material({...snapshot,...materialActual,objetivoId:snapshot.objetivoId,ajustes:snapshot.ajustes}));renderizarDocumentoEnPantalla();guardarEnHistorial(false)}
 };
 function editText(text,path){return `<div contenteditable="true" data-heva-path="${path}" class="border rounded p-2 whitespace-pre-line">${hevaEscape(text)}</div>`}
 function syncEdits(){if(!materialActual)return;materialActual.titulo=document.getElementById('doc-titulo').innerText;materialActual.introduccionLectura=document.getElementById('doc-lectura').innerText;document.querySelectorAll('[data-heva-path]').forEach(el=>{let keys=el.dataset.hevaPath.split('.'),obj=materialActual;for(let k of keys.slice(0,-1))obj=obj[k];obj[keys.at(-1)]=el.innerText})}
