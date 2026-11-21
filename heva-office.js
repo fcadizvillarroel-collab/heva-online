@@ -7,7 +7,7 @@ async function word(m,teacher=false){
  const {Document,Packer,Paragraph,TextRun,HeadingLevel,AlignmentType}=root.docx;
  const originalBlocks=HEVA.blocks(material,teacher),blocks=root.HEVAGuideVisuals?.plan(material,originalBlocks,root.HEVAContextAssets,HEVA.blocks(material,false).length)||originalBlocks;
  const main=visual.theme.main,ink=visual.theme.ink,children=[];
- const line=(value,opts={})=>new Paragraph({children:[new TextRun({text:String(value),size:opts.size||visual.wordSize,font:material.accesibilidadVisual?.fuente||'Arial',characterSpacing:Math.round((material.accesibilidadVisual?.espaciado||0)*(opts.size||visual.wordSize)*10),bold:!!opts.bold,color:opts.color||ink})],spacing:{before:opts.before||0,after:opts.after??110},...(opts.box?{shading:{fill:visual.theme.background},border:{left:{color:main,size:16,space:8,style:'single'}},indent:{left:160,right:100}}:{}),keepNext:!!opts.keepNext});
+ const line=(value,opts={})=>new Paragraph({children:[new TextRun({text:String(value),size:opts.size||visual.wordSize,font:material.accesibilidadVisual?.fuente||'Arial',characterSpacing:Math.round((material.accesibilidadVisual?.espaciado||0)*(opts.size||visual.wordSize)*10),bold:!!opts.bold,color:opts.color||ink})],spacing:{before:opts.before||0,after:opts.after??110},...(opts.box?{shading:{type:'clear',fill:visual.theme.background},border:{left:{color:main,size:16,space:8,style:'single'}},indent:{left:160,right:100}}:{}),keepNext:!!opts.keepNext});
  children.push(line('ESCUELA HÉCTOR VALENZUELA CEA · EPJA',{bold:true,color:main,size:20,after:260}));
  children.push(new Paragraph({text:material.titulo||'Material educativo',heading:HeadingLevel.TITLE,spacing:{after:220},keepNext:true}));
  children.push(line([material.asignatura,material.nivel,material.temaEspecifico].filter(Boolean).join(' · '),{color:main,after:260}));
@@ -25,7 +25,7 @@ async function word(m,teacher=false){
    for(let j=0;j<3;j++)children.push(line('___________________________________________________________________',{size:19,color:'9A9A9A',after:155}));
   }
  }
- const doc=new Document({styles:{paragraphStyles:[{id:'Heading2',name:'Heading 2',basedOn:'Normal',next:'Normal',run:{font:material.accesibilidadVisual?.fuente||'Arial',size:Math.max(visual.wordSize,28),bold:true,color:main},paragraph:{keepNext:true}},{id:'Title',name:'Title',basedOn:'Normal',next:'Normal',run:{font:material.accesibilidadVisual?.fuente||'Arial',size:Math.max(visual.wordSize+8,36),bold:true,color:main},paragraph:{keepNext:true}}],default:{document:{run:{font:material.accesibilidadVisual?.fuente||'Arial',size:visual.wordSize},paragraph:{spacing:{line:Math.round(240*(material.accesibilidadVisual?.interlineado||1.3))}}}}},sections:[{properties:{page:{margin:{top:1080,bottom:1080,left:1080,right:1080}}},children}]});
+ const doc=new Document({styles:{paragraphStyles:[{id:'Heading2',name:'Heading 2',basedOn:'Normal',next:'Normal',run:{font:material.accesibilidadVisual?.fuente||'Arial',size:Math.max(visual.wordSize,28),bold:true,color:main},paragraph:{keepNext:true}},{id:'Title',name:'Title',basedOn:'Normal',next:'Normal',run:{font:material.accesibilidadVisual?.fuente||'Arial',size:Math.max(visual.wordSize+8,36),bold:true,color:main},paragraph:{keepNext:true}}],default:{document:{run:{font:material.accesibilidadVisual?.fuente||'Arial',size:visual.wordSize},paragraph:{spacing:{line:Math.round(240*(material.accesibilidadVisual?.interlineado||1.3)),lineRule:'auto'}}}}},sections:[{properties:{page:{margin:{top:1080,bottom:1080,left:1080,right:1080}}},children}]});
  const blob=await Packer.toBlob(doc);
  download(blob,safeName(material.titulo)+(teacher?'_docente':'_estudiante')+'.docx');
  return blob;
@@ -69,10 +69,10 @@ function paginatePresentation(section,large=false){
 function addChrome(ppt,theme,section,num,total){
  const slide=ppt.addSlide();slide.background={color:theme.background};
  if(section==='activity')theme={...theme,main:'FFFFFF',ink:'FFFFFF'};
- slide.addShape(ppt.ShapeType.rect,{x:0,y:0,w:13.333,h:.06,line:{color:theme.main},fill:{color:theme.main}});
+ slide.addShape(ppt.ShapeType.rect,{x:0,y:0,w:13.333,h:theme.layout==='editorial'?.12:.07,line:{color:theme.main},fill:{color:theme.main}});
 
- slide.addText('HEVA  /  EDUCACIÓN DE PERSONAS JÓVENES Y ADULTAS',{x:.72,y:.33,w:10.7,h:.25,fontSize:10,bold:true,color:theme.main,margin:0});
- slide.addShape(ppt.ShapeType.line,{x:.72,y:6.96,w:11.88,h:0,line:{color:'DDCDBE',width:1}});
+ slide.addText('HEVA  /  EDUCACIÓN DE PERSONAS JÓVENES Y ADULTAS',{x:.72,y:.33,w:10.7,h:.25,fontFace:theme.font||'Aptos',fontSize:10,bold:true,color:theme.main,margin:0,charSpacing:theme.layout==='editorial'?1.2:0});
+ slide.addShape(ppt.ShapeType.line,{x:.72,y:6.96,w:11.88,h:0,line:{color:theme.soft||'DDCDBE',width:1}});
  slide.addText('ESCUELA HÉCTOR VALENZUELA CEA · VILLARRICA',{x:.72,y:7.06,w:9.9,h:.18,fontSize:9,color:theme.ink,margin:0});
  slide.addText(String(num)+' / '+String(total),{x:11.45,y:7.04,w:1.1,h:.2,fontSize:10,color:theme.main,bold:true,align:'right',margin:0});
  return slide;
@@ -134,7 +134,7 @@ function addContent(ppt,theme,slide,title,lines,section,index=0,scene={}){
  const activity=scene.design==='activity'||kind==='activity',activityStyle=activity&&resources.recuadros,ink=activityStyle?'FFFFFF':theme.ink,main=activityStyle?'FFFFFF':theme.main;
  // A single canvas: no nested cards, decorative counters or repeated panel grids.
  if(activityStyle)slide.background={color:theme.main};
- const text=(value,x,y,w,h,size,color,bold=false)=>slide.addText(String(value),{x,y,w,h,fontFace:'Arial',fontSize:size,color,bold,margin:0,breakLine:false,valign:'top',fit:'shrink',paraSpaceAfterPt:12});
+ const text=(value,x,y,w,h,size,color,bold=false)=>slide.addText(String(value),{x,y,w,h,fontFace:theme.font||'Aptos',fontSize:size,color,bold,margin:0,breakLine:false,valign:'top',fit:'shrink',paraSpaceAfterPt:12});
  const relation=resources.diagramas&&!activity?root.HEVASlideDesign?.relation(clean):null;
  const chart=resources.graficos&&scene.allowDataChart!==false&&!activity&&fitsText([clean.join('\n')],5.15,3.9,26)?root.HEVASlideDesign?.dataChart(clean):null;
  const titleSize=title.length>85?28:title.length>60?32:36;
@@ -149,12 +149,27 @@ function addContent(ppt,theme,slide,title,lines,section,index=0,scene={}){
  if(relation){
   const nodeX=illustration ? .85 : 1.15,nodeW=illustration?6.7:11.0,innerW=nodeW-.5;
   const heights=clean.map(t=>lineCount(t,innerW,26)*26*1.28/72+.3),height=heights.reduce((a,n)=>a+n,0)+(clean.length-1)*.25;
-  if(height<=4.05){let y=2.35+(4.05-height)/2;clean.forEach((line,j)=>{const h=heights[j],dark=j===0&&theme.main!=='111111';slide.addShape(ppt.ShapeType.roundRect,{x:nodeX,y,w:nodeW,h,rectRadius:.1,line:{color:theme.main,width:1},fill:{color:dark?theme.main:'FFFFFF'}});text(line,nodeX+.25,y+.15,innerW,h-.3,26,dark?'FFFFFF':ink);y+=h;if(j<clean.length-1){slide.addShape(ppt.ShapeType.downArrow,{x:nodeX+nodeW/2-.175,y:y+.025,w:.35,h:.2,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});y+=.25;}});if(illustration)addPicture();slide.hevaVisualType='diagram';return;}
+  if(height<=4.05){let y=2.35+(4.05-height)/2;clean.forEach((line,j)=>{const h=heights[j],dark=j===0&&theme.main!=='111111';slide.addShape(ppt.ShapeType.roundRect,{x:nodeX,y,w:nodeW,h,rectRadius:.1,line:{color:theme.main,width:1},fill:{color:dark?theme.main:(theme.panel||'FFFFFF')}});text(line,nodeX+.25,y+.15,innerW,h-.3,26,dark?'FFFFFF':ink);y+=h;if(j<clean.length-1){slide.addShape(ppt.ShapeType.downArrow,{x:nodeX+nodeW/2-.175,y:y+.025,w:.35,h:.2,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});y+=.25;}});if(illustration)addPicture();slide.hevaVisualType='diagram';return;}
  }
  if(illustration){addPicture();text(clean.join('\n\n'),.86,2.35,6.7,4.1,26,ink);return;}
  if(!resources.recuadros){text(clean.join('\n\n'),.86,2.4,11.0,4.05,26,ink);return;}
  if(activity)text('TRABAJO EN CLASE',.86,2.14,11.4,.32,14,'FFFFFF',true);
  const top=activity?2.7:2.4;
+ // Tres tarjetas editables, con colores del tema elegido.
+ if(!activity&&resources.recuadros&&clean.length===3&&
+    clean.every(line=>fitsText([line],3.36,2.82,21))&&
+    (kind==='cards'||scene.design==='concept'||theme.layout==='editorial')){
+   const width=3.72,gap=.19;
+   clean.forEach((line,j)=>{
+     const x=.86+j*(width+gap);
+     slide.addShape(ppt.ShapeType.roundRect,{x,y:2.55,w:width,h:3.64,rectRadius:.12,line:{color:theme.soft||theme.accent,width:1},fill:{color:j%2===0?(theme.panel||'FFFFFF'):(theme.soft||'F1E7DB')}});
+     slide.addShape(ppt.ShapeType.rect,{x:x+.2,y:2.83,w:.7,h:.08,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});
+     text(String(j+1).padStart(2,'0'),x+.2,3.06,.65,.42,17,theme.main,true);
+     text(line,x+.24,3.68,width-.48,2.25,21,theme.ink);
+   });
+   slide.hevaVisualType='cards';
+   return;
+ }
  if(resources.diagramas&&scene.design==='example'&&clean.length>=2&&clean.length<=3&&clean.every(t=>fitsText([t],10.4,1.05,26))){
   clean.forEach((line,j)=>{const y=2.3+j*1.34;text(String(j+1),.86,y,.65,.8,38,main,true);text(line,1.85,y,10.4,1.05,26,ink);});return;
  }
@@ -172,20 +187,20 @@ function addContent(ppt,theme,slide,title,lines,section,index=0,scene={}){
  const mid=Math.ceil(clean.length/2),halves=[clean.slice(0,mid),clean.slice(mid)];
  if(kind==='compare'&&clean.length>=2&&halves.every(x=>fitsText(x,4.9,3.3,26))){
   const panelHeight=Math.min(4.15,Math.max(2.6,...halves.map(part=>lineCount(part.join('\n\n'),4.9,26)*26*1.28/72+.75))),panelY=2.3+(4.15-panelHeight)/2;
-  halves.forEach((part,j)=>{const x=.86+j*6.03;slide.addShape(ppt.ShapeType.roundRect,{x,y:panelY,w:5.6,h:panelHeight,rectRadius:.12,line:{color:theme.accent,width:1},fill:{color:theme.main==='111111'?'FFFFFF':j?'F1E7DB':'FFFFFF'}});text(part.join('\n\n'),x+.35,panelY+.35,4.9,panelHeight-.7,26,ink);});
+  halves.forEach((part,j)=>{const x=.86+j*6.03;slide.addShape(ppt.ShapeType.roundRect,{x,y:panelY,w:5.6,h:panelHeight,rectRadius:.12,line:{color:theme.accent,width:1},fill:{color:theme.main==='111111'?'FFFFFF':j?(theme.soft||'F1E7DB'):(theme.panel||'FFFFFF')}});text(part.join('\n\n'),x+.35,panelY+.35,4.9,panelHeight-.7,26,ink);});
  }else{
   // Every remaining interior receives a real composition, including legacy
   // decks without role metadata and topics with no matching illustration.
   const mono=theme.main==='111111';
   if(!activity&&clean.length===2&&clean.every(t=>fitsText([t],4.9,3.35,26))){
-   clean.forEach((line,j)=>{const x=.85+j*6.03,dark=j===0&&!mono;slide.addShape(ppt.ShapeType.roundRect,{x,y:2.3,w:5.6,h:4.15,rectRadius:.12,line:{color:theme.main,width:1,transparency:dark?100:75},fill:{color:dark?theme.main:'FFFFFF'}});text(line,x+.35,2.72,4.9,3.35,26,dark?'FFFFFF':ink);});
+   clean.forEach((line,j)=>{const x=.85+j*6.03,dark=j===0&&!mono;slide.addShape(ppt.ShapeType.roundRect,{x,y:2.3,w:5.6,h:4.15,rectRadius:.12,line:{color:theme.main,width:1,transparency:dark?100:75},fill:{color:dark?theme.main:(theme.panel||'FFFFFF')}});text(line,x+.35,2.72,4.9,3.35,26,dark?'FFFFFF':ink);});
   }else{
    const heights=clean.map(t=>lineCount(t,10.9,26)*26*1.28/72+.34),total=heights.reduce((a,n)=>a+n,0)+Math.max(0,clean.length-1)*.17;
    if(!activity&&clean.length>=2&&clean.length<=3&&total<=4.05){
-    let y=2.35+(4.05-total)/2;clean.forEach((line,j)=>{const h=heights[j];slide.addShape(ppt.ShapeType.roundRect,{x:.85,y,w:11.65,h,rectRadius:.08,line:{color:theme.accent,width:.8},fill:{color:mono||j%2===0?'FFFFFF':theme.background}});slide.addShape(ppt.ShapeType.rect,{x:.85,y,w:.1,h,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});text(line,1.2,y+.17,10.9,h-.34,26,ink);y+=h+.17;});
+    let y=2.35+(4.05-total)/2;clean.forEach((line,j)=>{const h=heights[j];slide.addShape(ppt.ShapeType.roundRect,{x:.85,y,w:11.65,h,rectRadius:.08,line:{color:theme.accent,width:.8},fill:{color:mono||j%2===0?(theme.panel||'FFFFFF'):(theme.soft||theme.background)}});slide.addShape(ppt.ShapeType.rect,{x:.85,y,w:.1,h,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});text(line,1.2,y+.17,10.9,h-.34,26,ink);y+=h+.17;});
    }else{
     const y=activity?2.55:2.2,h=activity?3.95:4.4;
-    slide.addShape(ppt.ShapeType.roundRect,{x:.8,y,w:11.73,h,rectRadius:.12,line:{color:activity?'FFFFFF':theme.accent,width:1},fill:{color:activity?theme.main:'FFFFFF'}});
+    slide.addShape(ppt.ShapeType.roundRect,{x:.8,y,w:11.73,h,rectRadius:.12,line:{color:activity?'FFFFFF':theme.accent,width:1},fill:{color:activity?theme.main:(theme.panel||'FFFFFF')}});
     slide.addShape(ppt.ShapeType.rect,{x:.8,y,w:.12,h,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});
     const size=!activity&&clean.length===1&&fitsText(clean,11.0,4.05,28)?28:26;
     text(clean.join('\n\n'),1.15,activity?2.7:2.4,11.0,activity?3.65:4.05,size,ink);
@@ -221,13 +236,22 @@ function presentationPages(material,teacher=false){
 }
 function renderCover(ppt,theme,material,total){
  const cover=ppt.addSlide(),contrast=theme.background==='FFFFFF'&&theme.main==='111111';
- const image=material.imagenPortadaHEVA===true&&root.HEVASlideDesign?.options(material).imagenes!==false?root.HEVAVisualAssets?.cover:null;
- cover.background={color:contrast?'FFFFFF':theme.main};
+ const editorial=theme.layout==='editorial',clean=theme.layout==='clean',warm=theme.layout==='warm';
+ // La fotografía genérica nunca debe definir el tema de una asignatura.
+ const image=!editorial&&!clean&&root.HEVASlideDesign?.options(material).imagenes!==false?root.HEVAVisualAssets?.cover:null;
+ cover.background={color:contrast?'FFFFFF':editorial?theme.background:(theme.cover||theme.main)};
  if(image&&!contrast)cover.addImage({data:image,x:0,y:0,w:13.333,h:7.5,altText:'Cuaderno y materiales de estudio. Imagen decorativa generada.'});
- const color=contrast?'111111':'FFFFFF',title=String(material.titulo||'Presentación educativa');
- const size=title.length>100?32:title.length>65?38:44;
- cover.addText('HEVA  /  APRENDER Y APLICAR',{x:.85,y:.7,w:7,h:.4,fontSize:14,bold:true,color,margin:0});
- cover.addText(title,{x:.85,y:2,w:image&&!contrast?6.25:11.6,h:2.8,fontFace:'Arial',fontSize:size,bold:true,color,margin:0,valign:'mid',fit:'shrink'});
+ const color=contrast?'111111':editorial?theme.main:'FFFFFF',title=String(material.titulo||'Presentación educativa');
+ const size=title.length>100?30:title.length>65?35:editorial?43:44;
+ if(editorial){
+  cover.addShape(ppt.ShapeType.rect,{x:0,y:0,w:.22,h:7.5,line:{color:theme.main,transparency:100},fill:{color:theme.main}});
+  cover.addShape(ppt.ShapeType.rect,{x:.85,y:1.56,w:2.25,h:.07,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});
+ }else if(clean){
+  cover.addShape(ppt.ShapeType.rect,{x:0,y:0,w:13.333,h:.12,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});
+  cover.addShape(ppt.ShapeType.roundRect,{x:9.9,y:1.1,w:2.35,h:4.35,rectRadius:.18,line:{color:theme.accent,transparency:100},fill:{color:theme.accent,transparency:18}});
+ }
+ cover.addText('HEVA  /  APRENDER Y APLICAR',{x:.85,y:.7,w:7,h:.4,fontFace:theme.font||'Aptos',fontSize:14,bold:true,color,margin:0});
+ cover.addText(title,{x:.85,y:2,w:image&&!contrast?6.25:11.6,h:2.8,fontFace:theme.font||'Aptos',fontSize:size,bold:true,color,margin:0,valign:'mid',fit:'shrink'});
  cover.addText([material.asignatura,material.nivel].filter(Boolean).join(' · '),{x:.85,y:5.3,w:image&&!contrast?6.2:11.6,h:.65,fontSize:20,color,margin:0,fit:'shrink'});
  cover.addText('ESCUELA HÉCTOR VALENZUELA CEA · VILLARRICA',{x:.85,y:6.85,w:10.5,h:.3,fontSize:10,color,margin:0});
  if(typeof cover.addNotes==='function'&&image&&!contrast)cover.addNotes('Imagen de portada decorativa generada para HEVA. No constituye una fuente ni evidencia curricular.');
@@ -238,13 +262,13 @@ function preview(m,teacher=false){
  const ppt={ChartType:{bar:'bar'},ShapeType:{rect:'rect',roundRect:'roundRect',line:'line',downArrow:'downArrow'},addSlide(){const page={elements:[],background:{color:visual.theme.background}};record.push(page);return Object.defineProperties({addChart:(chartType,data,options)=>page.elements.push({kind:'chart',chartType,data,...options}),addImage:(options)=>page.elements.push({kind:'image',...options}),addShape:(shape,options)=>page.elements.push({kind:'shape',shape,...options}),addText:(text,options)=>page.elements.push({kind:'text',text:String(text),...options}),addNotes:()=>{}},{background:{set(v){page.background=v}},hevaVisualType:{set(v){page.visualKind=v}}});}};
  renderCover(ppt,visual.theme,material,pages.length+1);
  pages.forEach((page,i)=>{const slide=addChrome(ppt,visual.theme,page.visualOptions?.recuadros===false?'plain':page.design==='activity'?'activity':classifySlide(page.title,page.lines,i),i+2,pages.length+1);if(visual.large){const add=slide.addText;slide.addText=(text,options)=>add(text,{...options,fontSize:(options.fontSize>=17?Math.max(26,options.fontSize):options.fontSize)});}addContent(ppt,visual.theme,slide,page.title,page.lines,page.kind,i,page);});
- return {pages:record,visualSummary:{interiorPages:record.length-1,interiorImages:record.slice(1).reduce((n,p)=>n+p.elements.filter(x=>x.kind==='image').length,0),charts:record.reduce((n,p)=>n+p.elements.filter(x=>x.kind==='chart').length,0),diagrams:record.filter(p=>p.visualKind==='diagram').length,composedPages:record.slice(1).filter(p=>p.elements.some(x=>x.kind==='shape'&&x.shape==='roundRect')).length},width:13.333,height:7.5,limitation:'Comparte paginación y geometría con PPTX. Las fuentes y saltos de línea pueden variar en PowerPoint; comprobar el archivo final.'};
+ return {pages:record,visualSummary:{interiorPages:record.length-1,interiorImages:record.slice(1).reduce((n,p)=>n+p.elements.filter(x=>x.kind==='image').length,0),charts:record.reduce((n,p)=>n+p.elements.filter(x=>x.kind==='chart').length,0),diagrams:record.filter(p=>p.visualKind==='diagram').length,composedPages:record.slice(1).filter(p=>p.elements.some(x=>x.kind==='shape'&&x.shape==='roundRect')).length,cardPages:record.filter(p=>p.visualKind==='cards').length},width:13.333,height:7.5,limitation:'Comparte paginación y geometría con PPTX. Las fuentes y saltos de línea pueden variar en PowerPoint; comprobar el archivo final.'};
 }
 async function powerpoint(m,teacher=false){
  if(!root.PptxGenJS)throw Error('No se cargó el exportador PowerPoint. Recarga la página.');
  const material=HEVA.material(m),visual=root.HEVATemplates.layout(material),theme=visual.theme;
  const ppt=new root.PptxGenJS();ppt.layout='LAYOUT_WIDE';ppt.author='Escuela Héctor Valenzuela CEA';ppt.subject=material.objetivoAprendizaje||'';ppt.title=material.titulo;
- ppt.lang='es-CL';ppt.theme={headFontFace:'Aptos Display',bodyFontFace:'Aptos',lang:'es-CL'};
+ ppt.lang='es-CL';ppt.theme={headFontFace:theme.font||'Aptos Display',bodyFontFace:theme.font||'Aptos',lang:'es-CL'};
  const pages=presentationPages(material,teacher);
  const total=pages.length+1;
  renderCover(ppt,theme,material,total);
@@ -255,9 +279,8 @@ async function powerpoint(m,teacher=false){
 function auditExport(m,teacher=false){
  const material=HEVA.material(m),blocks=HEVA.blocks(material,teacher),issues=[];
  const text=blocks.map(b=>String(b.text||'')).join('\n');
- const isPresentation=String(material.tipoMaterial||'').toUpperCase()==='PRESENTACION';
- const slides=isPresentation?presentationPages(material,teacher).length+1:null;
- if(isPresentation&&slides>35)issues.push({level:'warning',code:'PPT_EXTENSO',detail:'La conversión podría producir '+slides+' diapositivas. Revise la necesidad de cada sección; no se recorta contenido.'});
+ const slides=presentationPages(material,teacher).length+1;
+ if(slides>35)issues.push({level:'warning',code:'PPT_EXTENSO',detail:'La conversión podría producir '+slides+' diapositivas. Revise la necesidad de cada sección; no se recorta contenido.'});
  if(/(?:Paso\s*\d+\s*:\s*Paso\s*\d+)/i.test(text))issues.push({level:'warning',code:'PASO_REPETIDO',detail:'Se detectó una etiqueta de paso duplicada en el contenido original.'});
  if(/(?:imagin(?:e|ar)|visualic(?:e|ar))\s+(?:una\s+)?balanza/i.test(text))issues.push({level:'info',code:'BALANZA_VISUAL',detail:'Conviene acompañar la metáfora de la balanza con un diagrama.'});
  if(/evaluaci[oó]n|prueba/i.test(material.tipoMaterial||'')&&!/puntaje|puntos/i.test(text))issues.push({level:'warning',code:'SIN_PUNTAJE',detail:'No se identificó un puntaje explícito en la evaluación.'});
@@ -265,7 +288,7 @@ function auditExport(m,teacher=false){
  const plannedPages=presentationPages(material,teacher);
  const withVisuals=plannedPages.filter(p=>p.image||p.chart||p.diagram).length;
  const requested=root.HEVASlideDesign?.options(material)||{};
- if(isPresentation&&requested.imagenes!==false&&plannedPages.length>=10&&withVisuals/Math.max(1,plannedPages.length)<.15)issues.push({level:'warning',code:'COBERTURA_VISUAL_BAJA',detail:'Solo '+withVisuals+' de '+plannedPages.length+' páginas tienen recursos visuales planificados. Revise su pertinencia y distribución; una portada decorativa no basta.'});
- const sectionData=blocks.map(b=>({title:b.title,text:b.text})); const q=root.HEVAQualityGate?.inspect({material,sections:sectionData,visuals:plannedPages}); if(q)for(const issue of q.issues)issues.push({level:'warning',code:issue.code,detail:issue.detail}); const evidence=root.HEVAEvidenceGate?.inspect({material,sections:sectionData,visuals:plannedPages}); if(evidence)for(const issue of evidence.issues)issues.push({level:'warning',code:issue.code,detail:issue.detail}); const approval=root.HEVAApprovalAudit?.review({material,sections:sectionData,visuals:plannedPages}); if(approval)for(const issue of approval.issues)issues.push({level:'warning',code:issue.code,detail:issue.detail}); return {estimatedSlides:slides,exportKind:isPresentation?'PRESENTACION':'DOCUMENTO',issues,qualityScore:q?.score??null,qualityScoreIsHeuristic:true,pedagogicallyApproved:approval?approval.aprobado:false,documentaryEvidence:evidence||null,approvalEvidence:approval||null,wordAndPowerpointShareContent:true};
+ if(['PRESENTACION','GUIA','TALLER','ACCESIBLE'].includes(material.tipoMaterial)&&requested.imagenes!==false&&plannedPages.length>=10&&withVisuals/Math.max(1,plannedPages.length)<.15)issues.push({level:'warning',code:'COBERTURA_VISUAL_BAJA',detail:'Solo '+withVisuals+' de '+plannedPages.length+' páginas tienen recursos visuales planificados. Revise su pertinencia y distribución; una portada decorativa no basta.'});
+ const sectionData=blocks.map(b=>({title:b.title,text:b.text})); const q=root.HEVAQualityGate?.inspect({material,sections:sectionData,visuals:plannedPages}); if(q)for(const issue of q.issues)issues.push({level:'warning',code:issue.code,detail:issue.detail}); const evidence=root.HEVAEvidenceGate?.inspect({material,sections:sectionData,visuals:plannedPages}); if(evidence)for(const issue of evidence.issues)issues.push({level:'warning',code:issue.code,detail:issue.detail}); const approval=root.HEVAApprovalAudit?.review({material,sections:sectionData,visuals:plannedPages}); if(approval)for(const issue of approval.issues)issues.push({level:'warning',code:issue.code,detail:issue.detail}); return {estimatedSlides:slides,issues,qualityScore:q?.score??null,qualityScoreIsHeuristic:true,pedagogicallyApproved:approval?approval.aprobado:false,documentaryEvidence:evidence||null,approvalEvidence:approval||null,wordAndPowerpointShareContent:true};
 }
 root.HEVAOffice={word,powerpoint,download,auditExport,preview,presentationPages,paginatePresentation,classifySlide};})(typeof globalThis!=='undefined'?globalThis:this);
