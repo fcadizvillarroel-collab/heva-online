@@ -49,6 +49,13 @@ module.exports = async function handler(req, res) {
   for (const [name,value,max] of [['cantAlternativas',cantAlternativas,30],['cantDesarrollo',cantDesarrollo,30],['cantCasos',cantCasos,30]]) {
     if (!Number.isInteger(value) || value < 0 || value > max) return res.status(400).json({error:`${name} debe estar entre 0 y ${max}`});
   }
+  // Comprobar tipos y límites antes de enviar solicitudes a IA.
+  for(const [name,value,max] of [['modoHerramienta',modoHerramienta,60],['tipoMaterial',tipoMaterial,60],['asignatura',asignatura,300],['nivel',nivel,300],['marcoCurricular',marcoCurricular,300],['objetivoAprendizaje',objetivoAprendizaje,3000],['temaEspecifico',temaEspecifico,3000],['estrategiaDidactica',estrategiaDidactica,500],['instruccionesDocente',instruccionesDocente,12000]]){
+    if(value!=null&&(typeof value!=='string'||value.length>max))return res.status(400).json({error:'Campo '+name+' inválido o demasiado largo.'});
+  }
+  for(const [name,value] of [['disenoPedagogico',disenoPedagogico],['planIntegrado',planIntegrado],['preguntaARegenerar',preguntaARegenerar],['adecuacionesPIE',adecuacionesPIE]]){
+    if(value!=null&&(typeof value!=='object'||JSON.stringify(value).length>200000))return res.status(400).json({error:'Campo '+name+' inválido o demasiado largo.'});
+  }
   if (typeof objetivoAprendizaje !== 'string' || typeof textoReferencia !== 'string' || textoReferencia.length > 60000) return res.status(400).json({error:'Objetivo o texto de referencia inválido o demasiado extenso.'});
   const OPENAI_API_KEY = process.env.ALLOW_PAID_AI === 'true' ? (process.env.OPENAI_API_KEY || '').trim() : '';
   const GEMINI_API_KEY = (process.env.GEMINI_API_KEY || '').trim();
