@@ -28,7 +28,7 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
         })
       });
 
-      track(resp,'openai');const data = await resp.json();
+      track(resp,'openai');const data = await resp.json().catch(()=>({}));
       if (resp.ok && data.choices?.[0]?.message?.content) {
         return {value:parseAIJSON(data.choices[0].message.content,data.choices[0].finish_reason),provider:'openai',model:'gpt-4o-mini'};
       } else {
@@ -61,13 +61,22 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
           })
         });
 
-        track(resp,'gemini');const data = await resp.json();
+        track(resp,'gemini');const data = await resp.json().catch(()=>({}));
         const candidate=data.candidates?.[0];
         if(resp.ok&&candidate?.content?.parts){
           const texto=candidate.content.parts.filter(p=>typeof p.text==='string'&&!p.thought).map(p=>p.text).join('');
           return {value:parseAIJSON(texto,candidate.finishReason),provider:'gemini',model:mod};
         }
-        tryNextModel=[404,429,500,502,503,504].includes(resp.status);errores.push('Gemini: proveedor no disponible ('+resp.status+').');break;
+        if(resp.ok){
+          // HTTP 200 sin partes utilizables: no es éxito; permitir segundo intento y respaldo Groq.
+          const problem={code:'AI_RESPONSE_INCOMPLETE',name:'AIResponseIncomplete'};
+          remember(problem,'gemini');
+          errores.push('Gemini: respuesta vacía o bloqueada ('+(candidate?.finishReason||'sin partes')+').');
+          if(attempt===0&&deadline-Date.now()>4000)continue;
+          tryNextModel=true;break;
+        }
+        tryNextModel=[404,429,500,502,503,504].includes(resp.status);
+        errores.push('Gemini: proveedor no disponible ('+resp.status+').');break;
       } catch(e){
         remember(e,'gemini');errores.push('Gemini: '+(e.code||'conexión no disponible'));
         if(String(e?.code||'').startsWith('AI_RESPONSE_')){
@@ -96,13 +105,13 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
             model: mod,
             messages: [{ role: 'system', content: 'Responde exclusivamente con JSON válido.' }, { role: 'user', content: options.fallbackPrompt||prompt }],
             response_format: { type: 'json_object' },
-            max_completion_tokens: options.fallbackMaxOutputTokens || options.maxOutputTokens || 8192,
+            max_completion_tokens: Math.min(mod==='llama-3.1-8b-instant'?8192:16384,options.fallbackMaxOutputTokens || options.maxOutputTokens || 8192),
             ...(mod.startsWith('openai/gpt-oss')?{reasoning_effort:'low'}:{}),
             temperature: 0.4
           })
         });
 
-        track(resp,'groq');const data = await resp.json();
+        track(resp,'groq');const data = await resp.json().catch(()=>({}));
         if (resp.ok && data.choices?.[0]?.message?.content) {
           return {value:parseAIJSON(data.choices[0].message.content,data.choices[0].finish_reason),provider:'groq',model:mod};
         }
