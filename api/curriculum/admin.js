@@ -1,10 +1,7 @@
 // api/curriculum/admin.js — Conexión Nativa a Supabase con columnas reales del CSV
 
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Credentials', 'false');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+ require('../_cors.cjs').applyCors(req,res,{methods:'GET,POST,OPTIONS',headers:'Content-Type, Authorization'});
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
