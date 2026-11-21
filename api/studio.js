@@ -4,7 +4,7 @@ module.exports=async(req,res)=>{
  if(req.method!=='POST')return res.status(405).json({error:'Utilice POST.'});
  try{
   const {material:m,seccion,instrucciones}=req.body||{};
-  if(JSON.stringify(req.body).length>240000)return res.status(413).json({error:'Material demasiado extenso.'});
+  if(JSON.stringify(req.body||{}).length>240000)return res.status(413).json({error:'Material demasiado extenso.'});
   if(m?.versionPedagogica!==3||!m.planGeneracion||typeof instrucciones!=='string'||!instrucciones.trim()||instrucciones.length>3000)return res.status(400).json({error:'Selecciona material, sección e instrucción de hasta 3.000 caracteres.'});
   if(!(await require('./_ai-access.cjs').protect(req,res)))return;
   const selected=Studio.section(m,seccion),author=m.autoriaIA?.proveedor;
@@ -17,5 +17,5 @@ module.exports=async(req,res)=>{
   if(issues.length)return res.status(422).json({error:'La propuesta necesita corrección; se conserva el original.',detalle:issues.join('; ')});
   next.edicionesIA=[...(m.edicionesIA||[]),{seccion,instrucciones,proveedor:result.provider,modelo:result.model,fecha:new Date().toISOString()}];
   return res.status(200).json({exito:true,material:next});
- }catch(e){return res.status(e.code?503:400).json({error:e.code?'No se pudo completar la edición con la cuota disponible. Se conserva el original.':e.message});}
+ }catch(e){return res.status(e.code?503:400).json({error:e.code?'No se pudo completar la edición con la cuota disponible. Se conserva el original.':(e instanceof TypeError||e instanceof ReferenceError||e instanceof RangeError||!e.message)?'No se pudo editar la sección. Se conserva el original.':e.message});}
 };
