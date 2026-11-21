@@ -5,7 +5,8 @@ const Q=require('../heva-quality.cjs');
 const P=require('../heva-pedagogy.js');
 const H=require('../heva-core.js');
 module.exports=async function(req,res){
- res.setHeader('Access-Control-Allow-Origin','*');res.setHeader('Access-Control-Allow-Headers','Content-Type');res.setHeader('Access-Control-Allow-Methods','POST,OPTIONS');
+ require('./_cors.cjs').applyCors(req,res,{methods:'POST,OPTIONS',headers:'Content-Type, Authorization'});
+
  if(req.method==='OPTIONS')return res.status(200).end();
  if(req.method!=='POST')return res.status(405).json({error:'Utilice POST.'});
  const {material,accion='revisar'}=req.body||{};
