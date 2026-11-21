@@ -54,7 +54,7 @@ function mountVisualForm(){
  const position=imagePlacementControl(savedPlacement,value=>{try{localStorage.setItem('heva-imagen-ubicacion-v1',value)}catch{}},'heva-image-placement-new');
  let coverSaved=false;try{coverSaved=localStorage.getItem('heva-imagen-portada-v1')==='true'}catch{}
  const cover=imageCoverControl(coverSaved,'heva-image-cover-new');cover.box.querySelector('input').addEventListener('change',()=>{try{localStorage.setItem('heva-imagen-portada-v1',String(cover.read()))}catch{}});
- let textbookSaved=false;try{textbookSaved=localStorage.getItem('heva-usar-textos-escolares-v1')==='true'}catch{}
+ let textbookSaved=true;try{textbookSaved=localStorage.getItem('heva-usar-textos-escolares-v1')!=='false'}catch{}
  const textbookLine=element('label');textbookLine.style.cssText='display:flex;align-items:flex-start;gap:8px;margin:12px 0';
  const textbookInput=element('input',null,{type:'checkbox',id:'heva-use-textbooks'});
  textbookInput.checked=textbookSaved;
