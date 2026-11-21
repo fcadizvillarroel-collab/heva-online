@@ -225,6 +225,8 @@ Responde ÚNICAMENTE en JSON:
     material.fuentesDocumentales=fuentesDocumentales;
     material.textosEscolaresComplementarios=librosRegulares;
     material.referenciasMetalmecanica=referenciasMetalmecanica;
+    material.trazabilidadDocumentalTP=TPInternational.documentEvidence(referenciasMetalmecanica,fuentesDocumentales);
+    material.planVisualTP=TPInternational.visualPlan(referenciasMetalmecanica,material.trazabilidadDocumentalTP);
     const evidence=Sources.validateEvidence(material.respaldoDocumental,fuentesDocumentales);
     material.respaldoDocumental=evidence.valid;material.incidenciasDocumentales=evidence.invalid;
     material=Skills.prepare(material,plan,fuentesDocumentales,evidence);
