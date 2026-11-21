@@ -8,7 +8,51 @@ function validateOptions(value){return value!=null&&typeof value==='object'&&!Ar
 function image(value){if(!value||typeof value!=='object'||!/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/]+=*$/.test(value.data||'')||value.data.length>1800000)return null;const w=Number(value.width),h=Number(value.height);if(!Number.isFinite(w)||!Number.isFinite(h)||w<=0||h<=0||w/h<.15||w/h>7)return null;return{data:value.data,width:w,height:h,alt:String(value.alt||'Imagen incorporada por el docente').slice(0,300),generated:value.generated===true};}
 function role(s){const f=norm(s.role||s.funcion),t=norm(s.title);if(/aplicacion|actividad|practica|desafio|ejercicio/.test(f)||/actividad|ejercicio|desafio|ticket de salida/.test(t))return'activity';if(/objetivo/.test(f))return'opening';if(/cierre|sintesis/.test(f))return'closing';if(/modelamiento|ejemplo/.test(f))return'example';if(/explicacion/.test(f))return'concept';return'editorial';}
 const rules=[{id:'intercambio',topic:/globaliza|comercio internacional|cadena de suministro/,slide:/comercio|producto|proveedor|intercambio|cadena|econom/},{id:'dialogo',topic:/resolucion.*conflic|convivencia|escucha activa|mediacion/,slide:/dialog|escuch|mediac|acuerdo|comunic/},{id:'observacion',topic:/germinacion|semilla|crecimiento vegetal/,slide:/germina|semilla|brote|raiz|planta/},{id:'linea_tiempo',topic:/historia|guerra mundial|guerra fria|revolucion industrial|independencia|descoloniza|edad media|edad moderna/,slide:/cronolog|periodo|etapa|antecedente|acontecimiento|hito|secuencia/},{id:'territorio',topic:/geograf|araucania|guerra del pacifico|territorio|migracion|expansion territorial/,slide:/mapa|region|frontera|territorio|ubicacion|desplazamiento/},{id:'ecuaciones',topic:/matematica|ecuacion|algebra|funcion lineal/,slide:/ecuacion|incognita|variable|despeje|igualdad|solucion/},{id:'lenguaje',topic:/lenguaje|comunicacion|comprension lectora|argumentacion/,slide:/lectura|texto|argumento|idea principal|comprension|evidencia/},{id:'ingles',topic:/ingles|english|vocabulary|grammar/,slide:/dialogue|conversation|vocabulary|sentence|dialogo|pronunciation/},{id:'ciencias',topic:/ciencias naturales|biologia|ecosistema|celula|sistema solar|fotosintesis/,slide:/organismo|celula|ecosistema|energia|ciclo|proceso|experimento/},{id:'seguridad',topic:/construcciones metalicas|prevencion de riesgos|seguridad laboral|soldadura|epp/,slide:/proteccion|riesgo|equipo|soldadura|procedimiento|seguridad/}];
-function subjectVisual(section,topic){
+function visualFamily(subject){
+ const n=norm(subject);
+ if(/lenguaje|lengua y literatura|lengua castellana|comunicacion|lectura|escritura/.test(n))return'lenguaje';
+ if(/ingles|english|idioma extranjero/.test(n))return'ingles';
+ if(/matemat|algebra|geometria/.test(n))return'matematica';
+ if(/historia|estudios sociales|geografia|ciudadania|filosofia/.test(n))return'sociales';
+ if(/ciencias naturales|biologia|quimica|fisica|ecosistema/.test(n))return'ciencias';
+ if(/construcciones metalicas|soldadura|especialidad metal|formacion en oficios|prevencion de riesgos/.test(n))return'tecnica';
+ if(/convivencia|insercion laboral|empleabilidad|emprendimiento|consumo/.test(n))return'ciudadana';
+ return'general';
+}
+const familyPatternIndexes={
+ lenguaje:[3,4,5],ingles:[13],matematica:[6,7],sociales:[1,2],
+ ciencias:[8,9],tecnica:[10],ciudadana:[11,12,2,4],general:[]
+};
+function diagramPlan(section,subject,topic){
+ const family=visualFamily(subject);
+ const sectionWords=norm([section?.title,section?.text].join(' '));
+ const topicWords=norm(topic);
+ // El esquema solo se selecciona dentro de la disciplina solicitada.
+ const names={
+  lenguaje:{title:'Adecuar el lenguaje',labels:['CONTEXTO','DESTINATARIO','REGISTRO'],notes:['Situación y propósito','A quién nos dirigimos','Elegir cómo expresarnos']},
+  ingles:{title:'Comunicarse en inglés',labels:['SITUATION','LANGUAGE','PRACTICE'],notes:['Who and where','Words and structure','Try a dialogue']},
+  matematica:{title:'Resolver con sentido',labels:['DATOS','PROCEDIMIENTO','COMPROBAR'],notes:['Identificar valores','Aplicar operaciones','Verificar el resultado']},
+  sociales:{title:'Interpretar la sociedad',labels:['CONTEXTO','EVIDENCIAS','CONCLUSIÓN'],notes:['Ubicar tiempo y lugar','Examinar fuentes','Explicar relaciones']},
+  ciencias:{title:'Explicar fenómenos',labels:['OBSERVAR','RELACIONAR','CONCLUIR'],notes:['Identificar evidencias','Analizar procesos','Explicar resultados']},
+  tecnica:{title:'Procedimiento técnico seguro',labels:['PREPARAR','EJECUTAR','CONTROLAR'],notes:['Materiales y EPP','Secuencia de trabajo','Calidad y seguridad']},
+  ciudadana:{title:'Decidir con fundamentos',labels:['SITUACIÓN','OPCIONES','DECISIÓN'],notes:['Comprender el caso','Comparar alternativas','Justificar elección']}
+ };
+ const fallback=names[family];
+ if(!fallback)return null; // No inventar un diagrama de otra asignatura.
+ // Prioridad explícita para registro oral. Nunca mostrar EPP en Lenguaje.
+ if(family==='lenguaje'&&/registro (?:formal|informal)|formal.*informal|informal.*formal|registro linguistico|comunicacion oral/.test(topicWords+' '+sectionWords))
+  return{title:'Elegir el registro adecuado',labels:['SITUACIÓN','DESTINATARIO','REGISTRO'],notes:['Lugar y propósito','Relación entre personas','Formal o informal']};
+ const byFamily={
+  lenguaje:[[/argument|tesis|opinion|evidencia/,{title:'Argumentar con razones',labels:['POSTURA','RAZONES','CONCLUSIÓN'],notes:['Qué sostengo','En qué me baso','Cómo lo justifico']}],[/texto|lectura|cuento|fabula|noticia|comprension/,{title:'Comprender un texto',labels:['LEER','INTERPRETAR','FUNDAMENTAR'],notes:['Información clave','Inferencias','Evidencia textual']}]],
+  sociales:[[/guerra|revolucion|independencia|ocupacion/,{title:'Analizar un proceso histórico',labels:['CAUSAS','DESARROLLO','CONSECUENCIAS'],notes:['Qué lo originó','Qué ocurrió','Qué cambió']}]],
+  matematica:[[/ecuacion|algebra|incognita/,{title:'Resolver ecuaciones',labels:['PLANTEAR','RESOLVER','VERIFICAR'],notes:['Datos e incógnita','Operaciones equivalentes','Comprobar solución']}]],
+  ciencias:[[/ecosistema|cadena alimentaria/,{title:'Relaciones en el ecosistema',labels:['ELEMENTOS','INTERACCIONES','CAMBIOS'],notes:['Organismos','Relaciones','Consecuencias']}]],
+  ciudadana:[[/convivencia|mediacion|conflicto/,{title:'Resolver un conflicto',labels:['PERSONAS','PROCESO','PROBLEMA'],notes:['Actores y emociones','Diálogo y acuerdos','Necesidades']}]]
+ };
+ for(const [regex,plan] of byFamily[family]||[])if(regex.test(topicWords+' '+sectionWords))return plan;
+ return fallback;
+}
+function subjectVisual(section,topic,subject){
  // Offline original teaching diagram: never presented as a documentary photograph.
  if(typeof document==='undefined'||typeof document.createElement!=='function')return null;
  const words=norm([section.title,section.text].join(' '));
@@ -39,9 +83,9 @@ function subjectVisual(section,topic){
   {re:/convivencia|resolucion de conflictos|mediacion|comunicacion asertiva/,title:'Resolver conflictos',labels:['PERSONAS','PROCESO','PROBLEMA'],notes:['Intereses y emociones','Diálogo y acuerdos','Necesidades de fondo']},
   {re:/english|ingles|vocabulary|dialogue|conversation|present simple/,title:'Use English in context',labels:['SITUATION','LANGUAGE','PRACTICE'],notes:['Who and where','Words and structure','Apply in a dialogue']}
  ];
- const matched=patterns.find(p=>p.re.test(content))||patterns.find(p=>p.re.test(subject));
- if(matched)groups.unshift({...matched,re:/./});
- const group=groups.find(g=>g.re.test(topic))||{title:'Aprender y aplicar',labels:['CONCEPTO','EJEMPLO','APLICACIÓN'],notes:['Comprender la idea','Observar un modelo','Resolver una tarea']};
+ // Una coincidencia textual aislada no autoriza un esquema de otra asignatura.
+ const group=diagramPlan(section,subject,topic);
+ if(!group)return null;
  try{
   const canvas=document.createElement('canvas');canvas.width=1000;canvas.height=550;
   const ctx=canvas.getContext('2d');if(!ctx)return null;
@@ -58,7 +102,7 @@ function subjectVisual(section,topic){
   return image({data:canvas.toDataURL('image/png'),width:1000,height:550,alt:'Organizador visual: '+group.labels.join(' → '),generated:true});
  }catch{return null;}
 }
-function decorate(m,sections,assets={}){const topic=norm([m.asignatura,m.titulo,m.temaEspecifico,m.objetivoAprendizaje,m.planGeneracion?.temaEspecifico].join(' ')),used=new Set();return sections.map((s,i)=>{const prefs=options(m),out={...s,design:role(s),visualOptions:prefs},own=image(s.image);if(!prefs.imagenes||s.hideImage)return{...out,image:null};if(own)return{...out,image:own};if(!['PRESENTACION','GUIA','TALLER','ACCESIBLE'].includes(m.tipoMaterial)||m.accesibilidadVisual?.contraste||i===0||out.design==='activity'||out.design==='closing'||out.design==='opening')return out;const words=norm(s.title+' '+s.text);for(const rule of rules){const asset=image(assets[rule.id]);if(asset&&!used.has(rule.id)&&rule.topic.test(topic)&&rule.slide.test(words)){used.add(rule.id);return{...out,image:asset};}}if(!used.has('infografia-asignatura')&&prefs.diagramas){const generated=subjectVisual(s,topic);if(generated){used.add('infografia-asignatura');return{...out,image:generated};}}return out;});}
+function decorate(m,sections,assets={}){const topic=norm([m.asignatura,m.titulo,m.temaEspecifico,m.objetivoAprendizaje,m.planGeneracion?.temaEspecifico].join(' ')),family=visualFamily(m.asignatura||m.planGeneracion?.asignatura||''),used=new Set();return sections.map((s,i)=>{const prefs=options(m),out={...s,design:role(s),visualOptions:prefs},own=image(s.image);if(!prefs.imagenes||s.hideImage)return{...out,image:null};if(own)return{...out,image:own};if(!['PRESENTACION','GUIA','TALLER','ACCESIBLE'].includes(m.tipoMaterial)||m.accesibilidadVisual?.contraste||i===0||out.design==='activity'||out.design==='closing'||out.design==='opening')return out;const words=norm(s.title+' '+s.text);for(const rule of rules){const asset=image(assets[rule.id]);if(asset&&!used.has(rule.id)&&rule.topic.test(topic)&&rule.slide.test(words)&&((rule.id==='seguridad')===(family==='tecnica')||rule.id!=='seguridad')&&!(family==='tecnica'&&rule.id==='lenguaje')){used.add(rule.id);return{...out,image:asset};}}if(!used.has('infografia-asignatura')&&prefs.diagramas){const generated=subjectVisual(s,topic,m.asignatura||m.planGeneracion?.asignatura||'');if(generated){used.add('infografia-asignatura');return{...out,image:generated};}}return out;});}
 function contain(asset,box){const ratio=asset.width/asset.height,w=Math.min(box.w,box.h*ratio),h=w/ratio;return{x:box.x+(box.w-w)/2,y:box.y+(box.h-h)/2,w,h};}
 function dataChart(lines){
  if(!Array.isArray(lines)||lines.length<2||lines.length>6)return null;
@@ -72,4 +116,4 @@ function dataChart(lines){
 function relation(lines){if(!Array.isArray(lines)||lines.length<2||lines.length>4)return null;const rows=lines.map(t=>String(t).match(/^\s*(Paso\s+\d+|Etapa\s+\d+|Causa|Consecuencia|Problema|Soluci[oó]n|Antes|Despu[eé]s)\s*:\s*(\S[\s\S]*)$/i));if(rows.some(x=>!x))return null;const labels=rows.map(x=>norm(x[1]));if(labels.every(x=>/^(paso|etapa) /.test(x))){const nums=labels.map(x=>Number(x.match(/\d+/)[0]));if(!nums.every((n,i)=>i===0||n===nums[i-1]+1))return null;return{kind:'steps',lines:lines.slice()};}if(rows.length===2&&['causa|consecuencia','problema|solucion','antes|despues'].includes(labels.join('|')))return{kind:'relation',lines:lines.slice()};return null;}
 function forAI(m){const base={...m};delete base.recursosVisualesHEVA;delete base.imagenGuiaHEVA;delete base.ocultarImagenGuiaHEVA;return{...base,...(Array.isArray(m?.diapositivas)?{diapositivas:m.diapositivas.map(d=>{const x={...d};delete x.imagenHEVA;delete x.ocultarImagenHEVA;return x;})}:{})};}
 function restoreImages(before,after){if(after&&before.objetivoAprendizaje===after.objetivoAprendizaje){const own=image(before.imagenGuiaHEVA);after={...after,...(before.recursosVisualesHEVA?{recursosVisualesHEVA:options(before)}:{}),...(own?{imagenGuiaHEVA:own}:{}),...(typeof before.ocultarImagenGuiaHEVA==='boolean'?{ocultarImagenGuiaHEVA:before.ocultarImagenGuiaHEVA}:{})};}if(!after||!Array.isArray(after.diapositivas))return after;const originals=before.diapositivas||[];return{...after,diapositivas:after.diapositivas.map(d=>{const matches=originals.filter(x=>String(x.titulo||'').trim()===String(d.titulo||'').trim());if(matches.length!==1)return d;const old=matches[0],picture=image(old.imagenHEVA);return{...d,...(picture?{imagenHEVA:picture}:{}),...(typeof old.ocultarImagenHEVA==='boolean'?{ocultarImagenHEVA:old.ocultarImagenHEVA}:{})};})};}
-return{resourceKeys,options,validateOptions,image,role,decorate,contain,dataChart,relation,forAI,restoreImages};});
+return{resourceKeys,options,validateOptions,image,role,visualFamily,diagramPlan,decorate,contain,dataChart,relation,forAI,restoreImages};});
