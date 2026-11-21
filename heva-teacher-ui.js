@@ -26,7 +26,7 @@ function visualOptionsDialog(){
  const m=current(),d=dialog('Elegir recursos visuales');
  d.append(element('p','Elige imágenes, diagramas, gráficos y recuadros. La imagen principal se coloca donde indiques, cuando haya una imagen pertinente incorporada o disponible. Sin imagen, no se añade un espacio vacío.'));
  const fields=visualFields(HEVASlideDesign.options(m),'heva-visual-material');
- const position=imagePlacementControl(m.ubicacionImagenHEVA,'', 'heva-visual-placement-material');
+ const position=imagePlacementControl(m.ubicacionImagenHEVA,()=>{},'heva-visual-placement-material');
  d.append(fields.box,position.box,button('Con recursos visuales',()=>fields.set(true)),button('Solo texto',()=>fields.set(false)),button('Aplicar y guardar opciones',()=>{
   checkpoint();m.recursosVisualesHEVA=fields.read();m.ubicacionImagenHEVA=position.read();setMaterial(m);d.close();
  }));
