@@ -3,8 +3,20 @@
 'use strict';
 const D=()=>typeof module==='object'&&module.exports?require('./heva-slide-design.js'):root.HEVASlideDesign;
 const enabled=m=>['GUIA','TALLER','ACCESIBLE'].includes(m.tipoMaterial);
+const placements=['explicacion','inicio','actividad','final'];
+function placement(m={}){const p=m.ubicacionImagenHEVA||'explicacion';return placements.includes(p)?p:'explicacion';}
+function imageTarget(blocks,limit,place){
+ const find=pred=>blocks.slice(0,limit).findIndex(pred);
+ const intro=find(b=>b.path==='introduccionLectura'||b.title==='Lectura'||b.title==='Explicación y lectura');
+ const activity=find(b=>/actividadesGuiadas\.\d+\.consigna|actividadAutonoma\.consigna|casosEstudio\.\d+\.contextoReal|preguntasAlternativas\.\d+\.enunciado/.test(b.path||''));
+ if(place==='inicio'){const p=find(b=>b.path==='activacion'||b.title==='Antes de comenzar');return p>=0?p:intro>=0?intro:0;}
+ if(place==='actividad')return activity>=0?activity:intro>=0?intro:0;
+ if(place==='final'){const i=find(b=>b.title==='Cierre y reflexión');return i>=0?i:Math.max(0,limit-1);}
+ return intro>=0?intro:Math.max(0,limit-1);
+}
+
 // Guides keep the author's requested visual preferences; never force visuals when disabled.
-function attach(m,blocks,studentCount=blocks.length){const own=D()?.image(m.imagenGuiaHEVA),index=blocks.slice(0,studentCount).findIndex(b=>b.path==='introduccionLectura'||b.title==='Lectura'||b.title==='Explicación y lectura'),target=index>=0?index:studentCount-1;return blocks.map((b,i)=>({...b,...(enabled(m)&&i<studentCount?{image:i===target?own:null,hideImage:m.ocultarImagenGuiaHEVA===true||b.path==='titulo'||b.title==='Objetivo curricular'||b.path==='instruccionesEstudiante'||(Boolean(own)&&i!==target)}:{} )}));}
+function attach(m,blocks,studentCount=blocks.length){const own=D()?.image(m.imagenGuiaHEVA),target=imageTarget(blocks,studentCount,placement(m));return blocks.map((b,i)=>({...b,...(enabled(m)&&i<studentCount?{image:i===target?own:null,hideImage:m.ocultarImagenGuiaHEVA===true||b.path==='titulo'||b.title==='Objetivo curricular'||b.path==='instruccionesEstudiante'||(Boolean(own)&&i!==target)}:{} )}));}
 function plan(m,blocks,assets={},studentCount=blocks.length){if(!enabled(m)||!D())return blocks.map(b=>({...b,guideVisual:null}));const prefs=D().options(m),attached=attach(m,blocks,studentCount),decorated=D().decorate(m,attached.slice(0,studentCount),D().image(m.imagenGuiaHEVA)?{}:assets);return attached.map((b,i)=>{if(i>=studentCount)return{...b,guideVisual:null};const d=decorated[i],rows=String(b.text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);return{...b,guideVisual:{image:d.image||null,chart:prefs.graficos?D().dataChart(rows):null,diagram:prefs.diagramas?D().relation(rows):null,box:prefs.recuadros&&/^ejemploGuiado\.|^actividadesGuiadas\.\d+\.apoyo$|^glosario\./.test(b.path||'')}};});}
 function render(docx,visual,line,theme){const out=[],{Paragraph,Table,TableRow,TableCell,WidthType,BorderStyle,TableLayoutType,HeightRule,ImageRun,AlignmentType}=docx,none={style:BorderStyle.NONE,size:0,color:'FFFFFF'},borders={top:none,bottom:none,left:none,right:none,insideHorizontal:none,insideVertical:none};
  const cell=(children,fill='FFFFFF',width=8800)=>new TableCell({width:{size:width,type:WidthType.DXA},shading:{fill},margins:{top:90,bottom:90,left:140,right:140},children});
@@ -13,4 +25,4 @@ function render(docx,visual,line,theme){const out=[],{Paragraph,Table,TableRow,T
  if(visual.diagram){visual.diagram.lines.forEach((text,i)=>{out.push(table([new TableRow({cantSplit:true,children:[cell([line(text,{bold:i===0,color:theme.ink})],theme.background)]})]));if(i<visual.diagram.lines.length-1)out.push(new Paragraph({text:'↓',alignment:AlignmentType.CENTER,spacing:{before:60,after:60},keepNext:true}));});}
  if(visual.image){const image=visual.image,mime=image.data.slice(11,image.data.indexOf(';')),type=mime==='jpeg'?'jpg':mime,bytes=Uint8Array.from(root.atob(image.data.split(',')[1]),c=>c.charCodeAt(0)),scale=Math.min(1,390/image.width,260/image.height);out.push(new Paragraph({children:[new ImageRun({type,data:bytes,transformation:{width:Math.round(image.width*scale),height:Math.round(image.height*scale)},altText:{title:'Imagen de apoyo',description:image.alt,name:'Imagen de apoyo HEVA'}})],alignment:AlignmentType.CENTER,keepNext:true,spacing:{before:120,after:80}}),line(image.generated?'Imagen ilustrativa generada para HEVA; no constituye evidencia documental.':'Imagen incorporada por el docente: '+image.alt,{color:theme.ink}));}
  return out;}
-return{enabled,attach,plan,render};});
+return{enabled,placement,imageTarget,attach,plan,render};});
