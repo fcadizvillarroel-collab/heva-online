@@ -1,6 +1,7 @@
 const Studio=require('../heva-studio.js'),P=require('../heva-pedagogy.js'),H=require('../heva-core.js'),Skills=require('../heva-skills.js'),{call}=require('./_providers.cjs');
 module.exports=async(req,res)=>{
  res.setHeader('Cache-Control','no-store');
+ require('./_cors.cjs').applyCors(req,res);
  if(req.method!=='POST')return res.status(405).json({error:'Utilice POST.'});
  try{
   const {material:m,seccion,instrucciones}=req.body||{};
