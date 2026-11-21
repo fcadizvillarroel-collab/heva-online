@@ -1,5 +1,6 @@
 const {call} = require('./_providers.cjs');
 const Skills=require('../heva-skills.js');
+const DeepMaterials=require('../heva-deep-materials.cjs');
 const Sources=require('../lib/document-sources.cjs');
 const Textbooks=require('../lib/textbook-reference-catalog.cjs');
 const Pedagogy = require('../heva-pedagogy.js');
@@ -227,6 +228,7 @@ Responde ÚNICAMENTE en JSON:
     material=require('../heva-studio.js').link(material,plan);
     material.auditoriaExperimental=require('../experimental/quality-audit.cjs').inspect(material,plan);
     material.auditoriaDisciplinar=require('../experimental/subject-audit.cjs').inspectAll(material,plan);
+    material.controlProfundidadHEVA=DeepMaterials.advisory(material,plan);
     return res.status(200).json({exito:true,material,revision:{alcance:'Estructura, cantidades y trazabilidad; revisión pedagógica docente pendiente',tipo:tipoMaterial,estrategia:metadata.estrategiaDidactica}});
 
   } catch (error) {
