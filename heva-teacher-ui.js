@@ -148,6 +148,28 @@ function showDepthAdvisories(bar){
  box.append(element('p','Control orientativo, no equivale a revisión disciplinar ni certifica la calidad del material.'));
  for(const issue of issues.slice(0,12))box.append(element('p',String(issue.detail||'Pendiente de revisión')));
 }
+function showMetalSources(bar){
+ let panel=byId('heva-metal-sources');
+ const ref=materialActual?.referenciasMetalmecanica;
+ if(!ref?.aplica){if(panel)panel.remove();return;}
+ if(!panel){panel=element('details',null,{id:'heva-metal-sources'});bar.append(panel);}
+ const titles=Array.isArray(ref.modules)?ref.modules.map(m=>m.id+' · '+m.title).join(' | '):'';
+ panel.replaceChildren(element('summary','Referencias técnicas comparadas · Construcciones Metálicas'),element('p','Módulos chilenos relacionados: '+(titles||'Sin correspondencia automática. Revisar OA seleccionado.')));
+ const known=new Set([
+ 'https://www.curriculumnacional.cl/docente/629/w3-article-34329.html',
+ 'https://www.todofp.es/que-estudiar/familias-profesionales/fabricacion-mecanica/construcciones-metalicas.html',
+ 'https://educacion.gob.ec/wp-content/uploads/downloads/2017/08/oferta-formativa-de-bachillerato-tecnico.pdf',
+ 'https://www.sena.edu.co/es-co/Documents/CONVOCATORIA-CHIEF-EXPERT-HABILIDAD-FINAL-10-de-marzo.pdf',
+ 'https://www.inet.edu.ar/wp-content/uploads/2013/04/15-07-anexo07.pdf',
+ 'https://www.conalep.edu.mx/sites/default/files/micrositios/Mapa_Curricular_2025/MC25_Soldaduras%20Industriales.pdf'
+ ]);
+ for(const item of Array.isArray(ref.sources)?ref.sources:[]){
+  if(!known.has(item.url))continue;
+  const p=element('p'),link=element('a',(item.country||'?')+' · '+item.title,{href:item.url,target:'_blank',rel:'noopener noreferrer'});
+  p.append(link,document.createTextNode(item.country==='CL'?' · Referencia curricular chilena prioritaria':' · Apoyo temático extranjero; contenidos y páginas por verificar'));panel.append(p);
+ }
+ panel.append(element('p','La correspondencia es orientativa: NO constituye homologación de títulos, niveles ni OA. No sustituye procedimientos de seguridad ni la revisión de un docente especialista.'));
+}
 function showTextbookCandidates(bar){
  let refs=byId('heva-textbook-references');
  const record=materialActual?.textosEscolaresComplementarios;
@@ -162,7 +184,7 @@ function showTextbookCandidates(bar){
  }
  refs.append(element('p','No se ha copiado ni reproducido contenido del libro. Las fuentes oficiales efectivamente recuperadas por HEVA se registran por separado.'));
 }
-function mount(){let bar=byId('heva-teacher-tools');if(!bar){bar=element('section',null,{id:'heva-teacher-tools',class:'no-print'});bar.append(element('h3','Revisar y adaptar el material'),button('Vista previa PPT',preview),button('Recursos visuales · con o sin',visualOptionsDialog),button('Asignar puntajes · 1, 2 o 3',scoring),button('Equilibrar claves A–D',balanceAnswerKeys),button('Editar y ordenar bloques',edit),guideImageButton(),button('Comparar versiones',compare),button('Deshacer último cambio',()=>{if(!undo.length)return;const previous=undo.at(-1),m=current();if(previous.materialId!==m.materialId)throw Error('El último cambio corresponde a otro material. Abre su historial para recuperarlo.');undo.pop();guardarEnHistorial(false);setMaterial(previous)}),button('Accesibilidad',accessibility),button('Escuchar',speak));byId('hoja-material').before(bar);}bar.hidden=!materialActual;showTextbookCandidates(bar);showDepthAdvisories(bar);renderGuideResources();const guideAction=byId('heva-guide-image-action');if(guideAction)guideAction.hidden=!HEVAGuideVisuals.enabled(materialActual||{});const buttons=[...bar.querySelectorAll('button')];const scoreButton=buttons.find(b=>b.textContent.includes('Asignar puntajes'));if(scoreButton)scoreButton.hidden=materialActual?.tipoMaterial!=='EVALUACION';const balanceButton=buttons.find(b=>b.textContent.includes('Equilibrar claves'));if(balanceButton)balanceButton.hidden=!['GUIA','EVALUACION','ACCESIBLE'].includes(materialActual?.tipoMaterial)||!(materialActual?.preguntasAlternativas?.length>=4);const previewButton=buttons.find(b=>b.textContent.includes('Vista previa PPT'));if(previewButton)previewButton.hidden=materialActual?.tipoMaterial!=='PRESENTACION';applyAccess();
+function mount(){let bar=byId('heva-teacher-tools');if(!bar){bar=element('section',null,{id:'heva-teacher-tools',class:'no-print'});bar.append(element('h3','Revisar y adaptar el material'),button('Vista previa PPT',preview),button('Recursos visuales · con o sin',visualOptionsDialog),button('Asignar puntajes · 1, 2 o 3',scoring),button('Equilibrar claves A–D',balanceAnswerKeys),button('Editar y ordenar bloques',edit),guideImageButton(),button('Comparar versiones',compare),button('Deshacer último cambio',()=>{if(!undo.length)return;const previous=undo.at(-1),m=current();if(previous.materialId!==m.materialId)throw Error('El último cambio corresponde a otro material. Abre su historial para recuperarlo.');undo.pop();guardarEnHistorial(false);setMaterial(previous)}),button('Accesibilidad',accessibility),button('Escuchar',speak));byId('hoja-material').before(bar);}bar.hidden=!materialActual;showTextbookCandidates(bar);showMetalSources(bar);showDepthAdvisories(bar);renderGuideResources();const guideAction=byId('heva-guide-image-action');if(guideAction)guideAction.hidden=!HEVAGuideVisuals.enabled(materialActual||{});const buttons=[...bar.querySelectorAll('button')];const scoreButton=buttons.find(b=>b.textContent.includes('Asignar puntajes'));if(scoreButton)scoreButton.hidden=materialActual?.tipoMaterial!=='EVALUACION';const balanceButton=buttons.find(b=>b.textContent.includes('Equilibrar claves'));if(balanceButton)balanceButton.hidden=!['GUIA','EVALUACION','ACCESIBLE'].includes(materialActual?.tipoMaterial)||!(materialActual?.preguntasAlternativas?.length>=4);const previewButton=buttons.find(b=>b.textContent.includes('Vista previa PPT'));if(previewButton)previewButton.hidden=materialActual?.tipoMaterial!=='PRESENTACION';applyAccess();
  if(materialActual){const report=T.inspect(materialActual);let summary=byId('heva-teaching-report');if(!summary){summary=element('details',null,{id:'heva-teaching-report'});bar.append(summary);}summary.replaceChildren(element('summary','Desempeño del OA y actividades · orientación docente'),element('p',report.alcance));for(const x of report.actividades)summary.append(element('p',x.ref+' · '+(x.cognicion?.nivel||'Nivel no inferido: revisar desempeño')));for(const issue of report.issues)summary.append(element('p',issue.detail));}}
 const oldRender=renderizarDocumentoEnPantalla;renderizarDocumentoEnPantalla=function(){oldRender();mount()};
 const oldGenerate=generarMaterialReal;generarMaterialReal=async function(...args){
