@@ -155,6 +155,21 @@ function addContent(ppt,theme,slide,title,lines,section,index=0,scene={}){
  if(!resources.recuadros){text(clean.join('\n\n'),.86,2.4,11.0,4.05,26,ink);return;}
  if(activity)text('TRABAJO EN CLASE',.86,2.14,11.4,.32,14,'FFFFFF',true);
  const top=activity?2.7:2.4;
+ // Tres tarjetas editables, con colores del tema elegido.
+ if(!activity&&resources.recuadros&&clean.length===3&&
+    clean.every(line=>fitsText([line],3.36,2.82,21))&&
+    (kind==='cards'||scene.design==='concept'||theme.layout==='editorial')){
+   const width=3.72,gap=.19;
+   clean.forEach((line,j)=>{
+     const x=.86+j*(width+gap);
+     slide.addShape(ppt.ShapeType.roundRect,{x,y:2.55,w:width,h:3.64,rectRadius:.12,line:{color:theme.soft||theme.accent,width:1},fill:{color:j%2===0?(theme.panel||'FFFFFF'):(theme.soft||'F1E7DB')}});
+     slide.addShape(ppt.ShapeType.rect,{x:x+.2,y:2.83,w:.7,h:.08,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});
+     text(String(j+1).padStart(2,'0'),x+.2,3.06,.65,.42,17,theme.main,true);
+     text(line,x+.24,3.68,width-.48,2.25,21,theme.ink);
+   });
+   slide.hevaVisualType='cards';
+   return;
+ }
  if(resources.diagramas&&scene.design==='example'&&clean.length>=2&&clean.length<=3&&clean.every(t=>fitsText([t],10.4,1.05,26))){
   clean.forEach((line,j)=>{const y=2.3+j*1.34;text(String(j+1),.86,y,.65,.8,38,main,true);text(line,1.85,y,10.4,1.05,26,ink);});return;
  }
@@ -247,7 +262,7 @@ function preview(m,teacher=false){
  const ppt={ChartType:{bar:'bar'},ShapeType:{rect:'rect',roundRect:'roundRect',line:'line',downArrow:'downArrow'},addSlide(){const page={elements:[],background:{color:visual.theme.background}};record.push(page);return Object.defineProperties({addChart:(chartType,data,options)=>page.elements.push({kind:'chart',chartType,data,...options}),addImage:(options)=>page.elements.push({kind:'image',...options}),addShape:(shape,options)=>page.elements.push({kind:'shape',shape,...options}),addText:(text,options)=>page.elements.push({kind:'text',text:String(text),...options}),addNotes:()=>{}},{background:{set(v){page.background=v}},hevaVisualType:{set(v){page.visualKind=v}}});}};
  renderCover(ppt,visual.theme,material,pages.length+1);
  pages.forEach((page,i)=>{const slide=addChrome(ppt,visual.theme,page.visualOptions?.recuadros===false?'plain':page.design==='activity'?'activity':classifySlide(page.title,page.lines,i),i+2,pages.length+1);if(visual.large){const add=slide.addText;slide.addText=(text,options)=>add(text,{...options,fontSize:(options.fontSize>=17?Math.max(26,options.fontSize):options.fontSize)});}addContent(ppt,visual.theme,slide,page.title,page.lines,page.kind,i,page);});
- return {pages:record,visualSummary:{interiorPages:record.length-1,interiorImages:record.slice(1).reduce((n,p)=>n+p.elements.filter(x=>x.kind==='image').length,0),charts:record.reduce((n,p)=>n+p.elements.filter(x=>x.kind==='chart').length,0),diagrams:record.filter(p=>p.visualKind==='diagram').length,composedPages:record.slice(1).filter(p=>p.elements.some(x=>x.kind==='shape'&&x.shape==='roundRect')).length},width:13.333,height:7.5,limitation:'Comparte paginación y geometría con PPTX. Las fuentes y saltos de línea pueden variar en PowerPoint; comprobar el archivo final.'};
+ return {pages:record,visualSummary:{interiorPages:record.length-1,interiorImages:record.slice(1).reduce((n,p)=>n+p.elements.filter(x=>x.kind==='image').length,0),charts:record.reduce((n,p)=>n+p.elements.filter(x=>x.kind==='chart').length,0),diagrams:record.filter(p=>p.visualKind==='diagram').length,composedPages:record.slice(1).filter(p=>p.elements.some(x=>x.kind==='shape'&&x.shape==='roundRect')).length,cardPages:record.filter(p=>p.visualKind==='cards').length},width:13.333,height:7.5,limitation:'Comparte paginación y geometría con PPTX. Las fuentes y saltos de línea pueden variar en PowerPoint; comprobar el archivo final.'};
 }
 async function powerpoint(m,teacher=false){
  if(!root.PptxGenJS)throw Error('No se cargó el exportador PowerPoint. Recarga la página.');
