@@ -40,6 +40,25 @@
     #heva-proposal-badge[hidden]{display:none!important}
     @media(max-width:640px){.heva-lab-banner-compact{padding:7px 12px!important;flex-wrap:wrap}.heva-lab-banner-compact a{margin-left:0!important}}
   </style>
+  <style id="heva-result-layout-css">
+    /* La guía aparece antes de las herramientas secundarias. */
+    #heva-result-edit,#heva-result-review{border:1px solid #e0d6c8;border-radius:12px;background:#fffdfa;padding:12px 16px;margin-top:13px}
+    #heva-result-review{background:#fbfaf7}
+    .heva-result-summary{font-size:.9rem;font-weight:700;color:#7e3041;cursor:pointer;padding:3px 0}
+    .heva-result-fold[open]>.heva-result-summary{padding-bottom:10px;border-bottom:1px solid #ebe2da;margin-bottom:12px}
+    .heva-result-fold details{margin:7px 0;padding:10px;border:1px solid #e2d8cd;border-radius:8px;background:white;max-width:100%}
+    .heva-result-fold #heva-experimental-audit,.heva-result-fold #heva-export-control,.heva-result-fold #heva-strategy-delivery{margin:8px 0!important;background:white}
+    #heva-teacher-tools.heva-toolbar-organized{display:grid;grid-template-columns:1fr;gap:12px;border:0;box-shadow:none;background:transparent;padding:0;margin:10px 0}
+    .heva-tools-group{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:8px 0;border-bottom:1px solid #f0e9e2}
+    .heva-tools-group:last-child{border-bottom:0}
+    .heva-tools-title{font-weight:700;color:#57514c;font-size:.8rem;width:100%;margin:0 0 3px}
+    .heva-tools-group button{font-size:.79rem;padding:8px 10px;border:1px solid #bd9fa2;border-radius:7px;background:#fff;color:#7e3041;white-space:normal;text-align:left}
+    .heva-tools-group button:hover{background:#faf1ed}
+    .heva-tools-group button[hidden],#heva-result-edit[hidden],#heva-result-review[hidden]{display:none!important}
+    #barra-calidad.heva-result-compact-top{gap:10px}
+    #barra-calidad.heva-result-compact-top button{font-size:.78rem}
+    @media(max-width:600px){.heva-result-fold{padding:10px!important}.heva-tools-group button{flex:1 1 46%;font-size:.76rem}}
+  </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
@@ -292,7 +311,8 @@
             <p id="resumen-claves" class="text-[11px] text-emerald-800">Haz clic en cualquier texto para editarlo directamente antes de descargar.</p>
           </div>
           <div class="no-print flex gap-2 flex-wrap">
-            <button onclick="mostrarAuditoriaHEVA()" id="btn-auditoria" class="px-3 py-1.5 bg-stone-700 text-white rounded text-xs font-semibold shadow" type="button">🔎 Revisar calidad</button>\n            <button onclick="guardarEnHistorial()" id="btn-guardar-doc" disabled class="px-3 py-1.5 bg-stone-600 text-white rounded text-xs font-semibold shadow hover:bg-stone-800 disabled:opacity-50">
+            <button onclick="mostrarAuditoriaHEVA()" id="btn-auditoria" class="px-3 py-1.5 bg-stone-700 text-white rounded text-xs font-semibold shadow" type="button">🔎 Revisar calidad</button>
+            <button onclick="guardarEnHistorial()" id="btn-guardar-doc" disabled class="px-3 py-1.5 bg-stone-600 text-white rounded text-xs font-semibold shadow hover:bg-stone-800 disabled:opacity-50">
               💾 Guardar
             </button>
             <button onclick="exportarWord()" id="btn-docx" disabled class="px-3 py-1.5 bg-[#8B2635] hover:bg-[#701E2A] text-white rounded text-xs font-bold shadow flex items-center gap-1 disabled:opacity-50 cursor-not-allowed">
@@ -304,7 +324,8 @@
           </div>
         </div>
 
-        <pre id="informe-auditoria-heva" class="whitespace-pre-wrap text-xs text-stone-800 bg-amber-50 rounded p-3 mb-3" aria-live="polite">Genera un material y selecciona «Revisar calidad» para ver alertas pedagógicas.</pre>\n        <article id="hoja-material" class="bg-white p-6 md:p-8 rounded-lg border border-stone-200 shadow-sm space-y-6">
+        <pre id="informe-auditoria-heva" class="whitespace-pre-wrap text-xs text-stone-800 bg-amber-50 rounded p-3 mb-3" aria-live="polite">Genera un material y selecciona «Revisar calidad» para ver alertas pedagógicas.</pre>
+        <article id="hoja-material" class="bg-white p-6 md:p-8 rounded-lg border border-stone-200 shadow-sm space-y-6">
           <div class="text-center border-b pb-4">
             <h2 class="text-sm md:text-base font-bold text-[#8B2635] tracking-wide">ESCUELA HÉCTOR VALENZUELA CEA — VILLARRICA</h2>
             <p class="text-xs text-stone-500">Educación de Personas Jóvenes y Adultas (EPJA)</p>
@@ -999,5 +1020,5 @@ function refresh(){
 }
 type.addEventListener('change',refresh);refresh();
 })();
-</script><script src="/experimental/heva-unified-ui.js?v=20261122-modo-coherente"></script><script src="/heva-strategy-delivery-ui.js?v=20261115-verificacion"></script><script src="/heva-assessment-ui.js?v=20261115-planificacion"></script><script src="/heva-planning-ui.js?v=20261115-planificacion"></script><script src="/heva-teacher-ui.js?v=20261117-opcionales-v5"></script><script src="/heva-layout-ui.js?v=20261122-diseno-coherente"></script></body>
+</script><script src="/experimental/heva-unified-ui.js?v=20261122-modo-coherente"></script><script src="/heva-strategy-delivery-ui.js?v=20261115-verificacion"></script><script src="/heva-assessment-ui.js?v=20261115-planificacion"></script><script src="/heva-planning-ui.js?v=20261115-planificacion"></script><script src="/heva-teacher-ui.js?v=20261117-opcionales-v5"></script><script src="/heva-layout-ui.js?v=20261122-diseno-coherente"></script><script src="/heva-result-layout.js?v=20261122-armonizado"></script></body>
 </html>
