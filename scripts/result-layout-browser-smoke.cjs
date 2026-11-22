@@ -30,6 +30,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
      &&document.getElementById('heva-export-control')?.closest('#revision-contenido')
      &&document.getElementById('heva-textbook-references')?.parentElement===review;
   },{timeout:15000});
+  await page.waitForFunction(()=>document.querySelector('#heva-result-review > summary')?.textContent.includes('2 advertencias'),{timeout:10000});
   const result=await page.evaluate(()=>{
    const edit=document.getElementById('heva-result-edit'),review=document.getElementById('heva-result-review');
    return{
