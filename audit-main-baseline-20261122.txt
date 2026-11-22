@@ -1,0 +1,1 @@
+Baseline CI de main al 22-11-2026. Este archivo no cambia funcionalidad. Se usa exclusivamente para comparar fallos de la integración del Laboratorio.
