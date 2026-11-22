@@ -46,6 +46,10 @@ function arrange(){
    group.hidden=![...group.querySelectorAll('button')].some(x=>!x.hidden);
   }
   toolbar.classList.add('heva-toolbar-organized');
+  const visual=[...toolbar.querySelectorAll('button')].find(b=>/Recursos visuales · con o sin/.test(b.textContent));
+  if(visual)visual.textContent='Elegir imágenes, diagramas y gráficos';
+  const guideImage=byId('heva-guide-image-action');
+  if(guideImage)guideImage.textContent='Añadir o cambiar imagen de apoyo';
  }
  const sources=['heva-experimental-audit','heva-audit-fold','heva-export-control','heva-strategy-delivery','heva-teaching-report','heva-textbook-references','heva-metal-sources','heva-depth-advisories','heva-tp-document-evidence'];
  for(const id of sources){
@@ -58,6 +62,13 @@ function arrange(){
    if(node.tagName==='DETAILS'&&node.parentElement===toolbar&&!node.matches('#heva-result-edit,#heva-result-review'))review.append(node);
   }
  }
+ const auditSummary=byId('heva-experimental-audit')?.querySelector('summary')?.textContent||'';
+ const problems=auditSummary.match(/(\\d+) errores estructurales y (\\d+) advertencias/);
+ const label=problems&&(+problems[1]||+problems[2])
+  ?'Revisión pedagógica y fuentes · '+(+problems[1]?' '+problems[1]+' errores':'')+(+problems[2]?' '+problems[2]+' advertencias':'')
+  :'Revisión pedagógica y fuentes';
+ const reviewSummary=review.querySelector('summary');
+ if(reviewSummary&&reviewSummary.textContent!==label)reviewSummary.textContent=label;
  const active=typeof materialActual!=='undefined'&&!!materialActual;
  edit.hidden=!active;
  review.hidden=!active;
@@ -86,6 +97,7 @@ function mount(){
   if(review&&!review.hidden)review.open=true;
   const fold=byId('heva-audit-fold');
   if(fold)fold.open=true;
+  if(review&&!review.hidden)review.scrollIntoView?.({behavior:'smooth',block:'start'});
  });
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});
