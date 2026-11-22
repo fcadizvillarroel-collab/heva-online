@@ -85,7 +85,10 @@ function audit(material, type='GUIA', expected={}){
   if(!title)issues.push('Falta el título.');
   if(!clean(material.objetivoAprendizaje))issues.push('Falta el objetivo de aprendizaje.');
   const sections=blocks(material,type,'student');
-  if(sections.length<3)issues.push('El material tiene menos de tres secciones utilizables.');
+  // Evaluaciones, presentaciones y planificaciones tienen estructura propia:
+  // OA + preguntas/diapositivas/secuencia es válido sin introducción de guía.
+  const minimumSections=['EVALUACION','PRESENTACION','PLANIFICACION','TALLER'].includes(type)?2:3;
+  if(sections.length<minimumSections)issues.push('El material contiene menos de '+minimumSections+' secciones utilizables.');
   if(/\b(?:lorem ipsum|por definir|insertar texto|paso 1:\s*\.\.\.)\b/i.test(JSON.stringify(material)))issues.push('Hay texto pendiente de completar.');
   const alt=Array.isArray(material.preguntasAlternativas)?material.preguntasAlternativas:[];
   const des=Array.isArray(material.preguntasDesarrollo)?material.preguntasDesarrollo:[];
