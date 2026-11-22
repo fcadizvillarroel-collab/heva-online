@@ -35,7 +35,7 @@ test('la matriz no cuenta las páginas indicadas en índices como libros leídos
 test('no asigna páginas chilenas o libros mexicanos a otras asignaturas o temas sin coincidencia',()=>{
  const wrong=Matrix.build({...plan,asignatura:'Educación Matemática'},{enabled:true,items:[]},{documents:[],fragments:[]});
  assert.equal(wrong.indicesConPaginasTE,0);
- assert.equal(wrong.fichasDeLibrosIdentificadas,0);
+ assert.equal(wrong.fichasDeLibrosIdentificadas,3,'Matemáticas presenta fichas SEP de su propia área, no Historia');
  const off=Matrix.build({...plan,usarTextosEscolares:false},{enabled:true,items:[]},{documents:[],fragments:[]});
  assert.equal(off.registros.length,0);
  const mismatch=Matrix.build({...plan,temaEspecifico:'Civilizaciones de la antigüedad'},{enabled:true,items:[]},{documents:[],fragments:[]});
