@@ -302,6 +302,18 @@ function showTextbookCandidates(bar){
   for(const step of planFuentes.etapas){const li=element('li',step);li.className='mb-1';list.append(li);}
   block.append(list,element('p','Estado de evidencia: '+(planFuentes.estado==='referencias_pdf_recuperadas_pendientes_de_revision_docente'
   ?'Hay fragmentos PDF recuperados; revisión docente pendiente.':'Sin páginas de libros comprobadas para atribuir contenido.')));
+  const didactic=planFuentes.secuenciaDocumentada90;
+  if(didactic?.etapas?.length){
+   const inner=element('details');
+   inner.append(element('summary','Propuesta didáctica de '+didactic.tiempoTotalMinutos+' minutos · patrón documental'));
+   const lines=element('ol');lines.className='list-decimal pl-5 text-sm';
+   for(const stage of didactic.etapas){
+    const line=element('li',stage.minutos+' min · '+stage.nombre+' · Evidencia esperada: '+stage.evidencia);
+    line.className='mb-1';lines.append(line);
+   }
+   inner.append(lines,element('p','Adaptación original EPJA inspirada en la organización de una muestra Mineduc, páginas impresas 6 y 7. No demuestra que se hayan revisado capítulos completos ni que exista aprobación docente.'));
+   block.append(inner);
+  }
   refs.append(block);
  }
  refs.append(element('p','Control de calidad: los capítulos, la pertinencia curricular y la validez pedagógica requieren revisión docente. Una coincidencia de palabras no acredita que el texto enseñe el objetivo EPJA.'));
