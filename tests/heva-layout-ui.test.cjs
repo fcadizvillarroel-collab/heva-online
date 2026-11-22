@@ -77,7 +77,7 @@ test('diseño pedagógico reúne cuatro ajustes antes de generar, conservando to
  const ids=advanced.children.filter(x=>['heva-depth-details','heva-design-details','heva-access-details','integrated-lab'].includes(x.id)).map(x=>x.id);
  assert.deepEqual(ids,['heva-depth-details','heva-design-details','heva-access-details','integrated-lab']);
  assert.ok(f.form.children.indexOf(advanced)<f.form.children.indexOf(f.map['btn-generar']));
- assert.equal(f.map['design-depth'],undefined,'El diseño no debe crear ni duplicar controles curriculares.');
+ assert.ok(f.map['design-depth']==null,'El diseño no debe crear ni duplicar controles curriculares.');
  assert.match(advanced.children[0].textContent,/Diseño pedagógico/);
  assert.equal(f.map['heva-design-details'].parentElement,advanced);
  assert.equal(f.map['heva-depth-details'].parentElement,advanced);
