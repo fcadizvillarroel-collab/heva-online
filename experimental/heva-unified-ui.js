@@ -89,24 +89,33 @@ syncPrimary();
 
 const original=window.hevaExperimentalPlan;
 if(typeof original==='function')window.hevaExperimentalPlan=function(){
-const plan=original();
-if(!plan){
- // Protege selecciones antiguas/restauradas sin bloquear la generación habitual.
- // Si hay complementarias marcadas, reactivar y validar la configuración antes de enviar.
- const selected=[...document.querySelectorAll('#lab-strategies input[data-strategy]:checked')];
- if(!selected.length)return null;
- enabled.checked=true;
- enabled.dispatchEvent(new Event('change',{bubbles:true}));
- return window.hevaExperimentalPlan();
-}
-const primary=primaryId();
-if(primary&&plan.slots.some(s=>s.strategy===primary)){
- syncPrimary();
- // Se conserva la estrategia principal en el selector y se evita duplicar su contrato.
- // Si la configuración está obsoleta, se recalcula con la selección corregida.
- return window.hevaExperimentalPlan();
-}
-return {...plan,primaryStrategy:legacy.value,subject:$('asignatura').value,objective:$('texto-oa').value,topic:$('tema-especifico').value};
+ // Restauraciones antiguas: normalizar una vez, sin bucles ni errores por toggles.
+ let plan=original();
+ if(!plan){
+  const selected=[...document.querySelectorAll('#lab-strategies input[data-strategy]:checked')];
+  if(!selected.length)return null;
+  enabled.checked=true;
+  enabled.dispatchEvent(new Event('change',{bubbles:true}));
+  // Si solo estaba marcada la estrategia principal, no hay combinación real.
+  if(!document.querySelector('#lab-strategies input[data-strategy]:checked')){
+   enabled.checked=false;
+   enabled.dispatchEvent(new Event('change',{bubbles:true}));
+   return null;
+  }
+  plan=original();
+ }
+ const primary=primaryId();
+ if(primary&&plan?.slots?.some(s=>s.strategy===primary)){
+  syncPrimary();
+  if(!document.querySelector('#lab-strategies input[data-strategy]:checked')){
+   enabled.checked=false;
+   enabled.dispatchEvent(new Event('change',{bubbles:true}));
+   return null;
+  }
+  plan=original();
+ }
+ if(!plan)return null;
+ return {...plan,primaryStrategy:legacy.value,subject:$('asignatura').value,objective:$('texto-oa').value,topic:$('tema-especifico').value};
 };
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
