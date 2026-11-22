@@ -39,3 +39,19 @@ jobs:
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
           sleep 2
           node scripts/export-browser-smoke.cjs
+      - name: Comprobar organización visual de la guía en Chromium
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/heva-ui-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          sleep 2
+          node scripts/result-layout-browser-smoke.cjs
+        env:
+          HEVA_RESULT_QA_DIR: ${{ runner.temp }}/heva-result-qa
+      - name: Conservar captura de revisión visual
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: heva-visor-guia-reordenado
+          path: ${{ runner.temp }}/heva-result-qa/
+          if-no-files-found: warn
