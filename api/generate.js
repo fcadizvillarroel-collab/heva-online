@@ -3,6 +3,7 @@ const Skills=require('../heva-skills.js');
 const Sources=require('../lib/document-sources.cjs');
 const Pedagogy = require('../heva-pedagogy.js');
 const HEVA = require('../heva-core.js');
+const LabBridge = require('../lib/lab-strategy.cjs');
 // api/generate.js — Motor Multi-IA Suite: ChatGPT / Gemini con Prosa Andragógica y RAG
 
 module.exports = async function handler(req, res) {
@@ -27,6 +28,8 @@ module.exports = async function handler(req, res) {
     instruccionesDocente = '',
     disenoPedagogico = null,
     planIntegrado = null,
+    estrategiaLaboratorio = null,
+    opcionesLaboratorio = null,
     textoReferencia: referenciaRecibida = '',
     modoReferencia = 'NINGUNA',
     adecuacionesPIE = [],
@@ -167,9 +170,12 @@ Responde ÚNICAMENTE en JSON:
     const extraIssues=require('../heva-studio.js').validateExtras(plan);if(extraIssues.length)return res.status(400).json({error:extraIssues.join('; ')});
     const designIssues=require('../heva-design.js').validate(disenoPedagogico,plan);
     if(designIssues.length)return res.status(400).json({error:designIssues.join('; ')});
+    let estrategiaLab = null;
+    try { estrategiaLab = LabBridge.resolve({asignatura,nivel,objetivoAprendizaje,temaEspecifico,tipoMaterial,estrategiaLaboratorio,opcionesLaboratorio}); }
+    catch (error) { return res.status(400).json({error:'Estrategia Laboratorio: '+error.message}); }
     const fuentesDocumentales=await Sources.retrieve(plan);
     const presentationGuidance=tipoMaterial==='PRESENTACION'?'\nMODO PRESENTACIÓN: genera 8 a 12 diapositivas completas en una respuesta JSON. Incluye objetivos, explicación progresiva, ejemplo modelado, actividades de aplicación y cierre. Cada diapositiva requiere título, función, contenido desarrollado y notas docentes. Crea una trazabilidadEstrategia con una referencia DIAPO-1, DIAPO-2, etc. para CADA diapositiva real, con habilidad, evidencia observable y criterio específicos. Incluye además las referencias de otras tareas reales si existen; no inventes referencias ni agregues preguntas por encima de las cantidades solicitadas. REGLA DE COHERENCIA DISCIPLINAR: desarrolla exclusivamente la asignatura, el tema y el objetivo seleccionados. No mezcles Matemática y Lenguaje ni otras asignaturas salvo que el docente solicite explícitamente una integración interdisciplinaria. AUTOSUFICIENCIA: toda actividad que mencione un segundo texto, fuente, noticia, tabla, gráfico, caso o párrafo debe incluir el estímulo completo en la misma diapositiva o en otra diapositiva identificada; nunca remitas a un material inexistente. Evita fuentes inventadas o nombres de empresas ficticias presentadas como reales; etiqueta ejemplos simulados. Diseña diapositivas con 2-4 ideas explicadas y ejemplos específicos, no instrucciones genéricas de relleno. Las notas docentes deben desarrollar lo que no cabe visualmente.':'';
-    const promptRedactor = Pedagogy.prompt(plan)+presentationGuidance+Sources.evidencePrompt(fuentesDocumentales);
+    const promptRedactor = Pedagogy.prompt(plan)+LabBridge.prompt(estrategiaLab,tipoMaterial)+presentationGuidance+Sources.evidencePrompt(fuentesDocumentales);
     const metadata = {objetivoAprendizaje,asignatura,nivel,marcoCurricular,temaEspecifico,tipoMaterial,estrategiaDidactica:Pedagogy.strategy(estrategiaDidactica).name};
     let author;
     const draft = async prompt => { const r = await call(prompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY,[],{deadline:generationDeadline}); author={proveedor:r.provider,modelo:r.model,fecha:new Date().toISOString()}; return r.value; };
@@ -224,7 +230,7 @@ Responde ÚNICAMENTE en JSON:
     material=require('../heva-studio.js').link(material,plan);
     material.auditoriaExperimental=require('../experimental/quality-audit.cjs').inspect(material,plan);
     material.auditoriaDisciplinar=require('../experimental/subject-audit.cjs').inspectAll(material,plan);
-    return res.status(200).json({exito:true,material,revision:{alcance:'Estructura, cantidades y trazabilidad; revisión pedagógica docente pendiente',tipo:tipoMaterial,estrategia:metadata.estrategiaDidactica}});
+    return res.status(200).json({exito:true,material,revision:{alcance:'Estructura, cantidades y trazabilidad; revisión pedagógica docente pendiente',tipo:tipoMaterial,estrategia:metadata.estrategiaDidactica,laboratorio:LabBridge.inspect(estrategiaLab,material)}});
 
   } catch (error) {
     console.error('Fallo de generación HEVA:',error.code||'ERROR',JSON.stringify(error.proveedores||[]));
