@@ -243,7 +243,7 @@ Responde ÚNICAMENTE en JSON:
     material.planVisualTP=TPInternational.visualPlan(referenciasMetalmecanica,material.trazabilidadDocumentalTP);
     material.controlCalidadTP=TPInternational.qualityReview(material,referenciasMetalmecanica,material.trazabilidadDocumentalTP);
     const evidence=Sources.validateEvidence(material.respaldoDocumental,fuentesDocumentales);
-    material.respaldoDocumental=evidence.valid;material.incidenciasDocumentales=evidence.invalid;
+    material.respaldoDocumental=evidence.valid;material.incidenciasDocumentales=evidence.invalid;material.matrizOATextos=OATextbookMatrix.linkActivities(matrizOA,evidence.valid);
     material=Skills.prepare(material,plan,fuentesDocumentales,evidence);
     material=require('../heva-studio.js').link(material,plan);
     material.auditoriaExperimental=require('../experimental/quality-audit.cjs').inspect(material,plan);
