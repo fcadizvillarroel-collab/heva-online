@@ -863,6 +863,15 @@
           for(const finding of [...audit.errores,...audit.advertencias].slice(0,20)){const item=document.createElement('p');item.className='mt-2';item.textContent=finding.location+': '+finding.detail;el.append(item)}
         }
         document.getElementById('dictamen-calidad').innerText = 'Revisión estructural completada · validación docente pendiente';
+        // Evitar pérdida de pruebas recuperadas: guardar antes de cerrar su checkpoint.
+        try {
+          hevaAutoSaveMaterial(materialActual);
+          hevaRecoveryCommit(payload);
+          if(typeof cargarHistorial==='function')cargarHistorial();
+        } catch (saveError) {
+          document.getElementById('dictamen-calidad').innerText='Material visible, pero no se guardó una copia. Conserva esta pestaña y revisa el almacenamiento.';
+          console.warn('HEVA: el checkpoint sigue disponible tras un fallo de guardado.',saveError?.message);
+        }
 
       } catch (err) {
         errorBox.classList.remove('hidden');
