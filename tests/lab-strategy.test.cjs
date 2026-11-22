@@ -1,0 +1,15 @@
+'use strict';
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const bridge=require('../lib/lab-strategy.cjs');
+const record=require('../catalogo-publicado.json').find(x=>x.clave_interna==='D257|MED|Estudios Sociales|N2|13');
+const base={asignatura:'Estudios Sociales',nivel:record.nivel,marcoCurricular:record.marco,oaClaveLaboratorio:record.clave_interna,objetivoAprendizaje:record.texto_literal,temaEspecifico:'Fuentes históricas',tipoMaterial:'GUIA'};
+test('el generador anterior permanece intacto sin selección LAB',()=>assert.deepEqual(bridge.resolveMany({...base,oaClaveLaboratorio:null}),[]));
+test('valida OA literal y marco',()=>{assert.equal(bridge.officialOA(base).clave_interna,record.clave_interna);for(const changed of [{objetivoAprendizaje:'Texto inventado'},{marcoCurricular:'Bases 2024'},{nivel:'1'},{oaClaveLaboratorio:'no-existe'}])assert.throws(()=>bridge.officialOA({...base,...changed}));});
+test('estrategia pertinente y prompt específico',()=>{const x=bridge.resolve({...base,estrategiaLaboratorio:'multicausalidad'});assert.equal(x.strategy.id,'multicausalidad');assert.match(bridge.prompt(x,'GUIA'),/causas/i);});
+test('rechaza estrategia ajena a la asignatura',()=>assert.throws(()=>bridge.resolve({...base,estrategiaLaboratorio:'indagacion'}),/no corresponde/i));
+test('rechaza OA sin clave y sujetos incompatibles',()=>{assert.throws(()=>bridge.resolve({...base,oaClaveLaboratorio:null,estrategiaLaboratorio:'casos'}),/OA oficial/i);assert.throws(()=>bridge.resolve({...base,asignatura:'Matemática',estrategiaLaboratorio:'casos'}),/otra asignatura/i);});
+test('rechaza duplicados, más de ocho y categorías inválidas',()=>{assert.throws(()=>bridge.resolveMany({...base,estrategiasLaboratorio:['casos','casos']}),/distintas/i);assert.throws(()=>bridge.resolveMany({...base,estrategiasLaboratorio:Array(9).fill('casos')}),/8 estrategias/i);assert.throws(()=>bridge.resolve({...base,estrategiaLaboratorio:'casos',opcionesLaboratorio:{profundidad:'ilimitada'}}),/Profundidad inválida/i);});
+test('prompts según tipo de material sin claves de evaluación',()=>{let x=bridge.resolve({...base,tipoMaterial:'EVALUACION',estrategiaLaboratorio:'casos'});assert.match(bridge.prompt(x,'EVALUACION'),/No muestres claves/);x=bridge.resolve({...base,tipoMaterial:'PLANIFICACION',estrategiaLaboratorio:'casos'});assert.match(bridge.prompt(x,'PLANIFICACION'),/90 minutos/);});
+test('rechaza OA inexistente de TP en el catálogo general',()=>assert.throws(()=>bridge.resolve({...base,asignatura:'Construcciones Metálicas',estrategiaLaboratorio:'casos'}),/otra asignatura/i));
+test('selección múltiple conserva orden y área',()=>{const xs=bridge.resolveMany({...base,estrategiasLaboratorio:['casos','multicausalidad']});assert.deepEqual(xs.map(x=>x.strategy.id),['casos','multicausalidad']);assert.match(bridge.promptMany(xs,'GUIA'),/ESTRATEGIA 2 DE 2/);});
