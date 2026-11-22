@@ -203,6 +203,12 @@ function showTextbookCandidates(bar){
  const meta=element('p','Marco: '+String(matrix?.marco||materialActual?.marcoCurricular||'No especificado')+' · Nivel: '+String(matrix?.nivel||materialActual?.nivel||'No especificado'));
  meta.style.cssText='font-size:.8rem;color:#57534e;margin:4px 0';
  refs.append(meta);
+ const oaReview=matrix?.verificacionOA;
+ const oaStatus=oaReview?.estado==='localizado_literalmente_en_pdf_epja'
+  ?'OA localizado literalmente en el documento EPJA: '+oaReview.documento+' · página PDF '+oaReview.paginaPDF
+  :'OA seleccionado: cotejo literal en la fuente oficial EPJA pendiente o no disponible.';
+ const oaLine=element('p',oaStatus);oaLine.style.cssText='font-size:.8rem;color:#57534e;margin:5px 0';
+ refs.append(oaLine);
  const rows=Array.isArray(matrix?.registros)?matrix.registros:[];
  const verified=rows.filter(r=>r.tipo==='fragmento_libro');
  const other=rows.filter(r=>r.tipo==='fragmento_documental');
