@@ -81,6 +81,10 @@ const material={
   assert.equal(docBytes.subarray(0,4).toString('hex'),'504b0304');
   const docXml=execFileSync('unzip',['-p',wordPath,'word/document.xml'],{encoding:'utf-8'});
   assert.ok(docXml.includes('Globalizaci'),'La guía Word no contiene el título esperado');
-  console.log('Word modelo exportado:',docBytes.length,'bytes; pauta reservada para docentes.');
+  for(const section of ['Ejemplo guiado','Práctica con apoyo','Ahora tú','Cierre y reflexión','Vocabulario']){
+    assert.ok(docXml.includes(section),'Word perdió sección pedagógica: '+section);
+  }
+  assert.ok(!docXml.includes('PAUTA DOCENTE · USO EXCLUSIVO'),'Word de estudiante expone pautas reservadas');
+  console.log('Word modelo completo:',docBytes.length,'bytes; glosario, práctica, modelamiento y cierre conservados.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
