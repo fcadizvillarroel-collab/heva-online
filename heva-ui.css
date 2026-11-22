@@ -46,6 +46,14 @@ body.alto-contraste main .bg-white,body.alto-contraste main .bg-stone-100{backgr
 #panel-crear label{font-size:.78rem!important;letter-spacing:.015em}
 #panel-crear select,#panel-crear textarea{font-size:.875rem!important;line-height:1.45}
 @media(max-width:640px){.heva-welcome{flex-direction:column;align-items:stretch;padding:1rem}.heva-start{width:100%}.heva-steps{grid-template-columns:1fr}}
+/* El aviso de recuperación es una sección de la cuadrícula, no parte del botón blanco. */
+#panel-crear > #heva-resume-recovery{grid-column:1/-1;min-width:0;position:relative;z-index:1}
+#heva-resume-recovery[hidden]{display:none!important}
+#heva-resume-recovery .heva-recovery-actions{display:flex;flex-wrap:wrap;gap:.75rem;align-items:stretch;margin-top:1rem}
+#heva-resume-recovery .heva-recovery-action{display:inline-flex;align-items:center;justify-content:center;position:relative;min-height:46px;max-width:100%;white-space:normal;text-align:center;line-height:1.35;flex:0 1 auto;min-width:210px;padding:.7rem 1rem;cursor:pointer}
+#heva-resume-recovery .heva-recovery-action:disabled{opacity:.55;cursor:not-allowed}
+#heva-resume-recovery .heva-steps{display:none!important}
+@media(max-width:640px){#heva-resume-recovery .heva-recovery-actions{flex-direction:column}#heva-resume-recovery .heva-recovery-action{width:100%;min-width:0}}
 @media print{.heva-welcome,.heva-steps{display:none!important}}
 /* Herramientas docentes y lectura accesible */
 #heva-teacher-tools,#heva-pending-request{padding:16px;border:1px solid #d7c8b7;background:#fffaf1;border-radius:12px;margin:14px 0}

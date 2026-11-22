@@ -12,8 +12,16 @@ function init(){
  main.insertBefore(hero,main.firstChild);
  hero.querySelector('button').addEventListener('click',()=>{const tab=document.getElementById('tab-crear');if(tab)tab.click();const target=document.getElementById('tipo-material');target?.scrollIntoView({block:'center',behavior:'smooth'});target?.focus({preventScroll:true});syncTabs();});
  const form=document.getElementById('panel-crear');if(form){
- const first=form.querySelector('.bg-white');if(first){
- const guide=document.createElement('div');guide.className='heva-steps no-print';guide.setAttribute('aria-label','Pasos para crear material');guide.innerHTML='<span><b>1</b> Tipo y nivel</span><span><b>2</b> Objetivo y estrategia</span><span><b>3</b> Generar y revisar</span><span><b>4</b> Guardar o exportar</span>';first.insertBefore(guide,first.children[1]||null);
+ // Nunca seleccionar el primer .bg-white del panel: puede ser el botón
+ // "Apartar avance" de la recuperación pendiente y anidaría los pasos dentro de él.
+ const materialType=document.getElementById('tipo-material');
+ const mainForm=materialType?.closest('div.bg-white');
+ if(mainForm&&form.contains(mainForm)&&!mainForm.querySelector(':scope > .heva-steps')){
+  const guide=document.createElement('div');
+  guide.className='heva-steps no-print';
+  guide.setAttribute('aria-label','Pasos para crear material');
+  guide.innerHTML='<span><b>1</b> Tipo y nivel</span><span><b>2</b> Objetivo y estrategia</span><span><b>3</b> Generar y revisar</span><span><b>4</b> Guardar o exportar</span>';
+  mainForm.insertBefore(guide,mainForm.children[1]||null);
  }
  }
  document.querySelectorAll('label').forEach(label=>{if(label.htmlFor)return;const wrapper=label.parentElement;if(!wrapper)return;const control=wrapper.querySelector(':scope > input,:scope > select,:scope > textarea');if(control?.id)label.htmlFor=control.id;});
