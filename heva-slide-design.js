@@ -44,10 +44,10 @@ function diagramPlan(section,subject,topic){
   return{title:'Elegir el registro adecuado',labels:['SITUACIÓN','DESTINATARIO','REGISTRO'],notes:['Lugar y propósito','Relación entre personas','Formal o informal']};
  const byFamily={
   lenguaje:[[/argument|tesis|opinion|evidencia/,{title:'Argumentar con razones',labels:['POSTURA','RAZONES','CONCLUSIÓN'],notes:['Qué sostengo','En qué me baso','Cómo lo justifico']}],[/texto|lectura|cuento|fabula|noticia|comprension/,{title:'Comprender un texto',labels:['LEER','INTERPRETAR','FUNDAMENTAR'],notes:['Información clave','Inferencias','Evidencia textual']}]],
-  sociales:[[/guerra|revolucion|independencia|ocupacion/,{title:'Analizar un proceso histórico',labels:['CAUSAS','DESARROLLO','CONSECUENCIAS'],notes:['Qué lo originó','Qué ocurrió','Qué cambió']}]],
+  sociales:[[/globalizacion|interdependencia|comercio internacional|exportacion|importacion/,{title:'Analizar conexiones globales',labels:['ORIGEN','CONEXIÓN','IMPACTO'],notes:['Producción y procedencia','Relaciones entre territorios','Efectos y consecuencias']}],[/guerra|revolucion|independencia|ocupacion/,{title:'Analizar un proceso histórico',labels:['ANTECEDENTES','DESARROLLO','CONSECUENCIAS'],notes:['Factores y contexto','Actores y hechos','Cambios y permanencias']}]],
   matematica:[[/ecuacion|algebra|incognita/,{title:'Resolver ecuaciones',labels:['PLANTEAR','RESOLVER','VERIFICAR'],notes:['Datos e incógnita','Operaciones equivalentes','Comprobar solución']}]],
   ciencias:[[/ecosistema|cadena alimentaria/,{title:'Relaciones en el ecosistema',labels:['ELEMENTOS','INTERACCIONES','CAMBIOS'],notes:['Organismos','Relaciones','Consecuencias']}]],
-  ciudadana:[[/convivencia|mediacion|conflicto/,{title:'Resolver un conflicto',labels:['PERSONAS','PROCESO','PROBLEMA'],notes:['Actores y emociones','Diálogo y acuerdos','Necesidades']}]]
+  ciudadana:[[/contrato|prevision|entrevista laboral|empleabilidad/,{title:'Analizar decisiones laborales',labels:['REQUISITOS','ACCIÓN','EVALUACIÓN'],notes:['Derechos, deberes y condiciones','Aplicación al caso','Verificar el resultado']}],[/convivencia|mediacion|conflicto/,{title:'Resolver un conflicto',labels:['PERSONAS','PROCESO','PROBLEMA'],notes:['Actores y emociones','Diálogo y acuerdos','Necesidades']}]]
  };
  for(const [regex,plan] of byFamily[family]||[])if(regex.test(topicWords+' '+sectionWords))return plan;
  return fallback;
