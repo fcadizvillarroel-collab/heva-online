@@ -53,7 +53,12 @@ test('Chrome carga estrategias y catálogo EPJA sin error de JavaScript',async()
     const png=fs.readFileSync(shot);
     assert.ok(png.byteLength>10000,'Captura vacía o no generada');
     assert.equal(png.toString('hex',0,8),'89504e470d0a1a0a','Captura PNG inválida');
-    console.log('Captura visual:',shot,'bytes:',png.length);
+    const mobile=path.join(outputDir,'heva-lab-mobile-430.png');
+    await run(binary,[...base.filter(x=>!x.startsWith('--window-size=')),'--window-size=430,900','--screenshot='+mobile,url],{timeout:30000,maxBuffer:3*1024*1024});
+    const mobilePng=fs.readFileSync(mobile);
+    assert.ok(mobilePng.byteLength>9000,'Captura móvil incompleta');
+    assert.equal(mobilePng.toString('hex',0,8),'89504e470d0a1a0a');
+    console.log('Capturas visuales:',shot,mobile,'bytes:',png.length,mobilePng.length);
   }finally{
     await new Promise(resolve=>srv.close(resolve));
   }
