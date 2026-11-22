@@ -35,17 +35,27 @@ function mount(){
  // Estilo visual de PPT solo pertinente cuando se pide presentación.
  ppt.classList.add('heva-ppt-conditional');
  ppt.setAttribute('aria-label','Diseño visual específico para PowerPoint');
- if(counts)counts.before(ppt);else advanced.before(ppt);
+ if(counts){counts.id='heva-conteos-material';counts.before(ppt);}else advanced.before(ppt);
  const refresh=()=>{
   const isPpt=type.value==='PRESENTACION';
   ppt.hidden=!isPpt;
   ppt.style.display=isPpt?'':'none';
   ppt.setAttribute('aria-hidden',String(!isPpt));
+  // El servidor no usa cantidades separadas en PowerPoint ni en planificación.
+  const hasCounts=!['PRESENTACION','PLANIFICACION'].includes(type.value);
+  if(counts){counts.hidden=!hasCounts;counts.style.display=hasCounts?'':'none';counts.setAttribute('aria-hidden',String(!hasCounts));}
   const helpEl=get('heva-context-material');
   if(helpEl&&!isPpt)helpEl.style.display='';
  };
  type.addEventListener('change',refresh);
  refresh();
+ // Mostrar una indicación discreta cuando existen ajustes opcionales activos.
+ const updateActive=()=>{
+  const selected=[get('pie-lectura-facil'),get('pie-apoyos-visuales'),get('pie-graduacion'),get('lab-enabled')].filter(x=>x?.checked).length;
+  summary.textContent='Personalización y apoyos · opcional'+(selected?' · '+selected+' activo'+(selected===1?'':'s'):'');
+ };
+ advanced.addEventListener('change',updateActive);
+ updateActive();
  // Auditoría permanece oculta hasta que se solicite explícitamente.
  const audit=get('informe-auditoria-heva'),auditButton=get('btn-auditoria');
  if(audit&&!get('heva-audit-fold')){
