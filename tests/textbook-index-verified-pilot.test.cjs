@@ -23,23 +23,24 @@ test('identifica páginas concretas indicadas para Guerra del Pacífico y ocupac
 test('la matriz no cuenta las páginas indicadas en índices como libros leídos ni citas reales',()=>{
  const matrix=Matrix.build(plan,{enabled:true,items:[]},{documents:[],fragments:[]});
  assert.equal(matrix.indicesConPaginasTE,2);
- assert.equal(matrix.fichasDeLibrosIdentificadas,1);
+ assert.equal(matrix.fichasDeLibrosIdentificadas,3);
  assert.equal(matrix.cobertura.CL.fragmentosLibro,0);
  assert.equal(matrix.cobertura.MX.fragmentosLibro,0);
  assert.equal(matrix.estado,'indices_oficiales_con_paginas_te_pendientes_lectura');
  assert.equal(matrix.registros.filter(x=>x.tipo==='indice_paginas_texto_regular').length,2);
- assert.equal(matrix.registros.filter(x=>x.tipo==='ficha_libro_oficial').length,1);
+ assert.equal(matrix.registros.filter(x=>x.tipo==='ficha_libro_oficial').length,3);
  assert.equal(Matrix.linkActivities(matrix,[]).vinculosActividades.length,0);
  assert.match(Matrix.instruction(matrix),/páginas TE/);
 });
 test('no asigna páginas chilenas o libros mexicanos a otras asignaturas o temas sin coincidencia',()=>{
  const wrong=Matrix.build({...plan,asignatura:'Educación Matemática'},{enabled:true,items:[]},{documents:[],fragments:[]});
  assert.equal(wrong.indicesConPaginasTE,0);
- assert.equal(wrong.fichasDeLibrosIdentificadas,0);
+ assert.equal(wrong.fichasDeLibrosIdentificadas,3,'Matemáticas presenta fichas SEP de su propia área, no Historia');
  const off=Matrix.build({...plan,usarTextosEscolares:false},{enabled:true,items:[]},{documents:[],fragments:[]});
  assert.equal(off.registros.length,0);
  const mismatch=Matrix.build({...plan,temaEspecifico:'Civilizaciones de la antigüedad'},{enabled:true,items:[]},{documents:[],fragments:[]});
  assert.equal(mismatch.indicesConPaginasTE,0);
+ assert.equal(mismatch.fichasDeLibrosIdentificadas,3,'Las fichas sociales SEP se localizan por asignatura; no afirman concordancia temática');
 });
 test('ficha SEP 2026–2027 enlaza el libro exacto, pero no proporciona contenidos ni páginas',()=>{
  const mx=Pilot.mexicoBook();
