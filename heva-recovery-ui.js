@@ -35,8 +35,23 @@ function hevaRestoreCheckpoint(){
  mostrarRecuperacionPendienteHEVA();
  return draft;
 }
+function hevaAutoSaveMaterial(material){
+ if(!material||typeof material!=='object'||!material.titulo)throw Error('El material no está listo para guardar.');
+ let stored;
+ try{stored=JSON.parse(localStorage.getItem('heva_historial')||'[]');}catch{stored=[];}
+ if(!Array.isArray(stored))stored=[];
+ const identical=stored.some(record=>record?.data?.titulo===material.titulo&&record?.data?.tipoMaterial===material.tipoMaterial&&JSON.stringify(record.data)===JSON.stringify(material));
+ if(!identical){
+  stored.unshift({id:'MAT-'+Date.now(),fecha:new Date().toLocaleDateString('es-CL'),data:material});
+  localStorage.setItem('heva_historial',JSON.stringify(stored.slice(0,20)));
+ }
+ return true;
+}
 function hevaRecoveryCommit(plan){
- try{const saved=recoveryRead(plan);if(saved){localStorage.removeItem(HEVA_RECOVERY_KEY);mostrarRecuperacionPendienteHEVA();}}catch{}
+ const saved=recoveryRead(plan);
+ if(!saved)return;
+ localStorage.removeItem(HEVA_RECOVERY_KEY);
+ mostrarRecuperacionPendienteHEVA();
 }
 function recoveryRead(plan){try{const x=JSON.parse(localStorage.getItem(HEVA_RECOVERY_KEY));if(x?.version!==HEVA_RECOVERY_VERSION||x?.planKey!==JSON.stringify(plan))return null;if(x.base&&(!Array.isArray(x.parts)||!Array.isArray(x.bloques)))return null;if(Array.isArray(x.bloques)&&x.parts.length>x.bloques.length)return null;return x}catch{return null}}
 function recoverySave(x){try{localStorage.setItem(HEVA_RECOVERY_KEY,JSON.stringify({...x,version:HEVA_RECOVERY_VERSION}));mostrarRecuperacionPendienteHEVA()}catch{}}
@@ -138,7 +153,7 @@ function mostrarRecuperacionPendienteHEVA(){
 
  const status=document.createElement('p');status.setAttribute('role','status');status.textContent=hevaResumeMessage;
  button.onclick=async()=>{const generate=document.getElementById('btn-generar');if(hevaResumeBusy||generate?.disabled)return;hevaResumeBusy=true;hevaResumeMessage='';button.disabled=true;if(generate)generate.disabled=true;
- try{const result=await recuperarMaterialHEVA(plan);if(result?.exito!==true||!result.material||typeof result.material!=='object')throw Error('La recuperación no devolvió un material válido; no se habilitan descargas.');if(typeof materialActual!=='undefined'&&materialActual&&typeof guardarEnHistorial==='function')guardarEnHistorial(false);materialActual=result.material;document.getElementById('error-ia')?.classList.add('hidden');renderizarDocumentoEnPantalla();guardarEnHistorial(false);hevaRecoveryCommit(plan);if(typeof cambiarHerramienta==='function')cambiarHerramienta('crear');if(typeof runQuality==='function')await runQuality();}
+ try{const result=await recuperarMaterialHEVA(plan);if(result?.exito!==true||!result.material||typeof result.material!=='object')throw Error('La recuperación no devolvió un material válido; no se habilitan descargas.');if(typeof materialActual!=='undefined'&&materialActual&&typeof guardarEnHistorial==='function')guardarEnHistorial(false);materialActual=result.material;document.getElementById('error-ia')?.classList.add('hidden');renderizarDocumentoEnPantalla();hevaAutoSaveMaterial(materialActual);hevaRecoveryCommit(plan);if(typeof cambiarHerramienta==='function')cambiarHerramienta('crear');if(typeof runQuality==='function')await runQuality();}
  catch(error){hevaResumeMessage=error.message||'La recuperación sigue pendiente. El avance se conserva.';status.textContent=hevaResumeMessage;}
  finally{hevaResumeBusy=false;if(generate)generate.disabled=false;button.disabled=false;}
  };
