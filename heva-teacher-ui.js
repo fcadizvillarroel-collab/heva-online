@@ -246,6 +246,18 @@ function showTextbookCandidates(bar){
  group('Chile/México · páginas recuperadas de textos escolares',verified);
  group('Otros PDF de apoyo curricular o disciplinar',other);
  group('Catálogos pendientes de cotejo documental',candidates);
+ const activities=Array.isArray(matrix?.vinculosActividades)?matrix.vinculosActividades:[];
+ if(activities.length){
+  const section=element('section');
+  section.append(element('h4','Actividades relacionadas con evidencia documental validada'));
+  for(const item of activities.slice(0,20)){
+   const line=element('p',item.seccion+' · '+item.pais+' · página PDF '+item.paginaPDF+' · '+item.afirmacion);
+   line.style.cssText='font-size:.8rem;line-height:1.55;margin:8px 0';
+   section.append(line);
+  }
+  section.append(element('p','Estos vínculos prueban coincidencia literal de una cita en el PDF. La pertinencia curricular y didáctica debe revisarla el docente.'));
+  refs.append(section);
+ }else refs.append(element('p','Aún no existen actividades enlazadas a citas verificadas de esos documentos. No se atribuyen ejercicios a libros sin evidencia.'));
  if(!rows.length)refs.append(element('p','No existen referencias verificadas para este objetivo y tema. La guía debe basarse en el OA y en las fuentes documentales disponibles, sin atribuir información a libros no consultados.'));
  refs.append(element('p','Control de calidad: los capítulos, la pertinencia curricular y la validez pedagógica requieren revisión docente. Una coincidencia de palabras no acredita que el texto enseñe el objetivo EPJA.'));
 }
