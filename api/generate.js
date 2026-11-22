@@ -247,7 +247,7 @@ Responde ÚNICAMENTE en JSON:
     material.auditoriaExperimental=require('../experimental/quality-audit.cjs').inspect(material,plan);
     material.auditoriaDisciplinar=require('../experimental/subject-audit.cjs').inspectAll(material,plan);
     material.controlProfundidadHEVA=DeepMaterials.advisory(material,plan);
-    return res.status(200).json({exito:true,material,revision:{alcance:'Estructura, cantidades y trazabilidad; revisión pedagógica docente pendiente',tipo:tipoMaterial,estrategia:metadata.estrategiaDidactica}});
+    return res.status(200).json({exito:true,material,revision:{alcance:'Estructura, cantidades y trazabilidad; revisión pedagógica docente pendiente',tipo:tipoMaterial,estrategia:metadata.estrategiaDidactica,laboratorio:estrategiasLab.map(spec=>LabBridge.inspect(spec,material))}});
 
   } catch (error) {
     console.error('Fallo de generación HEVA:',error.code||'ERROR',JSON.stringify(error.proveedores||[]));
