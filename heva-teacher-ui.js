@@ -215,7 +215,8 @@ function showTextbookCandidates(bar){
  const candidates=rows.filter(r=>r.tipo==='catalogo');
  const indices=rows.filter(r=>r.tipo==='indice_paginas_texto_regular');
  const mexicanBooks=rows.filter(r=>r.tipo==='ficha_libro_oficial');
- const summary=element('p',verified.length+' fragmentos de libros con página PDF identificada · '+other.length+' fragmentos de otros documentos · '+indices.length+' referencias con páginas TE indicadas por UCE (sin libro inspeccionado) · '+mexicanBooks.length+' libros mexicanos identificados solo en catálogo · '+candidates.length+' referencias generales.');
+ const inspectedIndices=rows.filter(r=>r.tipo==='indice_de_libro_inspeccionado');
+ const summary=element('p',verified.length+' fragmentos de libros con página PDF identificada · '+other.length+' fragmentos de otros documentos · '+indices.length+' referencias con páginas TE indicadas por UCE (sin libro inspeccionado) · '+mexicanBooks.length+' libros mexicanos identificados solo en catálogo · '+inspectedIndices.length+' índices del propio PDF inspeccionados (sin leer lecciones) · '+candidates.length+' referencias generales.');
  summary.style.cssText='padding:9px;background:#f5f0e9;border-radius:8px;margin:8px 0;font-size:.83rem;line-height:1.5';
  refs.append(summary);
  function group(title,items){
@@ -248,6 +249,21 @@ function showTextbookCandidates(bar){
  group('Chile/México · páginas recuperadas de textos escolares',verified);
  group('Otros PDF de apoyo curricular o disciplinar',other);
  group('Catálogos pendientes de cotejo documental',candidates);
+ if(inspectedIndices.length){
+  const section=element('section');
+  section.append(element('h4','Índice inspeccionado en PDF de muestra de Historia 1° medio'));
+  for(const entry of inspectedIndices){
+   const line=element('div');line.style.cssText='border-bottom:1px solid #e7ded5;padding:9px 0;font-size:.83rem;line-height:1.5';
+   line.append(element('strong',entry.tituloLeccion));
+   line.append(element('p','Unidad '+entry.unidadRegular+' · Lección '+entry.leccionRegular+
+    ' · Índice: página impresa '+entry.paginaIndiceImpresa+', PDF '+entry.paginaIndicePDF+
+    ' · Inicio indicado de la lección: pág. '+entry.paginaInicioLeccionImpresa+
+    '. Solo se examinó el índice; el contenido de la lección sigue pendiente.'));
+   const link=element('a','Abrir página de índice comprobada',{href:entry.url,target:'_blank',rel:'noopener noreferrer'});
+   link.className='underline text-[#8B2635]';line.append(link);section.append(line);
+  }
+  refs.append(section);
+ }
  if(indices.length||mexicanBooks.length){
   const section=element('section');
   section.append(element('h4','Índices y fichas oficiales: localizar páginas, no citar contenido'));
