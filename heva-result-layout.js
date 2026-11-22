@@ -83,11 +83,18 @@ function arrange(){
  const bar=byId('barra-calidad');
  if(bar)bar.classList.add('heva-result-compact-top');
 }
-let scheduled=false;
+let scheduled=false,observer=null,observedRoot=null;
 function schedule(){
  if(scheduled)return;
  scheduled=true;
- Promise.resolve().then(()=>{scheduled=false;arrange();});
+ // Un observador no debe reaccionar a sus propios movimientos de nodos.
+ // El intervalo corto evita ciclos con observadores existentes del módulo de revisión.
+ setTimeout(()=>{
+  scheduled=false;
+  observer?.disconnect();
+  try{arrange();}
+  finally{if(observer&&observedRoot)observer.observe(observedRoot,{childList:true,subtree:true});}
+ },80);
 }
 function mount(){
  const article=byId('hoja-material');
@@ -95,7 +102,8 @@ function mount(){
  arrange();
  const viewer=article.parentElement;
  if(typeof MutationObserver==='function'){
-  const observer=new MutationObserver(schedule);
+  observedRoot=viewer;
+  observer=new MutationObserver(schedule);
   observer.observe(viewer,{childList:true,subtree:true});
  }
  const auditButton=byId('btn-auditoria');
