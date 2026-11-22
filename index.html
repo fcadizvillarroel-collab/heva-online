@@ -869,12 +869,20 @@
         // Mismo control de calidad para generación directa y recuperación por bloques.
         const laboratorioEnUso=Boolean(payload.planIntegrado?.slots?.length||payload.estrategiasLaboratorio?.length);
         let vistaLab=data.revision?.laboratorioVista||null;
-        if(laboratorioEnUso&&window.HEVALabMaterialView?.audit){
-          vistaLab=window.HEVALabMaterialView.audit(materialActual,payload.tipoMaterial,{
-            alternativas:payload.cantAlternativas,
-            desarrollo:payload.cantDesarrollo,
-            casos:payload.cantCasos
-          });
+        if(laboratorioEnUso){
+          try{
+            if(!window.HEVALabMaterialView?.audit)throw new Error('Módulo de auditoría no cargado');
+            vistaLab=window.HEVALabMaterialView.audit(materialActual,payload.tipoMaterial,{
+              alternativas:payload.cantAlternativas,
+              desarrollo:payload.cantDesarrollo,
+              casos:payload.cantCasos
+            });
+          }catch(error){
+            // La falla del informe nunca debe borrar un material ya generado.
+            console.warn('HEVA LAB: revisión complementaria pendiente:',error?.message);
+            vistaLab={ok:false,issues:['La revisión complementaria no pudo completarse.'],
+              warnings:['El material permanece disponible; revisar antes de utilizar.']};
+          }
         }
         if(vistaLab){
           const panel=document.createElement('details');
