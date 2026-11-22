@@ -74,6 +74,20 @@ test('API de cobertura devuelve paginación y filtros sin publicar supuestos cap
  const bad=await call({},'POST');
  assert.equal(bad.status,405);
 });
+test('el CSV exportable tiene 407 OA reales y todos los cotejos de libro pendientes',()=>{
+ const csv=fs.readFileSync(path.join(root,'data/matriz-documental-407-oa.csv'),'utf8').replace(/^\uFEFF/,'');
+ const lines=csv.trim().split(/\r?\n/);
+ assert.equal(lines.length,408,'Una cabecera más exactamente 407 OA');
+ assert.match(lines[0],/codigo_oficial/);
+ assert.match(lines[0],/pagina_pdf_libro/);
+ assert.match(lines[0],/estado_revision_pedagogica/);
+ const pend=(csv.match(/PENDIENTE_COTEJO_DOCUMENTAL/g)||[]).length;
+ assert.equal(pend,407,'Ningún libro debe certificarse sin cotejo');
+ const sourceIds=new Set(official.map(x=>x.codigo_oficial));
+ for(const id of sourceIds)assert.ok(csv.includes('"'+id.replace(/"/g,'""')+'"'));
+ const ui=fs.readFileSync(path.join(root,'heva-documentary-ui.js'),'utf8');
+ assert.match(ui,/\/data\/matriz-documental-407-oa\.csv/);
+});
 test('la revisión de staging permite revisar la cobertura sin alterar los OA ni generar material',()=>{
  const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
  const ui=fs.readFileSync(path.join(root,'heva-documentary-ui.js'),'utf8');

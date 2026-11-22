@@ -21,7 +21,12 @@
   const header=table.createTHead().insertRow();for(const h of ['Código OA','Marco y asignatura','Referencia Chile','Referencia México','Revisión de libros']){const th=document.createElement('th');th.scope='col';th.textContent=h;th.className='text-left p-2 border-b';header.append(th);}
   const body=table.createTBody();data.append(table);
   controls.append(category,prev,pageLabel,next);
-  section.append(head,help,stats,controls,data);
+  const exportLink=document.createElement('a');
+  exportLink.href='/data/matriz-documental-407-oa.csv';exportLink.download='matriz-documental-407-oa.csv';
+  exportLink.className='inline-flex border rounded px-3 py-2 text-sm font-bold text-[#8B2635]';
+  exportLink.textContent='Descargar matriz de 407 OA para revisión documental (CSV)';
+  exportLink.setAttribute('aria-label','Descargar inventario de OA con columnas de revisión de libros pendientes');
+  section.append(head,help,exportLink,stats,controls,data);
   stage.prepend(section);
   let page=1,loading=false;
   function link(parent,item,label){
