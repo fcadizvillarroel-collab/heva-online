@@ -57,6 +57,15 @@ jobs:
           node scripts/lab-visual-browser-smoke.cjs
         env:
           HEVA_RESULT_QA_DIR: ${{ runner.temp }}/heva-result-qa
+      - name: Verificar PPTX de 16 diapositivas y guía Word de muestra
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/heva-office-extended.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          sleep 2
+          node scripts/lab-full-office-smoke.cjs
+        env:
+          HEVA_RESULT_QA_DIR: ${{ runner.temp }}/heva-result-qa
       - name: Conservar captura de revisión visual
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
