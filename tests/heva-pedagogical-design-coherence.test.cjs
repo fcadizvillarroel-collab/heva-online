@@ -5,7 +5,7 @@ const workflow=fs.readFileSync(path.join(__dirname,'../heva-workflow-ui.js'),'ut
 const layout=fs.readFileSync(path.join(__dirname,'../heva-layout-ui.js'),'utf8');
 const index=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 test('estrategias complementarias activan el modo al seleccionarlas',()=>{
- assert.match(unified,/if\(control\?\.matches\?\.\('input\[data-strategy\]'\)\&\&control\.checked\&\&!enabled\.checked\)/);
+ assert.match(unified,/if\(control\.checked&&\!enabled\.checked\)/);
  assert.match(unified,/enabled\.checked=true/);
  assert.match(unified,/enabled\.dispatchEvent\(new Event\('change'/);
 });
