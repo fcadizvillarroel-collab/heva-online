@@ -30,7 +30,7 @@ for(const t of actividades){
 const tr=(m.trazabilidadEstrategia||[]).find(x=>x.referencia===t.ref);
 const declared=String(tr?.evidencia||'').trim(),e=cognitive(declared);
 const generic=/^(?:describe|desarrolla|identifica|reconoce|evidencia|producto|respuesta) (?:el |la |un |una )?(?:desempeño|habilidad|aprendizaje|tarea|contenido|resultado)/i.test(declared);
-if(t.cognicion&&t.cognicion.indice>=3&&e&&e.indice<=1&&declared.length>=25&&!generic)
+if(t.cognicion&&t.cognicion.indice>=3&&e&&e.indice<=1&&declared.length>=12&&!generic)
 issues.push({code:'EVIDENCIA_'+t.ref,detail:t.ref+': la consigna exige '+t.cognicion.nivel+' pero la evidencia declarada («'+declared.slice(0,95)+'») se limita a '+e.nivel+'. Ajustar producto y criterio para observar la tarea real.'});
 if(/(?:segun|conforme a) (?:la |el )?(?:noticia|articulo|texto periodistico)|de acuerdo (?:con|a) (?:la |el )?(?:noticia|articulo|texto periodistico)|a partir de (?:la |el )?(?:noticia|articulo|texto periodistico)/.test(norm(t.text))&&!hasNewsBody(m,t))issues.push({code:'NOTICIA_'+t.ref,detail:t.ref+': remite a una noticia que no tiene un cuerpo de texto identificable en el material. Agregar el texto completo o corregir la referencia.'});}
 return {objetivo,actividades,issues,alcance:'Señales heurísticas sobre las consignas reales. No verifica semántica, una respuesta única ni certifica alineación; requiere revisión docente e independiente.'};}

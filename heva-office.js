@@ -238,7 +238,7 @@ function renderCover(ppt,theme,material,total){
  const cover=ppt.addSlide(),contrast=theme.background==='FFFFFF'&&theme.main==='111111';
  const editorial=theme.layout==='editorial',clean=theme.layout==='clean',warm=theme.layout==='warm';
  // La fotografía genérica nunca debe definir el tema de una asignatura.
- const image=!editorial&&!clean&&root.HEVASlideDesign?.options(material).imagenes!==false?root.HEVAVisualAssets?.cover:null;
+ const image=material.imagenPortadaHEVA===true&&!editorial&&!clean&&root.HEVASlideDesign?.options(material).imagenes!==false?root.HEVAVisualAssets?.cover:null;
  cover.background={color:contrast?'FFFFFF':editorial?theme.background:(theme.cover||theme.main)};
  if(image&&!contrast)cover.addImage({data:image,x:0,y:0,w:13.333,h:7.5,altText:'Cuaderno y materiales de estudio. Imagen decorativa generada.'});
  const color=contrast?'111111':editorial?theme.main:'FFFFFF',title=String(material.titulo||'Presentación educativa');
@@ -279,8 +279,9 @@ async function powerpoint(m,teacher=false){
 function auditExport(m,teacher=false){
  const material=HEVA.material(m),blocks=HEVA.blocks(material,teacher),issues=[];
  const text=blocks.map(b=>String(b.text||'')).join('\n');
- const slides=presentationPages(material,teacher).length+1;
- if(slides>35)issues.push({level:'warning',code:'PPT_EXTENSO',detail:'La conversión podría producir '+slides+' diapositivas. Revise la necesidad de cada sección; no se recorta contenido.'});
+ const isPresentation=String(material.tipoMaterial||'').toUpperCase()==='PRESENTACION';
+ const slides=isPresentation?presentationPages(material,teacher).length+1:0;
+ if(isPresentation&&slides>35)issues.push({level:'warning',code:'PPT_EXTENSO',detail:'La conversión podría producir '+slides+' diapositivas. Revise la necesidad de cada sección; no se recorta contenido.'});
  if(/(?:Paso\s*\d+\s*:\s*Paso\s*\d+)/i.test(text))issues.push({level:'warning',code:'PASO_REPETIDO',detail:'Se detectó una etiqueta de paso duplicada en el contenido original.'});
  if(/(?:imagin(?:e|ar)|visualic(?:e|ar))\s+(?:una\s+)?balanza/i.test(text))issues.push({level:'info',code:'BALANZA_VISUAL',detail:'Conviene acompañar la metáfora de la balanza con un diagrama.'});
  if(/evaluaci[oó]n|prueba/i.test(material.tipoMaterial||'')&&!/puntaje|puntos/i.test(text))issues.push({level:'warning',code:'SIN_PUNTAJE',detail:'No se identificó un puntaje explícito en la evaluación.'});
