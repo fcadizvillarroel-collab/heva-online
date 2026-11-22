@@ -29,3 +29,14 @@ jobs:
         run: node --test tests/lab-strategy.test.cjs
       - name: Pruebas globales HEVA
         run: npm test
+      - name: Prueba visual del Laboratorio en Chrome
+        run: node --test tests/lab-browser.test.cjs
+        env:
+          HEVA_QA_ARTIFACT_DIR: ${{ runner.temp }}/heva-lab-visual
+      - name: Guardar captura y evidencia
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: heva-lab-visual
+          path: ${{ runner.temp }}/heva-lab-visual/
+          if-no-files-found: warn
