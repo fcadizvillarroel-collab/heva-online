@@ -1,0 +1,247 @@
+{
+  "titulo": "Globalización: conexiones, oportunidades y desafíos",
+  "asignatura": "Estudios Sociales",
+  "nivel": "2",
+  "marcoCurricular": "Decreto 257",
+  "tipoMaterial": "GUIA",
+  "temaEspecifico": "Dimensiones y efectos de la globalización",
+  "oaClaveLaboratorio": "D257|MED|Estudios Sociales|N2|7",
+  "objetivoAprendizaje": "Comprender diferentes ámbitos en los que se expresa el fenómeno de la globalización a nivel nacional y a escala planetaria distinguiendo efectos positivos y negativos en la realidad vivida.",
+  "activacion": "Observa las etiquetas de tres artículos cotidianos: ropa, alimentos y dispositivos. ¿Qué países o regiones podrían intervenir en su producción, traslado y venta? Explica una relación sin necesitar Internet.",
+  "introduccionLectura": "La globalización es un proceso de creciente conexión entre territorios, economías, culturas y personas. No significa que todos vivan lo mismo ni que los beneficios se distribuyan por igual. En la dimensión económica, materias primas, productos y servicios circulan por cadenas internacionales. En la dimensión tecnológica, herramientas y redes permiten intercambiar información con rapidez. En la dimensión cultural, costumbres, música, alimentos e ideas se difunden y se transforman al entrar en contacto con otras culturas. En la dimensión ambiental, la producción y el transporte generan efectos que atraviesan fronteras, como emisiones y residuos. En Chile, una exportación agrícola o forestal puede vincular empleos locales con compradores internacionales. Esto abre mercados, pero también genera dependencia de precios externos. Para analizar un caso, identifica primero qué dimensión predomina, quiénes participan, qué beneficios puede haber y qué dificultades pueden surgir. Es importante distinguir un dato comprobable de una opinión y no suponer que una consecuencia es idéntica para toda la población.",
+  "glosario": [
+    {
+      "termino": "Interdependencia",
+      "definicion": "Relación en la que decisiones de distintos lugares pueden afectarse entre sí."
+    },
+    {
+      "termino": "Cadena productiva",
+      "definicion": "Etapas que permiten producir, transportar y comercializar un bien."
+    },
+    {
+      "termino": "Diversidad cultural",
+      "definicion": "Variedad de costumbres, expresiones e identidades presentes en sociedades humanas."
+    },
+    {
+      "termino": "Externalidad ambiental",
+      "definicion": "Efecto sobre el entorno que no siempre está incluido en el precio de un producto."
+    }
+  ],
+  "ejemploGuiado": {
+    "situacion": "Una pequeña empresa de Villarrica vende prendas fabricadas con telas importadas y confeccionadas localmente. Aumenta el costo internacional del transporte.",
+    "pasos": [
+      {
+        "accion": "Identificar conexiones",
+        "explicacion": "La empresa depende tanto de su trabajo local como de telas y transporte provenientes de otros territorios."
+      },
+      {
+        "accion": "Reconocer un beneficio",
+        "explicacion": "Puede acceder a una mayor variedad de materiales y ofrecer distintos productos."
+      },
+      {
+        "accion": "Reconocer un riesgo",
+        "explicacion": "Si sube el transporte, aumentan los costos incluso cuando la confección es local."
+      },
+      {
+        "accion": "Concluir con matices",
+        "explicacion": "La conexión internacional genera oportunidades y riesgos; sus efectos dependen de las condiciones de cada actividad."
+      }
+    ],
+    "conclusion": "La globalización económica puede favorecer la oferta de productos, pero también transmitir aumentos de costos entre países."
+  },
+  "actividadesGuiadas": [
+    {
+      "consigna": "Completa una tabla con tres columnas: dimensión, ejemplo y efecto. Usa la venta de prendas del ejemplo y agrega otro caso cultural relacionado con alimentos o música.",
+      "apoyo": "Pregunta guía: ¿qué cruza fronteras: mercancías, información, costumbres o impactos ambientales?",
+      "productoEsperado": "Tabla con dos dimensiones bien distinguidas y ejemplos pertinentes."
+    }
+  ],
+  "actividadAutonoma": {
+    "consigna": "Escribe un párrafo que explique dos efectos positivos y dos riesgos de la globalización en la vida cotidiana, considerando al menos dos dimensiones y evitando afirmar que todas las personas se benefician de la misma manera.",
+    "productoEsperado": "Párrafo argumentado con dimensiones, efectos y matices."
+  },
+  "casosEstudio": [
+    {
+      "titulo": "Caso 1. Una cooperativa de alimentos",
+      "naturaleza": "SIMULADA",
+      "contextoReal": "Una cooperativa regional vende productos procesados a comercios nacionales. Una cadena extranjera ofrece comprar parte de su producción, pero exige envases diferentes y una entrega regular. Algunas personas ven la oportunidad de ampliar las ventas y otras temen el aumento de costos y residuos de embalaje. El relato es simulado para fines pedagógicos.",
+      "preguntaReflexion": "Identifica una oportunidad económica y un riesgo ambiental. ¿Qué información adicional pedirías antes de aceptar el acuerdo?",
+      "habilidad": "Analizar consecuencias",
+      "criterioEvaluacion": "Distingue oportunidad y riesgo en dimensiones diferentes y solicita un dato relevante."
+    },
+    {
+      "titulo": "Caso 2. Música y diversidad cultural",
+      "naturaleza": "SIMULADA",
+      "contextoReal": "En una actividad cultural comunitaria se combinan expresiones musicales locales con estilos difundidos internacionalmente. Una parte del público valora el intercambio; otra teme que se pierda espacio para artistas del territorio. Los organizadores deciden reservar tiempo para ambos tipos de repertorio y explicar sus orígenes. Es un caso simulado.",
+      "preguntaReflexion": "¿Por qué esta situación se relaciona con la dimensión cultural? Propón una decisión que favorezca el intercambio sin invisibilizar expresiones locales.",
+      "habilidad": "Interpretar y proponer",
+      "criterioEvaluacion": "Reconoce difusión cultural y plantea una decisión concreta y respetuosa."
+    }
+  ],
+  "preguntasAlternativas": [
+    {
+      "numero": 1,
+      "enunciado": "Una empresa chilena importa componentes para fabricar un producto local. ¿Qué dimensión se observa principalmente?",
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Ambiental, porque todo componente produce contaminación."
+        },
+        {
+          "letra": "B",
+          "texto": "Económica, por la relación comercial entre territorios."
+        },
+        {
+          "letra": "C",
+          "texto": "Cultural, porque cambia la identidad local."
+        },
+        {
+          "letra": "D",
+          "texto": "Política, porque se elimina la legislación nacional."
+        }
+      ],
+      "claveCorrecta": "B",
+      "justificacion": "El ejemplo describe una relación productiva y comercial."
+    },
+    {
+      "numero": 2,
+      "enunciado": "¿Cuál afirmación muestra mejor un análisis equilibrado de la globalización?",
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Todos los efectos de la globalización son positivos."
+        },
+        {
+          "letra": "B",
+          "texto": "La globalización solo afecta a las grandes ciudades."
+        },
+        {
+          "letra": "C",
+          "texto": "Las conexiones internacionales siempre eliminan la cultura local."
+        },
+        {
+          "letra": "D",
+          "texto": "Puede ofrecer oportunidades y también crear riesgos diferentes según el contexto."
+        }
+      ],
+      "claveCorrecta": "D",
+      "justificacion": "Los efectos son diversos, condicionados por cada territorio."
+    },
+    {
+      "numero": 3,
+      "enunciado": "Una misma canción circula en distintos países y se combina con ritmos locales. ¿Qué dimensión predomina?",
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Cultural, por el intercambio y la transformación de expresiones."
+        },
+        {
+          "letra": "B",
+          "texto": "Financiera, porque siempre aumenta la rentabilidad."
+        },
+        {
+          "letra": "C",
+          "texto": "Ambiental, porque desaparecen las distancias físicas."
+        },
+        {
+          "letra": "D",
+          "texto": "Industrial, porque la música deja de ser una expresión artística."
+        }
+      ],
+      "claveCorrecta": "A",
+      "justificacion": "El caso presenta intercambio y transformación cultural."
+    },
+    {
+      "numero": 4,
+      "enunciado": "Sube el precio internacional del transporte y una tienda local paga más por sus insumos. ¿Qué concepto explica mejor la situación?",
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Aislamiento comercial, porque la tienda no tiene proveedores."
+        },
+        {
+          "letra": "B",
+          "texto": "Autosuficiencia, porque los precios no dependen de terceros."
+        },
+        {
+          "letra": "C",
+          "texto": "Interdependencia, porque cambios externos afectan una actividad local."
+        },
+        {
+          "letra": "D",
+          "texto": "Homogeneidad cultural, porque todos consumen los mismos productos."
+        }
+      ],
+      "claveCorrecta": "C",
+      "justificacion": "Existe transmisión de efectos entre territorios conectados."
+    },
+    {
+      "numero": 5,
+      "enunciado": "¿Cuál actividad permite evaluar un posible efecto ambiental de una cadena global de producción?",
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Contar únicamente los anuncios publicitarios."
+        },
+        {
+          "letra": "B",
+          "texto": "Comparar distancias de transporte, embalajes y residuos."
+        },
+        {
+          "letra": "C",
+          "texto": "Identificar el país de origen sin estudiar el trayecto."
+        },
+        {
+          "letra": "D",
+          "texto": "Preguntar cuál marca se ve más moderna."
+        }
+      ],
+      "claveCorrecta": "B",
+      "justificacion": "Transporte y residuos son variables pertinentes."
+    },
+    {
+      "numero": 6,
+      "enunciado": "Un docente pide identificar una consecuencia negativa de la globalización. ¿Qué respuesta está mejor fundamentada?",
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "Puede generar dependencia de precios internacionales para algunas empresas locales."
+        },
+        {
+          "letra": "B",
+          "texto": "Siempre impide el intercambio cultural entre países."
+        },
+        {
+          "letra": "C",
+          "texto": "Significa que ningún país puede crear empleos."
+        },
+        {
+          "letra": "D",
+          "texto": "Hace innecesario estudiar la historia de los territorios."
+        }
+      ],
+      "claveCorrecta": "A",
+      "justificacion": "La dependencia de precios es un riesgo plausible y contextualizable."
+    }
+  ],
+  "preguntasDesarrollo": [
+    {
+      "numero": 1,
+      "enunciado": "Explica con un ejemplo propio la diferencia entre globalización económica y cultural. Debes nombrar qué se intercambia en cada caso.",
+      "habilidad": "Comparar",
+      "criterioEvaluacion": "Distingue ambas dimensiones e incorpora ejemplos pertinentes."
+    },
+    {
+      "numero": 2,
+      "enunciado": "Usando el caso de la cooperativa, plantea una medida para aprovechar la oportunidad comercial reduciendo un riesgo. Justifica tu respuesta.",
+      "habilidad": "Proponer y justificar",
+      "criterioEvaluacion": "La medida se relaciona con el caso y considera al menos un beneficio y un riesgo."
+    }
+  ],
+  "cierreReflexivo": "Ticket de salida: escribe un efecto de la globalización que notes en tu entorno, clasifica su dimensión e indica qué información necesitarías para evaluarlo mejor.",
+  "planEstrategia": {
+    "id": "casos",
+    "evidenciaEsperada": "Tabla comparativa, análisis de dos casos y respuestas justificadas.",
+    "retroalimentacionDocente": "Revisar si se distinguen dimensiones y efectos con ejemplos verificables, no solo opiniones."
+  }
+}
