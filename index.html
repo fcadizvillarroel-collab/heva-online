@@ -22,6 +22,24 @@
       .pauta-print { page-break-before: always; }
     }
   </style>
+  <style id="heva-layout-style">
+    /* La interfaz se abre despejada; los controles originales siguen en el DOM. */
+    #heva-ppt-temas { display:none; }
+    #heva-ppt-temas[hidden] { display:none !important; }
+    .heva-options-fold { border:1px solid #d9cfc5; background:#faf8f5; border-radius:12px; padding:11px 13px; }
+    .heva-options-fold>summary { cursor:pointer; font-weight:700; color:#713646; font-size:.88rem; }
+    .heva-options-fold[open]>summary { margin-bottom:10px; }
+    .heva-fold-hint {font-size:.78rem; color:#66615e; margin:8px 0 9px; line-height:1.5}
+    .heva-fold-nested { background:white; margin:8px 0; border-color:#ded7cf; border-width:1px; }
+    .heva-fold-nested summary {font-size:.82rem}
+    .heva-audit-fold { margin-bottom:10px; border:1px solid #d5c9ae; border-radius:9px; background:#fffaf0; padding:9px 11px; }
+    .heva-audit-fold>summary { cursor:pointer; font-size:.8rem; font-weight:650; color:#653b26; }
+    .heva-audit-fold #informe-auditoria-heva { margin:10px 0 0; max-height:350px; overflow:auto; }
+    .heva-lab-banner-compact {display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 24px!important;font-size:.79rem}
+    .heva-lab-banner-compact a{margin-left:auto!important}
+    #heva-proposal-badge[hidden]{display:none!important}
+    @media(max-width:640px){.heva-lab-banner-compact{padding:7px 12px!important;flex-wrap:wrap}.heva-lab-banner-compact a{margin-left:0!important}}
+  </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
@@ -981,5 +999,5 @@ function refresh(){
 }
 type.addEventListener('change',refresh);refresh();
 })();
-</script><script src="/experimental/heva-unified-ui.js"></script><script src="/heva-strategy-delivery-ui.js?v=20261115-verificacion"></script><script src="/heva-assessment-ui.js?v=20261115-planificacion"></script><script src="/heva-planning-ui.js?v=20261115-planificacion"></script><script src="/heva-teacher-ui.js?v=20261117-opcionales-v5"></script></body>
+</script><script src="/experimental/heva-unified-ui.js"></script><script src="/heva-strategy-delivery-ui.js?v=20261115-verificacion"></script><script src="/heva-assessment-ui.js?v=20261115-planificacion"></script><script src="/heva-planning-ui.js?v=20261115-planificacion"></script><script src="/heva-teacher-ui.js?v=20261117-opcionales-v5"></script><script src="/heva-layout-ui.js?v=20261122-simplificada"></script></body>
 </html>
