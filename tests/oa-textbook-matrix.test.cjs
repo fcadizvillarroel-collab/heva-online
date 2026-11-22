@@ -75,7 +75,7 @@ test('vincula preguntas con páginas solo si la cita ya fue verificada',()=>{
 });
 test('sin PDF consultado, queda solo bibliografía y prohibición de citar páginas',()=>{
  const r=M.build(plan,catalogs(),{documents:[],fragments:[]});
- assert.equal(r.estado,'solo_catalogos_pendientes_verificacion');
+ assert.equal(r.estado,'indices_oficiales_con_paginas_te_pendientes_lectura');
  assert.equal(r.cobertura.CL.fragmentosLibro+r.cobertura.MX.fragmentosLibro,0);
  assert.match(M.instruction(r),/No hay páginas de libros de texto comprobadas/);
 });
@@ -88,7 +88,7 @@ test('si el docente desactiva los textos, no se añaden referencias',()=>{
 test('matriz usa catálogos de países autorizados y no inventa contenido mexicano',()=>{
  const real=Textbooks.recommendations(plan);
  const result=M.build(plan,real,{documents:[],fragments:[]});
- assert.ok(result.registros.every(x=>['catalogo','ficha_libro_oficial','indice_paginas_texto_regular'].includes(x.tipo)));
+ assert.ok(result.registros.every(x=>['catalogo','ficha_libro_oficial','indice_paginas_texto_regular','indice_de_libro_inspeccionado'].includes(x.tipo)));
  assert.ok(result.registros.every(x=>x.paginaPDF===null));
 });
 test('generación normal y por bloques incluyen la misma matriz documental',()=>{
