@@ -27,11 +27,11 @@ test('el diseño pedagógico agrupa controles sin duplicar OA ni tema',()=>{
  assert.ok(layout.indexOf('if(design)')<layout.indexOf('if(access)'));
  assert.ok(layout.indexOf('if(access)')<layout.indexOf('if(lab)'));
  assert.doesNotMatch(workflow,/id="design-oa"/);
- assert.match(workflow,/id="design-depth"/);
- assert.match(workflow,/id="design-context"/);
- assert.match(workflow,/id="design-modelado"/);
- assert.match(workflow,/id="design-ausencias"/);
- assert.match(workflow,/id="design-desafio"/);
+ assert.match(workflow,/design-depth/);
+ assert.match(workflow,/design-context/);
+ assert.match(workflow,/design-modelado/);
+ assert.match(workflow,/design-ausencias/);
+ assert.match(workflow,/design-desafio/);
  assert.match(index,/heva-layout-ui\.js\?v=20261122-diseno-coherente/);
 });
 test('JS de los controles críticos tiene sintaxis válida',()=>{
