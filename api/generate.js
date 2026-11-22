@@ -9,6 +9,7 @@ const OAPedagogy=require('../lib/oa-pedagogical-bridge.cjs');
 const Pedagogy = require('../heva-pedagogy.js');
 const HEVA = require('../heva-core.js');
 const LabBridge = require('../lib/lab-strategy.cjs');
+const LabMaterialView = require('../experimental/material-view.js');
 // api/generate.js — Motor Multi-IA Suite: ChatGPT / Gemini con Prosa Andragógica y RAG
 
 module.exports = async function handler(req, res) {
@@ -251,7 +252,19 @@ Responde ÚNICAMENTE en JSON:
     material.auditoriaExperimental=require('../experimental/quality-audit.cjs').inspect(material,plan);
     material.auditoriaDisciplinar=require('../experimental/subject-audit.cjs').inspectAll(material,plan);
     material.controlProfundidadHEVA=DeepMaterials.advisory(material,plan);
-    return res.status(200).json({exito:true,material,revision:{alcance:'Estructura, cantidades y trazabilidad; revisión pedagógica docente pendiente',tipo:tipoMaterial,estrategia:metadata.estrategiaDidactica,laboratorio:estrategiasLab.map(spec=>LabBridge.inspect(spec,material))}});
+    // Auditoría adicional del Laboratorio en respuestas reales: informativa, no
+    // aprueba contenido disciplinar ni descarta el material que ya pasó HEVA.
+    const auditoriaVistaLab=estrategiasLab.length?LabMaterialView.audit(material,tipoMaterial,{
+      alternativas:cantidadesEfectivas.cantAlternativas,
+      desarrollo:cantidadesEfectivas.cantDesarrollo,
+      casos:cantidadesEfectivas.cantCasos
+    }):null;
+    return res.status(200).json({exito:true,material,revision:{
+      alcance:'Estructura, cantidades y trazabilidad; revisión pedagógica docente pendiente',
+      tipo:tipoMaterial,estrategia:metadata.estrategiaDidactica,
+      laboratorio:estrategiasLab.map(spec=>LabBridge.inspect(spec,material)),
+      laboratorioVista:auditoriaVistaLab
+    }});
 
   } catch (error) {
     console.error('Fallo de generación HEVA:',error.code||'ERROR',JSON.stringify(error.proveedores||[]));
