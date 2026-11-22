@@ -213,7 +213,9 @@ function showTextbookCandidates(bar){
  const verified=rows.filter(r=>r.tipo==='fragmento_libro');
  const other=rows.filter(r=>r.tipo==='fragmento_documental');
  const candidates=rows.filter(r=>r.tipo==='catalogo');
- const summary=element('p',verified.length+' fragmentos de libros con página PDF identificada · '+other.length+' fragmentos de otros documentos · '+candidates.length+' referencias de catálogos aún no verificadas.');
+ const indices=rows.filter(r=>r.tipo==='indice_paginas_texto_regular');
+ const mexicanBooks=rows.filter(r=>r.tipo==='ficha_libro_oficial');
+ const summary=element('p',verified.length+' fragmentos de libros con página PDF identificada · '+other.length+' fragmentos de otros documentos · '+indices.length+' referencias con páginas TE indicadas por UCE (sin libro inspeccionado) · '+mexicanBooks.length+' libros mexicanos identificados solo en catálogo · '+candidates.length+' referencias generales.');
  summary.style.cssText='padding:9px;background:#f5f0e9;border-radius:8px;margin:8px 0;font-size:.83rem;line-height:1.5';
  refs.append(summary);
  function group(title,items){
@@ -246,6 +248,23 @@ function showTextbookCandidates(bar){
  group('Chile/México · páginas recuperadas de textos escolares',verified);
  group('Otros PDF de apoyo curricular o disciplinar',other);
  group('Catálogos pendientes de cotejo documental',candidates);
+ if(indices.length||mexicanBooks.length){
+  const section=element('section');
+  section.append(element('h4','Índices y fichas oficiales: localizar páginas, no citar contenido'));
+  for(const entry of [...indices,...mexicanBooks]){
+   const line=element('div');line.style.cssText='border-bottom:1px solid #e7ded5;padding:9px 0;font-size:.83rem;line-height:1.5';
+   line.append(element('strong',entry.pais+' · '+(entry.temaIndice||entry.titulo)));
+   line.append(element('p',entry.tipo==='indice_paginas_texto_regular'
+    ?'OA regular '+entry.oaRegular+' · Unidad '+entry.unidadRegular+' · Lección '+entry.leccionRegular+' · Páginas TE indicadas: '+entry.paginasTEIndicadas+' (no inspeccionadas). Fuente: UCE 2023, pág. '+entry.paginaIndiceImpresa
+    :'Libro oficial identificado en catálogo SEP '+entry.ciclo+'. No se han leído ni validado sus páginas.'));
+   const a=element('a','Abrir fuente oficial',{href:entry.url,target:'_blank',rel:'noopener noreferrer'});
+   a.className='underline text-[#8B2635]';line.append(a);
+   if(entry.visor){const reader=element('a','Abrir visor del libro',{href:entry.visor,target:'_blank',rel:'noopener noreferrer'});reader.className='underline text-[#8B2635] ml-3';line.append(reader);}
+   section.append(line);
+  }
+  section.append(element('p','Precaución: las páginas TE son del texto escolar regular de 2023, no páginas PDF verificadas ni equivalencias con OA EPJA. Los ejemplos mexicanos solo podrán utilizarse tras consultar y verificar sus páginas.'));
+  refs.append(section);
+ }
  const activities=Array.isArray(matrix?.vinculosActividades)?matrix.vinculosActividades:[];
  if(activities.length){
   const section=element('section');
