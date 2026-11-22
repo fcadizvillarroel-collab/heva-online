@@ -39,10 +39,13 @@ test('Chrome carga estrategias y catálogo EPJA sin error de JavaScript',async()
   try{
     const base=['--headless=new','--disable-gpu','--no-sandbox','--disable-dev-shm-usage','--hide-scrollbars','--virtual-time-budget=4000','--window-size=1280,1000'];
     const {stdout}=await run(binary,[...base,'--dump-dom',url],{timeout:30000,maxBuffer:12*1024*1024});
-    assert.match(stdout,/id="oa-select"/,'Falta el selector de OA');
-    assert.match(stdout,/OA publicados disponibles/,'No se cargó el catálogo EPJA');
-    assert.match(stdout,/<option value="(?:B24|D257)\|/,'No se encontraron opciones reales del catálogo');
-    assert.doesNotMatch(stdout,/No se pudo consultar el catálogo:/,'La interfaz no pudo cargar el currículo');
+    const choices=stdout.match(/<select id="oa-select"[^>]*>([\\s\\S]*?)<\\/select>/i);
+    assert.ok(choices,'Falta el selector de OA en el DOM generado.');
+    assert.match(choices[1],/<option value="(?:B24|D257)\\|/,'El DOM no contiene objetivos reales.');
+    const info=stdout.match(/<p id="oa-info"[^>]*>([\\s\\S]*?)<\\/p>/i);
+    assert.ok(info,'Falta el estado de carga curricular.');
+    assert.match(info[1],/OA publicados disponibles/,'No se cargó el catálogo EPJA.');
+    assert.doesNotMatch(info[1],/No se pudo consultar el catálogo:/,'Chrome muestra un error de carga curricular.');
     const shot=path.join(outputDir,'heva-lab-1280.png');
     await run(binary,[...base,'--screenshot='+shot,url],{timeout:30000,maxBuffer:3*1024*1024});
     const png=fs.readFileSync(shot);
