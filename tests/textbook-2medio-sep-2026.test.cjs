@@ -41,7 +41,7 @@ test('catálogo CONALITEG identifica tres libros oficiales de sociales y tres de
 });
 test('la matriz integra referencias pero no declara páginas mexicanas ni chilenas verificadas',()=>{
  const m=Matrix.build({...base,temaEspecifico:'Guerra Fría'},{enabled:true,items:[]},{documents:[],fragments:[]});
- assert.equal(m.indicesConPaginasTE,2);
+ assert.equal(m.indicesConPaginasTE,1,'Guerra Fría se vincula a OA 08; fin de Guerra Fría requiere un tema explícito');
  assert.equal(m.fichasDeLibrosIdentificadas,3);
  assert.equal(m.cobertura.CL.fragmentosLibro,0);
  assert.equal(m.cobertura.MX.fragmentosLibro,0);
