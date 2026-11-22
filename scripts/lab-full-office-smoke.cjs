@@ -85,6 +85,17 @@ const material={
     assert.ok(docXml.includes(section),'Word perdió sección pedagógica: '+section);
   }
   assert.ok(!docXml.includes('PAUTA DOCENTE · USO EXCLUSIVO'),'Word de estudiante expone pautas reservadas');
-  console.log('Word modelo completo:',docBytes.length,'bytes; glosario, práctica, modelamiento y cierre conservados.');
+  // Verificar que un enunciado con sus cuatro opciones mantiene la cadena
+  // keepNext en OOXML para no partir la pregunta entre dos páginas.
+  const paragraphs=[...docXml.matchAll(/<w:p(?:\s[^>]*)?>[\s\S]*?<\/w:p>/g)].map(match=>({
+    raw:match[0],
+    text:[...match[0].matchAll(/<w:t(?:\s[^>]*)?>([\s\S]*?)<\/w:t>/g)].map(x=>x[1]).join(''),
+    keep:/<w:keepNext\b/.test(match[0])
+  }));
+  const first=paragraphs.findIndex(p=>p.text.includes('Selección múltiple 1'));
+  assert.ok(first>=0,'No se encontró la pregunta uno en Word');
+  assert.ok(paragraphs[first].keep&&paragraphs[first+1]?.keep,'El título o enunciado quedó sin protección de salto');
+  for(let i=2;i<=4;i++)assert.ok(paragraphs[first+i]?.keep,'Opción '+i+' sin keepNext');
+  console.log('Word modelo completo:',docBytes.length,'bytes; glosario, práctica, modelamiento, cierre y preguntas A–D agrupadas.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
