@@ -1,15 +1,20 @@
 name: HEVA Laboratorio CI
 on:
   push:
-    branches:
-      - experimental/heva-lab-strategy-bridge
+    branches: [experimental/heva-lab-strategy-bridge]
+  pull_request:
+    branches: [experimental/estrategias-pedagogicas]
   workflow_dispatch:
+permissions:
+  contents: read
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '22'
       - name: Instalar dependencias
@@ -19,5 +24,8 @@ jobs:
           node --check api/generate.js
           node --check lib/lab-strategy.cjs
           node --check experimental/strategy-lab.js
-      - name: Pruebas HEVA
+          node --check experimental/integration.js
+      - name: Pruebas nuevas del puente EPJA
+        run: node --test tests/lab-strategy.test.cjs
+      - name: Pruebas globales HEVA
         run: npm test
