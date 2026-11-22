@@ -255,11 +255,19 @@ Responde ÚNICAMENTE en JSON:
     // Auditoría adicional del Laboratorio en respuestas reales: informativa, no
     // aprueba contenido disciplinar ni descarta el material que ya pasó HEVA.
     const laboratorioActivo=estrategiasLab.length>0||(Array.isArray(planIntegrado?.slots)&&planIntegrado.slots.length>0);
-    const auditoriaVistaLab=laboratorioActivo?LabMaterialView.audit(material,tipoMaterial,{
-      alternativas:cantidadesEfectivas.cantAlternativas,
-      desarrollo:cantidadesEfectivas.cantDesarrollo,
-      casos:cantidadesEfectivas.cantCasos
-    }):null;
+    let auditoriaVistaLab=null;
+    if(laboratorioActivo){
+      try{
+        auditoriaVistaLab=LabMaterialView.audit(material,tipoMaterial,{
+          alternativas:cantidadesEfectivas.cantAlternativas,
+          desarrollo:cantidadesEfectivas.cantDesarrollo,
+          casos:cantidadesEfectivas.cantCasos
+        });
+      }catch(error){
+        console.warn('HEVA LAB: auditoría no disponible:',error?.code||'ERROR');
+        auditoriaVistaLab={ok:false,sections:0,issues:['No se completó el control complementario del laboratorio.'],warnings:['El material generado se conserva y requiere revisión docente.']};
+      }
+    }
     return res.status(200).json({exito:true,material,revision:{
       alcance:'Estructura, cantidades y trazabilidad; revisión pedagógica docente pendiente',
       tipo:tipoMaterial,estrategia:metadata.estrategiaDidactica,
