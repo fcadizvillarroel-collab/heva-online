@@ -27,7 +27,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
    return edit?.previousElementSibling===article&&review?.previousElementSibling===edit
      &&document.getElementById('heva-teacher-tools')?.parentElement===edit
      &&document.getElementById('heva-experimental-audit')?.parentElement===review
-     &&document.getElementById('heva-export-control')?.parentElement===review
+     &&document.getElementById('heva-export-control')?.closest('#revision-contenido')
      &&document.getElementById('heva-textbook-references')?.parentElement===review;
   },{timeout:15000});
   const result=await page.evaluate(()=>{
