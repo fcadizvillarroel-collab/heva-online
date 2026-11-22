@@ -65,11 +65,19 @@ module.exports=async(req,res)=>{
    issues=R.partIssues(result.value,plan,fase==='items'?batch:null,parts);
   }
   if(fase==='items'&&R.traceIssuesOnly(issues)&&deadline-Date.now()>5500){
-   try{
-    const fixed=await call(R.traceRepairPrompt(plan,result.value,batch),...keys,exclude,{deadline,maxOutputTokens:2600});
-    const candidate=R.mergeTraceRepair(result.value,fixed.value,plan,batch),candidateIssues=R.partIssues(candidate,plan,batch,parts);
-    if(candidateIssues.length<issues.length){result.value=candidate;issues=candidateIssues;}
-   }catch(error){console.warn('HEVA trace repair pending:',error.code||'TRACE_REPAIR_ERROR');}
+   // Reparación aislada. No se reescriben las preguntas: solo se admiten trazas
+   // con referencias globales exactas y vínculos solicitados por el docente.
+   for(let attempt=0;attempt<2&&R.traceIssuesOnly(issues)&&deadline-Date.now()>9000;attempt++){
+    try{
+     const remaining=issues.filter(x=>/^Falta (?:trazabilidad|vínculo)/.test(x));
+     const promptTrace=R.traceRepairPrompt(plan,result.value,batch)
+      +(attempt?'\\nSEGUNDO INTENTO: devuelve todos los IDs exigidos por referencia exacta. Aún falta: '+remaining.join('; '):'');
+     const fixed=await call(promptTrace,...keys,exclude,{deadline,maxOutputTokens:2600});
+     const candidate=R.mergeTraceRepair(result.value,fixed.value,plan,batch);
+     const candidateIssues=R.partIssues(candidate,plan,batch,parts);
+     if(candidateIssues.length<issues.length){result.value=candidate;issues=candidateIssues;}
+    }catch(error){console.warn('HEVA trace repair pending:',error.code||'TRACE_REPAIR_ERROR');break;}
+   }
   }
   if(fase==='items'&&R.traceIssuesOnly(issues))return res.status(422).json({error:'Las preguntas están conservadas; falta completar su trazabilidad pedagógica.',detalle:issues.join('; '),codigo:'ITEM_TRACES_INCOMPLETE',borradorBloque:result.value,reintentable:true});
   // Repair strategy metadata separately instead of regenerating and losing a
