@@ -54,8 +54,13 @@ enabled.addEventListener('change',update);update();
 // Así no puede quedar una estrategia marcada con el módulo desactivado.
 $('lab-strategies')?.addEventListener('change',event=>{
  const control=event.target;
- if(control?.matches?.('input[data-strategy]')&&control.checked&&!enabled.checked){
+ if(!control?.matches?.('input[data-strategy]'))return;
+ if(control.checked&&!enabled.checked){
   enabled.checked=true;
+  enabled.dispatchEvent(new Event('change',{bubbles:true}));
+ }else if(!control.checked&&enabled.checked&&!document.querySelector('#lab-strategies input[data-strategy]:checked')){
+  // Última estrategia desmarcada: regresar a la modalidad principal sin error.
+  enabled.checked=false;
   enabled.dispatchEvent(new Event('change',{bubbles:true}));
  }
 });
