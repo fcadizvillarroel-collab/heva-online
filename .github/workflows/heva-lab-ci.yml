@@ -1,0 +1,23 @@
+name: HEVA Laboratorio CI
+on:
+  push:
+    branches:
+      - experimental/heva-lab-strategy-bridge
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar dependencias
+        run: npm ci --ignore-scripts
+      - name: Validar sintaxis
+        run: |
+          node --check api/generate.js
+          node --check lib/lab-strategy.cjs
+          node --check experimental/strategy-lab.js
+      - name: Pruebas HEVA
+        run: npm test
