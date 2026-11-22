@@ -278,6 +278,16 @@ function showTextbookCandidates(bar){
   refs.append(section);
  }else refs.append(element('p','Aún no existen actividades enlazadas a citas verificadas de esos documentos. No se atribuyen ejercicios a libros sin evidencia.'));
  if(!rows.length)refs.append(element('p','No existen referencias verificadas para este objetivo y tema. La guía debe basarse en el OA y en las fuentes documentales disponibles, sin atribuir información a libros no consultados.'));
+ const planFuentes=materialActual?.planUsoFuentesOA;
+ if(planFuentes?.etapas?.length){
+  const block=element('details');block.className='border rounded p-2 mt-2';
+  block.append(element('summary','Secuencia didáctica vinculada al OA · criterios de revisión'));
+  const list=element('ol');list.className='list-decimal pl-5 text-sm';
+  for(const step of planFuentes.etapas){const li=element('li',step);li.className='mb-1';list.append(li);}
+  block.append(list,element('p','Estado de evidencia: '+(planFuentes.estado==='referencias_pdf_recuperadas_pendientes_de_revision_docente'
+  ?'Hay fragmentos PDF recuperados; revisión docente pendiente.':'Sin páginas de libros comprobadas para atribuir contenido.')));
+  refs.append(block);
+ }
  refs.append(element('p','Control de calidad: los capítulos, la pertinencia curricular y la validez pedagógica requieren revisión docente. Una coincidencia de palabras no acredita que el texto enseñe el objetivo EPJA.'));
 }
 
