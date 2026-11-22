@@ -47,9 +47,9 @@ function arrange(){
   }
   toolbar.classList.add('heva-toolbar-organized');
   const visual=[...toolbar.querySelectorAll('button')].find(b=>/Recursos visuales · con o sin/.test(b.textContent));
-  if(visual)visual.textContent='Elegir imágenes, diagramas y gráficos';
+  if(visual&&visual.textContent!=='Elegir imágenes, diagramas y gráficos')visual.textContent='Elegir imágenes, diagramas y gráficos';
   const guideImage=byId('heva-guide-image-action');
-  if(guideImage)guideImage.textContent='Añadir o cambiar imagen de apoyo';
+  if(guideImage&&guideImage.textContent!=='Añadir o cambiar imagen de apoyo')guideImage.textContent='Añadir o cambiar imagen de apoyo';
  }
  const sources=['heva-experimental-audit','heva-audit-fold','heva-export-control','heva-strategy-delivery','heva-teaching-report','heva-textbook-references','heva-metal-sources','heva-depth-advisories','heva-tp-document-evidence'];
  for(const id of sources){
