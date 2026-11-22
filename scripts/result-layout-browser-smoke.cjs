@@ -97,7 +97,12 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
   assert.ok(layout.actionRect.top>=layout.cardRect.top&&layout.actionRect.bottom<=layout.cardRect.bottom+1,'Apartar debe quedar dentro de la tarjeta');
   assert.ok(layout.actionRect.width>=190&&layout.actionRect.height>=44,'Botón Apartar legible y usable');
   assert.ok(layout.stepsRect.top>=layout.cardRect.bottom-1,'Los pasos no deben superponerse a la recuperación');
-  assert.match(layout.data,/"cantAlternativas":6/,'No alterar checkpoint conservado');
+  const saved=JSON.parse(layout.data);
+  assert.equal(saved.version,2,'Mantener versión del checkpoint');
+  assert.equal(saved.parts.length,0,'No agregar ni borrar bloques del avance');
+  assert.equal(JSON.parse(saved.planKey).cantAlternativas,6,'Conservar cantidad de alternativas solicitadas');
+  assert.equal(JSON.parse(saved.planKey).cantDesarrollo,2,'Conservar desarrollo solicitado');
+  assert.equal(JSON.parse(saved.planKey).cantCasos,2,'Conservar casos solicitados');
   await recovery.screenshot({path:path.join(out,'heva-prueba-pendiente-sin-superposicion.png'),fullPage:true});
   console.log('Recuperación visual de prueba comprobada: controles separados, pasos en formulario y checkpoint intacto.');
  }finally{await browser.close();}
