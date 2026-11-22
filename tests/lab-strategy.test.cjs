@@ -1,0 +1,15 @@
+'use strict';
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const bridge=require('../lib/lab-strategy.cjs');
+const base={asignatura:'Historia y Estudios Sociales',nivel:'I NIVEL MEDIO',objetivoAprendizaje:'Analizar causas y consecuencias de procesos históricos mediante evidencia.',temaEspecifico:'Revolución Industrial',tipoMaterial:'GUIA'};
+test('flujo existente sin estrategia sigue disponible',()=>{assert.equal(bridge.resolve(base),null);assert.deepEqual(bridge.resolveMany(base),[]);});
+test('estrategia pertinente produce encargo específico',()=>{const x=bridge.resolve({...base,estrategiaLaboratorio:'multicausalidad'});assert.equal(x.strategy.id,'multicausalidad');assert.match(bridge.prompt(x,'GUIA'),/causas/i);});
+test('se rechaza una estrategia de otra asignatura',()=>{assert.throws(()=>bridge.resolve({...base,estrategiaLaboratorio:'indagacion'}),/no corresponde/i);});
+test('se detectan duplicados y exceso de estrategias',()=>{assert.throws(()=>bridge.resolveMany({...base,estrategiasLaboratorio:['casos','casos']}),/distintas/i);assert.throws(()=>bridge.resolveMany({...base,estrategiasLaboratorio:Array(9).fill('casos')}),/8 estrategias/i);});
+test('se rechaza OA vacío',()=>{assert.throws(()=>bridge.resolve({...base,objetivoAprendizaje:'',estrategiaLaboratorio:'casos'}),/OA EPJA/i);});
+test('se rechaza asignatura desconocida',()=>{assert.throws(()=>bridge.resolve({...base,asignatura:'Asignatura inventada',estrategiaLaboratorio:'casos'}),/sin correspondencia/i);});
+test('se rechazan opciones invalidas',()=>{assert.throws(()=>bridge.resolve({...base,estrategiaLaboratorio:'casos',opcionesLaboratorio:{profundidad:'sin_limite'}}),/Profundidad inválida/i);});
+test('evaluaciones preservan separación de pautas',()=>{const x=bridge.resolve({...base,tipoMaterial:'EVALUACION',estrategiaLaboratorio:'casos'});assert.match(bridge.prompt(x,'EVALUACION'),/No muestres claves/i);});
+test('planificación requiere 90 minutos y TP exige seguridad',()=>{const x=bridge.resolve({...base,tipoMaterial:'PLANIFICACION',estrategiaLaboratorio:'casos'});assert.match(bridge.prompt(x,'PLANIFICACION'),/90 minutos/);const metal=bridge.resolve({asignatura:'Construcciones Metálicas',objetivoAprendizaje:'Interpretar secuencias de trabajo y controles preventivos.',tipoMaterial:'TALLER',estrategiaLaboratorio:'casos'});assert.match(bridge.prompt(metal,'TALLER'),/EPP adecuado/);});
+test('múltiples estrategias conservan orden y mantienen objetivo',()=>{const xs=bridge.resolveMany({...base,estrategiasLaboratorio:['casos','multicausalidad']});assert.deepEqual(xs.map(x=>x.strategy.id),['casos','multicausalidad']);assert.match(bridge.promptMany(xs,'GUIA'),/ESTRATEGIA 2 DE 2/);});
