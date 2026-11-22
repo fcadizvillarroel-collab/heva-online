@@ -64,5 +64,41 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
   await fs.mkdir(out,{recursive:true});
   await page.screenshot({path:path.join(out,'heva-guia-visor-ordenado.png'),fullPage:true});
   console.log('Visor integrado: artículo primero, herramientas debajo, advertencias agrupadas, etiquetas claras.');
+  // Reproducir el caso reportado: Firefox/Chrome con una prueba de 6 ALT, 2 DES, 2 CASO pendiente.
+  // El checkpoint es sintético y solo se escribe en un contexto aislado de Chromium.
+  const recovery=await browser.newPage({viewport:{width:1366,height:768}});
+  await recovery.addInitScript(()=>{
+   const plan={tipoMaterial:'EVALUACION',cantAlternativas:6,cantDesarrollo:2,cantCasos:2,
+    asignatura:'Estudios Sociales',nivel:'I Nivel Medio',marcoCurricular:'Bases Curriculares EPJA 2024',
+    objetivoAprendizaje:'Evaluar cambios históricos',temaEspecifico:'Globalización'};
+   localStorage.setItem('heva-recuperacion-v2',JSON.stringify({version:2,planKey:JSON.stringify(plan),parts:[]}));
+  });
+  await recovery.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded',timeout:30000});
+  await recovery.waitForFunction(()=>Boolean(document.querySelector('#heva-resume-recovery .heva-recovery-actions')&&document.querySelector('.heva-steps')),{timeout:30000});
+  const layout=await recovery.evaluate(()=>{
+   const card=document.getElementById('heva-resume-recovery');
+   const action=[...card.querySelectorAll('button')].find(x=>x.textContent.includes('Apartar'));
+   const steps=document.querySelector('.heva-steps');
+   const type=document.getElementById('tipo-material');
+   const form=type.closest('div.bg-white');
+   const rect=x=>{const r=x.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}};
+   return {actions:card.querySelectorAll('button').length,
+    stepsInsideRecovery:card.contains(steps),stepsInsideButton:!!action?.contains(steps),
+    stepsInsideForm:form.contains(steps),stepsCount:document.querySelectorAll('.heva-steps').length,
+    cardRect:rect(card),actionRect:rect(action),stepsRect:rect(steps),
+    data:localStorage.getItem('heva-recuperacion-v2'),
+    buttons:[...card.querySelectorAll('button')].map(x=>x.textContent.trim())};
+  });
+  assert.equal(layout.actions,2,'La recuperación debe tener dos botones');
+  assert.equal(layout.stepsInsideRecovery,false,'Los pasos no pueden estar dentro de la recuperación');
+  assert.equal(layout.stepsInsideButton,false,'Los pasos no pueden estar dentro del botón Apartar');
+  assert.equal(layout.stepsInsideForm,true,'Los pasos deben estar en el formulario del tipo de material');
+  assert.equal(layout.stepsCount,1,'Los cuatro pasos deben aparecer una sola vez');
+  assert.ok(layout.actionRect.top>=layout.cardRect.top&&layout.actionRect.bottom<=layout.cardRect.bottom+1,'Apartar debe quedar dentro de la tarjeta');
+  assert.ok(layout.actionRect.width>=190&&layout.actionRect.height>=44,'Botón Apartar legible y usable');
+  assert.ok(layout.stepsRect.top>=layout.cardRect.bottom-1,'Los pasos no deben superponerse a la recuperación');
+  assert.match(layout.data,/"cantAlternativas":6/,'No alterar checkpoint conservado');
+  await recovery.screenshot({path:path.join(out,'heva-prueba-pendiente-sin-superposicion.png'),fullPage:true});
+  console.log('Recuperación visual de prueba comprobada: controles separados, pasos en formulario y checkpoint intacto.');
  }finally{await browser.close();}
 })().catch(err=>{console.error(err);process.exitCode=1});
