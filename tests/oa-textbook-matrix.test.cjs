@@ -61,6 +61,18 @@ test('un OA solo se declara cotejado con fragmento literal curricular recuperado
  assert.equal(found.verificacionOA.paginaPDF,10);
  assert.equal(found.verificacionOA.documento,'Bases curriculares EPJA');
 });
+test('vincula preguntas con páginas solo si la cita ya fue verificada',()=>{
+ const matrix=M.build(plan,catalogs(),sources());
+ const linked=M.linkActivities(matrix,[
+  {fuenteId:'TEXTO_REG_HIST1_MUESTRA-P12-T',seccion:'ALT-1',paginaPDF:12,page:12,afirmacion:'Cambio en el trabajo',cita:'La Revolución Industrial produjo cambios en el trabajo'},
+  {fuenteId:'TEXTO_REG_HIST1_MUESTRA-P12-T',seccion:'ALT-2',page:24,afirmacion:'Página equivocada',cita:'Texto'},
+  {fuenteId:'inventada',seccion:'ALT-3',page:12,cita:'Texto inventado'}
+ ]);
+ assert.equal(linked.vinculosActividades.length,1);
+ assert.equal(linked.vinculosActividades[0].seccion,'ALT-1');
+ assert.equal(linked.vinculosActividades[0].paginaPDF,12);
+ assert.equal(matrix.vinculosActividades,undefined);
+});
 test('sin PDF consultado, queda solo bibliografía y prohibición de citar páginas',()=>{
  const r=M.build(plan,catalogs(),{documents:[],fragments:[]});
  assert.equal(r.estado,'solo_catalogos_pendientes_verificacion');
