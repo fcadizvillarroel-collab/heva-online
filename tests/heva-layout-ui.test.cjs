@@ -16,8 +16,8 @@ class El {
  querySelector(selector){if(selector==='span')return this.children.find(x=>x.tag==='span')||null;return null}
 }
 function fixture(){
- const map={},el=(id,cls='',tag='div')=>{let e=new El(id,cls,tag);if(id)map[id]=e;return e};
- const body=el('body'),banner=el('banner','no-print');banner.style.background='#f0f6ee';banner.append(el('banner-title','','strong'));const intro=el('intro','','span');banner.append(intro);banner.append(el('banner-link','','a'));body.append(banner);
+ const stored={};let body;const map=new Proxy(stored,{get(t,key){if(Object.hasOwn(t,key))return t[key];const find=n=>{if(!n)return null;if(n.id===key)return n;for(const child of n.children){const hit=find(child);if(hit)return hit}return null};return find(body)}});const el=(id,cls='',tag='div')=>{let e=new El(id,cls,tag);if(id)stored[id]=e;return e};
+ body=el('body');const banner=el('banner','no-print');banner.style.background='#f0f6ee';banner.append(el('banner-title','','strong'));const intro=el('intro','','span');banner.append(intro);banner.append(el('banner-link','','a'));body.append(banner);
  body.append(el('heva-proposal-badge'));
  const panel=el('panel-crear'),form=el('form','bg-white'),quality=el('quality','bg-white');body.append(panel);panel.append(form);panel.append(quality);
  const typeBlock=el('type-block');typeBlock.append(el('tipo-material','','select'));form.append(typeBlock);
