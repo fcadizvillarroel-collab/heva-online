@@ -68,15 +68,24 @@ function mostrarRecuperacionPendienteHEVA(){
  if(!plan||!Array.isArray(saved.parts)){if(box)box.hidden=true;return;}
  if(!box){box=document.createElement('section');box.id='heva-resume-recovery';box.className='no-print border rounded p-3 bg-amber-50';box.style.gridColumn='1 / -1';host.prepend(box);}
  box.hidden=false;box.replaceChildren();
- const text=document.createElement('p');text.textContent='Hay una generación guardada: '+String(plan.tipoMaterial||'material')+' · '+String(plan.cantAlternativas||0)+' alternativas, '+String(plan.cantDesarrollo||0)+' de desarrollo y '+String(plan.cantCasos||0)+' casos. Retomar utiliza el encargo original, aunque el formulario haya cambiado.';
- const button=document.createElement('button');button.type='button';button.textContent=plan.tipoMaterial==='EVALUACION'?'Retomar prueba pendiente':'Retomar material pendiente';button.className='border rounded px-3 py-2 font-bold';button.disabled=hevaResumeBusy||!!document.getElementById('btn-generar')?.disabled;
+ const tipo=String(plan.tipoMaterial||'').toUpperCase();
+ const nombres={GUIA:'guía',EVALUACION:'prueba',PRESENTACION:'presentación',PLANIFICACION:'planificación',TALLER:'taller',ACCESIBLE:'versión accesible'};
+ const nombre=nombres[tipo]||'material';
+ const title=document.createElement('h3');title.className='font-bold text-sm text-amber-950';title.textContent='Generación de '+nombre+' interrumpida';
+ const text=document.createElement('p');text.className='text-xs text-amber-900 mt-1';
+ text.textContent='HEVA conservó un avance sin terminar: '+String(plan.cantAlternativas||0)+' alternativas, '+String(plan.cantDesarrollo||0)+' preguntas de desarrollo y '+String(plan.cantCasos||0)+' casos solicitados. Puedes continuar el encargo original o descartarlo para iniciar otro. No es una actividad de la '+nombre+'.';
+ const actions=document.createElement('div');actions.className='flex flex-wrap gap-2 mt-2';
+ const button=document.createElement('button');button.type='button';button.textContent='Continuar '+nombre+' pendiente';button.className='border rounded px-3 py-2 font-bold bg-amber-100 text-amber-950';button.disabled=hevaResumeBusy||!!document.getElementById('btn-generar')?.disabled;
+ const discard=document.createElement('button');discard.type='button';discard.textContent='Descartar este avance';discard.className='border rounded px-3 py-2 font-semibold bg-white text-stone-800';discard.disabled=hevaResumeBusy;
+ discard.onclick=()=>{if(hevaResumeBusy)return;try{const current=JSON.parse(localStorage.getItem(HEVA_RECOVERY_KEY)||'null');if(current?.version!==HEVA_RECOVERY_VERSION||current.planKey!==saved.planKey)return;localStorage.removeItem(HEVA_RECOVERY_KEY);hevaResumeMessage='';box.hidden=true;mostrarRecuperacionPendienteHEVA();}catch{status.textContent='No se pudo descartar el avance. Revisa el almacenamiento del navegador.';}};
+
  const status=document.createElement('p');status.setAttribute('role','status');status.textContent=hevaResumeMessage;
  button.onclick=async()=>{const generate=document.getElementById('btn-generar');if(hevaResumeBusy||generate?.disabled)return;hevaResumeBusy=true;hevaResumeMessage='';button.disabled=true;if(generate)generate.disabled=true;
  try{const result=await recuperarMaterialHEVA(plan);if(result?.exito!==true||!result.material||typeof result.material!=='object')throw Error('La recuperación no devolvió un material válido; no se habilitan descargas.');if(typeof materialActual!=='undefined'&&materialActual&&typeof guardarEnHistorial==='function')guardarEnHistorial(false);materialActual=result.material;document.getElementById('error-ia')?.classList.add('hidden');renderizarDocumentoEnPantalla();guardarEnHistorial(false);if(typeof cambiarHerramienta==='function')cambiarHerramienta('crear');if(typeof runQuality==='function')await runQuality();}
  catch(error){hevaResumeMessage=error.message||'La recuperación sigue pendiente. El avance se conserva.';status.textContent=hevaResumeMessage;}
  finally{hevaResumeBusy=false;if(generate)generate.disabled=false;button.disabled=false;}
  };
- box.append(text,button,status);
+ actions.append(button,discard);box.append(title,text,actions,status);
 }
 mostrarRecuperacionPendienteHEVA();
 if(typeof MutationObserver==='function'&&document.getElementById('btn-generar'))new MutationObserver(mostrarRecuperacionPendienteHEVA).observe(document.getElementById('btn-generar'),{attributes:true,attributeFilter:['disabled']});
