@@ -11,6 +11,7 @@ function mount(){
  const topic=get('tema-especifico')?.closest('div');
  const strategy=get('estrategia-didactica')?.closest('div');
  const access=get('heva-access-details'),lab=get('integrated-lab');
+ const design=get('heva-design-details'),depth=get('heva-depth-details');
  const counts=get('cant-alternativas')?.closest('div.border-t');
  // Mantener el tema inmediatamente después del objetivo, antes de la estrategia.
  if(topic&&strategy&&strategy.parentElement===topic.parentElement)strategy.before(topic);
@@ -19,15 +20,19 @@ function mount(){
  advanced.id='heva-ajustes-adicionales';
  advanced.className='heva-options-fold';
  const summary=document.createElement('summary');
- summary.textContent='Personalización y apoyos · opcional';
- summary.setAttribute('aria-label','Mostrar personalización y apoyos opcionales');
+ summary.textContent='Diseño pedagógico · profundidad, contexto y apoyos';
+ summary.setAttribute('aria-label','Abrir diseño pedagógico antes de generar');
  advanced.append(summary);
  const help=document.createElement('p');
  help.className='heva-fold-hint';
- help.textContent='Lectura acompañada, accesibilidad y estrategias combinadas. No necesitas abrir este panel para generar.';
+ help.textContent='Una sola configuración, sin repetir el OA ni el tema. Puedes ajustar la profundidad y el contexto, añadir apoyos y combinar estrategias cuando corresponda. Si no cambias nada, HEVA utiliza su propuesta habitual.';
  advanced.append(help);
- if(access){advanced.append(access);access.classList.add('heva-fold-nested');}
- if(lab){advanced.append(lab);lab.classList.add('heva-fold-nested');}
+ // Los controles de diseño y profundidad los monta el flujo anterior. Se conservan sus ID y valores.
+ // Orden didáctico: nivel de profundidad -> diseño de tareas -> apoyos -> combinaciones.
+ if(depth){advanced.append(depth);depth.classList.add('heva-fold-nested');const d=depth.querySelector('summary');if(d)d.textContent='1. Profundidad y contextualización';}
+ if(design){advanced.append(design);design.classList.add('heva-fold-nested');const d=design.querySelector('summary');if(d)d.textContent='2. Secuencia didáctica, habilidades y evaluación';}
+ if(access){advanced.append(access);access.classList.add('heva-fold-nested');const d=access.querySelector('summary');if(d)d.textContent='3. Accesibilidad, adecuaciones y recuperación';}
+ if(lab){advanced.append(lab);lab.classList.add('heva-fold-nested');const d=lab.querySelector('summary');if(d)d.textContent='4. Combinar estrategias complementarias · opcional';}
  const before=get('btn-generar');
  if(before)before.before(advanced);else form.append(advanced);
  // Preguntas/casos tras la estrategia y antes de los ajustes avanzados.
@@ -52,7 +57,7 @@ function mount(){
  // Mostrar una indicación discreta cuando existen ajustes opcionales activos.
  const updateActive=()=>{
   const selected=[get('pie-lectura-facil'),get('pie-apoyos-visuales'),get('pie-graduacion'),get('lab-enabled')].filter(x=>x?.checked).length;
-  summary.textContent='Personalización y apoyos · opcional'+(selected?' · '+selected+' activo'+(selected===1?'':'s'):'');
+  summary.textContent='Diseño pedagógico · profundidad, contexto y apoyos'+(selected?' · '+selected+' activo'+(selected===1?'':'s'):'');
  };
  advanced.addEventListener('change',updateActive);
  updateActive();

@@ -29,6 +29,8 @@ function fixture(){
  const topic=el('topic');topic.append(el('tema-especifico','','input'));form.append(topic);
  const counts=el('counts','border-t');counts.append(el('cant-alternativas','','input'));form.append(counts);
  const lab=el('integrated-lab','','details');lab.append(el('lab-enabled','','input'));form.append(lab);
+ const design=el('heva-design-details','','details');design.append(el('design-summary','','summary'));form.append(design);
+ const depth=el('heva-depth-details','','details');depth.append(el('depth-summary','','summary'));form.append(depth);
  form.append(el('btn-generar','','button'));
  const audit=el('informe-auditoria-heva','','pre');quality.append(el('btn-auditoria','','button'));quality.append(audit);
  const document={readyState:'complete',getElementById:id=>map[id]||null,createElement:tag=>new El('', '',tag),querySelector:selector=>selector.includes('background:#f0f6ee')?banner:null};
@@ -68,6 +70,17 @@ test('indica apoyos activos sin perder su selección',()=>{
  assert.match(advanced.children[0].textContent,/1 activo/);
  f.map['lab-enabled'].checked=true;advanced.dispatch('change');
  assert.match(advanced.children[0].textContent,/2 activos/);
+});
+test('diseño pedagógico reúne cuatro ajustes antes de generar, conservando todos los campos',()=>{
+ const f=fixture();vm.runInNewContext(source,{document:f.document});
+ const advanced=f.map['heva-ajustes-adicionales'];
+ const ids=advanced.children.filter(x=>['heva-depth-details','heva-design-details','heva-access-details','integrated-lab'].includes(x.id)).map(x=>x.id);
+ assert.deepEqual(ids,['heva-depth-details','heva-design-details','heva-access-details','integrated-lab']);
+ assert.ok(f.form.children.indexOf(advanced)<f.form.children.indexOf(f.map['btn-generar']));
+ assert.ok(f.map['design-depth']==null,'El diseño no debe crear ni duplicar controles curriculares.');
+ assert.match(advanced.children[0].textContent,/Diseño pedagógico/);
+ assert.equal(f.map['heva-design-details'].parentElement,advanced);
+ assert.equal(f.map['heva-depth-details'].parentElement,advanced);
 });
 test('la portada y el registro de precarga incluyen el módulo nuevo',()=>{
  const index=fs.readFileSync(require('node:path').join(__dirname,'../index.html'),'utf8');
