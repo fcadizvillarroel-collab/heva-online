@@ -433,6 +433,7 @@
 
   </main>
 
+  <script src="/experimental/material-view.js?v=20261122-qa-integrada"></script>
   <script>
     let materialActual = null;
     let itemsStaging = [];
@@ -853,6 +854,9 @@
         materialActual.asignatura = payload.asignatura;
 
         renderizarDocumentoEnPantalla();
+        // Limpiar dictámenes de materiales anteriores antes de presentar el actual.
+        document.getElementById('heva-experimental-audit')?.remove();
+        document.getElementById('heva-lab-material-check')?.remove();
         const audit=data.material?.auditoriaExperimental;
         if(audit){
           let el=document.getElementById('heva-experimental-audit');
@@ -862,7 +866,36 @@
           const description=document.createElement('p');description.className='mt-2';description.textContent=audit.alcance;el.append(description);
           for(const finding of [...audit.errores,...audit.advertencias].slice(0,20)){const item=document.createElement('p');item.className='mt-2';item.textContent=finding.location+': '+finding.detail;el.append(item)}
         }
-        document.getElementById('dictamen-calidad').innerText = 'Revisión estructural completada · validación docente pendiente';
+        // Mismo control de calidad para generación directa y recuperación por bloques.
+        const laboratorioEnUso=Boolean(payload.planIntegrado?.slots?.length||payload.estrategiasLaboratorio?.length);
+        let vistaLab=data.revision?.laboratorioVista||null;
+        if(laboratorioEnUso&&window.HEVALabMaterialView?.audit){
+          vistaLab=window.HEVALabMaterialView.audit(materialActual,payload.tipoMaterial,{
+            alternativas:payload.cantAlternativas,
+            desarrollo:payload.cantDesarrollo,
+            casos:payload.cantCasos
+          });
+        }
+        if(vistaLab){
+          const panel=document.createElement('details');
+          panel.id='heva-lab-material-check';
+          panel.className='no-print border rounded-lg p-3 bg-orange-50 text-xs mt-2';
+          const summary=document.createElement('summary');
+          summary.className='cursor-pointer font-bold';
+          summary.textContent='Control HEVA LAB · '+(vistaLab.issues?.length||0)+' incidencias y '+(vistaLab.warnings?.length||0)+' observaciones';
+          panel.append(summary);
+          const alcance=document.createElement('p');
+          alcance.className='mt-2';
+          alcance.textContent='Verificación de estructura y cantidades. No certifica exactitud histórica, científica, documental ni aprobación docente.';
+          panel.append(alcance);
+          for(const message of [...(vistaLab.issues||[]),...(vistaLab.warnings||[])].slice(0,30)){
+            const p=document.createElement('p');p.className='mt-2';p.textContent='• '+message;panel.append(p);
+          }
+          document.getElementById('barra-calidad')?.after(panel);
+        }
+        document.getElementById('dictamen-calidad').innerText = vistaLab?.issues?.length
+          ? 'HEVA LAB detectó '+vistaLab.issues.length+' incidencias estructurales · revisar antes de usar'
+          : 'Revisión estructural completada · validación docente pendiente';
         // Evitar pérdida de pruebas recuperadas: guardar antes de cerrar su checkpoint.
         try {
           hevaAutoSaveMaterial(materialActual);
