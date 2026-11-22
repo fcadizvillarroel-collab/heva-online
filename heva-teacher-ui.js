@@ -213,7 +213,9 @@ function showTextbookCandidates(bar){
  const verified=rows.filter(r=>r.tipo==='fragmento_libro');
  const other=rows.filter(r=>r.tipo==='fragmento_documental');
  const candidates=rows.filter(r=>r.tipo==='catalogo');
- const summary=element('p',verified.length+' fragmentos de libros con página PDF identificada · '+other.length+' fragmentos de otros documentos · '+candidates.length+' referencias de catálogos aún no verificadas.');
+ const indices=rows.filter(r=>r.tipo==='indice_paginas_texto_regular');
+ const mexicanBooks=rows.filter(r=>r.tipo==='ficha_libro_oficial');
+ const summary=element('p',verified.length+' fragmentos de libros con página PDF identificada · '+other.length+' fragmentos de otros documentos · '+indices.length+' referencias con páginas TE indicadas por UCE (sin libro inspeccionado) · '+mexicanBooks.length+' libros mexicanos identificados solo en catálogo · '+candidates.length+' referencias generales.');
  summary.style.cssText='padding:9px;background:#f5f0e9;border-radius:8px;margin:8px 0;font-size:.83rem;line-height:1.5';
  refs.append(summary);
  function group(title,items){
@@ -246,6 +248,23 @@ function showTextbookCandidates(bar){
  group('Chile/México · páginas recuperadas de textos escolares',verified);
  group('Otros PDF de apoyo curricular o disciplinar',other);
  group('Catálogos pendientes de cotejo documental',candidates);
+ if(indices.length||mexicanBooks.length){
+  const section=element('section');
+  section.append(element('h4','Índices y fichas oficiales: localizar páginas, no citar contenido'));
+  for(const entry of [...indices,...mexicanBooks]){
+   const line=element('div');line.style.cssText='border-bottom:1px solid #e7ded5;padding:9px 0;font-size:.83rem;line-height:1.5';
+   line.append(element('strong',entry.pais+' · '+(entry.temaIndice||entry.titulo)));
+   line.append(element('p',entry.tipo==='indice_paginas_texto_regular'
+    ?'OA regular '+entry.oaRegular+' · Unidad '+entry.unidadRegular+' · Lección '+entry.leccionRegular+' · Páginas TE indicadas: '+entry.paginasTEIndicadas+' (no inspeccionadas). Fuente: UCE 2023, pág. '+entry.paginaIndiceImpresa
+    :'Libro oficial identificado en catálogo SEP '+entry.ciclo+'. No se han leído ni validado sus páginas.'));
+   const a=element('a','Abrir fuente oficial',{href:entry.url,target:'_blank',rel:'noopener noreferrer'});
+   a.className='underline text-[#8B2635]';line.append(a);
+   if(entry.visor){const reader=element('a','Abrir visor del libro',{href:entry.visor,target:'_blank',rel:'noopener noreferrer'});reader.className='underline text-[#8B2635] ml-3';line.append(reader);}
+   section.append(line);
+  }
+  section.append(element('p','Precaución: las páginas TE son del texto escolar regular de 2023, no páginas PDF verificadas ni equivalencias con OA EPJA. Los ejemplos mexicanos solo podrán utilizarse tras consultar y verificar sus páginas.'));
+  refs.append(section);
+ }
  const activities=Array.isArray(matrix?.vinculosActividades)?matrix.vinculosActividades:[];
  if(activities.length){
   const section=element('section');
@@ -259,6 +278,16 @@ function showTextbookCandidates(bar){
   refs.append(section);
  }else refs.append(element('p','Aún no existen actividades enlazadas a citas verificadas de esos documentos. No se atribuyen ejercicios a libros sin evidencia.'));
  if(!rows.length)refs.append(element('p','No existen referencias verificadas para este objetivo y tema. La guía debe basarse en el OA y en las fuentes documentales disponibles, sin atribuir información a libros no consultados.'));
+ const planFuentes=materialActual?.planUsoFuentesOA;
+ if(planFuentes?.etapas?.length){
+  const block=element('details');block.className='border rounded p-2 mt-2';
+  block.append(element('summary','Secuencia didáctica vinculada al OA · criterios de revisión'));
+  const list=element('ol');list.className='list-decimal pl-5 text-sm';
+  for(const step of planFuentes.etapas){const li=element('li',step);li.className='mb-1';list.append(li);}
+  block.append(list,element('p','Estado de evidencia: '+(planFuentes.estado==='referencias_pdf_recuperadas_pendientes_de_revision_docente'
+  ?'Hay fragmentos PDF recuperados; revisión docente pendiente.':'Sin páginas de libros comprobadas para atribuir contenido.')));
+  refs.append(block);
+ }
  refs.append(element('p','Control de calidad: los capítulos, la pertinencia curricular y la validez pedagógica requieren revisión docente. Una coincidencia de palabras no acredita que el texto enseñe el objetivo EPJA.'));
 }
 
