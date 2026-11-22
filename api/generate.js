@@ -5,6 +5,7 @@ const DeepMaterials=require('../heva-deep-materials.cjs');
 const Sources=require('../lib/document-sources.cjs');
 const Textbooks=require('../lib/textbook-reference-catalog.cjs');
 const OATextbookMatrix=require('../lib/oa-textbook-matrix.cjs');
+const OAPedagogy=require('../lib/oa-pedagogical-bridge.cjs');
 const Pedagogy = require('../heva-pedagogy.js');
 const HEVA = require('../heva-core.js');
 const LabBridge = require('../lib/lab-strategy.cjs');
@@ -186,9 +187,10 @@ Responde ÚNICAMENTE en JSON:
     const fuentesDocumentales=await Sources.retrieve(plan);
     const librosRegulares=Textbooks.recommendations(plan);
     const matrizOA=OATextbookMatrix.build(plan,librosRegulares,fuentesDocumentales);
+    const planUsoFuentes=OAPedagogy.build(plan,matrizOA);
     const referenciasMetalmecanica=TPInternational.bibliography(plan);
     const presentationGuidance=tipoMaterial==='PRESENTACION'?'\nMODO PRESENTACIÓN: genera 14 a 24 diapositivas completas en una respuesta JSON. Incluye objetivos, explicación progresiva, ejemplo modelado, actividades de aplicación y cierre. Cada diapositiva requiere título, función, contenido desarrollado y notas docentes. Crea una trazabilidadEstrategia con una referencia DIAPO-1, DIAPO-2, etc. para CADA diapositiva real, con habilidad, evidencia observable y criterio específicos. Incluye además las referencias de otras tareas reales si existen; no inventes referencias ni agregues preguntas por encima de las cantidades solicitadas. REGLA DE COHERENCIA DISCIPLINAR: desarrolla exclusivamente la asignatura, el tema y el objetivo seleccionados. No mezcles Matemática y Lenguaje ni otras asignaturas salvo que el docente solicite explícitamente una integración interdisciplinaria. AUTOSUFICIENCIA: toda actividad que mencione un segundo texto, fuente, noticia, tabla, gráfico, caso o párrafo debe incluir el estímulo completo en la misma diapositiva o en otra diapositiva identificada; nunca remitas a un material inexistente. Evita fuentes inventadas o nombres de empresas ficticias presentadas como reales; etiqueta ejemplos simulados. Diseña diapositivas con 2-4 ideas explicadas y ejemplos específicos, no instrucciones genéricas de relleno. Las notas docentes deben desarrollar lo que no cabe visualmente.':'';
-    const promptRedactor = Pedagogy.prompt(plan)+LabBridge.promptMany(estrategiasLab,tipoMaterial)+presentationGuidance+Sources.evidencePrompt(fuentesDocumentales)+Textbooks.instruction(librosRegulares)+OATextbookMatrix.instruction(matrizOA)+TPInternational.prompt(referenciasMetalmecanica);
+    const promptRedactor = Pedagogy.prompt(plan)+LabBridge.promptMany(estrategiasLab,tipoMaterial)+presentationGuidance+Sources.evidencePrompt(fuentesDocumentales)+Textbooks.instruction(librosRegulares)+OATextbookMatrix.instruction(matrizOA)+OAPedagogy.instructions(planUsoFuentes)+TPInternational.prompt(referenciasMetalmecanica);
     const metadata = {objetivoAprendizaje,asignatura,nivel,marcoCurricular,temaEspecifico,tipoMaterial,estrategiaDidactica:Pedagogy.strategy(estrategiaDidactica).name};
     let author;
     const draft = async prompt => { const r = await call(prompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY,[],{deadline:generationDeadline}); author={proveedor:r.provider,modelo:r.model,fecha:new Date().toISOString()}; return r.value; };
@@ -237,7 +239,7 @@ Responde ÚNICAMENTE en JSON:
     material.autoriaIA=author;
     material.planGeneracion=plan;
     material.fuentesDocumentales=fuentesDocumentales;
-    material.textosEscolaresComplementarios=librosRegulares;material.matrizOATextos=matrizOA;
+    material.textosEscolaresComplementarios=librosRegulares;material.matrizOATextos=matrizOA;material.planUsoFuentesOA=planUsoFuentes;
     material.referenciasMetalmecanica=referenciasMetalmecanica;
     material.trazabilidadDocumentalTP=TPInternational.documentEvidence(referenciasMetalmecanica,fuentesDocumentales);
     material.planVisualTP=TPInternational.visualPlan(referenciasMetalmecanica,material.trazabilidadDocumentalTP);
