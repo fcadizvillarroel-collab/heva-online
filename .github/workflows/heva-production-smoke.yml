@@ -1,0 +1,45 @@
+name: HEVA production - prueba de generación
+on:
+  pull_request:
+    branches: [main]
+    paths: [.github/workflows/heva-production-smoke.yml]
+permissions:
+  contents: read
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Ejecutar generación mínima con OA EPJA oficial
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const c=require('./catalogo-publicado.json').find(x=>x.clave_interna==='D257|MED|Estudios Sociales|N2|7');
+          if(!c)throw Error('OA no encontrado');
+          fs.writeFileSync('/tmp/heva-input.json',JSON.stringify({
+            asignatura:c.asignatura,nivel:c.nivel,marcoCurricular:c.marco,objetivoAprendizaje:c.texto_literal,
+            oaClaveLaboratorio:c.clave_interna,temaEspecifico:'Dimensiones de globalización y vida cotidiana',
+            estrategiaLaboratorio:'casos',tipoMaterial:'GUIA',cantAlternativas:1,cantDesarrollo:0,cantCasos:1
+          }));
+          NODE
+          STATUS=$(curl --silent --show-error --location --max-time 68 -o /tmp/heva-output.json -w '%{http_code}' -H 'Content-Type: application/json' --data-binary @/tmp/heva-input.json https://heva-online.vercel.app/api/generate) || STATUS=000
+          STATUS="$STATUS" node - <<'NODE'
+          const fs=require('node:fs');
+          let r={};try{r=JSON.parse(fs.readFileSync('/tmp/heva-output.json','utf8'))}catch{}
+          const result={status:process.env.STATUS,exito:r.exito===true,
+            error:typeof r.error==='string'?r.error:r.error?.message||null,
+            codigo:r.codigo||null,
+            alt:r.material?.preguntasAlternativas?.length||0,
+            casos:r.material?.casosEstudio?.length||0,
+            auditorias:r.revision?.laboratorio?.length||0};
+          console.log('HEVA production smoke:',JSON.stringify(result));
+          if(result.status!=='200'||!r.exito)throw Error('Generación en producción no validada; revisar status');
+          const oa=require('./catalogo-publicado.json').find(x=>x.clave_interna==='D257|MED|Estudios Sociales|N2|7');
+          if(r.material?.objetivoAprendizaje!==oa.texto_literal)throw Error('OA alterado');
+          if(result.alt!==1||result.casos!==1||result.auditorias!==1)throw Error('Cantidades o auditorías incoherentes');
+          console.log('Validación de generación con IA completada: requiere revisión disciplinar docente.');
+          NODE
