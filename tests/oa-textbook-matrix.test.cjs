@@ -50,6 +50,17 @@ test('un catálogo SEP nunca se presenta como libro leído ni se le inventa cap�
  assert.equal(mx[0].capitulo,null);
  assert.doesNotMatch(M.instruction(r),/México.*página real/);
 });
+test('un OA solo se declara cotejado con fragmento literal curricular recuperado',()=>{
+ const base=sources();
+ const unknown=M.build(plan,catalogs(),base);
+ assert.equal(unknown.verificacionOA.estado,'pendiente_cotejo_literal');
+ base.documents.push({id:'EPJA2024',role:'curriculo',title:'Bases curriculares EPJA',status:'consultada',sha256:digest});
+ base.fragments.push({id:'EPJA2024-P10-OA',documentId:'EPJA2024',page:10,url:'https://aprendoenlinea.mineduc.gob.cl/epja.pdf#page=10',sha256:digest,text:plan.objetivoAprendizaje,uso:'objetivo_literal'});
+ const found=M.build(plan,catalogs(),base);
+ assert.equal(found.verificacionOA.estado,'localizado_literalmente_en_pdf_epja');
+ assert.equal(found.verificacionOA.paginaPDF,10);
+ assert.equal(found.verificacionOA.documento,'Bases curriculares EPJA');
+});
 test('sin PDF consultado, queda solo bibliografía y prohibición de citar páginas',()=>{
  const r=M.build(plan,catalogs(),{documents:[],fragments:[]});
  assert.equal(r.estado,'solo_catalogos_pendientes_verificacion');
