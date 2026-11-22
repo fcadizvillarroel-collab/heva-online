@@ -6,7 +6,19 @@
 'use strict';
 const clean=x=>String(x??'').trim();
 const escape=x=>clean(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-const text=x=>Array.isArray(x)?x.map(text).filter(Boolean).join('\n'):typeof x==='string'?x:typeof x==='number'?String(x):'';
+// Mostrar únicamente campos didácticos destinados al estudiante. Las claves,
+ // pautas y notas docentes no se recorren aunque aparezcan anidadas en objetos.
+const studentFields=new Set(['titulo','texto','descripcion','explicacion','contenido','idea','ideas','ideasclave','puntos','puntosclave','items','lista','pasos','datos','tabla','encabezados','filas','celdas','nombre','valor','etiqueta','concepto','ejemplo','ejemplos','fase','detalle','observacion']);
+function text(x,depth=0){
+  if(depth>6||x==null)return '';
+  if(typeof x==='string'||typeof x==='number')return String(x);
+  if(Array.isArray(x))return x.map(item=>text(item,depth+1)).filter(Boolean).join('\n');
+  if(typeof x==='object'){
+    return Object.entries(x).filter(([key])=>studentFields.has(key.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()))
+      .map(([,value])=>text(value,depth+1)).filter(Boolean).join('\n');
+  }
+  return '';
+}
 const truth=x=>!!clean(text(x));
 const tag=(name,body,attrs='')=>'<'+name+attrs+'>'+body+'</'+name+'>';
 const p=value=>truth(value)?tag('p',escape(text(value)).replace(/\n/g,'<br>')):'';
@@ -61,10 +73,27 @@ function audit(material, type='GUIA'){
     if(!['A','B','C','D'].includes(q.claveCorrecta))issues.push('Pregunta '+(i+1)+': falta la clave docente.');
     if(new Set((q.alternativas||[]).map(o=>clean(o.texto).toLowerCase())).size!==(q.alternativas||[]).length)issues.push('Pregunta '+(i+1)+': alternativas repetidas.');
   }
-  if(type==='PRESENTACION'&&(!Array.isArray(material.diapositivas)||material.diapositivas.length<5))issues.push('Presentación incompleta: menos de cinco diapositivas.');
-  if(type==='PLANIFICACION'&&Array.isArray(material.planClase)){
-    const minutes=material.planClase.reduce((n,x)=>n+Number(x.minutos||0),0);
+  if(type==='PRESENTACION'){
+    const slides=Array.isArray(material.diapositivas)?material.diapositivas:[];
+    if(slides.length<5)issues.push('Presentación incompleta: menos de cinco diapositivas.');
+    slides.forEach((slide,i)=>{
+      if(!clean(slide?.titulo)||!truth(slide?.contenido))issues.push('Diapositiva '+(i+1)+': falta título o contenido visible.');
+    });
+  }
+  if(type==='EVALUACION'){
+    const count=['preguntasAlternativas','preguntasDesarrollo','casosEstudio']
+      .reduce((sum,key)=>sum+(Array.isArray(material[key])?material[key].length:0),0);
+    if(!count)issues.push('La evaluación no contiene preguntas ni casos evaluables.');
+  }
+  if(type==='PLANIFICACION'){
+    const plan=Array.isArray(material.planClase)?material.planClase:[];
+    if(!plan.length)issues.push('La planificación no contiene momentos de clase.');
+    const minutes=plan.reduce((n,x)=>n+Number(x.minutos||0),0);
     if(minutes!==90)issues.push('La planificación no suma 90 minutos: '+minutes+'.');
+    plan.forEach((moment,i)=>{
+      if(!clean(moment?.momento)||(!clean(moment?.accionesDocente)&&!clean(moment?.accionesEstudiantes)))
+        issues.push('Momento '+(i+1)+': faltan acciones de enseñanza y aprendizaje.');
+    });
   }
   if(sections.some(x=>x.body.length<35))warnings.push('Algunas secciones requieren ampliar la explicación.');
   warnings.push('La validación documental, disciplinar y visual final requiere revisión docente.');
