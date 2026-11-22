@@ -254,7 +254,8 @@ Responde ÚNICAMENTE en JSON:
     material.controlProfundidadHEVA=DeepMaterials.advisory(material,plan);
     // Auditoría adicional del Laboratorio en respuestas reales: informativa, no
     // aprueba contenido disciplinar ni descarta el material que ya pasó HEVA.
-    const auditoriaVistaLab=estrategiasLab.length?LabMaterialView.audit(material,tipoMaterial,{
+    const laboratorioActivo=estrategiasLab.length>0||(Array.isArray(planIntegrado?.slots)&&planIntegrado.slots.length>0);
+    const auditoriaVistaLab=laboratorioActivo?LabMaterialView.audit(material,tipoMaterial,{
       alternativas:cantidadesEfectivas.cantAlternativas,
       desarrollo:cantidadesEfectivas.cantDesarrollo,
       casos:cantidadesEfectivas.cantCasos
