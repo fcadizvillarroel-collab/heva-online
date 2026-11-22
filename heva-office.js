@@ -11,14 +11,21 @@ async function word(m,teacher=false){
  children.push(line('ESCUELA HÉCTOR VALENZUELA CEA · EPJA',{bold:true,color:main,size:20,after:260}));
  children.push(new Paragraph({text:material.titulo||'Material educativo',heading:HeadingLevel.TITLE,spacing:{after:220},keepNext:true}));
  children.push(line([material.asignatura,material.nivel,material.temaEspecifico].filter(Boolean).join(' · '),{color:main,after:260}));
- for(const block of blocks){
+ for(const [blockIndex,block] of blocks.entries()){
   if(block.path==='titulo'||(block===blocks[0]&&block.title===material.titulo))continue;
-  if(block.kind==='option'){children.push(line(block.title+' '+block.text,{after:115}));continue;}
+  if(block.kind==='option'){
+   // Mantener la pregunta A–D completa; evita que el enunciado quede
+   // solo al final de una página y las opciones aparezcan en la siguiente.
+   const next=blocks[blockIndex+1];
+   const keepNext=Boolean(next?.kind==='option'&&next.group===block.group);
+   children.push(line(block.title+' '+block.text,{after:115,keepNext}));
+   continue;
+  }
   children.push(new Paragraph({text:block.title,heading:HeadingLevel.HEADING_2,spacing:{before:220,after:110},keepNext:true}));
   if(block.kind==='planning-moment'){for(const field of block.fields){children.push(line(field.title,{bold:true,color:main,keepNext:true,after:70}));for(const paragraph of field.text.split(/\n+/).filter(Boolean))children.push(line(paragraph,{after:140}));}continue;}
   const extra=block.guideVisual;
   if(!extra?.chart&&!extra?.diagram)for(const paragraph of String(block.text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean)){
-   children.push(line(paragraph,{after:140,box:!!extra?.box,keepNext:/^ejemploGuiado\.pasos\.\d+\.accion$/.test(block.path||'')}));
+   children.push(line(paragraph,{after:140,box:!!extra?.box,keepNext:block.kind==='question'||/^ejemploGuiado\.pasos\.\d+\.accion$/.test(block.path||'')}));
   }
   if(extra)children.push(...root.HEVAGuideVisuals.render(root.docx,extra,line,visual.theme));
   if(!teacher&&/preguntaReflexion$|actividadesGuiadas\.\d+\.consigna$|actividadAutonoma\.consigna$/.test(block.path||'')){
