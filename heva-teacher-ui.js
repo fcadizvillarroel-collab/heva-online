@@ -193,17 +193,57 @@ function showTPDocumentEvidence(bar){
 function showTextbookCandidates(bar){
  let refs=byId('heva-textbook-references');
  const record=materialActual?.textosEscolaresComplementarios;
+ const matrix=materialActual?.matrizOATextos;
  if(!record?.enabled){if(refs)refs.remove();return;}
  if(!refs){refs=element('details',null,{id:'heva-textbook-references'});bar.append(refs);}
- const status=record.status==='candidata_por_tema_oa_pendiente_libro_y_pagina'?'Coincidencia preliminar por tema y OA, pendiente de verificar PDF, capítulos, páginas y equivalencia pedagógica.':'No se identificó una coincidencia documental suficiente para esta asignatura y OA.';
- refs.replaceChildren(element('summary','Textos escolares de apoyo · referencias para revisar'),element('p',status));
- for(const item of Array.isArray(record.items)?record.items:[]){
-  if(!['https://www.librosdelmineduc.cl/educacion-basica/','https://www.librosdelmineduc.cl/educacion-media/','https://www.curriculumnacional.cl/textos_escolares','https://aprendoenlinea.mineduc.gob.cl/','https://aprendoenlinea.mineduc.gob.cl/recursos/historia-geografia-ciencias-sociales-1-medio-santillana-texto-estudiante','https://aprendoenlinea.mineduc.gob.cl/recursos/matematica-7o-basico-sm-texto-estudiante','https://libros.conaliteg.gob.mx/primaria_2024.html','https://libros.conaliteg.gob.mx/secundaria_2024.html','https://libros.conaliteg.gob.mx/telesecundaria_2024.html'].includes(item.url))continue;
-  const para=element('p'),link=element('a',item.title||'Referencia',{href:item.url,target:'_blank',rel:'noopener noreferrer'});
-  para.append(link,document.createTextNode(' · '+(item.country==='MX'?'Catálogo oficial SEP México · libro y página pendientes de verificación':['indice_oficial','ficha_texto_oficial'].includes(item.role)?'Ficha o catálogo ministerial Chile':'Catálogo de terceros, no acredita autoría de los archivos')));refs.append(para);
+ refs.replaceChildren(element('summary','Matriz OA EPJA · libros y fuentes de Chile/México'));
+ const header=element('p','Objetivo curricular prioritario: '+String(matrix?.oaLiteral||materialActual?.objetivoAprendizaje||'Sin información')+'.');
+ header.style.cssText='font-size:.87rem;font-weight:600;line-height:1.5;margin:8px 0';
+ refs.append(header);
+ const meta=element('p','Marco: '+String(matrix?.marco||materialActual?.marcoCurricular||'No especificado')+' · Nivel: '+String(matrix?.nivel||materialActual?.nivel||'No especificado'));
+ meta.style.cssText='font-size:.8rem;color:#57534e;margin:4px 0';
+ refs.append(meta);
+ const rows=Array.isArray(matrix?.registros)?matrix.registros:[];
+ const verified=rows.filter(r=>r.tipo==='fragmento_libro');
+ const other=rows.filter(r=>r.tipo==='fragmento_documental');
+ const candidates=rows.filter(r=>r.tipo==='catalogo');
+ const summary=element('p',verified.length+' fragmentos de libros con página PDF identificada · '+other.length+' fragmentos de otros documentos · '+candidates.length+' referencias de catálogos aún no verificadas.');
+ summary.style.cssText='padding:9px;background:#f5f0e9;border-radius:8px;margin:8px 0;font-size:.83rem;line-height:1.5';
+ refs.append(summary);
+ function group(title,items){
+  if(!items.length)return;
+  const section=element('section');
+  section.append(element('h4',title));
+  for(const entry of items.slice(0,18)){
+   const line=element('div');
+   line.style.cssText='border-bottom:1px solid #e7ded5;padding:9px 0;font-size:.83rem;line-height:1.55';
+   const label=element('strong',entry.pais+' · '+entry.titulo);
+   line.append(label);
+   const source=element('p',entry.tipo==='catalogo'?'Referencia bibliográfica preliminar, sin libro ni capítulo revisado.':
+    'Página del PDF: '+entry.paginaPDF+(entry.paginaPDFHasta>entry.paginaPDF?'–'+entry.paginaPDFHasta:'')+
+    ' · Capítulo y página impresa: pendientes · Coincidencias: '+(entry.terminosCoincidentes||[]).join(', '));
+   line.append(source);
+   if(entry.tipo!=='catalogo'&&entry.extractoVerificable){
+    const sample=element('p','Extracto para cotejo: '+entry.extractoVerificable);
+    sample.style.cssText='font-size:.78rem;color:#57534e';
+    line.append(sample);
+   }
+   if(/^https:\/\//.test(entry.url||'')){
+    const link=element('a','Abrir documento o catálogo',{href:entry.url,target:'_blank',rel:'noopener noreferrer'});
+    link.style.cssText='text-decoration:underline;color:#8b2635';
+    line.append(link);
+   }
+   section.append(line);
+  }
+  refs.append(section);
  }
- refs.append(element('p','No se ha copiado ni reproducido contenido del libro. Las fuentes oficiales efectivamente recuperadas por HEVA se registran por separado.'));
+ group('Chile/México · páginas recuperadas de textos escolares',verified);
+ group('Otros PDF de apoyo curricular o disciplinar',other);
+ group('Catálogos pendientes de cotejo documental',candidates);
+ if(!rows.length)refs.append(element('p','No existen referencias verificadas para este objetivo y tema. La guía debe basarse en el OA y en las fuentes documentales disponibles, sin atribuir información a libros no consultados.'));
+ refs.append(element('p','Control de calidad: los capítulos, la pertinencia curricular y la validez pedagógica requieren revisión docente. Una coincidencia de palabras no acredita que el texto enseñe el objetivo EPJA.'));
 }
+
 function mount(){let bar=byId('heva-teacher-tools');if(!bar){bar=element('section',null,{id:'heva-teacher-tools',class:'no-print'});bar.append(element('h3','Revisar y adaptar el material'),button('Vista previa PPT',preview),button('Recursos visuales · con o sin',visualOptionsDialog),button('Asignar puntajes · 1, 2 o 3',scoring),button('Equilibrar claves A–D',balanceAnswerKeys),button('Editar y ordenar bloques',edit),guideImageButton(),button('Comparar versiones',compare),button('Deshacer último cambio',()=>{if(!undo.length)return;const previous=undo.at(-1),m=current();if(previous.materialId!==m.materialId)throw Error('El último cambio corresponde a otro material. Abre su historial para recuperarlo.');undo.pop();guardarEnHistorial(false);setMaterial(previous)}),button('Accesibilidad',accessibility),button('Escuchar',speak));byId('hoja-material').before(bar);}bar.hidden=!materialActual;showTextbookCandidates(bar);showMetalSources(bar);showTPDocumentEvidence(bar);showDepthAdvisories(bar);renderGuideResources();const guideAction=byId('heva-guide-image-action');if(guideAction)guideAction.hidden=!HEVAGuideVisuals.enabled(materialActual||{});const buttons=[...bar.querySelectorAll('button')];const scoreButton=buttons.find(b=>b.textContent.includes('Asignar puntajes'));if(scoreButton)scoreButton.hidden=materialActual?.tipoMaterial!=='EVALUACION';const balanceButton=buttons.find(b=>b.textContent.includes('Equilibrar claves'));if(balanceButton)balanceButton.hidden=!['GUIA','EVALUACION','ACCESIBLE'].includes(materialActual?.tipoMaterial)||!(materialActual?.preguntasAlternativas?.length>=4);const previewButton=buttons.find(b=>b.textContent.includes('Vista previa PPT'));if(previewButton)previewButton.hidden=materialActual?.tipoMaterial!=='PRESENTACION';applyAccess();
  if(materialActual){const report=T.inspect(materialActual);let summary=byId('heva-teaching-report');if(!summary){summary=element('details',null,{id:'heva-teaching-report'});bar.append(summary);}summary.replaceChildren(element('summary','Desempeño del OA y actividades · orientación docente'),element('p',report.alcance));for(const x of report.actividades)summary.append(element('p',x.ref+' · '+(x.cognicion?.nivel||'Nivel no inferido: revisar desempeño')));for(const issue of report.issues)summary.append(element('p',issue.detail));}}
 const oldRender=renderizarDocumentoEnPantalla;renderizarDocumentoEnPantalla=function(){oldRender();mount()};
