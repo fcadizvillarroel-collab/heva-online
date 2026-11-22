@@ -30,7 +30,15 @@ function blocks(material={},type='GUIA',audience='student'){
   if(material.preguntasAlternativas?.length)add('Selección múltiple',material.preguntasAlternativas.map((q,i)=>{
     const choices=(q.alternativas||[]).map(o=>tag('li',tag('b',escape(o.letra||'')+'. ')+escape(o.texto||''))).join('');
     return tag('article',tag('h3',(i+1)+'. '+escape(q.enunciado))+tag('ol',choices,' class="options"')+(teacher?p('Clave: '+clean(q.claveCorrecta)+' · '+clean(q.justificacion)):''));}).join(''));
-  if(material.preguntasDesarrollo?.length)add('Desarrollo',material.preguntasDesarrollo.map((q,i)=>tag('article',tag('h3',(i+1)+'. '+escape(q.enunciado))+(teacher?p('Criterio: '+clean(q.criterioEvaluacion))+bullets((q.rubrica||[]).map(r=>clean(r.puntaje)+' pts: '+clean(r.descripcion))):'<div class="lines">________________________________________________________________<br>________________________________________________________________<br>________________________________________________________________</div>')).join(''));
+  if(material.preguntasDesarrollo?.length){
+    const answers=material.preguntasDesarrollo.map((q,i)=>{
+      const question=tag('h3',(i+1)+'. '+escape(q.enunciado));
+      const rubric=bullets((q.rubrica||[]).map(r=>clean(r.puntaje)+' pts: '+clean(r.descripcion)));
+      const extra=teacher?p('Criterio: '+clean(q.criterioEvaluacion))+rubric:'<div class="lines">________________________________________________________________<br>________________________________________________________________<br>________________________________________________________________</div>';
+      return tag('article',question+extra);
+    }).join('');
+    add('Desarrollo',answers);
+  }
   if(material.planClase?.length)add('Secuencia de clase (90 minutos)',material.planClase.map((m,i)=>tag('article',tag('h3',escape(m.momento||'Momento '+(i+1))+' · '+escape(m.minutos||0)+' min')+p('Docente: '+clean(m.accionesDocente))+p('Estudiantes: '+clean(m.accionesEstudiantes))+(teacher?p('Evidencia: '+clean(m.evidencia)):''))).join(''));
   if(material.diapositivas?.length)add('Presentación',material.diapositivas.map((s,i)=>tag('article',tag('h3',(i+1)+'. '+escape(s.titulo||'Sin título'))+p(s.contenido)+(teacher?p('Notas docentes: '+clean(s.notasDocente)):''))).join(''));
   if(material.procedimientoTaller?.length)add('Procedimiento de taller',material.procedimientoTaller.map((x,i)=>tag('article',tag('h3','Paso '+(i+1))+p(x.accion)+p('Prevención: '+clean(x.cuidado)))).join(''));
