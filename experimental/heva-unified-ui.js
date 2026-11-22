@@ -50,6 +50,25 @@ note.textContent=active?'Modo combinado activo: HEVA toma las estrategias del pa
 const summary=$('lab-summary');if(summary)summary.setAttribute('data-enabled',String(active));
 }
 enabled.addEventListener('change',update);update();
+// La elección de una estrategia complementaria activa el modo correspondiente.
+// Así no puede quedar una estrategia marcada con el módulo desactivado.
+$('lab-strategies')?.addEventListener('change',event=>{
+ const control=event.target;
+ if(control?.matches?.('input[data-strategy]')&&control.checked&&!enabled.checked){
+  enabled.checked=true;
+  enabled.dispatchEvent(new Event('change',{bubbles:true}));
+ }
+});
+enabled.addEventListener('change',()=>{
+ if(enabled.checked)return;
+ // Desactivar es explícito: elimina las marcas inactivas y evita el error de contradicción.
+ for(const control of document.querySelectorAll('#lab-strategies input[data-strategy]:checked')){
+  control.checked=false;
+  const amount=$('lab-count-'+control.dataset.strategy);
+  if(amount)amount.disabled=true;
+ }
+ $('lab-mode')?.dispatchEvent(new Event('change',{bubbles:true}));
+});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&lab.open){lab.open=false;desc.focus()}});
 const mapping={fuentes:'FUENTES',modelado:'MODELADO',casos:'CASOS',lectura:'LECTURA',problemas:'PROBLEMAS',errores:'ERRORES'};
 const reverse=Object.fromEntries(Object.entries(mapping).map(([a,b])=>[b,a]));
@@ -71,9 +90,22 @@ syncPrimary();
 const original=window.hevaExperimentalPlan;
 if(typeof original==='function')window.hevaExperimentalPlan=function(){
 const plan=original();
-if(!plan){if([...document.querySelectorAll('#lab-strategies input[data-strategy]:checked')].length)throw Error('Marcaste estrategias complementarias, pero el módulo está desactivado. Activa “Estrategias integradas” para aplicarlas.');return null;}
+if(!plan){
+ // Protege selecciones antiguas/restauradas sin bloquear la generación habitual.
+ // Si hay complementarias marcadas, reactivar y validar la configuración antes de enviar.
+ const selected=[...document.querySelectorAll('#lab-strategies input[data-strategy]:checked')];
+ if(!selected.length)return null;
+ enabled.checked=true;
+ enabled.dispatchEvent(new Event('change',{bubbles:true}));
+ return window.hevaExperimentalPlan();
+}
 const primary=primaryId();
-if(primary&&plan.slots.some(s=>s.strategy===primary))throw Error('La estrategia principal ya está incluida; quita la repetición en las combinadas.');
+if(primary&&plan.slots.some(s=>s.strategy===primary)){
+ syncPrimary();
+ // Se conserva la estrategia principal en el selector y se evita duplicar su contrato.
+ // Si la configuración está obsoleta, se recalcula con la selección corregida.
+ return window.hevaExperimentalPlan();
+}
 return {...plan,primaryStrategy:legacy.value,subject:$('asignatura').value,objective:$('texto-oa').value,topic:$('tema-especifico').value};
 };
 }
