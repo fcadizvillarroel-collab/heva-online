@@ -70,7 +70,7 @@ function arrange(){
   }
  }
  const auditSummary=byId('heva-experimental-audit')?.querySelector('summary')?.textContent||'';
- const problems=auditSummary.match(/(\\d+) errores estructurales y (\\d+) advertencias/);
+ const problems=auditSummary.match(/(\d+) errores estructurales y (\d+) advertencias/);
  const label=problems&&(+problems[1]||+problems[2])
   ?'Revisión pedagógica y fuentes · '+(+problems[1]?' '+problems[1]+' errores':'')+(+problems[2]?' '+problems[2]+' advertencias':'')
   :'Revisión pedagógica y fuentes';
