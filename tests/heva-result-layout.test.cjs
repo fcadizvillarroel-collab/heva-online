@@ -9,7 +9,9 @@ test('guía se muestra antes de herramientas secundarias',()=>{
  assert.match(ui,/edit\.after\(review\)/);
  assert.match(ui,/toolbar\.parentElement!==edit/);
  assert.match(ui,/const sources=/);
- assert.match(ui,/heva-export-control/);
+ assert.doesNotMatch(ui,/'heva-export-control'/);
+ const ux=fs.readFileSync(path.join(root,'heva-ux.js'),'utf8');
+ assert.match(ux,/heva-export-control/);
  assert.match(ui,/heva-strategy-delivery/);
 });
 test('conservar controles y eventos de edición y revisión existentes',()=>{
