@@ -44,10 +44,10 @@ test('documento CL solo se identifica con número de página de PDF, huella y fr
 test('un catálogo SEP nunca se presenta como libro leído ni se le inventa capítulo',()=>{
  const r=M.build(plan,catalogs(),sources());
  const mx=r.registros.filter(x=>x.pais==='MX');
- assert.equal(mx.length,1);
- assert.equal(mx[0].tipo,'catalogo');
- assert.equal(mx[0].paginaPDF,null);
- assert.equal(mx[0].capitulo,null);
+ assert.equal(mx.length,4,'Un índice SEP y tres fichas CONALITEG por grado');
+ assert.equal(mx.filter(x=>x.tipo==='catalogo').length,1);
+ assert.equal(mx.filter(x=>x.tipo==='ficha_libro_oficial').length,3);
+ assert.ok(mx.every(x=>x.paginaPDF===null&&x.capitulo===null&&x.fragmentoId===null));
  assert.doesNotMatch(M.instruction(r),/México.*página real/);
 });
 test('un OA solo se declara cotejado con fragmento literal curricular recuperado',()=>{
@@ -88,7 +88,7 @@ test('si el docente desactiva los textos, no se añaden referencias',()=>{
 test('matriz usa catálogos de países autorizados y no inventa contenido mexicano',()=>{
  const real=Textbooks.recommendations(plan);
  const result=M.build(plan,real,{documents:[],fragments:[]});
- assert.ok(result.registros.every(x=>x.tipo==='catalogo'));
+ assert.ok(result.registros.every(x=>['catalogo','ficha_libro_oficial','indice_paginas_texto_regular'].includes(x.tipo)));
  assert.ok(result.registros.every(x=>x.paginaPDF===null));
 });
 test('generación normal y por bloques incluyen la misma matriz documental',()=>{
