@@ -22,7 +22,14 @@ function arrange(){
  let edit=byId('heva-result-edit');
  let review=byId('heva-result-review');
  if(!edit){edit=fold('heva-result-edit','Editar y adaptar el material');article.after(edit);}
- if(!review){review=fold('heva-result-review','Revisión pedagógica y fuentes');edit.after(review);}
+ if(!review){
+  review=fold('heva-result-review','Revisión pedagógica y fuentes');
+  const note=element('p','heva-review-note','Aquí se resumen las advertencias y estrategias. Los informes extensos y el control de exportación permanecen en la pestaña «Revisión y fuentes».');
+  const go=element('button','heva-review-open-tab','Abrir revisión completa');
+  go.type='button';
+  go.addEventListener('click',()=>byId('tab-revision')?.click());
+  review.append(note,go);edit.after(review);
+ }
  // El documento debe ser el primer contenido extenso. Solo las descargas rápidas permanecen arriba.
  if(edit.previousElementSibling!==article)article.after(edit);
  if(review.previousElementSibling!==edit)edit.after(review);
@@ -51,7 +58,7 @@ function arrange(){
   const guideImage=byId('heva-guide-image-action');
   if(guideImage&&guideImage.textContent!=='Añadir o cambiar imagen de apoyo')guideImage.textContent='Añadir o cambiar imagen de apoyo';
  }
- const sources=['heva-experimental-audit','heva-audit-fold','heva-export-control','heva-strategy-delivery','heva-teaching-report','heva-textbook-references','heva-metal-sources','heva-depth-advisories','heva-tp-document-evidence'];
+ const sources=['heva-experimental-audit','heva-audit-fold','heva-strategy-delivery','heva-teaching-report','heva-textbook-references','heva-metal-sources','heva-depth-advisories','heva-tp-document-evidence'];
  for(const id of sources){
   const node=byId(id);
   if(node && node.parentElement!==review)review.append(node);
