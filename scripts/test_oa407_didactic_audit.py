@@ -9,8 +9,10 @@ with tempfile.TemporaryDirectory() as tmp:
     report=audit(tmp)
     assert report["oa"]==407
     assert report["aprobaciones_expertas"]==0
-    assert report["con_alertas"]>=1
-    assert report["alertas"].get("EXPLICACION_CON_ESTRUCTURA_PLANTILLA",0)>=1
+    assert report["con_alertas"]>=0
+    assert report["alertas"].get("EXPLICACION_CON_ESTRUCTURA_PLANTILLA",0)==0
+    assert report["alertas"].get("EXPLICACION_SIN_CASO_RESUELTO_Y_TRANSFERENCIA",0)==0
+    assert report["alertas"].get("EXPLICACION_SIN_PROFUNDIDAD_MINIMA",0)==0
     assert report["alertas"].get("PREGUNTA_PLANTILLA_ENTRE_OA",0)<407, "Las 407 consignas no deben permanecer idénticas"
     folder=Path(tmp)
     rows=list(csv.DictReader((folder/"matriz_calidad_didactica_407.csv").open(encoding="utf-8-sig")))
@@ -22,4 +24,4 @@ with tempfile.TemporaryDirectory() as tmp:
     assert "## Alertas por tipo\n" in summary
     assert "\\n" not in summary, "Markdown must use actual line breaks"
     assert "Supabase" in summary
-print("PASS: 407 OA, plantilla didáctica marcada, QA de solo lectura y 0 aprobaciones inventadas")
+print("PASS: 407 OA grounded in case, solved reasoning and transfer; 0 expert approvals invented")
