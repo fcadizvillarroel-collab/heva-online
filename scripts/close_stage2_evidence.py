@@ -9,6 +9,8 @@ import json
 import re
 import sys
 from collections import Counter
+from datetime import date
+from urllib.parse import urlsplit
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,16 +27,41 @@ FIELDS = (
     "requiere_evidencia_visual_documental", "requiere_revision_normativa",
     "revision_pedagogica", "revision_documental", "revision_visual",
     "revision_respuestas", "revisor_pedagogico", "revisor_documental",
-    "revisor_visual", "evidencia_pedagogica", "evidencia_documental",
+    "revisor_visual", "revisor_respuestas", "fecha_revision_pedagogica",
+    "fecha_revision_documental", "fecha_revision_visual", "fecha_revision_respuestas",
+    "evidencia_pedagogica", "evidencia_documental",
     "evidencia_visual", "evidencia_respuestas", "estado_final", "pendientes"
 )
 APPROVED = "APROBADO"
 PENDING = "PENDIENTE"
 GATES = (
-    ("revision_pedagogica", "revisor_pedagogico", "evidencia_pedagogica"),
-    ("revision_documental", "revisor_documental", "evidencia_documental"),
-    ("revision_visual", "revisor_visual", "evidencia_visual"),
+    ("revision_pedagogica", "revisor_pedagogico", "evidencia_pedagogica", "fecha_revision_pedagogica"),
+    ("revision_documental", "revisor_documental", "evidencia_documental", "fecha_revision_documental"),
+    ("revision_visual", "revisor_visual", "evidencia_visual", "fecha_revision_visual"),
+    ("revision_respuestas", "revisor_respuestas", "evidencia_respuestas", "fecha_revision_respuestas"),
 )
+def valid_reviewer(value):
+    name=str(value or "").strip()
+    return len(name)>=6 and " " in name and name.casefold() not in {"docente","revisor","por definir","pendiente","sin nombre","test","n/a"}
+
+def valid_date(value):
+    try:
+        literal=str(value or "").strip()
+        return date.fromisoformat(literal).isoformat()==literal and date.fromisoformat(literal)<=date.today()
+    except ValueError:
+        return False
+
+def valid_evidence(value):
+    literal=str(value or "").strip()
+    if re.fullmatch(r"sha256:[0-9a-fA-F]{64}",literal):return True
+    parsed=urlsplit(literal)
+    return (parsed.scheme=="https" and bool(parsed.hostname) and "." in parsed.hostname
+      and parsed.hostname not in ("example.org","example.com","example.net","localhost")
+      and not parsed.username and not parsed.password and not any(x.isspace() for x in literal))
+
+def completed_gate(row,review,reviewer,evidence,reviewed_at):
+    return (row[review]==APPROVED and valid_reviewer(row[reviewer])
+      and valid_evidence(row[evidence]) and valid_date(row[reviewed_at]))
 def risk_flags(oa):
     text = oa["texto_literal"].lower()
     area = oa["asignatura"].lower()
@@ -90,18 +117,13 @@ def run(output, reviews_path=None):
             "requiere_revision_normativa": "REVISAR" if legal else "",
         }
         for field in FIELDS:
-            if field.startswith(("revision_", "revisor_", "evidencia_")) and field not in row:
-                row[field] = old.get(field, PENDING if field.startswith("revision_") else "").strip()
-        # No unattended auto-approval: an explicit reviewer and evidence are mandatory.
-        complete = all(
-            row[review] == APPROVED and row[reviewer] and row[evidence]
-            for review, reviewer, evidence in GATES
-        )
-        complete &= row["revision_respuestas"] == APPROVED and bool(row["evidencia_respuestas"])
-        gaps = [name for name, reviewer, evidence in GATES
-                if not (row[name] == APPROVED and row[reviewer] and row[evidence])]
-        if row["revision_respuestas"] != APPROVED or not row["evidencia_respuestas"]:
-            gaps.append("revision_respuestas")
+            if field.startswith(("revision_", "revisor_", "evidencia_", "fecha_revision_")) and field not in row:
+                row[field] = str(old.get(field) or (PENDING if field.startswith("revision_") else "")).strip()
+        # All four sign-offs, INCLUDING teacher answer-key review, require
+        # a named reviewer, a nonfuture date and a traceable review record.
+        complete = all(completed_gate(row,*gate) for gate in GATES)
+        gaps = [name for name,reviewer,evidence,reviewed_at in GATES
+                if not completed_gate(row,name,reviewer,evidence,reviewed_at)]
         row["estado_final"] = "VALIDADO_CON_EVIDENCIAS" if complete else "NO_VALIDADO"
         row["pendientes"] = "|".join(gaps)
         results.append(row)
@@ -118,7 +140,7 @@ def run(output, reviews_path=None):
         "banderas_fuentes": sum(r["requiere_texto_o_fuente_autentica"] == "REVISAR" for r in results),
         "banderas_visuales": sum(r["requiere_evidencia_visual_documental"] == "REVISAR" for r in results),
         "banderas_normativa": sum(r["requiere_revision_normativa"] == "REVISAR" for r in results),
-        "criterio_cierre": "407/407 con aprobacion pedagógica, documental, visual y de respuestas, revisor y evidencia",
+        "criterio_cierre": "407/407 con revisión pedagógica, documental, visual y de respuestas, cada una con revisor, fecha no futura y referencia de evidencia",
         "etapa2_cerrada": approved == 407,
         "advertencia": "Los indicadores automáticos no sustituyen revisión independiente."
     }
