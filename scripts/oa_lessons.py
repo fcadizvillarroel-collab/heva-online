@@ -58,7 +58,9 @@ def lesson(oa):
     # El desarrollo se construye con el caso realmente asociado a ESTE OA,
     # su resolución y una transferencia contextualizada. No sustituye revisión
     # disciplinar ni usa el objetivo literal como único contenido de enseñanza.
-    caso_original = solved_record[0].strip() if curated else scenario.strip()
+    # Include the *complete* scenario after accessibility/context additions.
+    # Omitting that suffix broke exact textual traceability for 73 short cases.
+    caso_original = scenario.strip()
     solucion = solved_record[1].strip() if curated else worked.strip()
     transferencia = solved_record[2].strip() if curated else transfer.strip()
     explicacion = (
