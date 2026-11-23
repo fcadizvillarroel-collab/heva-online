@@ -816,7 +816,9 @@
         cantAlternativas: cantidadesHEVA.cantAlternativas,
         cantDesarrollo: cantidadesHEVA.cantDesarrollo,
         cantCasos: cantidadesHEVA.cantCasos,
-        adecuacionesPIE: [...document.querySelectorAll('input[data-heva-support]:checked')].map(x=>x.parentElement.textContent.trim()),
+        adecuacionesPIE: [...document.querySelectorAll('input[data-heva-support]:checked')]
+          .filter(x=>!(document.getElementById('tipo-material').value==='EVALUACION'&&x.dataset.hevaSupport==='modelado'))
+          .map(x=>x.parentElement.textContent.trim()),
         apoyosInclusivos: [...document.querySelectorAll('input[data-heva-support]:checked')].map(x=>x.dataset.hevaSupport),
         ...(window.hevaPlanningExtras?window.hevaPlanningExtras():{})
       };
