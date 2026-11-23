@@ -1,5 +1,11 @@
 # Reglas obligatorias para cualquier IA o persona que trabaje en HEVA
 
+## Evitar trabajos circulares y funcionalidad duplicada
+
+Antes de implementar cualquier mejora, consultar **[el mapa canónico de módulos y 12 áreas](docs/HEVA_MAPA_CANONICO_SIN_DUPLICADOS_20261123.md)**. Si ya existe exportador Word/PPT, revisión IA, panel de documentos, catálogo OA, editor o auditoría, corregirlo y probarlo en su sitio; **no crear otro módulo o aplicación**. No repetir una auditoría completa de 407 documentos cuando solo cambie un texto de documentación. Mantener los estados `implementado/probado`, `pendiente de prueba real`, y `pendiente de revisión humana` separados.
+
+**Propuesta no integrada #58:** revisar y aprovechar únicamente las funciones nuevas antes de fusionar una segunda interfaz HEVA Review; el generador principal ya tiene herramientas para previsualizar, editar, comparar versiones y solicitar revisión IA.
+
 ## Autoridad curricular: NO volver a crear los 407 OA
 
 **Supabase HEVA es la fuente de verdad de los objetivos de aprendizaje (OA) EPJA.**
