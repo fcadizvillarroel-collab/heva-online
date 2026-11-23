@@ -272,7 +272,7 @@
         </div>
 
         <details id="integrated-lab" class="rounded-xl border-2 border-amber-400 bg-amber-50 p-3 mt-3">
-          <summary class="cursor-pointer font-bold text-sm text-[#8B2635]">4. Estrategias pedagógicas combinadas · HEVA (opcional)</summary>
+          <summary class="cursor-pointer font-bold text-sm text-[#8B2635]">Estrategias pedagógicas combinadas · opcional</summary>
           <p class="text-xs mt-2">Estas funciones antes estaban en HEVA LAB. Ahora utilizan directamente la asignatura, el nivel, el OA EPJA y el tema del generador principal. No necesitas entrar a otra aplicación.</p>
           <label class="block text-xs font-bold mt-3"><input id="lab-enabled" type="checkbox" class="mr-2">Usar estas estrategias combinadas al generar</label>
           <div id="lab-strategies" class="mt-3"></div>
@@ -1122,7 +1122,7 @@ function refresh(){
  const caseLabel=document.getElementById('cant-casos')?.previousElementSibling;
  if(caseLabel)caseLabel.textContent=exam?'Situaciones de lectura / análisis (con pregunta):':'Situaciones de lectura / análisis:';
  const lab=document.getElementById('integrated-lab');
- if(lab){const summary=lab.querySelector('summary');if(summary)summary.textContent=exam?'4. Estrategias complementarias para evaluar · opcional':'4. Estrategias complementarias para enseñar · opcional';}
+ if(lab){const summary=lab.querySelector('summary');if(summary)summary.textContent=exam?'Estrategias complementarias para evaluar · opcional':'Estrategias complementarias para enseñar · opcional';}
 }
 type.addEventListener('change',refresh);refresh();
 })();
