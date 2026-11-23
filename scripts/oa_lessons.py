@@ -67,8 +67,8 @@ def lesson(oa):
       ],
       'answer_guide':[
         ('Solución del caso presentado: '+solved_record[1]) if curated else ('Orientación para el caso guiado: '+worked+' No se proporciona una respuesta numérica o factual única cuando el enunciado no incluye datos suficientes.'),
-        'Pauta para la transferencia: verificar que el estudiante aplique el mismo concepto o procedimiento a la nueva situación; contrastar cálculos, fuentes y conclusiones con los datos del enunciado. No hay respuesta única si la consigna es abierta.',
-        'Verificación: exigir evidencia explícita y una comprobación independiente. Un error solo se considera corregido cuando se identifica, explica y rectifica.',
+        'Pauta de transferencia vinculada al OA: '+b['actividades'][1]+' Comprueba la justificación con los datos, textos o procedimientos efectivamente suministrados; si es abierta, no presupongas una respuesta única.',
+        'Verificación específica: '+b['actividades'][2]+' La revisión debe señalar el error, explicar la corrección y conservar evidencia comprobable.',
         'Respuesta abierta: evaluar pertinencia del caso, justificación y respeto por la experiencia personal.'
       ],
       'accessibility':'Lectura guiada: el docente puede leer el caso y las preguntas en voz alta; permitir respuesta oral, dictada o escrita. Evitar depender exclusivamente de la imagen.',
