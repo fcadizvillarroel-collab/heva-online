@@ -6,6 +6,9 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
   const page=await browser.newPage({viewport:{width:1280,height:860}});
   await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded',timeout:30000});
   await page.waitForFunction(()=>Boolean(document.getElementById('heva-result-edit')&&document.getElementById('heva-result-review')),{timeout:30000});
+  assert.equal(await page.locator('#hoja-material').isVisible(),false,'No mostrar documento ficticio antes de generar');
+  assert.equal(await page.locator('#barra-calidad').isVisible(),false,'Ocultar descargas antes de generar');
+  assert.equal(await page.locator('#heva-empty-preview').isVisible(),true,'Mostrar mensaje de espera mientras no hay material');
   // Synthetic DOM scenario: no AI call or fabricated claim of material generation.
   await page.evaluate(()=>{
    materialActual={titulo:'Ejemplo de revisión del visor',tipoMaterial:'GUIA'};
@@ -54,6 +57,9 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
   });
   assert.equal(result.editHidden,false);
   assert.equal(result.reviewHidden,false);
+  assert.equal(await page.locator('#hoja-material').isVisible(),true,'Mostrar documento al disponer de material');
+  assert.equal(await page.locator('#barra-calidad').isVisible(),true,'Habilitar zona de exportaciones al disponer de material');
+  assert.equal(await page.locator('#heva-empty-preview').isVisible(),false,'Ocultar mensaje de espera cuando existe material');
   assert.match(result.reviewTitle,/2 advertencias/);
   assert.match(result.visualLabel,/imágenes, diagramas y gráficos/);
   assert.match(result.guideImageLabel,/imagen de apoyo/);
