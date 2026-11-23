@@ -20,6 +20,7 @@ const path=require('node:path');
      const r=el.getBoundingClientRect();
      return {number:n,label:el.querySelector('.heva-inline-stage-label')?.textContent,
        hidden:el.hidden,display:getComputedStyle(el).display,
+       hint:el.querySelector('.heva-inline-stage-hint')?.textContent||'',
        left:r.left,right:r.right,width:r.width,top:r.top,
        next:el.nextElementSibling?.id||el.nextElementSibling?.querySelector?.('select,input,textarea')?.id||''};
     });
@@ -38,7 +39,8 @@ const path=require('node:path');
         first:s1?.nextElementSibling?.contains(type),
         second:s2?.nextElementSibling?.contains(oa),
         third:s3?.nextElementSibling===submit,
-        fourth:s4?.nextElementSibling===bar
+        fourth:s4?.nextElementSibling===document.getElementById('heva-empty-preview')&&
+          s4?.parentElement===bar?.parentElement
       },
       subNumbers:[...document.querySelectorAll('#heva-ajustes-adicionales summary')]
         .filter(x=>/^\s*[1-4]\./.test(x.textContent)).map(x=>x.textContent.trim())
@@ -51,10 +53,12 @@ const path=require('node:path');
      'Tipo y nivel','Objetivo y estrategia','Generar y revisar','Guardar o exportar'
    ]);
    assert.ok(Object.values(before.matches).every(Boolean),'Los números deben acompañar a sus campos reales');
-   assert.equal(before.stages[3].hidden,true,'Paso 4 oculto antes de generar');
+   assert.equal(before.stages[3].hidden,false,'Paso 4 debe estar visible aun antes de generar');
+   assert.match(before.stages[3].hint,/Disponible después de generar/,'Avisar que la exportación requiere material');
+   assert.equal(await page.locator('#barra-calidad').isVisible(),false,'Los botones permanecen ocultos sin material');
    assert.deepEqual(before.subNumbers,[],'No confundir pasos principales con números de opciones');
    assert.ok(before.scrollWidth<=width+2,'Desbordamiento horizontal con etapas');
-   for(const s of before.stages.slice(0,3)){
+   for(const s of before.stages){
      assert.equal(s.hidden,false);
      assert.ok(s.left>=-2&&s.right<=width+2,'Etapa '+s.number+' fuera de pantalla');
    }
@@ -71,7 +75,8 @@ const path=require('node:path');
       return h&&!h.hidden&&bar&&getComputedStyle(bar).display!=='none';
    },{timeout:12000});
    const after=await state();
-   assert.equal(after.stages[3].hidden,false,'Paso 4 visible tras recibir material');
+   assert.equal(after.stages[3].hidden,false,'Paso 4 sigue visible tras recibir material');
+   assert.match(after.stages[3].hint,/Material disponible/,'Indicar disponibilidad al generar material');
    assert.equal(after.duplicates,4,'Números conservados después de generar');
    assert.ok(after.scrollWidth<=width+2,'Desbordamiento horizontal después de generar');
    assert.equal(calls,0,'Prueba no debe consumir IA');
@@ -79,6 +84,6 @@ const path=require('node:path');
    console.log('HEVA PASOS',JSON.stringify({width,labels:before.stages.map(x=>x.label),beforeVisible:before.stages.filter(x=>!x.hidden).length,afterVisible:after.stages.filter(x=>!x.hidden).length,overflow:after.scrollWidth-width}));
    await page.close();
   }
-  console.log('APROBADO: cuatro pasos en el cuerpo y en su lugar correcto en escritorio, tableta y móvil.');
+  console.log('APROBADO: cuatro pasos visibles desde el inicio en escritorio, tableta y móvil.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1});
