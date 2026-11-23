@@ -3,6 +3,7 @@ const TPInternational=require('../lib/tp-metal-international.cjs');
 const {call} = require('./_providers.cjs');
 const Skills=require('../heva-skills.js');
 const DeepMaterials=require('../heva-deep-materials.cjs');
+const CompactPrompt=require('../lib/compact-generator-prompt.cjs');
 const Sources=require('../lib/document-sources.cjs');
 const Textbooks=require('../lib/textbook-reference-catalog.cjs');
 const OATextbookMatrix=require('../lib/oa-textbook-matrix.cjs');
@@ -201,9 +202,14 @@ Responde ÚNICAMENTE en JSON:
     const referenciasMetalmecanica=TPInternational.bibliography(plan);
     const presentationGuidance=tipoMaterial==='PRESENTACION'?'\nMODO PRESENTACIÓN: genera 14 a 24 diapositivas completas en una respuesta JSON. Incluye objetivos, explicación progresiva, ejemplo modelado, actividades de aplicación y cierre. Cada diapositiva requiere título, función, contenido desarrollado y notas docentes. Crea una trazabilidadEstrategia con una referencia DIAPO-1, DIAPO-2, etc. para CADA diapositiva real, con habilidad, evidencia observable y criterio específicos. Incluye además las referencias de otras tareas reales si existen; no inventes referencias ni agregues preguntas por encima de las cantidades solicitadas. REGLA DE COHERENCIA DISCIPLINAR: desarrolla exclusivamente la asignatura, el tema y el objetivo seleccionados. No mezcles Matemática y Lenguaje ni otras asignaturas salvo que el docente solicite explícitamente una integración interdisciplinaria. AUTOSUFICIENCIA: toda actividad que mencione un segundo texto, fuente, noticia, tabla, gráfico, caso o párrafo debe incluir el estímulo completo en la misma diapositiva o en otra diapositiva identificada; nunca remitas a un material inexistente. Evita fuentes inventadas o nombres de empresas ficticias presentadas como reales; etiqueta ejemplos simulados. Diseña diapositivas con 2-4 ideas explicadas y ejemplos específicos, no instrucciones genéricas de relleno. Las notas docentes deben desarrollar lo que no cabe visualmente.':'';
     const promptRedactor = Pedagogy.prompt(plan)+DeepMaterials.guidance(plan)+Didactics.prompt(plan)+Inclusive.prompt(plan)+DidacticResources.prompt(plan)+International.prompt(plan)+LabBridge.promptMany(estrategiasLab,tipoMaterial)+presentationGuidance+Sources.evidencePrompt(fuentesDocumentales)+Textbooks.instruction(librosRegulares)+OATextbookMatrix.instruction(matrizOA)+OAPedagogy.instructions(planUsoFuentes)+TPInternational.prompt(referenciasMetalmecanica);
+    // Keep the first, complete curricular/documentary request intact. For a
+    // simple source-free task Groq may retry HTTP 413 once with the same OA,
+    // exact counts and a compact JSON contract. Never truncate attachments,
+    // textbook citations, integrated strategies or the teacher's instructions.
+    const compactFallback=CompactPrompt.build(plan,Pedagogy,{estrategiasLaboratorioActivas:estrategiasLab.length>0});
     const metadata = {objetivoAprendizaje,asignatura,nivel,marcoCurricular,temaEspecifico,tipoMaterial,estrategiaDidactica:Pedagogy.strategy(estrategiaDidactica).name};
     let author;
-    const draft = async prompt => { const r = await call(prompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY,[],{deadline:generationDeadline}); author={proveedor:r.provider,modelo:r.model,fecha:new Date().toISOString()}; return r.value; };
+    const draft = async (prompt,allowCompact=false) => { const r = await call(prompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY,[],{deadline:generationDeadline,oversizePrompt:allowCompact?compactFallback:undefined,oversizeMaxOutputTokens:6000}); author={proveedor:r.provider,modelo:r.model,fecha:new Date().toISOString()}; return r.value; };
     const normalize = raw => {
       const normalized=Pedagogy.normalizeStrategyPlan(raw,plan);
       const counted=Pedagogy.enforceRequestedCounts(normalized,plan);
@@ -216,7 +222,7 @@ Responde ÚNICAMENTE en JSON:
       return m;
     };
     const check = m => [...HEVA.validate(m,cantidadesEfectivas),...Pedagogy.validate(m,plan),...Skills.generationIssues(m,plan)];
-    let material = normalize(await draft(promptRedactor));
+    let material = normalize(await draft(promptRedactor,true));
     let issues = check(material);
     if (issues.length) {
       const missingRefs=Pedagogy.missingTaskTraces(material);
