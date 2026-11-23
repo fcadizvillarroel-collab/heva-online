@@ -236,15 +236,19 @@
         <!-- 8. APOYOS DE ACCESO Y DIFERENCIACIÓN: UNA SOLA SECCIÓN OPCIONAL -->
         <details id="heva-access-details" class="rounded-xl border border-stone-300 bg-orange-50 p-3">
           <summary class="cursor-pointer text-xs font-bold uppercase text-[#8B2635]">Adecuaciones, lectura acompañada y diferenciación · opcional</summary>
-          <p class="text-xs text-stone-600 my-3">Los apoyos de acceso se aplican al material elegido sin cambiar su objetivo. Para una guía específicamente diseñada para lectura acompañada, selecciona «Versión accesible / lectura acompañada» en Tipo de material.</p>
-          <div class="space-y-2 text-xs text-stone-700">
-            <label class="flex items-start gap-2"><input type="checkbox" id="pie-lectura-facil" class="rounded text-[#8B2635] mt-0.5"/><span>Lectura accesible: oraciones claras, vocabulario explicado y segmentación del texto</span></label>
-            <label class="flex items-start gap-2"><input type="checkbox" id="pie-apoyos-visuales" class="rounded text-[#8B2635] mt-0.5"/><span>Apoyos visuales o descriptivos, glosario y procedimientos paso a paso</span></label>
-            <label class="flex items-start gap-2"><input type="checkbox" id="pie-graduacion" class="rounded text-[#8B2635] mt-0.5"/><span>Diferenciación: actividades graduadas y apoyos que se retiran progresivamente</span></label>
+          <p class="text-sm text-stone-700 my-3">Elige apoyos pedagógicos según las barreras de acceso observadas. Se aplican al mismo OA EPJA y no implican un diagnóstico PIE. Puedes combinarlos sin crear otra evaluación ni repetir el tema.</p>
+          <div class="space-y-1.5 text-stone-800" id="heva-inclusive-options">
+            <label class="heva-support-choice"><input type="checkbox" id="pie-lectura-facil" data-heva-support="lectura" class="rounded text-[#8B2635]" checked/><span><strong>Lectura accesible:</strong> párrafos breves, consignas claras y vocabulario explicado.</span></label>
+            <label class="heva-support-choice"><input type="checkbox" id="pie-apoyos-visuales" data-heva-support="vision" class="rounded text-[#8B2635]"/><span><strong>Baja visión o ceguera:</strong> texto lineal y descripciones equivalentes de imágenes, mapas y gráficos.</span></label>
+            <label class="heva-support-choice"><input type="checkbox" id="pie-graduacion" data-heva-support="modelado" class="rounded text-[#8B2635]" checked/><span><strong>Ejemplo resuelto y práctica guiada:</strong> apoyo gradual y actividad autónoma (sin pistas en las evaluaciones).</span></label>
+            <label class="heva-support-choice"><input type="checkbox" id="pie-respuestas-flexibles" data-heva-support="respuesta" class="rounded text-[#8B2635]"/><span><strong>Formas de responder:</strong> escrita, oral o dictada cuando el objetivo y las normas lo permitan.</span></label>
+            <label class="heva-support-choice"><input type="checkbox" id="pie-recuperacion" data-heva-support="recuperacion" class="rounded text-[#8B2635]" checked/><span><strong>Recuperación por inasistencia:</strong> síntesis autónoma y tarea breve para retomar aprendizajes.</span></label>
+            <label class="heva-support-choice"><input type="checkbox" id="pie-desafio" data-heva-support="desafio" class="rounded text-[#8B2635]"/><span><strong>Desafío:</strong> aplicación de lo aprendido en una situación nueva, sin añadir preguntas extras.</span></label>
           </div>
+          <p id="heva-inclusive-selected" class="text-xs font-semibold text-[#6d3948] mt-2" aria-live="polite">3 apoyos pedagógicos seleccionados.</p>
           <div class="mt-3 border-t border-stone-200 pt-3">
-            <p class="font-bold text-xs text-[#8B2635]">Lectura acompañada y recuperación</p>
-            <p class="text-xs text-stone-600 mt-1">Puedes combinar estos apoyos con «Profundidad y contextualización» en Diseño pedagógico. Para un plan de remediación, selecciona el objetivo y describe las dificultades observadas en Indicaciones docentes, sin incluir datos personales.</p>
+            <p class="font-bold text-xs text-[#8B2635]">Formato de lectura acompañada</p>
+            <p class="text-xs text-stone-600 mt-1">Los apoyos anteriores se aplican al tipo de material elegido. Para una guía específicamente accesible selecciona el formato siguiente. Las adecuaciones de evaluación requieren el criterio docente y las autorizaciones pertinentes.</p>
             <button type="button" onclick="document.getElementById('tipo-material').value='ACCESIBLE';document.getElementById('tipo-material').dispatchEvent(new Event('change',{bubbles:true}));" class="mt-2 border border-amber-400 rounded px-3 py-2 text-xs font-bold bg-white">Usar formato de lectura acompañada</button>
           </div>
         </details>
@@ -812,7 +816,8 @@
         cantAlternativas: cantidadesHEVA.cantAlternativas,
         cantDesarrollo: cantidadesHEVA.cantDesarrollo,
         cantCasos: cantidadesHEVA.cantCasos,
-        adecuacionesPIE: [...document.querySelectorAll('input[id^="pie-"]:checked')].map(x=>x.parentElement.textContent.trim()),
+        adecuacionesPIE: [...document.querySelectorAll('input[data-heva-support]:checked')].map(x=>x.parentElement.textContent.trim()),
+        apoyosInclusivos: [...document.querySelectorAll('input[data-heva-support]:checked')].map(x=>x.dataset.hevaSupport),
         ...(window.hevaPlanningExtras?window.hevaPlanningExtras():{})
       };
 
@@ -832,6 +837,7 @@
           ...Object.entries(payload.instrumentosEvaluacion||{}).map(([k,n])=>(window.HEVAAssessment?.types[k]?.label||k)+': '+n),
           'Noticias reales: '+(payload.usarNoticias?'Consultar canales disponibles':'Desactivadas'),
           'Noticia didáctica simulada: '+(payload.noticiaDidacticaModo||'AUTO'),
+          'Apoyos inclusivos solicitados: '+(payload.apoyosInclusivos.join(', ')||'Ninguno'),
           'Adecuaciones: '+(payload.adecuacionesPIE.join(', ')||'Ninguna')
         ].join('\n');
         let resumenPanel=document.getElementById('heva-encargo-enviado');if(!resumenPanel){resumenPanel=document.createElement('details');resumenPanel.id='heva-encargo-enviado';resumenPanel.className='no-print border rounded p-3 my-3 bg-stone-50';document.getElementById('btn-generar').before(resumenPanel);}resumenPanel.replaceChildren();const resumenTitulo=document.createElement('summary');resumenTitulo.textContent='Ver el encargo enviado a la IA';const resumenTexto=document.createElement('pre');resumenTexto.className='text-xs whitespace-pre-wrap';resumenTexto.textContent=resumenHEVA;resumenPanel.append(resumenTitulo,resumenTexto);
