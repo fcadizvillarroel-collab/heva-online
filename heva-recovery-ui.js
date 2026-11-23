@@ -143,6 +143,7 @@ function mostrarRecuperacionPendienteHEVA(){
  text.textContent=tipo==='PRESENTACION'
  ?'Presentación guardada: '+String(saved.parts.filter(Boolean).length)+' de '+String(saved.bloques?.length||'?')+' bloques completos. No tiene relación con la planificación u otro material que estés creando.'
  :'Avance guardado: '+String(saved.parts.filter(Boolean).length)+' de '+String(saved.bloques?.length||'?')+' bloques completos. Puedes continuar o apartar el encargo anterior; no forma parte del material actual.';
+ text.textContent+=' No es una actividad de la '+nombre+'.';
  const actions=document.createElement('div');actions.className='heva-recovery-actions flex flex-wrap gap-2 mt-2';
  const button=document.createElement('button');button.type='button';button.textContent='Continuar '+nombre+' pendiente';button.className='heva-recovery-action border rounded px-3 py-2 font-bold bg-amber-100 text-amber-950';button.disabled=hevaResumeBusy||!!document.getElementById('btn-generar')?.disabled;
  const discard=document.createElement('button');discard.type='button';discard.textContent='Apartar avance (recuperable)';discard.className='heva-recovery-action border rounded px-3 py-2 font-semibold bg-white text-stone-800';discard.disabled=hevaRecoveryRunning();
@@ -163,13 +164,25 @@ function mostrarRecuperacionPendienteHEVA(){
  catch(error){hevaResumeMessage=error.message||'La recuperación sigue pendiente. El avance se conserva.';status.textContent=hevaResumeMessage;}
  finally{hevaResumeBusy=false;if(generate)generate.disabled=false;button.disabled=false;}
  };
- // No ocupar permanentemente la parte superior con un aviso ajeno al tipo actual.
- const fold=document.createElement('details');fold.id='heva-resume-details';fold.className='rounded border border-amber-200 bg-amber-50 p-2';
- const heading=document.createElement('summary');heading.className='cursor-pointer font-semibold text-xs text-amber-950';
+ // Conservar los controles originales como hijos directos para reanudación,
+ // restauración y compatibilidad; mostrar solo un botón compacto hasta abrirlos.
+ actions.append(button,discard);box.append(title,text,actions,status);
+ const toggle=document.createElement('button');toggle.type='button';toggle.id='heva-resume-toggle';
+ toggle.className='heva-recovery-action text-xs font-bold text-amber-950';
  const chosen=document.getElementById('tipo-material')?.value;
- heading.textContent=(chosen!==tipo?'Hay una '+nombre+' anterior guardada · ':'Avance de '+nombre+' recuperable · ')+'ver opciones';
- fold.append(heading,title,text,actions,status);actions.append(button,discard);box.append(fold);
+ const label=(chosen!==tipo?'Hay una '+nombre+' anterior guardada':'Avance de '+nombre+' recuperable');
+ let expanded=false;
+ const setExpanded=value=>{
+  expanded=!!value;
+  for(const n of [title,text,actions])n.hidden=!expanded;
+  status.hidden=!expanded&&!status.textContent;
+  toggle.textContent=label+(expanded?' · ocultar opciones':' · ver opciones');
+  toggle.setAttribute('aria-expanded',String(expanded));
+ };
+ toggle.onclick=()=>setExpanded(!expanded);
+ box.append(toggle);setExpanded(false);
+ if(hevaResumeMessage)setExpanded(true);
 }
 mostrarRecuperacionPendienteHEVA();
-document.getElementById('tipo-material')?.addEventListener('change',mostrarRecuperacionPendienteHEVA);
+document.getElementById('tipo-material')?.addEventListener?.('change',mostrarRecuperacionPendienteHEVA);
 if(typeof MutationObserver==='function'&&document.getElementById('btn-generar'))new MutationObserver(mostrarRecuperacionPendienteHEVA).observe(document.getElementById('btn-generar'),{attributes:true,attributeFilter:['disabled']});
