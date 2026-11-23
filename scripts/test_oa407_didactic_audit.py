@@ -29,7 +29,7 @@ with tempfile.TemporaryDirectory() as tmp:
 catalog=json.loads((Path(__file__).resolve().parents[1]/"catalogo-publicado.json").read_text(encoding="utf-8"))
 supports=[lesson(oa)["accessibility"] for oa in catalog]
 assert len(set(supports))>=9,"Accessibility must differ by curricular discipline"
-assert all("respuesta oral" in s and "teléfonos" in s for s in supports)
+assert all("respuesta oral" in s and "teléfonos" in s and "ciegos" in s and "alto contraste" in s for s in supports)
 for subject,keyword in [("Estudios Sociales","cronologías"),("Educación Matemática","operación"),("Lengua Castellana","vocabulario"),("Ciencias Naturales","observaciones"),("Inglés","inglés")]:
     match=next(oa for oa in catalog if subject.lower() in oa["asignatura"].lower())
     assert keyword in lesson(match)["accessibility"],subject
