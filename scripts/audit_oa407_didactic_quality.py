@@ -6,6 +6,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"scripts"))
 from oa_lessons import lesson
+from oa_curated_cases import curated_case
 
 def norm(s):
     return " ".join("".join(c for c in unicodedata.normalize("NFD",s.lower()) if unicodedata.category(c)!="Mn").split())
@@ -27,7 +28,17 @@ def audit(output):
         if len(m["scenario"].strip())<65: issues.append("ESCENARIO_BREVE")
         if len(m["answer_guide"][0].strip())<85: issues.append("PAUTA_BREVE")
         if "solucion del caso presentado" not in so: issues.append("SIN_SOLUCION_DESARROLLADA")
-        if m["scenario"].strip() not in m["explanation"] and m["worked"].strip() not in m["explanation"]: issues.append("EXPLICACION_DESVINCULADA")
+        case=curated_case(oa)
+        # A genuine worked explanation must include the real original situation,
+        # reasoning with its actual solution, and a transferable challenge.
+        if case:
+            case_present=norm(m["scenario"]) in norm(m.get("explanation",""))
+            solved_present=norm(case[1]) in norm(m.get("explanation",""))
+            transfer_present=norm(case[2]) in norm(m.get("explanation",""))
+            if not (case_present and solved_present and transfer_present):
+                issues.append("EXPLICACION_SIN_CASO_RESUELTO_Y_TRANSFERENCIA")
+        elif m["scenario"].strip() not in m["explanation"] and m["worked"].strip() not in m["explanation"]:
+            issues.append("EXPLICACION_DESVINCULADA")
         if len(set(norm(q) for q in m["questions"]))!=len(m["questions"]): issues.append("PREGUNTAS_DUPLICADAS")
         if not m["accessibility"].strip(): issues.append("SIN_ACCESIBILIDAD")
         # Repetition across different OA is not detected by per-lesson duplication.
@@ -37,6 +48,11 @@ def audit(output):
         explanation=norm(m.get("explanation",""))
         if explanation.startswith("contenido curricular del objetivo:") and "orientacion didactica:" in explanation and "evidencia esperada:" in explanation:
             issues.append("EXPLICACION_CON_ESTRUCTURA_PLANTILLA")
+        # Detect solutions copied in isolation: the objective itself cannot
+        # count as disciplinary substance, and a short label is not an example.
+        substantive=explanation.replace(norm(oa["texto_literal"]),"")
+        if len(substantive)<280:
+            issues.append("EXPLICACION_SIN_PROFUNDIDAD_MINIMA")
         rows.append({"clave_interna":oa["clave_interna"],"asignatura":oa["asignatura"],"nivel":oa["nivel"],"marco":oa["marco"],"alertas":"|".join(issues),"estado":"REVISAR" if issues else "SIN_ALERTAS_HEURISTICAS","revision_disciplinar":"NO_ACREDITADA","preguntas_repetidas_entre_oa":len(repeated),"preguntas_totales":len(m["questions"])})
     output=Path(output);output.mkdir(parents=True,exist_ok=True)
     with (output/"matriz_calidad_didactica_407.csv").open("w",encoding="utf-8-sig",newline="") as f:

@@ -117,7 +117,7 @@ def create_ppt(oa,png,png_evidence,out):
    addtext(s,.78,6.65,11.8,.45,footer,14,False,TEAL)
   return first
  slide('OBJETIVO DE APRENDIZAJE · '+str(oa['_index']).zfill(3),oa['asignatura']+' · '+oa['nivel']+'\n\n'+oa['texto_literal'])
- slide('¿Qué vamos a aprender?',data['explanation'])
+ slide('Ruta de aprendizaje','Identifica la habilidad y el contenido del objetivo antes de analizar el caso.\n\nContenido: '+data['focus']+'\n\nObserva la situación, intenta resolverla, contrasta la solución explicada y aplica el procedimiento en un caso nuevo.')
  sources=sources_for(oa)
  citas='\n'.join(r['titulo']+': '+r['url'] for r in sources)
  slide('Fuente curricular y alcance','Marco: '+oa['marco']+'\nPágina indicada en catálogo: '+str(oa.get('pagina_oficial','No indicada'))+'\nReferencia oficial: '+curricular_source(oa)+('\n\nCotejo focalizado de hechos (no validación total):\n'+citas if sources else '')+'\n\nLos casos son originales, no citas del decreto. Las imágenes son esquemas originales y no fotografías documentales.')
@@ -125,7 +125,7 @@ def create_ppt(oa,png,png_evidence,out):
  picture=s.shapes.add_picture(str(png),Inches(1.1),Inches(2.1),width=Inches(10.8),height=Inches(4.0))
  picture._element.nvPicPr.cNvPr.set('descr','Organizador original de comprender, aplicar y revisar.')
  slide('Caso para pensar',data['scenario']+'\n\nPregunta: ¿cómo lo resolverías antes de ver la demostración?')
- slide('Orientación para resolver el OA',data['worked'])
+ slide('Resolución explicada y transferencia',data['explanation'])
  slide('Practiquemos', '\n\n'.join(str(i)+'. '+q for i,q in enumerate(data['questions'][:3],1)))
  s=slide('Cómo revisar tu trabajo','Comprueba la respuesta al objetivo, justifica con evidencia y verifica los procedimientos. Utiliza la ruta visual siguiente.')
  picture=s.shapes.add_picture(str(png_evidence),Inches(1.1),Inches(2.25),width=Inches(10.8),height=Inches(3.95))
@@ -146,8 +146,8 @@ def create_doc(oa,png,out,teacher=False):
  doc.add_heading('Explicación para aprender',level=1);doc.add_paragraph(data['explanation'])
  picture=doc.add_picture(str(png),width=Cm(10.2))
  picture._inline.docPr.set('descr','Esquema original: comprender, aplicar y revisar.')
- doc.add_heading('Caso de ejemplo',level=1);doc.add_paragraph(data['scenario'])
- doc.add_heading('Orientación para resolver el OA',level=1);doc.add_paragraph(data['worked'])
+ # El caso original y su solución ya están íntegros en la explicación.
+ # Evitar repetirlos en secciones posteriores de la misma guía.
  doc.add_heading('Actividades de práctica',level=1)
  for q in data['questions']:doc.add_paragraph(q,style='List Number')
  if teacher:

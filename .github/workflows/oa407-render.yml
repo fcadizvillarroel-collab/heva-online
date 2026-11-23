@@ -10,6 +10,7 @@ on:
       - 'scripts/oa_specific_examples.py'
       - 'scripts/build_407_oa_materials.py'
       - 'scripts/test_oa407_ppt_adaptive.py'
+      - 'scripts/test_oa407_pedagogical_sequence.py'
       - 'scripts/attest_oa407_technical.py'
       - 'scripts/audit_oa407_office_content.py'
       - 'scripts/audit_oa407_curricular_trace.py'
@@ -42,6 +43,8 @@ jobs:
           python -m pip install --disable-pip-version-check python-docx python-pptx pillow pymupdf
       - name: Smoke-test adaptive 20pt slide layout and subject diagrams
         run: python scripts/test_oa407_ppt_adaptive.py
+      - name: Validate case-before-solution sequence and unique worked examples
+        run: python scripts/test_oa407_pedagogical_sequence.py
       - name: Generate 407 DOCX and 407 PPTX, render all pages and audit
         run: python scripts/build_407_oa_materials.py --out out/oa407
       - name: Certify technical evidence for 407 objectives and 1221 Office files
