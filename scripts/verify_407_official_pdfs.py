@@ -26,7 +26,7 @@ def candidate_page(literal,pages):
  starts=sorted({round(extent*i/7) for i in range(8)})
  anchors=[normalized[start:start+width] for start in starts]
  scored=[(sum(anchor in page for anchor in anchors),idx+1) for idx,page in enumerate(pages)]
- best_count,best_page=max(scored,default=(0,0))
+ best_count,best_page=max(scored,key=lambda candidate:candidate[0],default=(0,0))
  return (best_page if best_count>=2 and best_count/len(anchors)>=0.25 else None,
          best_count,len(anchors))
 
