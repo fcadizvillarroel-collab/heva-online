@@ -18,3 +18,14 @@ test('guide visuals may appear in matching explanatory sections, not only the re
  assert.ok(!p[0].guideVisual.image);
  assert.ok(!G.plan({...m,recursosVisualesHEVA:{imagenes:false}},blocks,{intercambio:picture}).some(b=>b.guideVisual?.image));
 });
+
+test('Word guide keeps two oral registers in an editable table when enabled',()=>{
+ const input=[{title:'Objetivo',text:'Expresarse con claridad',path:'titulo'},{title:'Comparemos mensajes',text:'Formal: Buenos días, ¿podría informarme del horario?\nInformal: Hola, ¿a qué hora es?',path:'introduccionLectura'}];
+ const material={tipoMaterial:'GUIA',asignatura:'Lenguaje',temaEspecifico:'Registro formal e informal'};
+ const planned=G.plan(material,input);
+ assert.equal(planned[1].guideVisual.comparison.length,2);
+ assert.match(planned[1].guideVisual.comparison[0].text,/Buenos días/);
+ assert.match(planned[1].guideVisual.comparison[1].text,/Hola/);
+ assert.ok(!G.plan({...material,recursosVisualesHEVA:{recuadros:false}},input)[1].guideVisual.comparison);
+ assert.deepEqual(input[1].text,'Formal: Buenos días, ¿podría informarme del horario?\nInformal: Hola, ¿a qué hora es?');
+});

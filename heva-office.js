@@ -24,7 +24,7 @@ async function word(m,teacher=false){
   children.push(new Paragraph({text:block.title,heading:HeadingLevel.HEADING_2,spacing:{before:220,after:110},keepNext:true}));
   if(block.kind==='planning-moment'){for(const field of block.fields){children.push(line(field.title,{bold:true,color:main,keepNext:true,after:70}));for(const paragraph of field.text.split(/\n+/).filter(Boolean))children.push(line(paragraph,{after:140}));}continue;}
   const extra=block.guideVisual;
-  if(!extra?.chart&&!extra?.diagram)for(const paragraph of String(block.text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean)){
+  if(!extra?.chart&&!extra?.diagram&&!extra?.comparison)for(const paragraph of String(block.text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean)){
    children.push(line(paragraph,{after:140,box:!!extra?.box,keepNext:block.kind==='question'||/^ejemploGuiado\.pasos\.\d+\.accion$/.test(block.path||'')}));
   }
   if(extra)children.push(...root.HEVAGuideVisuals.render(root.docx,extra,line,visual.theme));
@@ -151,6 +151,20 @@ function addContent(ppt,theme,slide,title,lines,section,index=0,scene={}){
   text('Unidad: '+chart.unit,6.6,2.08,5.65,.35,16,main,true);
   slide.addChart(ppt.ChartType.bar,[{name:chart.unit,labels:chart.labels,values:chart.values}],{x:6.45,y:2.65,w:5.95,h:3.65,barDir:'bar',showLegend:false,showValue:true,showTitle:false,catAxisLabelFontSize:18,valAxisLabelFontSize:14,dataLabelFontSize:18,valAxisMinVal:0,chartColors:[theme.main],showBorder:false,showCatName:false,showShadow:false});
   return;
+ }
+ // Comparación editable de dos mensajes de registro, sin gráficos decorativos.
+ const registerLines=clean.map(line=>line.match(/^\s*(formal|informal)\s*:\s*(.+)$/i));
+ if(resources.recuadros&&!illustration&&clean.length===2&&registerLines.every(Boolean)&&
+    new Set(registerLines.map(r=>r[1].toLowerCase())).size===2&&
+    clean.every(line=>fitsText([line],5.0,2.75,25))){
+   registerLines.forEach((part,j)=>{
+     const x=.86+j*6.03,formal=part[1].toLowerCase()==='formal';
+     slide.addShape(ppt.ShapeType.roundRect,{x,y:2.4,w:5.6,h:3.85,rectRadius:.13,
+       line:{color:theme.accent,width:1.3},fill:{color:formal?(theme.panel||'FFFFFF'):(theme.soft||'F1E7DB')}});
+     text(formal?'REGISTRO FORMAL':'REGISTRO INFORMAL',x+.32,2.75,4.96,.45,17,theme.main,true);
+     text(part[2],x+.32,3.54,4.96,2.35,25,theme.ink);
+   });
+   slide.hevaVisualType='dialogue';return;
  }
  const addPicture=()=>{const box=root.HEVASlideDesign.contain(illustration,{x:8.45,y:1.75,w:4.03,h:4.82});slide.addImage({data:illustration.data,...box,altText:illustration.alt});if(illustration.generated)text('IMAGEN ILUSTRATIVA GENERADA',8.45,6.66,4.03,.18,9,main);if(typeof slide.addNotes==='function')slide.addNotes(illustration.alt);};
  if(relation){

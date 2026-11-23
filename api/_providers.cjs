@@ -107,6 +107,9 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
           return {value:parseAIJSON(data.choices[0].message.content,data.choices[0].finish_reason),provider:'groq',model:mod};
         }
         errores.push('Groq ('+mod+'): proveedor no disponible ('+resp.status+').');
+         // Un 413 indica que el mensaje supera la capacidad del proveedor: probar
+         // otros modelos con el mismo texto no lo reduce y consume cuota.
+         if(resp.status===413)break;
       } catch (e) {
         remember(e,'groq');
         errores.push(`Groq (${mod}): ${e.message}`);
