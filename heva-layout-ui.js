@@ -61,7 +61,10 @@ function mount(){
  refresh();
  // Mostrar una indicación discreta cuando existen ajustes opcionales activos.
  const updateActive=()=>{
-  const selected=[get('pie-lectura-facil'),get('pie-apoyos-visuales'),get('pie-graduacion'),get('lab-enabled')].filter(x=>x?.checked).length;
+  const selected=[
+   'pie-lectura-facil','pie-apoyos-visuales','pie-graduacion',
+   'pie-respuestas-flexibles','pie-recuperacion','pie-desafio','lab-enabled'
+  ].map(get).filter(x=>x?.checked).length;
   summary.textContent='Diseño pedagógico y estrategias · opcional'+(selected?' · '+selected+' activo'+(selected===1?'':'s'):'');
  };
  advanced.addEventListener('change',updateActive);
