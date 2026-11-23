@@ -14,13 +14,14 @@ function mount(){
  const design=get('heva-design-details'),depth=get('heva-depth-details');
  const counts=get('cant-alternativas')?.closest('div.border-t');
  // Mantener el tema inmediatamente después del objetivo, antes de la estrategia.
- if(topic&&strategy&&strategy.parentElement===topic.parentElement)strategy.before(topic);
+ const strategyBlock=strategy?.closest?.('#heva-unified-pedagogy')||strategy;
+ if(topic&&strategyBlock&&strategyBlock.parentElement===topic.parentElement)strategyBlock.before(topic);
  // Las configuraciones secundarias se recogen en un único panel, cerrado al abrir.
  const advanced=document.createElement('details');
  advanced.id='heva-ajustes-adicionales';
  advanced.className='heva-options-fold';
  const summary=document.createElement('summary');
- summary.textContent='Diseño pedagógico · profundidad, contexto y apoyos';
+ summary.textContent='Diseño pedagógico y estrategias · opcional';
  summary.setAttribute('aria-label','Abrir diseño pedagógico antes de generar');
  advanced.append(summary);
  const help=document.createElement('p');
@@ -57,7 +58,7 @@ function mount(){
  // Mostrar una indicación discreta cuando existen ajustes opcionales activos.
  const updateActive=()=>{
   const selected=[get('pie-lectura-facil'),get('pie-apoyos-visuales'),get('pie-graduacion'),get('lab-enabled')].filter(x=>x?.checked).length;
-  summary.textContent='Diseño pedagógico · profundidad, contexto y apoyos'+(selected?' · '+selected+' activo'+(selected===1?'':'s'):'');
+  summary.textContent='Diseño pedagógico y estrategias · opcional'+(selected?' · '+selected+' activo'+(selected===1?'':'s'):'');
  };
  advanced.addEventListener('change',updateActive);
  updateActive();
