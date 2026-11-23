@@ -40,7 +40,7 @@ function diagramPlan(section,subject,topic){
  const fallback=names[family];
  if(!fallback)return null; // No inventar un diagrama de otra asignatura.
  // Prioridad explícita para registro oral. Nunca mostrar EPP en Lenguaje.
- if(family==='lenguaje'&&/registro (?:formal|informal)|formal.*informal|informal.*formal|registro linguistico|comunicacion oral/.test(topicWords+' '+sectionWords))
+ if(family==='lenguaje'&&/registro (?:formal|informal)|formal.*informal|informal.*formal|registro linguistico|comunicacion oral/.test(sectionWords))
   return{title:'Elegir el registro adecuado',labels:['SITUACIÓN','DESTINATARIO','REGISTRO'],notes:['Lugar y propósito','Relación entre personas','Formal o informal']};
  const byFamily={
   lenguaje:[[/texto|lectura|cuento|fabula|noticia|comprension/,{title:'Comprender un texto',labels:['TEXTO','INTERPRETAR','FUNDAMENTAR'],notes:['Identificar información','Distinguir inferencias','Utilizar evidencias textuales']}],[/argument|tesis|opinion|evidencia/,{title:'Argumentar con razones',labels:['AFIRMACIÓN','RAZONES','CONCLUSIÓN'],notes:['Qué sostengo','En qué me baso','Cómo lo justifico']}]],
@@ -85,7 +85,7 @@ function speechRegisterVisual(){
 function subjectVisual(section,topic,subject){
  // Esquema específico antes del organizador abstracto: el estudiante ve
  // dos mensajes comparables y un criterio de adecuación, no tres etiquetas.
- if(visualFamily(subject)==='lenguaje'&&/registro(?:s)?(?: de habla| formal| informal)?|formal e informal/i.test(norm(topic)+' '+norm(section?.title||''))){
+ if(visualFamily(subject)==='lenguaje'&&/registro(?:s)?(?: de habla| formal| informal)?|formal e informal/i.test(norm([section?.title,section?.text].join(' ')))){
   const specific=speechRegisterVisual();if(specific)return specific;
  }
  // Offline original teaching diagram: never presented as a documentary photograph.
@@ -137,7 +137,7 @@ function subjectVisual(section,topic,subject){
   return image({data:canvas.toDataURL('image/png'),width:1000,height:550,alt:'Organizador visual: '+group.labels.join(' → '),generated:true});
  }catch{return null;}
 }
-function decorate(m,sections,assets={}){const topic=norm([m.asignatura,m.titulo,m.temaEspecifico,m.objetivoAprendizaje,m.planGeneracion?.temaEspecifico].join(' ')),family=visualFamily(m.asignatura||m.planGeneracion?.asignatura||m.titulo||''),used=new Set();return sections.map((s,i)=>{const prefs=options(m),out={...s,design:role(s),visualOptions:prefs},own=image(s.image);if(!prefs.imagenes||s.hideImage)return{...out,image:null};if(own)return{...out,image:own};if(!['PRESENTACION','GUIA','TALLER','ACCESIBLE'].includes(m.tipoMaterial)||m.accesibilidadVisual?.contraste||i===0||out.design==='activity'||out.design==='closing'||out.design==='opening')return out;const words=norm(s.title+' '+s.text);for(const rule of rules){const asset=image(assets[rule.id]);if(asset&&!used.has(rule.id)&&rule.topic.test(topic)&&rule.slide.test(words)&&(rule.id!=='seguridad'||family==='tecnica')&&!(family==='tecnica'&&rule.id==='lenguaje')){used.add(rule.id);return{...out,image:asset};}}if(!used.has('infografia-asignatura')&&prefs.diagramas){const generated=subjectVisual(s,topic,m.asignatura||m.planGeneracion?.asignatura||'');if(generated){used.add('infografia-asignatura');return{...out,image:generated};}}return out;});}
+function decorate(m,sections,assets={}){const topic=norm([m.asignatura,m.titulo,m.temaEspecifico,m.objetivoAprendizaje,m.planGeneracion?.temaEspecifico].join(' ')),family=visualFamily(m.asignatura||m.planGeneracion?.asignatura||m.titulo||''),used=new Set();let generatedCount=0;return sections.map((s,i)=>{const prefs=options(m),out={...s,design:role(s),visualOptions:prefs},own=image(s.image);if(!prefs.imagenes||s.hideImage)return{...out,image:null};if(own)return{...out,image:own};if(!['PRESENTACION','GUIA','TALLER','ACCESIBLE'].includes(m.tipoMaterial)||m.accesibilidadVisual?.contraste||i===0||out.design==='activity'||out.design==='closing'||out.design==='opening')return out;const words=norm(s.title+' '+s.text);for(const rule of rules){const asset=image(assets[rule.id]);if(asset&&!used.has(rule.id)&&rule.topic.test(topic)&&rule.slide.test(words)&&(rule.id!=='seguridad'||family==='tecnica')&&!(family==='tecnica'&&rule.id==='lenguaje')){used.add(rule.id);return{...out,image:asset};}}if(generatedCount<3&&prefs.diagramas){const generated=subjectVisual(s,topic,m.asignatura||m.planGeneracion?.asignatura||'');const key='infografia:'+String(generated?.alt||'');if(generated&&!used.has(key)){used.add(key);generatedCount++;return{...out,image:generated};}}return out;});}
 function contain(asset,box){const ratio=asset.width/asset.height,w=Math.min(box.w,box.h*ratio),h=w/ratio;return{x:box.x+(box.w-w)/2,y:box.y+(box.h-h)/2,w,h};}
 function dataChart(lines){
  if(!Array.isArray(lines)||lines.length<2||lines.length>6)return null;
