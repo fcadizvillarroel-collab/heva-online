@@ -44,6 +44,7 @@ test('planificación completa de 90 minutos puede aprobar estructura propia sin 
 
 test('la versión en caché cambia junto con los módulos de auditoría',()=>{
  const sw=source('sw.js');
- assert.match(sw,/heva-online-v68-apoyos-inclusivos-piloto/);
+ assert.match(sw,/heva-online-v69-armonizacion-auditoria/);
+ const html=source('index.html');for(const asset of ['heva-quality-gate','heva-slide-design','heva-guide-visuals','heva-office','heva-recovery-ui'])assert.ok(html.includes('/'+asset+'.js?v=20261123-armonizado'),asset);
  assert.match(sw,/experimental\/material-view\.js/);
 });
