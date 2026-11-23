@@ -44,6 +44,6 @@ test('planificación completa de 90 minutos puede aprobar estructura propia sin 
 
 test('la versión en caché cambia junto con los módulos de auditoría',()=>{
  const sw=source('sw.js');
- assert.match(sw,/heva-online-v63-estrategias-modelo-en-principal/);
+ assert.match(sw,/heva-online-v64-visual-sin-duplicados/);
  assert.match(sw,/experimental\/material-view\.js/);
 });

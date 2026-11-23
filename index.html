@@ -64,10 +64,6 @@
 <body class="min-h-screen flex flex-col">
 
   <div id="heva-proposal-badge" class="no-print" style="background:#fff1ce;color:#633222;padding:10px 24px;font-weight:bold">HEVA · estrategias EPJA integradas · versión 2026.11.22</div>
-  <div class="no-print heva-lab-banner-compact" style="background:#f0f6ee;border-bottom:2px solid #4f7659;color:#243e2d">
-    <span><strong>HEVA unificado</strong> · Las estrategias combinadas y el modelo de guía están en este mismo generador.</span>
-    <button type="button" id="heva-abrir-estrategias" aria-controls="integrated-lab" style="border-radius:8px;background:#295c45;color:white;padding:9px 12px;font-weight:700">Configurar estrategias aquí</button>
-  </div>
   <!-- HEADER INSTITUCIONAL -->
   <header class="no-print bg-[#8B2635] text-white px-6 py-4 shadow-md flex flex-wrap justify-between items-center gap-3">
     <div>
@@ -310,6 +306,12 @@
 
       <!-- Visor del Material (Editable en Vivo) -->
       <div class="lg:col-span-2 space-y-4">
+        <section id="heva-empty-preview" class="bg-white border border-stone-200 rounded-lg shadow-sm p-6 md:p-10 no-print" aria-label="Vista previa pendiente de generación">
+          <p class="text-xs font-bold tracking-wide uppercase text-[#8B2635]">Área de trabajo</p>
+          <h2 class="text-xl font-bold text-stone-800 mt-2">Tu material aparecerá aquí</h2>
+          <p class="text-sm text-stone-600 mt-3 leading-relaxed">Selecciona el tipo de material, el objetivo EPJA y el tema de la clase. Después pulsa «Generar con Inteligencia Artificial».</p>
+          <p class="text-xs text-stone-500 mt-3">La edición, los controles de calidad y las descargas de Word o PowerPoint se habilitan cuando exista un material.</p>
+        </section>
         <div id="barra-calidad" class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-emerald-900 flex flex-wrap justify-between items-center gap-2">
           <div>
             <h3 id="dictamen-calidad" class="font-bold text-xs uppercase text-emerald-900">Dictamen: LISTO PARA GENERAR</h3>
@@ -1053,14 +1055,6 @@ function labMessage(title,message){
   const p=document.createElement('p');p.className='mt-2';p.textContent=message;
   resultLab.append(h,p);return resultLab;
 }
-$('heva-abrir-estrategias')?.addEventListener?.('click',()=>{
-  const panel=$('integrated-lab');if(!panel)return;
-  // HEVA Layout aloja estrategias dentro de otros acordeones cerrados.
-  // Abrir toda la cadena evita que el botón lleve a contenido invisible.
-  for(let node=panel;node;node=node.parentElement)
-    if(node.tagName==='DETAILS')node.open=true;
-  panel.scrollIntoView({behavior:'smooth',block:'start'});
-});
 $('lab-preview-plan')?.addEventListener?.('click',()=>{
  try{
   if(!$('lab-enabled').checked)throw Error('Marca “Usar estas estrategias combinadas al generar”.');

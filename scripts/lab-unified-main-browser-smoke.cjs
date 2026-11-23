@@ -13,14 +13,25 @@ const assert=require('node:assert/strict');
   await page.waitForFunction(()=>Boolean(window.HEVAStrategyLab&&window.HEVAIntegration&&
     window.HEVALabMaterialView&&window.hevaExperimentalPlan),{timeout:30000});
   assert.equal(await page.locator('a[href="/experimental/"]').count(),0,
-    'Unificar HEVA debe evitar el enlace a una aplicación de LAB separada');
-  await page.locator('#heva-abrir-estrategias').click();
+    'HEVA principal no debe ofrecer una segunda aplicación de LAB');
+  assert.equal(await page.locator('#heva-abrir-estrategias').count(),0,
+    'El botón duplicado del encabezado debe desaparecer');
+  await page.locator('#heva-ajustes-adicionales > summary').click();
+  await page.locator('#integrated-lab > summary').click();
   assert.equal(await page.locator('#integrated-lab').evaluate(el=>el.open),true,
-    'El botón principal debe abrir el panel de estrategias en la misma página');
+    'El mismo formulario debe abrir la configuración de estrategias');
   assert.equal(await page.locator('#heva-ajustes-adicionales').evaluate(el=>el.open),true,
-    'También debe abrir el acordeón contenedor de ajustes avanzados');
+    'La sección de ajustes debe permanecer abierta');
   assert.equal(await page.locator('#lab-preview-model').isVisible(),true,
     'La guía modelo debe quedar visible al abrir las estrategias');
+  const strategyEvidence=page.locator('#heva-strategy-evidence');
+  assert.equal(await strategyEvidence.count(),1,'Debe existir solo una explicación desplegable de la estrategia');
+  assert.equal(await strategyEvidence.evaluate(el=>el.open),false,'La explicación larga debe estar plegada');
+  const hierarchy=await page.evaluate(()=>({
+    topic:document.querySelector('#tema-especifico').closest('div')?.getBoundingClientRect().top,
+    strategy:document.querySelector('#heva-unified-pedagogy')?.getBoundingClientRect().top
+  }));
+  assert.ok(hierarchy.topic<hierarchy.strategy,'El tema debe preceder a la estrategia');
   await page.locator('#lab-preview-model').click();
   const frame=page.frameLocator('#lab-preview-result iframe');
   await frame.locator('body').waitFor({timeout:12000});

@@ -73,6 +73,22 @@ jobs:
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
           sleep 2
           node scripts/lab-unified-main-browser-smoke.cjs
+      - name: Auditar visual y controles repetidos en cuatro anchos
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/heva-main-visual-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          sleep 2
+          node scripts/heva-main-visual-audit.cjs
+        env:
+          HEVA_VISUAL_AUDIT_DIR: ${{ runner.temp }}/heva-visual-qa
+      - name: Conservar capturas del generador unificado
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: heva-auditoria-visual-responsive
+          path: ${{ runner.temp }}/heva-visual-qa/
+          if-no-files-found: warn
       - name: Conservar captura de revisión visual
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

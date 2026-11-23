@@ -77,11 +77,15 @@ function arrange(){
  const reviewSummary=review.querySelector('summary');
  if(reviewSummary&&reviewSummary.textContent!==label)reviewSummary.textContent=label;
  const active=typeof materialActual!=='undefined'&&!!materialActual;
+ // No mostrar una hoja ficticia, pauta ni botones de exportación cuando no hay
+ // material generado. El artículo y sus ID permanecen para los recuperadores.
+ const empty=byId('heva-empty-preview');
+ if(empty)empty.hidden=active;
+ article.hidden=!active;
  edit.hidden=!active;
  review.hidden=!active;
- // Keep teacher tools available, but make the material itself the visual focus.
  const bar=byId('barra-calidad');
- if(bar)bar.classList.add('heva-result-compact-top');
+ if(bar){bar.hidden=!active;bar.style.display=active?'':'none';bar.classList.add('heva-result-compact-top');}
 }
 let scheduled=false,observer=null,observedRoot=null;
 function schedule(){
