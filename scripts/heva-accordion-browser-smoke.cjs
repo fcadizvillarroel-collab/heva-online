@@ -79,6 +79,19 @@ const fs=require('node:fs/promises'), path=require('node:path');
    assert.equal(await topic.inputValue(),'Globalización y empleo local','No perder la selección al plegar');
    // Los recursos LAB continúan dentro del paso 2, sin crear una segunda app.
    await page.locator('#heva-ajustes-adicionales > summary').click();
+   // Las seis estrategias inclusivas deben ser seleccionables y conservarse.
+   await page.locator('#heva-access-details > summary').click();
+   const included=page.locator('#heva-inclusive-options [data-heva-support]');
+   assert.equal(await included.count(),6,'Seis apoyos inclusivos sin duplicación');
+   assert.equal(await page.locator('#heva-inclusive-options input:checked').count(),3,'Tres apoyos pedagógicos sugeridos por defecto');
+   assert.match(await page.locator('#heva-inclusive-selected').innerText(),/3 apoyos pedagógicos/);
+   await page.locator('#pie-apoyos-visuales').check();
+   await page.locator('#pie-respuestas-flexibles').check();
+   assert.equal(await page.locator('#heva-inclusive-options input:checked').count(),5);
+   assert.match(await page.locator('#heva-inclusive-selected').innerText(),/5 apoyos pedagógicos/);
+   await page.screenshot({path:path.join(out,'heva-inclusive-'+width+'-opciones.png')});
+   // No se ha ejecutado IA: se conserva el mismo objetivo y tema.
+   assert.equal(await page.locator('#tema-especifico').inputValue(),'Globalización y empleo local');
    await page.locator('#integrated-lab > summary').click();
    assert.ok(await page.locator('#lab-preview-plan').isVisible(),'LAB sigue accesible dentro del paso 2');
    await page.locator('.heva-lab-close').click();
