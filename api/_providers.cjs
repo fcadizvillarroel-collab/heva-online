@@ -85,39 +85,48 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
     }
   }
 
-  // 3. Groq (Respaldo)
+  // 3. Groq (respaldo). On 413 retry *once* with a genuinely shorter,
+  // caller-authorized prompt for simple tasks; never repeat the oversized text.
   if (groqKey && !exclude.includes('groq')) {
     const modelosGroq = ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b', 'llama-3.1-8b-instant'];
+    const primary=options.fallbackPrompt||prompt;
+    const shorter=typeof options.oversizePrompt==='string'?options.oversizePrompt:'';
+    const canShrink=shorter.length>=300&&shorter.length<primary.length*0.85;
+    let stopped=false;
     for (const mod of modelosGroq) {
       if(deadline-Date.now()<=1500)break;
-      try {
-        const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST', signal: AbortSignal.timeout(timeoutFor('groq')),
-          headers: { 'Authorization': `Bearer ${groqKey}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: mod,
-            messages: [{ role: 'system', content: 'Responde exclusivamente con JSON válido.' }, { role: 'user', content: options.fallbackPrompt||prompt }],
-            response_format: { type: 'json_object' },
-            max_completion_tokens: options.fallbackMaxOutputTokens || options.maxOutputTokens || 8192,
-            ...(mod.startsWith('openai/gpt-oss')?{reasoning_effort:'low'}:{}),
-            temperature: 0.4
-          })
-        });
-
-        track(resp,'groq');const data = await resp.json();
-        if (resp.ok && data.choices?.[0]?.message?.content) {
-          return {value:parseAIJSON(data.choices[0].message.content,data.choices[0].finish_reason),provider:'groq',model:mod};
+      for(let attempt=0;attempt<(canShrink?2:1);attempt++){
+        if(deadline-Date.now()<=1500)break;
+        try {
+          const sendPrompt=attempt===0?primary:shorter;
+          const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST', signal: AbortSignal.timeout(timeoutFor('groq')),
+            headers: { 'Authorization': `Bearer ${groqKey}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              model: mod,
+              messages: [{ role: 'system', content: 'Responde exclusivamente con JSON válido.' }, { role: 'user', content: sendPrompt }],
+              response_format: { type: 'json_object' },
+              max_completion_tokens: attempt===1?(options.oversizeMaxOutputTokens||6000):(options.fallbackMaxOutputTokens || options.maxOutputTokens || 8192),
+              ...(mod.startsWith('openai/gpt-oss')?{reasoning_effort:'low'}:{}),
+              temperature: 0.4
+            })
+          });
+          track(resp,'groq');const data = await resp.json();
+          if (resp.ok && data.choices?.[0]?.message?.content) {
+            return {value:parseAIJSON(data.choices[0].message.content,data.choices[0].finish_reason),provider:'groq',model:mod};
+          }
+          errores.push('Groq ('+mod+'): proveedor no disponible ('+resp.status+').');
+          if(resp.status===413&&attempt===0&&canShrink&&deadline-Date.now()>5000)continue;
+          // Quota and credential failures are account-wide; repeated calls
+          // cannot repair them, even if another model ID is available.
+          if([413,429,401,403].includes(resp.status))stopped=true;
+          // 404 may identify a retired model; try a different model only.
+          break;
+        } catch(e){
+          remember(e,'groq');errores.push('Groq ('+mod+'): '+(e.code||e.message));break;
         }
-        errores.push('Groq ('+mod+'): proveedor no disponible ('+resp.status+').');
-         // Un 413 indica que el mensaje supera la capacidad del proveedor: probar
-         // otros modelos con el mismo texto no lo reduce y consume cuota.
-         if(resp.status===413||resp.status===429||resp.status===401||resp.status===403)break;
-         // 404 is often a model ID retired on the free tier; trying the next
-         // distinct model is useful, but not when account-wide quota is exhausted.
-      } catch (e) {
-        remember(e,'groq');
-        errores.push(`Groq (${mod}): ${e.message}`);
       }
+      if(stopped)break;
     }
   }
 
