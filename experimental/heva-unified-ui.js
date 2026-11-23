@@ -1,4 +1,4 @@
-/* HEVA preview-only compact unified pedagogical controls. */
+/* HEVA: visual compacta y controles pedagógicos del generador principal. */
 (function(){
 'use strict';
 const $=id=>document.getElementById(id);
@@ -7,15 +7,18 @@ const lab=$('integrated-lab'),legacy=$('estrategia-didactica'),questions=$('cant
 if(!lab||!legacy||!questions||!enabled)return;
 const strategy=legacy.parentElement;
 const container=document.createElement('section');
-container.id='heva-unified-pedagogy';container.className='rounded-xl border border-amber-300 bg-amber-50/40 p-3 space-y-3';
+container.id='heva-unified-pedagogy';container.className='heva-primary-fields space-y-3';
 strategy.parentNode.insertBefore(container,strategy);
 container.append(strategy,questions,lab);
-const heading=document.createElement('div');heading.className='flex items-center justify-between gap-2';
-const title=document.createElement('strong');title.className='text-sm text-[#8B2635]';title.textContent='Estrategia pedagógica del material';
-const hint=document.createElement('span');hint.className='text-xs text-stone-500';hint.textContent='Configuración';
-heading.append(title,hint);container.prepend(heading);
-const note=document.createElement('p');note.className='text-xs text-stone-600';note.textContent='La estrategia principal se utiliza en modo habitual. Activa el laboratorio para combinar estrategias; las cantidades de preguntas son compartidas.';
-strategy.append(note);
+// Conservar un único rótulo de estrategia: el formulario ya tiene su etiqueta.
+const evidence=$('desc-estrategia');
+if(evidence&&!evidence.closest('#heva-strategy-evidence')){
+ const fold=document.createElement('details');fold.id='heva-strategy-evidence';
+ fold.className='border border-stone-200 rounded-lg bg-stone-50 p-2 mt-2';
+ const summary=document.createElement('summary');summary.className='cursor-pointer text-xs font-semibold text-[#713646]';
+ summary.textContent='Ver explicación, evidencia y fuente de esta estrategia';
+ evidence.before(fold);fold.append(summary,evidence);
+}
 const desc=lab.querySelector('summary');desc.textContent='Configurar estrategias combinadas  →';
 desc.setAttribute('aria-label','Abrir configuración lateral de estrategias integradas');
 const panel=document.createElement('div');panel.id='heva-lab-drawer';panel.className='heva-lab-drawer';
@@ -46,7 +49,6 @@ body:has(#integrated-lab[open]){overflow:hidden}
 function update(){
 const active=enabled.checked;
 strategy.querySelector('label')?.classList.toggle('opacity-60',active);
-note.textContent=active?'Modo combinado activo: HEVA toma las estrategias del panel lateral. La estrategia principal también se exige; el informe del resultado mostrará qué tareas se vinculan a cada estrategia.':'Elige la estrategia principal en el menú. Para combinar varias, abre el botón de estrategias combinadas.';
 const summary=$('lab-summary');if(summary)summary.setAttribute('data-enabled',String(active));
 }
 enabled.addEventListener('change',update);update();
