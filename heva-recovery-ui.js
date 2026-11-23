@@ -167,7 +167,8 @@ function mostrarRecuperacionPendienteHEVA(){
  // Conservar los controles originales como hijos directos para reanudación,
  // restauración y compatibilidad; mostrar solo un botón compacto hasta abrirlos.
  actions.append(button,discard);box.append(title,text,actions,status);
- const toggle=document.createElement('button');toggle.type='button';toggle.id='heva-resume-toggle';
+ const toggle=document.createElement('div');toggle.id='heva-resume-toggle';
+ toggle.setAttribute('role','button');toggle.setAttribute('tabindex','0');
  toggle.className='heva-recovery-action text-xs font-bold text-amber-950';
  const chosen=document.getElementById('tipo-material')?.value;
  const label=(chosen!==tipo?'Hay una '+nombre+' anterior guardada':'Avance de '+nombre+' recuperable');
@@ -180,6 +181,7 @@ function mostrarRecuperacionPendienteHEVA(){
   toggle.setAttribute('aria-expanded',String(expanded));
  };
  toggle.onclick=()=>setExpanded(!expanded);
+ toggle.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault?.();setExpanded(!expanded);}};
  box.append(toggle);setExpanded(false);
  if(hevaResumeMessage)setExpanded(true);
 }
