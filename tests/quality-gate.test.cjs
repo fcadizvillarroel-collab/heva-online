@@ -26,3 +26,18 @@ test('diagrams enabled without images still require visual evidence',()=>{
  const result=Q.inspect({material:{tipoMaterial:'GUIA',objetivoAprendizaje:'Analizar la globalización',recursosVisualesHEVA:{imagenes:false,diagramas:true,graficos:false}},sections:[{text:'La globalización es un proceso. Ejemplo: comercio. Actividad: analiza.'}]});
  assert.ok(result.issues.some(i=>i.code==='VISUALES_AUSENTES'));
 });
+
+test('auditoría reconoce claveCorrecta canónica, no solo claves heredadas',()=>{
+ const material={tipoMaterial:'EVALUACION',preguntasAlternativas:Array.from({length:8},(_,i)=>({claveCorrecta:i<7?'A':'B',enunciado:'Pregunta '+(i+1)+': ¿qué corresponde al objetivo?'}))};
+ const r=Q.inspect({material});
+ assert.ok(r.issues.some(x=>x.code==='CLAVES_DESEQUILIBRADAS'));
+});
+test('solo texto evita advertencias visuales, pero diagramas activados sí las producen',()=>{
+ const sections=[{title:'Lectura',text:'Concepto, ejemplo y actividad contextualizada'}];
+ for(const recursos of [{imagenes:false,diagramas:false,graficos:false},{imagenes:false}]){
+  const r=Q.inspect({material:{tipoMaterial:'GUIA',recursosVisualesHEVA:recursos},sections});
+  assert.ok(!r.issues.some(x=>x.code==='VISUALES_AUSENTES'));
+ }
+ const r=Q.inspect({material:{tipoMaterial:'GUIA',recursosVisualesHEVA:{imagenes:false,diagramas:true,graficos:false}},sections});
+ assert.ok(r.issues.some(x=>x.code==='VISUALES_AUSENTES'));
+});
