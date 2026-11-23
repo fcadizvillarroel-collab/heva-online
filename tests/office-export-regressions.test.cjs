@@ -12,7 +12,7 @@ test('balance visual prompt is identified',()=>{const result=office().auditExpor
 function renderDeck(material,large=false){
  const slides=[];
  class Deck{constructor(){this.ShapeType={rect:'rect',line:'line',roundRect:'roundRect'}}addSlide(){const slide={texts:[],boxes:[],addText(t,options){this.texts.push(String(t));this.boxes.push({text:String(t),...options})},addShape(){},addNotes(n){this.notes=n}};slides.push(slide);return slide}async writeFile(){}}
- const context={HEVA:{material:m=>m,blocks:m=>m.blocks||[]},HEVATemplates:{layout:()=>({large,theme:{main:'8B2635',accent:'C77638',background:'FFF7ED',ink:'302723'}})},PptxGenJS:Deck};
+ const context={HEVA:{material:m=>m,blocks:m=>m.blocks||[]},HEVATemplates:{layout:()=>({large,theme:{main:'8B2635',accent:'C77638',background:'FFF7ED',ink:'302723'}})},PptxGenJS:Deck,HEVASlideDesign:require('../heva-slide-design.js')};
  vm.runInNewContext(code,context);
  return context.HEVAOffice.powerpoint(material).then(()=>slides);
 }
