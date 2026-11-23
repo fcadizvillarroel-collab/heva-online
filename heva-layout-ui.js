@@ -42,6 +42,10 @@ function mount(){
  ppt.classList.add('heva-ppt-conditional');
  ppt.setAttribute('aria-label','Diseño visual específico para PowerPoint');
  if(counts){counts.id='heva-conteos-material';counts.before(ppt);}else advanced.before(ppt);
+ // Paso 3 siempre se presenta después de las opciones y justo antes del botón
+ // Generar, aunque el panel avanzado se reubique al cargar la interfaz.
+ const third=get('heva-stage-3');
+ if(third&&before)before.before(third);
  const refresh=()=>{
   const isPpt=type.value==='PRESENTACION';
   ppt.hidden=!isPpt;
