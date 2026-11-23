@@ -67,7 +67,9 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
           const texto=candidate.content.parts.filter(p=>typeof p.text==='string'&&!p.thought).map(p=>p.text).join('');
           return {value:parseAIJSON(texto,candidate.finishReason),provider:'gemini',model:mod};
         }
-        tryNextModel=[404,429,500,502,503,504].includes(resp.status);errores.push('Gemini: proveedor no disponible ('+resp.status+').');break;
+        // A 429 generally consumes the shared free-account quota, regardless of model.
+        // Try other Gemini models for 404 or transient server failures only.
+        tryNextModel=[404,500,502,503,504].includes(resp.status);errores.push('Gemini: proveedor no disponible ('+resp.status+').');break;
       } catch(e){
         remember(e,'gemini');errores.push('Gemini: '+(e.code||'conexión no disponible'));
         if(String(e?.code||'').startsWith('AI_RESPONSE_')){
@@ -109,7 +111,9 @@ async function call(prompt, openAiKey, geminiKey, groqKey, exclude = [], options
         errores.push('Groq ('+mod+'): proveedor no disponible ('+resp.status+').');
          // Un 413 indica que el mensaje supera la capacidad del proveedor: probar
          // otros modelos con el mismo texto no lo reduce y consume cuota.
-         if(resp.status===413)break;
+         if(resp.status===413||resp.status===429||resp.status===401||resp.status===403)break;
+         // 404 is often a model ID retired on the free tier; trying the next
+         // distinct model is useful, but not when account-wide quota is exhausted.
       } catch (e) {
         remember(e,'groq');
         errores.push(`Groq (${mod}): ${e.message}`);

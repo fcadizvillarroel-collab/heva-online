@@ -41,3 +41,19 @@ test('Word muestra cronología con fechas originales sin inventar ni perder text
  assert.equal(plain[1].guideVisual.timeline,null);
  assert.ok(!G.plan(m,[{title:'Texto',text:'Primero se analiza.\nLuego se compara.'}])[0].guideVisual.timeline);
 });
+
+test('un bloque cronológico no duplica tabla, diagrama ni gráfico',()=>{
+ const m={tipoMaterial:'GUIA',recursosVisualesHEVA:{imagenes:false,diagramas:true,graficos:true,recuadros:true}};
+ const input=[{title:'Cronología',path:'introduccionLectura',text:'1914: Comienza la guerra.\n1918: Termina la guerra.'}];
+ const v=G.plan(m,input)[0].guideVisual;
+ assert.equal(v.timeline.length,2);
+ assert.equal(v.diagram,null);
+ assert.equal(v.chart,null);
+});
+test('comparaciones de habla impiden representaciones redundantes',()=>{
+ const m={tipoMaterial:'GUIA',recursosVisualesHEVA:{imagenes:false,diagramas:true,graficos:true,recuadros:true}};
+ const input=[{title:'Mensajes',text:'Formal: Buenos días.\nInformal: Hola.',path:'introduccionLectura'}];
+ const v=G.plan(m,input)[0].guideVisual;
+ assert.equal(v.comparison.length,2);
+ assert.equal(v.diagram,null);assert.equal(v.chart,null);
+});

@@ -28,3 +28,11 @@ test('proveedor de pago no se llama sin habilitación explícita, aunque se entr
 test('un objeto de noticia vacío o un titular aislado no ocultan la falta del texto',()=>{for(const noticiaDidactica of [{},{titulo:'Titular'}, {cuerpo:'  '}]){const m={...structuredClone(example),noticiaDidactica,introduccionLectura:'Titular: un taller abre',actividadAutonoma:{consigna:'Según la noticia, compara las decisiones.'}};assert.ok(T.inspect(m).issues.some(x=>x.code==='NOTICIA_AUTONOMA'));}});
 test('la revisión de tareas y noticia incluye V/F lectura ejercicios e identificación',()=>{const m={objetivoAprendizaje:'Evaluar decisiones con datos',verdaderoFalso:[{enunciado:'Según la noticia, identifica el cambio.'}],comprensionLectora:{texto:'',preguntas:[{enunciado:'Según la noticia, compara opciones.'}]},ejerciciosEvaluacion:[{consigna:'Según la noticia, calcula el costo.'}],identificacion:[{consigna:'Según la noticia, identifica el plazo.'}]};const r=T.inspect(m);assert.deepEqual(r.actividades.map(x=>x.ref),['VF-1','LECT-1','EJE-1','IDEN-1']);for(const ref of ['VF-1','LECT-1','EJE-1','IDEN-1'])assert.ok(r.issues.some(x=>x.code==='NOTICIA_'+ref));});
 test('una noticia incluida como estímulo de lectura no exige una noticia global duplicada',()=>{const m={comprensionLectora:{texto:'Noticia didáctica simulada. En una localidad ficticia, dos talleres comparan distintos plazos de entrega para decidir cómo organizar un pedido sin retrasarlo.',preguntas:[{enunciado:'Según la noticia, compara los plazos.'}]}};assert.ok(!T.inspect(m).issues.some(x=>x.code==='NOTICIA_LECT-1'));});
+
+test('vista de guía incluye los mismos recursos estructurados que exporta Word',()=>{
+ const source=fs.readFileSync(require.resolve('../heva-teacher-ui.js'),'utf8');
+ assert.match(source,/if\(!v\.image&&!v\.chart&&!v\.diagram&&!v\.timeline&&!v\.comparison\)continue/);
+ assert.match(source,/if\(v\.comparison\)/);
+ assert.match(source,/if\(v\.timeline\)/);
+ assert.match(source,/Hecho o etapa/);
+});
