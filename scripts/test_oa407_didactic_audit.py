@@ -4,6 +4,8 @@ import csv
 import tempfile
 from pathlib import Path
 from audit_oa407_didactic_quality import audit
+from oa_lessons import lesson
+import json
 
 with tempfile.TemporaryDirectory() as tmp:
     report=audit(tmp)
@@ -24,4 +26,11 @@ with tempfile.TemporaryDirectory() as tmp:
     assert "## Alertas por tipo\n" in summary
     assert "\\n" not in summary, "Markdown must use actual line breaks"
     assert "Supabase" in summary
-print("PASS: 407 OA grounded in case, solved reasoning and transfer; 0 expert approvals invented")
+catalog=json.loads((Path(__file__).resolve().parents[1]/"catalogo-publicado.json").read_text(encoding="utf-8"))
+supports=[lesson(oa)["accessibility"] for oa in catalog]
+assert len(set(supports))>=9,"Accessibility must differ by curricular discipline"
+assert all("respuesta oral" in s and "teléfonos" in s for s in supports)
+for subject,keyword in [("Estudios Sociales","cronologías"),("Educación Matemática","operación"),("Lengua Castellana","vocabulario"),("Ciencias Naturales","observaciones"),("Inglés","inglés")]:
+    match=next(oa for oa in catalog if subject.lower() in oa["asignatura"].lower())
+    assert keyword in lesson(match)["accessibility"],subject
+print("PASS: 407 OA, original case/solution/transfer and discipline-specific low-vision/offline support")
