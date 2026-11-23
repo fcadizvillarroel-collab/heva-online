@@ -89,6 +89,22 @@ jobs:
           name: heva-auditoria-visual-responsive
           path: ${{ runner.temp }}/heva-visual-qa/
           if-no-files-found: warn
+      - name: Comprobar cuatro pasos dentro de HEVA en móvil y escritorio
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/heva-steps-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          sleep 2
+          node scripts/heva-steps-browser-smoke.cjs
+        env:
+          HEVA_STEPS_QA_DIR: ${{ runner.temp }}/heva-pasos-qa
+      - name: Guardar capturas de los pasos 1 al 4
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: heva-pasos-1-4-visual
+          path: ${{ runner.temp }}/heva-pasos-qa/
+          if-no-files-found: warn
       - name: Conservar captura de revisión visual
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
