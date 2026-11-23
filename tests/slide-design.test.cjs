@@ -82,3 +82,10 @@ test('infografías temáticas se generan en todas las asignaturas con opción de
   }
  }finally{global.document=old;}
 });
+
+test('auditoría de exportación cuenta gráficos realmente renderizados, no solo imágenes asignadas',()=>{
+ const presentation={tipoMaterial:'PRESENTACION',titulo:'Comparación de datos',asignatura:'Estudios Sociales',objetivoAprendizaje:'Analizar datos geográficos',diapositivas:Array.from({length:10},(_,i)=>({titulo:'Plazos '+(i+1),funcion:'explicación',contenido:['Proveedor cercano: 2 días','Proveedor distante: 12 días'],notasDocente:'Comparar ambas cifras'}))};
+ const officeApi=office(),rendered=officeApi.preview(presentation),report=officeApi.auditExport(presentation);
+ assert.ok(rendered.visualSummary.charts>=10);
+ assert.ok(!report.issues.some(x=>x.code==='COBERTURA_VISUAL_BAJA'));
+});
