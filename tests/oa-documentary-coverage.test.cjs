@@ -98,3 +98,21 @@ test('la revisión de staging permite revisar la cobertura sin alterar los OA ni
  assert.match(sw,/heva-documentary-ui\.js/);
  assert.doesNotThrow(()=>new (require('node:vm').Script)(ui));
 });
+
+test('OA aprobado no pierde alineación por fallo de extracción literal de PDF',()=>{
+ const objectives=[
+  official.find(x=>x.marco==='Decreto 257'&&x.asignatura==='Estudios Sociales'),
+  official.find(x=>x.marco==='Bases 2024'&&x.asignatura==='Filosofía')
+ ];
+ assert.equal(objectives.length,2);
+ for(const oa of objectives){
+  assert.ok(oa,'El OA debe existir ya en catálogo');
+  const plan={asignatura:oa.asignatura,marcoCurricular:oa.marco==='Decreto 257'?'Decreto Supremo 257/2009':'Bases Curriculares EPJA 2024',objetivoAprendizaje:oa.texto_literal};
+  assert.equal(Register.findByPlan(plan)?.objetivoCatalogado,true);
+  assert.equal(Register.requiresCurricularSourceReview(plan,'no_localizado_en_extraccion'),false);
+  assert.equal(Register.requiresCurricularSourceReview(plan,'localizado_literalmente'),false);
+  assert.equal(Register.requiresCurricularSourceReview({...plan,objetivoAprendizaje:'Texto no registrado en los OA publicados'},'no_localizado_en_extraccion'),true);
+ }
+ const reviewApi=fs.readFileSync(path.join(root,'api/review.js'),'utf8');
+ assert.match(reviewApi,/CurricularRegistry\.requiresCurricularSourceReview\(material\.planGeneracion\|\|material,fuentesDocumentales\.objetivo\)/);
+});
