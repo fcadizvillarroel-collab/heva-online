@@ -19,7 +19,15 @@ jobs:
         run: python -m pip install pypdf==5.9.0 'cryptography>=42,<47' 'pymupdf>=1.25,<1.27'
       - name: Compare every OA against downloaded original official PDFs
         run: python scripts/verify_407_official_pdfs.py out/contraste_fuentes
+      - name: Summarize literal PDF evidence without claiming expert validation
+        if: always()
+        run: |
+          if test -f out/contraste_fuentes/resumen_contraste_fuentes.json; then
+            python -c "import json;d=json.load(open('out/contraste_fuentes/resumen_contraste_fuentes.json'));print('Original PDFs:',len(d['fuentes']),'of 2; literal OA:',d['coincidencia_literal_pdf'],'cross-page:',d['coincidencia_entre_paginas'],'not located:',d['no_localizados_en_texto_extraido'],'PDF missing:',d['pdf_no_disponible'])" >> "$GITHUB_STEP_SUMMARY"
+            python -c "import json;d=json.load(open('out/contraste_fuentes/resumen_contraste_fuentes.json'));assert len(d['fuentes'])==2,'Both official PDFs must be available before considering source coverage checked'"
+          fi
       - name: Preserve individual matches and original PDF checksums
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: heva-407-oa-original-mineduc-pdf-source-contrast
