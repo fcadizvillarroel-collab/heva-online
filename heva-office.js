@@ -154,19 +154,17 @@ function addContent(ppt,theme,slide,title,lines,section,index=0,scene={}){
   slide.addChart(ppt.ChartType.bar,[{name:chart.unit,labels:chart.labels,values:chart.values}],{x:6.45,y:2.65,w:5.95,h:3.65,barDir:'bar',showLegend:false,showValue:true,showTitle:false,catAxisLabelFontSize:18,valAxisLabelFontSize:14,dataLabelFontSize:18,valAxisMinVal:0,chartColors:[theme.main],showBorder:false,showCatName:false,showShadow:false});
   return;
  }
- // Comparación editable de dos mensajes de registro, sin gráficos decorativos.
- const registerLines=clean.map(line=>line.match(/^\s*(formal|informal)\s*:\s*(.+)$/i));
- if(resources.recuadros&&!illustration&&clean.length===2&&registerLines.every(Boolean)&&
-    new Set(registerLines.map(r=>r[1].toLowerCase())).size===2&&
-    clean.every(line=>fitsText([line],5.0,2.75,25))){
-   registerLines.forEach((part,j)=>{
-     const x=.86+j*6.03,formal=part[1].toLowerCase()==='formal';
+ // Pares disciplinarios editables basados exclusivamente en el texto real.
+ const pair=resources.recuadros&&!illustration?root.HEVASlideDesign?.comparisonPairs(clean):null;
+ if(pair&&pair.every(entry=>fitsText([entry.text],5.0,2.75,25))){
+   pair.forEach((entry,j)=>{
+     const x=.86+j*6.03;
      slide.addShape(ppt.ShapeType.roundRect,{x,y:2.4,w:5.6,h:3.85,rectRadius:.13,
-       line:{color:theme.accent,width:1.3},fill:{color:formal?(theme.panel||'FFFFFF'):(theme.soft||'F1E7DB')}});
-     text(formal?'REGISTRO FORMAL':'REGISTRO INFORMAL',x+.32,2.75,4.96,.45,17,theme.main,true);
-     text(part[2],x+.32,3.54,4.96,2.35,25,theme.ink);
+       line:{color:theme.accent,width:1.3},fill:{color:j===0?(theme.panel||'FFFFFF'):(theme.soft||'F1E7DB')}});
+     text(entry.label.toUpperCase(),x+.32,2.75,4.96,.45,17,theme.main,true);
+     text(entry.text,x+.32,3.54,4.96,2.35,25,theme.ink);
    });
-   slide.hevaVisualType='dialogue';return;
+   slide.hevaVisualType=pair.some(entry=>/Registro (formal|informal)/.test(entry.label))?'dialogue':'diagram';return;
  }
  const addPicture=()=>{const box=root.HEVASlideDesign.contain(illustration,{x:8.45,y:1.75,w:4.03,h:4.82});slide.addImage({data:illustration.data,...box,altText:illustration.alt});if(illustration.generated)text('IMAGEN ILUSTRATIVA GENERADA',8.45,6.66,4.03,.18,9,main);if(typeof slide.addNotes==='function')slide.addNotes(illustration.alt);};
  if(relation){
