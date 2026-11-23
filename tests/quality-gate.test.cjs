@@ -65,7 +65,7 @@ test('PPT con ejemplos diferentes no recibe alertas falsas de duplicación',()=>
 test('detecta pasos y ejemplos sin contenido en una guía EPJA',()=>{
  const r=Q.inspect({
   material:{tipoMaterial:'GUIA',objetivoAprendizaje:'Aplicar una secuencia de resolución',recursosVisualesHEVA:{imagenes:false,diagramas:false,graficos:false}},
-  sections:[{title:'Modelamiento',text:'Ejemplo resuelto:\\n...\\nPaso 1:\\nPaso 2:\\nComprobar la respuesta.\\nActividad: analiza el caso.'}]
+  sections:[{title:'Modelamiento',text:'Ejemplo resuelto:\n...\nPaso 1:\nPaso 2:\nComprobar la respuesta.\nActividad: analiza el caso.'}]
  });
  assert.ok(r.issues.some(x=>x.code==='PASOS_SIN_DESARROLLO'));
  assert.ok(r.issues.some(x=>x.code==='EJEMPLO_SIN_RESOLUCION'));
@@ -74,7 +74,7 @@ test('detecta pasos y ejemplos sin contenido en una guía EPJA',()=>{
 test('admite pasos y ejemplos explicados en la línea siguiente sin marcar falsos vacíos',()=>{
  const r=Q.inspect({
   material:{tipoMaterial:'GUIA',objetivoAprendizaje:'Resolver problemas contextualizados',recursosVisualesHEVA:{imagenes:false,diagramas:false,graficos:false}},
-  sections:[{title:'Modelamiento',text:'Ejemplo resuelto:\\nSe comparan dos presupuestos ficticios: uno con gasto de 300 y otro de 500.\\nPaso 1:\\nSe identifican los costos y se calcula la diferencia de 200.\\nPaso 2:\\nSe comprueba restando nuevamente.\\nActividad: compara otro presupuesto.'}]
+  sections:[{title:'Modelamiento',text:'Ejemplo resuelto:\nSe comparan dos presupuestos ficticios: uno con gasto de 300 y otro de 500.\nPaso 1:\nSe identifican los costos y se calcula la diferencia de 200.\nPaso 2:\nSe comprueba restando nuevamente.\nActividad: compara otro presupuesto.'}]
  });
  assert.ok(!r.issues.some(x=>['PASOS_SIN_DESARROLLO','EJEMPLO_SIN_RESOLUCION'].includes(x.code)));
 });
