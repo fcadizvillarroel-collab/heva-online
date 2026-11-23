@@ -105,12 +105,12 @@ test('comparaciones disciplinares se basan en dos afirmaciones concretas, no en 
  for(const lines of pairs){const parsed=D.comparisonPairs(lines);assert.equal(parsed.length,2);assert.ok(parsed[0].text.length>12);}
  for(const lines of [['Causa: A','Causa: B'],['Problema: El mismo texto','Solución: El mismo texto'],['Título sin datos','Conclusión sin datos']])assert.equal(D.comparisonPairs(lines),null);
 });
-test('PPT usa las causas y consecuencias originales en dos paneles editables',()=>{
- const lines=['Causa: La falta de materias primas interrumpe la producción local.','Consecuencia: Los pedidos se entregan fuera de plazo.'];
+test('PPT usa los riesgos y prevenciones originales en dos paneles editables',()=>{
+ const lines=['Riesgo: La proyección de partículas puede alcanzar los ojos.','Prevención: Utilizar protección ocular apropiada para cortar metal.'];
  const view=office().preview({tipoMaterial:'PRESENTACION',titulo:'Causa y consecuencia',recursosVisualesHEVA:{imagenes:false,diagramas:true,recuadros:true,graficos:false},diapositivas:[{titulo:'Relación entre causas y consecuencias',contenido:lines}]});
  const page=view.pages[1];
  assert.equal(page.visualKind,'diagram');
- assert.ok(page.elements.some(e=>e.kind==='text'&&e.text==='CAUSA'));
- assert.ok(page.elements.some(e=>e.kind==='text'&&e.text==='CONSECUENCIA'));
+ assert.ok(page.elements.some(e=>e.kind==='text'&&e.text==='RIESGO'));
+ assert.ok(page.elements.some(e=>e.kind==='text'&&e.text==='PREVENCIÓN'));
  for(const line of lines)assert.ok(page.elements.some(e=>e.kind==='text'&&e.text===line.split(': ')[1]));
 });
