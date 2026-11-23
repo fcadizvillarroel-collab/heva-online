@@ -18,7 +18,8 @@ function convert(number,expanded=true){
  details.dataset.step=String(number);
  const summary=document.createElement('summary');
  summary.className='heva-test-accordion-summary';
- summary.setAttribute('aria-label','Paso '+number+': '+old.querySelector('.heva-inline-stage-label')?.textContent+'. Desplegar u ocultar');
+ const title=number===2?'Objetivo, tema y estrategia':old.querySelector('.heva-inline-stage-label')?.textContent||'Paso '+number;
+ summary.setAttribute('aria-label','Paso '+number+': '+title+'. Desplegar u ocultar');
  const numberSpan=document.createElement('span');
  numberSpan.className='heva-inline-stage-number';
  numberSpan.textContent=String(number);
@@ -27,7 +28,7 @@ function convert(number,expanded=true){
  copy.className='heva-test-accordion-copy';
  const label=document.createElement('strong');
  label.className='heva-inline-stage-label';
- label.textContent=old.querySelector('.heva-inline-stage-label')?.textContent||'Paso '+number;
+ label.textContent=title;
  const hint=document.createElement('small');
  hint.className='heva-inline-stage-hint';
  hint.textContent=number===4?'Disponible después de generar. '+descriptions[4]:descriptions[number];
