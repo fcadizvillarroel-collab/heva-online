@@ -78,7 +78,9 @@ function organizeStepTwo(step){
  }
 }
 function mount(){
- const one=convert(1,true),two=convert(2,true),three=convert(3,true),four=convert(4,true);
+ // Apertura inicial compacta: primero la selección básica. El objetivo y
+ // la generación están a un clic; el visor explica la disponibilidad.
+ const one=convert(1,true),two=convert(2,false),three=convert(3,false),four=convert(4,true);
  if(!one||!two||!three||!four)return;
  // Paso 1: tipo, marco, nivel, asignatura. Paso 2: OA y decisiones
  // didácticas. Paso 3: generar y revisar. El visor permanece independiente.
