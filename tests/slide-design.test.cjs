@@ -114,3 +114,29 @@ test('PPT usa los riesgos y prevenciones originales en dos paneles editables',()
  assert.ok(page.elements.some(e=>e.kind==='text'&&e.text==='PREVENCIÓN'));
  for(const line of lines)assert.ok(page.elements.some(e=>e.kind==='text'&&e.text===line.split(': ')[1]));
 });
+
+test('cronología de seis hitos usa dos filas de tarjetas editables, fechas originales y tipografía legible',()=>{
+ const lines=[
+  '1810: Comienza el proceso de independencia.',
+  '1818: Se proclama la independencia.',
+  '1833: Se promulga una nueva Constitución.',
+  '1861: Comienza la República Liberal.',
+  '1879: Inicia la Guerra del Pacífico.',
+  '1884: Chile y Bolivia acuerdan una tregua.'
+ ];
+ const pages=office().preview({tipoMaterial:'PRESENTACION',titulo:'Historia de Chile',recursosVisualesHEVA:{imagenes:false,diagramas:true,graficos:false,recuadros:true},diapositivas:[{titulo:'Cronología de hitos',funcion:'explicación',contenido:lines}]}).pages;
+ const page=pages[1];assert.equal(page.visualKind,'diagram');
+ const text=page.elements.filter(e=>e.kind==='text');
+ for(const line of lines){const [year,...parts]=line.split(': ');assert.ok(text.some(e=>e.text===year));assert.ok(text.some(e=>e.text===parts.join(': ')),line);}
+ const years=text.filter(e=>/^(1810|1818|1833|1861|1879|1884)$/.test(e.text));
+ assert.equal(years.length,6);
+ assert.ok(years.every(e=>e.fontSize>=20));
+ assert.ok(page.elements.every(e=>e.x>=0&&e.y>=0&&e.x+e.w<=13.34&&e.y+e.h<=7.51));
+});
+test('una cronología sin fechas explícitas no inventa años',()=>{
+ const lines=['Primera etapa: los trabajadores conocen el problema.','Segunda etapa: acuerdan posibles soluciones.','Tercera etapa: comprueban los resultados.','Cuarta etapa: registran el acuerdo.','Quinta etapa: evalúan el cumplimiento.'];
+ const pages=office().preview({tipoMaterial:'PRESENTACION',titulo:'Trabajo en equipo',recursosVisualesHEVA:{imagenes:false},diapositivas:[{titulo:'Cronología del proceso',contenido:lines}]}).pages.slice(1);
+ assert.ok(!pages.flatMap(page=>page.elements).some(e=>e.kind==='text'&&/^\d{3,4}$/.test(e.text||'')));
+ const all=pages.flatMap(page=>page.elements.map(e=>String(e.text||''))).join(' ');
+ for(const line of lines)assert.ok(all.includes(line));
+});
