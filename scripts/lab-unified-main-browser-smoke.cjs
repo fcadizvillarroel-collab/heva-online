@@ -17,6 +17,10 @@ const assert=require('node:assert/strict');
   await page.locator('#heva-abrir-estrategias').click();
   assert.equal(await page.locator('#integrated-lab').evaluate(el=>el.open),true,
     'El botón principal debe abrir el panel de estrategias en la misma página');
+  assert.equal(await page.locator('#heva-ajustes-adicionales').evaluate(el=>el.open),true,
+    'También debe abrir el acordeón contenedor de ajustes avanzados');
+  assert.equal(await page.locator('#lab-preview-model').isVisible(),true,
+    'La guía modelo debe quedar visible al abrir las estrategias');
   await page.locator('#lab-preview-model').click();
   const frame=page.frameLocator('#lab-preview-result iframe');
   await frame.locator('body').waitFor({timeout:12000});
