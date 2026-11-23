@@ -33,7 +33,7 @@ test('Una presentación combina recursos visuales distintos sin repetir el mismo
  assert.ok(output[1].image);
  assert.ok(output[2].image);
  assert.notEqual(output[1].image.alt,output[2].image.alt);
- assert.equal(output[3].image,null);
+ assert.ok(!output[3].image);
  const without=context.HEVASlideDesign.decorate({...material,recursosVisualesHEVA:{imagenes:true,diagramas:false}},sections);
  assert.ok(without.every(s=>!s.image));
 });
