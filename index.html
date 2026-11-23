@@ -64,10 +64,9 @@
 <body class="min-h-screen flex flex-col">
 
   <div id="heva-proposal-badge" class="no-print" style="background:#fff1ce;color:#633222;padding:10px 24px;font-weight:bold">HEVA · estrategias EPJA integradas · versión 2026.11.22</div>
-  <div class="no-print" style="padding:11px 24px;background:#f0f6ee;border-bottom:2px solid #4f7659;color:#243e2d">
-    <strong>Laboratorio de estrategias EPJA integrado</strong>
-    <span style="margin-left:8px">Selecciona un OA oficial, explora estrategias y revisa la guía modelo antes de generar.</span>
-    <a href="/experimental/" style="display:inline-block;margin-left:12px;padding:7px 12px;border-radius:8px;background:#295c45;color:#fff;font-weight:700;text-decoration:none">Abrir Laboratorio</a>
+  <div class="no-print heva-lab-banner-compact" style="background:#f0f6ee;border-bottom:2px solid #4f7659;color:#243e2d">
+    <span><strong>HEVA unificado</strong> · Las estrategias combinadas y el modelo de guía están en este mismo generador.</span>
+    <button type="button" id="heva-abrir-estrategias" aria-controls="integrated-lab" style="border-radius:8px;background:#295c45;color:white;padding:9px 12px;font-weight:700">Configurar estrategias aquí</button>
   </div>
   <!-- HEADER INSTITUCIONAL -->
   <header class="no-print bg-[#8B2635] text-white px-6 py-4 shadow-md flex flex-wrap justify-between items-center gap-3">
@@ -277,14 +276,19 @@
         </div>
 
         <details id="integrated-lab" class="rounded-xl border-2 border-amber-400 bg-amber-50 p-3 mt-3">
-          <summary class="cursor-pointer font-bold text-sm text-[#8B2635]">🧪 HEVA Experimental · Estrategias integradas (opcional)</summary>
-          <p class="text-xs mt-2">Usa automáticamente la asignatura, el nivel, el objetivo y el tema elegidos arriba. No necesitas repetirlos. Si no activas este módulo, HEVA mantiene su comportamiento habitual.</p>
-          <label class="block text-xs font-bold mt-3"><input id="lab-enabled" type="checkbox" class="mr-2">Activar estrategias integradas para esta generación</label>
+          <summary class="cursor-pointer font-bold text-sm text-[#8B2635]">4. Estrategias pedagógicas combinadas · HEVA (opcional)</summary>
+          <p class="text-xs mt-2">Estas funciones antes estaban en HEVA LAB. Ahora utilizan directamente la asignatura, el nivel, el OA EPJA y el tema del generador principal. No necesitas entrar a otra aplicación.</p>
+          <label class="block text-xs font-bold mt-3"><input id="lab-enabled" type="checkbox" class="mr-2">Usar estas estrategias combinadas al generar</label>
           <div id="lab-strategies" class="mt-3"></div>
           <label class="block text-xs font-bold mt-3" for="lab-mode">Distribución de preguntas</label>
           <select id="lab-mode" class="w-full border rounded p-2 text-xs"><option value="auto">Automática</option><option value="manual">Manual por actividad</option></select>
           <div id="lab-manual" class="mt-2"></div>
           <div id="lab-summary" class="text-xs bg-white rounded p-2 mt-3" aria-live="polite">Selecciona estrategias y cantidades.</div>
+          <div class="flex gap-2 flex-wrap mt-3">
+            <button id="lab-preview-plan" type="button" class="rounded bg-[#8B2635] text-white px-3 py-2 text-xs font-bold">Previsualizar plan sin IA</button>
+            <button id="lab-preview-model" type="button" class="rounded bg-[#295c45] text-white px-3 py-2 text-xs font-bold">Ver guía modelo de globalización</button>
+          </div>
+          <div id="lab-preview-result" class="bg-white rounded border p-3 text-xs mt-3" aria-live="polite" hidden></div>
         </details>
         <button onclick="generarMaterialReal('GENERADOR_ESTANDAR')" id="btn-generar" class="w-full py-3 bg-[#8B2635] hover:bg-[#701E2A] text-white font-bold rounded shadow transition flex items-center justify-center gap-2">
           <span>Generar con Inteligencia Artificial</span>
@@ -1040,6 +1044,59 @@ function render(){const root=$('lab-strategies');root.replaceChildren();root.dat
 function counts(){if($('tipo-material').value==='PRESENTACION')return{alternativas:0,desarrollo:0,lecturas:0};return{alternativas:Number($('cant-alternativas').value),desarrollo:Number($('cant-desarrollo').value),lecturas:Number($('cant-casos').value)}}
 function refresh(){if($('lab-strategies').dataset.subject!==family()){render();return}const root=$('lab-manual');root.replaceChildren();if($('lab-mode').value==='manual'){for(const s of choices())for(let n=1;n<=Math.min(30,Math.max(0,s.quantity));n++){const row=document.createElement('div');row.className='border rounded p-2 mt-2 bg-white';const title=document.createElement('strong');title.className='block text-xs';title.textContent=s.id+' · Actividad '+n;row.append(title);for(const [key,label]of [['alternativas','Alternativas'],['desarrollo','Desarrollo'],['lecturas','Lectura/análisis']]){const l=document.createElement('label');l.className='text-xs inline-block mr-2 mt-2';l.textContent=label+' ';const input=document.createElement('input');input.type='number';input.min='0';input.max='30';input.value='0';input.dataset.labSlot=s.id+'-'+n;input.dataset.labKind=key;input.className='w-16 border rounded p-1';l.append(input);row.append(l)}root.append(row)}}$('lab-summary').textContent=choices().length+' estrategias seleccionadas · '+choices().reduce((a,x)=>a+(Number.isFinite(x.quantity)?x.quantity:0),0)+' actividades. Las preguntas se toman de los controles existentes.'}
 window.hevaExperimentalPlan=function(){if(!$('lab-enabled').checked)return null;if(!choices().length){$('lab-enabled').checked=false;$('lab-enabled').dispatchEvent(new Event('change',{bubbles:true}));$('lab-summary').textContent='Sin estrategias complementarias seleccionadas. HEVA utilizará solo la estrategia principal.';return null;}const oa=$('texto-oa').value.trim(),topic=$('tema-especifico').value.trim();if(!oa||!topic)throw Error('Selecciona un objetivo y escribe el tema antes de generar.');const strategies=choices(),c=counts();if(c.alternativas>30||c.desarrollo>30||c.lecturas>30)throw Error('Selecciona hasta 30 ítems por tipo de pregunta.');const manual={};if($('lab-mode').value==='manual')for(const input of document.querySelectorAll('[data-lab-slot]')){const id=input.dataset.labSlot;manual[id]??={};manual[id][input.dataset.labKind]=Number(input.value)}const p=window.HEVAIntegration.plan({strategies,counts:c,mode:$('lab-mode').value,manual});const audit=window.HEVAIntegration.validate(p);if(!audit.ok)throw Error(audit.errors.join('; '));return p};
+// Las herramientas de diseño del antiguo LAB viven dentro del mismo
+// generador. Ninguna previsualización llama a IA, altera el OA o guarda materiales.
+const resultLab=$('lab-preview-result');
+function labMessage(title,message){
+  resultLab.hidden=false;resultLab.replaceChildren();
+  const h=document.createElement('h4');h.className='font-bold text-sm text-[#8B2635]';h.textContent=title;
+  const p=document.createElement('p');p.className='mt-2';p.textContent=message;
+  resultLab.append(h,p);return resultLab;
+}
+$('heva-abrir-estrategias')?.addEventListener('click',()=>{
+  const panel=$('integrated-lab');panel.open=true;
+  panel.scrollIntoView({behavior:'smooth',block:'start'});
+});
+$('lab-preview-plan').addEventListener('click',()=>{
+ try{
+  if(!$('lab-enabled').checked)throw Error('Marca “Usar estas estrategias combinadas al generar”.');
+  const p=window.hevaExperimentalPlan();
+  if(!p||!p.slots.length)throw Error('Selecciona una estrategia y su cantidad de actividades.');
+  const total=p.slots.reduce((a,s)=>a+s.alternativas+s.desarrollo+s.lecturas,0);
+  const panel=labMessage('Diseño de actividades · vista previa sin IA',
+    p.slots.length+' actividades · '+total+' preguntas/situaciones distribuidas. Se usará el OA EPJA seleccionado y el tema del formulario. Este diseño no es un material generado.');
+  const names=new Map(window.HEVAStrategyLab.items(family()).map(x=>[x.id,x.name]));
+  const list=document.createElement('ol');list.className='list-decimal pl-5 mt-3';
+  for(const slot of p.slots){
+    const item=document.createElement('li');
+    item.textContent=(names.get(slot.strategy)||slot.strategy)+' · actividad '+slot.number+
+       ': '+slot.alternativas+' alternativas, '+slot.desarrollo+' desarrollo, '+slot.lecturas+' lectura/análisis.';
+    list.append(item);
+  }
+  panel.append(list);
+ }catch(e){labMessage('Revisa la selección antes de generar',e.message)}
+});
+$('lab-preview-model').addEventListener('click',async()=>{
+ const panel=labMessage('Guía modelo · Globalización',
+   'Ejemplo demostrativo del visor, no generado por IA. Sus contenidos y OA deben revisarse antes de utilizarlos en una clase.');
+ try{
+  const response=await fetch('/experimental/ejemplo-globalizacion.json',{cache:'no-store'});
+  if(!response.ok)throw Error('No se pudo cargar la guía modelo (HTTP '+response.status+').');
+  const material=await response.json();
+  const viewer=window.HEVALabMaterialView;
+  if(!viewer)throw Error('No se pudo iniciar el visor de HEVA.');
+  const report=viewer.audit(material,'GUIA');
+  const note=document.createElement('p');note.className='my-2 font-medium';
+  note.textContent='Control estructural: '+(report.issues?.length||0)+' incidencias y '+(report.warnings?.length||0)+
+    ' advertencias. No constituye revisión documental ni aprobación docente.';
+  const iframe=document.createElement('iframe');
+  iframe.title='Guía modelo de globalización · versión estudiante';
+  iframe.setAttribute('sandbox','');iframe.loading='lazy';
+  iframe.style.cssText='width:100%;min-height:480px;border:1px solid #d8c9b8;border-radius:8px;background:white';
+  iframe.srcdoc=viewer.html(material,'GUIA','student');
+  panel.append(note,iframe);
+ }catch(e){labMessage('La guía modelo no pudo abrirse',e.message)}
+});
 $('asignatura').addEventListener('change',render);$('marco-curricular').addEventListener('change',()=>setTimeout(render,0));$('nivel-epja').addEventListener('change',()=>setTimeout(render,0));$('integrated-lab').addEventListener('toggle',()=>{if($('integrated-lab').open)refresh()});$('lab-mode').addEventListener('change',refresh);for(const id of ['cant-alternativas','cant-desarrollo','cant-casos','tipo-material'])$(id).addEventListener('change',refresh);render();
 })();
 </script><script>
