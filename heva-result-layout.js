@@ -81,6 +81,8 @@ function arrange(){
  // material generado. El artículo y sus ID permanecen para los recuperadores.
  const empty=byId('heva-empty-preview');
  if(empty)empty.hidden=active;
+ const stageFour=byId('heva-stage-4');
+ if(stageFour)stageFour.hidden=!active;
  article.hidden=!active;
  edit.hidden=!active;
  review.hidden=!active;
