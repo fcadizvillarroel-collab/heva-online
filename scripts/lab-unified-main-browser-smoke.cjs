@@ -16,7 +16,8 @@ const assert=require('node:assert/strict');
     'HEVA principal no debe ofrecer una segunda aplicación de LAB');
   assert.equal(await page.locator('#heva-abrir-estrategias').count(),0,
     'El botón duplicado del encabezado debe desaparecer');
-  await page.locator('#heva-ajustes-adicionales > summary').click();
+  await page.locator('#heva-stage-2 > summary').click();
+ await page.locator('#heva-ajustes-adicionales > summary').click();
   await page.locator('#integrated-lab > summary').click();
   assert.equal(await page.locator('#integrated-lab').evaluate(el=>el.open),true,
     'El mismo formulario debe abrir la configuración de estrategias');
