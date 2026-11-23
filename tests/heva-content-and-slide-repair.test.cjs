@@ -64,6 +64,19 @@ test('Las diapositivas repetidas se reparan sin modificar ejercicios válidos',(
  assert.equal(result.diapositivas[2].titulo,'Trabajo final');
  assert.equal(result.trazabilidadEstrategia[1].referencia,'DIAPO-5');
 });
+test('Una reparación de diapositivas truncada no reemplaza un bloque ya conservado',()=>{
+ const p={tipoMaterial:'PRESENTACION',asignatura:'Lenguaje y Comunicación',objetivoAprendizaje:'Expresarse oralmente',cantAlternativas:0,cantDesarrollo:0,cantCasos:0};
+ const batch=R.batches(p).find(x=>x.tipo==='diapositivas'&&x.inicio===3);
+ const trace=i=>({referencia:'DIAPO-'+i,habilidad:'Expresar',evidencia:'Exposición oral',criterio:'Claridad'});
+ const old={diapositivas:Array.from({length:batch.cantidad},(_,i)=>({titulo:'Tema '+i,contenido:['Contenido específico '+i],funcion:'explicación',notasDocente:'Orientar '+i})),trazabilidadEstrategia:Array.from({length:batch.cantidad},(_,i)=>trace(batch.inicio+i+1))};
+ const partial={diapositivas:[{titulo:'Única diapositiva',contenido:['Contenido truncado'],funcion:'explicación',notasDocente:'Orientar'}],trazabilidadEstrategia:[trace(batch.inicio+1)]};
+ assert.deepEqual(R.mergeSlideRepair(old,partial,p,batch,[]).diapositivas,old.diapositivas);
+});
+test('La revisión final conserva el borrador de las diapositivas observadas',()=>{
+ const ui=fs.readFileSync(path.join(__dirname,'../heva-recovery-ui.js'),'utf8');
+ assert.ok(ui.includes("b?.tipo==='diapositivas'&&checkpoint.parts[i]"));
+ assert.match(ui,/checkpoint\.pendingSlide=\{tipo:b\.tipo,inicio:b\.inicio,parte:checkpoint\.parts\[i\]\}/);
+});
 test('Ilustración del registro contiene frases comparables y criterio de uso',()=>{
  const labels=[];
  const ctx={fillRect(){},fillText(v){labels.push(v)},beginPath(){},roundRect(){},fill(){},moveTo(){},lineTo(){},
