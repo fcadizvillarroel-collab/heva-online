@@ -61,3 +61,48 @@ test('PPT con ejemplos diferentes no recibe alertas falsas de duplicación',()=>
  const r=Q.inspect({material:{tipoMaterial:'PRESENTACION',diapositivas:slides},visuals:slides.map(()=>({visualKind:'diagram'}))});
  assert.ok(!r.issues.some(x=>['PPT_CONTENIDO_REPETIDO','PPT_TITULOS_REPETIDOS','PPT_EXPLICACION_BREVE','PPT_FORMATO_REPETITIVO'].includes(x.code)));
 });
+
+test('detecta pasos y ejemplos sin contenido en una guía EPJA',()=>{
+ const r=Q.inspect({
+  material:{tipoMaterial:'GUIA',objetivoAprendizaje:'Aplicar una secuencia de resolución',recursosVisualesHEVA:{imagenes:false,diagramas:false,graficos:false}},
+  sections:[{title:'Modelamiento',text:'Ejemplo resuelto:\n...\nPaso 1:\nPaso 2:\nComprobar la respuesta.\nActividad: analiza el caso.'}]
+ });
+ assert.ok(r.issues.some(x=>x.code==='PASOS_SIN_DESARROLLO'));
+ assert.ok(r.issues.some(x=>x.code==='EJEMPLO_SIN_RESOLUCION'));
+ assert.equal(r.heuristic,true);
+});
+test('admite pasos y ejemplos explicados en la línea siguiente sin marcar falsos vacíos',()=>{
+ const r=Q.inspect({
+  material:{tipoMaterial:'GUIA',objetivoAprendizaje:'Resolver problemas contextualizados',recursosVisualesHEVA:{imagenes:false,diagramas:false,graficos:false}},
+  sections:[{title:'Modelamiento',text:'Ejemplo resuelto:\nSe comparan dos presupuestos ficticios: uno con gasto de 300 y otro de 500.\nPaso 1:\nSe identifican los costos y se calcula la diferencia de 200.\nPaso 2:\nSe comprueba restando nuevamente.\nActividad: compara otro presupuesto.'}]
+ });
+ assert.ok(!r.issues.some(x=>['PASOS_SIN_DESARROLLO','EJEMPLO_SIN_RESOLUCION'].includes(x.code)));
+});
+test('detecta situaciones de casos idénticas aunque cambien sus preguntas',()=>{
+ const context='Una familia compara dos presupuestos ficticios para organizar sus gastos mensuales y analiza las consecuencias de una compra.';
+ const r=Q.inspect({material:{tipoMaterial:'EVALUACION',casosEstudio:[
+   {contextoReal:context,preguntaReflexion:'¿Cuál es el costo total?'},
+   {contextoReal:context,preguntaReflexion:'¿Qué decisión conviene justificar?'}
+ ]}});
+ assert.ok(r.issues.some(x=>x.code==='CASOS_CONTEXTO_REPETIDO'));
+});
+test('advierte pautas genéricas y repetidas, sin cambiar claves ni bloquear exportaciones',()=>{
+ const questions=[1,2,3].map(i=>({enunciado:'Pregunta '+i,claveCorrecta:'ABCD'[i],justificacion:'Porque es la respuesta correcta.'}));
+ const before=JSON.stringify(questions);
+ const r=Q.inspect({material:{tipoMaterial:'EVALUACION',preguntasAlternativas:questions}});
+ assert.ok(r.issues.some(x=>x.code==='PAUTAS_POCO_ESPECIFICAS'));
+ assert.equal(JSON.stringify(questions),before);
+ assert.equal(r.heuristic,true);
+});
+test('pautas diferentes y escenarios distintos no generan estas advertencias',()=>{
+ const questions=[
+ {justificacion:'El total es 120 porque 70 + 50 son 120 y la opción B refleja esa suma.'},
+ {justificacion:'La etapa de análisis exige comparar causas y consecuencias distintas de un proceso.'},
+ {justificacion:'La fuente distingue claramente el hecho comprobable de la opinión personal.'}
+ ];
+ const r=Q.inspect({material:{tipoMaterial:'EVALUACION',preguntasAlternativas:questions,casosEstudio:[
+ {contextoReal:'La escuela organiza un taller de presupuesto con costos ficticios de 500 y 300; el grupo compara necesidades y gastos esenciales.'},
+ {contextoReal:'En una reunión de vecinos se debate cómo resolver un desacuerdo sobre el uso del espacio comunitario con criterios compartidos.'}
+ ]}});
+ assert.ok(!r.issues.some(x=>['PAUTAS_POCO_ESPECIFICAS','CASOS_CONTEXTO_REPETIDO'].includes(x.code)));
+});
