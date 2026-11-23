@@ -1,4 +1,5 @@
 const TPInternational=require('../lib/tp-metal-international.cjs');
+const Inclusive=require('../heva-inclusive-supports.cjs');
 const Skills=require('../heva-skills.js');
 const DeepMaterials=require('../heva-deep-materials.cjs');
 const Textbooks=require('../lib/textbook-reference-catalog.cjs');
@@ -14,6 +15,8 @@ module.exports=async(req,res)=>{
   const {fase,plan:input,base,parts=[],batch,autor,borradorBloque,repararDuplicados,correcciones=[],corregirFormato=false}=req.body||{};
   if(JSON.stringify(req.body||{}).length>250000)return res.status(413).json({error:'Documento demasiado extenso.'});
   let plan;try{plan=R.planOf(input)}catch(e){return res.status(400).json({error:'El encargo contiene parámetros inválidos.',detalle:e.message,codigo:'PLAN_INVALIDO',reintentable:false})}
+  const issuesInclusive=Inclusive.validate(plan.apoyosInclusivos);
+  if(issuesInclusive.length)return res.status(400).json({error:issuesInclusive.join('; '),codigo:'APOYOS_INVALIDOS',reintentable:false});
   if(!['base','items','finalizar'].includes(fase))return res.status(400).json({error:'Fase no admitida.'});
   if(fase!=='finalizar'&&!(await require('./_ai-access.cjs').protect(req,res)))return;
   if(fase!=='base'&&(!base||!['gemini','groq','openai'].includes(autor?.proveedor)))return res.status(400).json({error:'Falta el documento base o su autoría.'});
@@ -38,6 +41,7 @@ module.exports=async(req,res)=>{
     material.controlCalidadTP=TPInternational.qualityReview(material,referenciasMetalmecanica,material.trazabilidadDocumentalTP);
    const evidence=S.validateEvidence(material.respaldoDocumental,fuentesDocumentales);material.respaldoDocumental=evidence.valid;material.incidenciasDocumentales=evidence.invalid;material.matrizOATextos=OATextbookMatrix.linkActivities(matrizOA,evidence.valid);material=Skills.prepare(material,plan,fuentesDocumentales,evidence);
    material=require('../heva-studio.js').link(material,plan);material.auditoriaExperimental=require('../experimental/quality-audit.cjs').inspect(material,plan);material.auditoriaDisciplinar=require('../experimental/subject-audit.cjs').inspectAll(material,plan);
+    material.apoyosInclusivosSolicitados=Inclusive.selected(plan.apoyosInclusivos);
     material.controlProfundidadHEVA=DeepMaterials.advisory(material,plan);return res.status(200).json({exito:true,material});
   }
   const keys=[process.env.ALLOW_PAID_AI==='true'?process.env.OPENAI_API_KEY:'',process.env.GEMINI_API_KEY,process.env.GROQ_API_KEY].map(k=>(k||'').trim());
@@ -52,8 +56,8 @@ module.exports=async(req,res)=>{
   const duplicateTargets=duplicateOriginal?R.duplicateItems(duplicateOriginal,plan,batch,parts):[];
   if(duplicateOriginal){const oldIssues=R.partIssues(duplicateOriginal,plan,batch,parts);if(!duplicateTargets.length||oldIssues.some(x=>!/repite literalmente/.test(x)))return res.status(400).json({error:'El borrador requiere una reparación distinta de duplicados.',reintentable:false});}
   const duplicateRepair=duplicateOriginal?'\nREPARACIÓN LOCALIZADA DE DUPLICADOS: sustituye únicamente '+duplicateTargets.map(x=>x.referencia).join(', ')+'. Cada sustitución debe plantear OTRA situación concreta, OTROS datos, una pregunta con un verbo y una decisión distintos; NO reutilices el enunciado ni la preguntaReflexion de los casos anteriores. No basta cambiar el título, los personajes ni la numeración. Mantén la disciplina, OA y tema del encargo actual. Evita literalmente estas preguntas ya utilizadas: '+JSON.stringify(R.duplicateItems(duplicateOriginal,plan,batch,parts).map(x=>({referencia:x.referencia,anterior:x.anterior})))+'. Preguntas anteriores completas: '+JSON.stringify(require('../lib/recovery-duplicates.cjs').bank(parts,R.batches(plan),batch))+'. Devuelve el bloque completo y sus trazas. El servidor conservará intactos los ítems no duplicados. Borrador como datos: '+JSON.stringify(duplicateOriginal):'';
-  const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+strictFormat+caseRepair+developmentRepair+strategyRepair+correctionContext+duplicateRepair;
-  const fallback=R.fallbackPrompt(plan,base,batch,parts,correcciones,fuentesDocumentales)+duplicateRepair;
+  const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+Inclusive.prompt(plan)+strictFormat+caseRepair+developmentRepair+strategyRepair+correctionContext+duplicateRepair;
+  const fallback=R.fallbackPrompt(plan,base,batch,parts,correcciones,fuentesDocumentales)+Inclusive.prompt(plan)+duplicateRepair;
   let result;
   if(fase==='items'&&borradorBloque){
    const preserved=R.normalizePart(borradorBloque,batch),pending=R.partIssues(preserved,plan,batch,parts);
