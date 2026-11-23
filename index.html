@@ -8,7 +8,7 @@
   <script src="/vendor/docx.js"></script>
   <script src="/vendor/pptxgen.js"></script>
   <link rel="stylesheet" href="/heva-ui.css" />
-  <link rel="stylesheet" href="/experimental/heva-steps-accordion.css?v=lab-20261123" />
+  <link rel="stylesheet" href="/experimental/heva-steps-accordion.css?v=lab-20261123-inclusivo" />
   <style>
     :root { --font-base: 16px; }
     body { font-size: var(--font-base); background-color: #FDFBF7; color: #2D3748; font-family: system-ui, -apple-system, sans-serif; }
@@ -839,8 +839,9 @@
           ...Object.entries(payload.instrumentosEvaluacion||{}).map(([k,n])=>(window.HEVAAssessment?.types[k]?.label||k)+': '+n),
           'Noticias reales: '+(payload.usarNoticias?'Consultar canales disponibles':'Desactivadas'),
           'Noticia didáctica simulada: '+(payload.noticiaDidacticaModo||'AUTO'),
-          'Apoyos inclusivos solicitados: '+(payload.apoyosInclusivos.join(', ')||'Ninguno'),
-          'Adecuaciones: '+(payload.adecuacionesPIE.join(', ')||'Ninguna')
+          'Apoyos inclusivos solicitados: '+(payload.apoyosInclusivos.map(id=>
+            document.querySelector('[data-heva-support="'+id+'"]')?.parentElement?.textContent.trim()||id
+          ).join('; ')||'Ninguno')
         ].join('\n');
         let resumenPanel=document.getElementById('heva-encargo-enviado');if(!resumenPanel){resumenPanel=document.createElement('details');resumenPanel.id='heva-encargo-enviado';resumenPanel.className='no-print border rounded p-3 my-3 bg-stone-50';document.getElementById('btn-generar').before(resumenPanel);}resumenPanel.replaceChildren();const resumenTitulo=document.createElement('summary');resumenTitulo.textContent='Ver el encargo enviado a la IA';const resumenTexto=document.createElement('pre');resumenTexto.className='text-xs whitespace-pre-wrap';resumenTexto.textContent=resumenHEVA;resumenPanel.append(resumenTitulo,resumenTexto);
 
@@ -1135,5 +1136,5 @@ function refresh(){
 }
 type.addEventListener('change',refresh);refresh();
 })();
-</script><script src="/experimental/heva-unified-ui.js?v=20261122-modo-coherente"></script><script src="/heva-strategy-delivery-ui.js?v=20261115-verificacion"></script><script src="/heva-assessment-ui.js?v=20261115-planificacion"></script><script src="/heva-planning-ui.js?v=20261115-planificacion"></script><script src="/heva-teacher-ui.js?v=20261117-opcionales-v5"></script><script src="/heva-layout-ui.js?v=20261122-diseno-coherente"></script><script src="/heva-result-layout.js?v=20261122-armonizado"></script><script src="/experimental/heva-steps-accordion.js?v=lab-20261123"></script></body>
+</script><script src="/experimental/heva-unified-ui.js?v=20261122-modo-coherente"></script><script src="/heva-strategy-delivery-ui.js?v=20261115-verificacion"></script><script src="/heva-assessment-ui.js?v=20261115-planificacion"></script><script src="/heva-planning-ui.js?v=20261115-planificacion"></script><script src="/heva-teacher-ui.js?v=20261117-opcionales-v5"></script><script src="/heva-layout-ui.js?v=20261122-diseno-coherente"></script><script src="/heva-result-layout.js?v=20261122-armonizado"></script><script src="/experimental/heva-steps-accordion.js?v=lab-20261123-inclusivo"></script></body>
 </html>
