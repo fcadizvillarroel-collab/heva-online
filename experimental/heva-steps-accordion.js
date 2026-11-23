@@ -95,6 +95,18 @@ function mount(){
  // Evitar repetir el contenido de la vista vacía y el resumen del paso 4.
  const placeholder=$('heva-empty-preview');
  if(placeholder)placeholder.classList.add('heva-test-preview');
+ // Un único registro visual muestra lo solicitado sin crear más opciones.
+ const supportItems=[...document.querySelectorAll('#heva-inclusive-options [data-heva-support]')];
+ const supportReceipt=$('heva-inclusive-selected');
+ function refreshSupports(){
+  if(!supportReceipt)return;
+  const count=supportItems.filter(x=>x.checked).length;
+  supportReceipt.textContent=count
+   ?count+' apoyo'+(count===1?'':'s')+' pedagógico'+(count===1?'':'s')+' seleccionado'+(count===1?'':'s')+'. Se incorporarán al encargo de IA.'
+   :'Sin apoyos adicionales seleccionados. HEVA conserva las instrucciones generales de accesibilidad.';
+ }
+ for(const item of supportItems)item.addEventListener('change',refreshSupports);
+ refreshSupports();
  const hero=document.querySelector('.heva-eyebrow');
  if(hero)hero.textContent='HEVA DE PRUEBA · MENÚS DESPLEGABLES';
  const starter=document.querySelector('.heva-start');
