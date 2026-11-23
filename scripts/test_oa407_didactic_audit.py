@@ -11,6 +11,7 @@ with tempfile.TemporaryDirectory() as tmp:
     assert report["aprobaciones_expertas"]==0
     assert report["con_alertas"]>=1
     assert report["alertas"].get("EXPLICACION_CON_ESTRUCTURA_PLANTILLA",0)>=1
+    assert report["alertas"].get("PREGUNTA_PLANTILLA_ENTRE_OA",0)<407, "Las 407 consignas no deben permanecer idénticas"
     folder=Path(tmp)
     rows=list(csv.DictReader((folder/"matriz_calidad_didactica_407.csv").open(encoding="utf-8-sig")))
     assert len(rows)==407
