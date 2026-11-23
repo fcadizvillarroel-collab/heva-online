@@ -24,7 +24,7 @@ async function word(m,teacher=false){
   children.push(new Paragraph({text:block.title,heading:HeadingLevel.HEADING_2,spacing:{before:220,after:110},keepNext:true}));
   if(block.kind==='planning-moment'){for(const field of block.fields){children.push(line(field.title,{bold:true,color:main,keepNext:true,after:70}));for(const paragraph of field.text.split(/\n+/).filter(Boolean))children.push(line(paragraph,{after:140}));}continue;}
   const extra=block.guideVisual;
-  if(!extra?.chart&&!extra?.diagram&&!extra?.comparison)for(const paragraph of String(block.text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean)){
+  if(!extra?.chart&&!extra?.diagram&&!extra?.comparison&&!extra?.timeline)for(const paragraph of String(block.text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean)){
    children.push(line(paragraph,{after:140,box:!!extra?.box,keepNext:block.kind==='question'||/^ejemploGuiado\.pasos\.\d+\.accion$/.test(block.path||'')}));
   }
   if(extra)children.push(...root.HEVAGuideVisuals.render(root.docx,extra,line,visual.theme));
