@@ -50,7 +50,7 @@ const fs=require('node:fs/promises'), path=require('node:path');
     };
    });
    assert.deepEqual(status.stages.map(s=>s.tag),['DETAILS','DETAILS','DETAILS','DETAILS']);
-   assert.deepEqual(status.stages.map(s=>s.label),['Tipo y nivel','Objetivo y estrategia','Generar y revisar','Guardar o exportar']);
+   assert.deepEqual(status.stages.map(s=>s.label),['Tipo y nivel','Objetivo, tema y estrategia','Generar y revisar','Guardar o exportar']);
    assert.ok(status.stages.every(s=>s.help.length>=45),'Cada paso necesita explicación breve');
    assert.ok(status.stages.every(s=>s.open),'Por defecto todos los pasos deben ser accesibles');
    assert.ok(status.stages.every(s=>s.left>=-2&&s.right<=width+2),'Resumen de etapa fuera de la pantalla');
