@@ -25,3 +25,22 @@ test('el respaldo offline no se importa automáticamente a Supabase',()=>{
  assert.match(html,/fetch\('\/api\/curriculum\/admin\?'/);
  assert.match(rules,/NO generar, importar, reconstruir/);
 });
+
+test('la interfaz HEVA que realmente utiliza el docente respeta respuestas Supabase vacías',()=>{
+ const ui=src('heva-ui.js');
+ assert.match(ui,/list=usable\(data\.objetivos\)/);
+ assert.match(ui,/localStorage\.setItem\(key,JSON\.stringify\(list\)\)/,'También registrar listas verificadas vacías');
+ assert.match(ui,/catch\(e\)\{source='catálogo local EPJA';list=await local\(\);\}/);
+ assert.ok(!ui.includes("if(!list.length&&source==='Supabase')"),'No cambiar la fuente después de recibir un cero válido');
+ const html=src('index.html');
+ assert.match(html,/heva-ui\.js\?v=20261123-qa-guard/);
+});
+test('Word y PPT muestran auditoría existente de forma automática y sin bloquear exportaciones válidas',()=>{
+ const ui=src('heva-ui.js');
+ assert.match(ui,/async function hevaAuditBeforeExport\(format\)/);
+ assert.match(ui,/await mostrarAuditoriaHEVA\(\)/);
+ assert.match(ui,/syncEdits\(\);await hevaAuditBeforeExport\('Word'\);try\{await HEVAOffice\.word/);
+ assert.match(ui,/syncEdits\(\);await hevaAuditBeforeExport\('PowerPoint'\);try\{await HEVAOffice\.powerpoint/);
+ assert.match(ui,/validación docente pendiente/);
+ assert.ok(!ui.includes('confirm(\'¿Desea exportar'), 'No insertar ventanas modales innecesarias');
+});

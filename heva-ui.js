@@ -26,9 +26,9 @@ actualizarObjetivosYEstrategias=async function(){
    const data=await r.json();
    if(!Array.isArray(data.objetivos))throw Error('Respuesta sin objetivos');
    list=usable(data.objetivos);
-   if(list.length)try{localStorage.setItem(key,JSON.stringify(list))}catch{}
+   // Respuesta válida, incluso [], manda sobre respaldos y cachés antiguos.
+   try{localStorage.setItem(key,JSON.stringify(list))}catch{}
   }catch(e){source='catálogo local EPJA';list=await local();}
-  if(!list.length&&source==='Supabase'){const backup=await local();if(backup.length){list=backup;source='catálogo local EPJA'}}
   if(serial!==catalogRequest)return;
   sel.replaceChildren();
   for(const item of list){
@@ -73,7 +73,23 @@ renderizarDocumentoEnPantalla=function(){if(!materialActual)return;materialActua
 function readHistory(){try{let h=JSON.parse(localStorage.getItem('heva_historial')||'[]');return Array.isArray(h)?h:[]}catch{alert('El historial no se pudo leer. Descarga un respaldo antes de modificarlo.');return null}}
 guardarEnHistorial=function(notify=true){if(!materialActual)return;syncEdits();let h=readHistory();if(!h)return;try{if(!materialActual.materialId)materialActual.materialId=crypto.randomUUID();const old=h.find(x=>x.data.materialId===materialActual.materialId);materialActual.version=(old?.data.version||0)+1;h.unshift({id:crypto.randomUUID(),fecha:new Date().toLocaleString('es-CL'),data:structuredClone(materialActual)});localStorage.setItem('heva_historial',JSON.stringify(h));cargarHistorial();if(notify)alert('Versión '+materialActual.version+' guardada en este navegador.')}catch(e){alert('No se pudo guardar: '+e.message+'. Descarga un respaldo JSON.')}};
 cargarHistorial=function(){let h=readHistory(),c=document.getElementById('lista-guardados');if(!h)return;c.innerHTML=h.length?h.map((x,i)=>`<div class="border rounded p-3"><b>${hevaEscape(x.data.titulo)}</b> · ${hevaEscape(x.data.nivel)} · v${x.data.version||1} · ${hevaEscape(x.fecha)} <button class="border rounded px-2" onclick="recuperarHistorial(${i})">Abrir</button></div>`).join(''):'No hay materiales guardados.'};
-exportarWord=async function(){if(!materialActual)return;syncEdits();try{await HEVAOffice.word(materialActual,document.getElementById('incluir-pauta')?.checked)}catch(e){alert('No se pudo exportar Word: '+e.message)}};exportarPowerPoint=async function(){if(!materialActual)return;syncEdits();try{await HEVAOffice.powerpoint(materialActual,document.getElementById('incluir-pauta')?.checked)}catch(e){alert('No se pudo exportar PowerPoint: '+e.message)}};
+// Aprovecha el auditor y el panel que HEVA YA tiene, sin volver a
+// generar, bloquear documentos ni exigir pulsar «Revisar calidad».
+async function hevaAuditBeforeExport(format){
+ try{
+  if(typeof mostrarAuditoriaHEVA==='function')await mostrarAuditoriaHEVA();
+  const panel=document.getElementById('informe-auditoria-heva');
+  if(panel){
+   panel.dataset.ultimaExportacion=format;
+   panel.setAttribute('role','status');
+   if(!panel.textContent.includes('Revisión previa a exportar'))panel.textContent='Revisión previa a exportar '+format+' (orientativa; validación docente pendiente)\n'+panel.textContent;
+  }
+ }catch(error){
+  console.warn('HEVA: el informe previo a la exportación no pudo actualizarse.',error?.message);
+ }
+}
+exportarWord=async function(){if(!materialActual)return;syncEdits();await hevaAuditBeforeExport('Word');try{await HEVAOffice.word(materialActual,document.getElementById('incluir-pauta')?.checked)}catch(e){alert('No se pudo exportar Word: '+e.message)}};
+exportarPowerPoint=async function(){if(!materialActual)return;syncEdits();await hevaAuditBeforeExport('PowerPoint');try{await HEVAOffice.powerpoint(materialActual,document.getElementById('incluir-pauta')?.checked)}catch(e){alert('No se pudo exportar PowerPoint: '+e.message)}};
 function respaldoHEVA(){syncEdits();HEVAOffice.download(new Blob([JSON.stringify({schema:'heva-online-v2',historial:readHistory()||[],materialActual},null,2)],{type:'application/json'}),'HEVA_online_respaldo.json')}
 function importOnlineJSON(file){if(!file)return;file.text().then(t=>{let d=JSON.parse(t);if(d.schema==='heva-online-v2'&&Array.isArray(d.historial)){respaldoHEVA();let old=readHistory()||[];localStorage.setItem('heva_historial',JSON.stringify([...d.historial,...old]));cargarHistorial();return}materialActual=HEVA.material(d.material||d);renderizarDocumentoEnPantalla();guardarEnHistorial();cambiarHerramienta('crear')}).catch(e=>alert('No se pudo importar: '+e.message))}
 const toolbar=document.getElementById('btn-pptx').parentElement;toolbar.insertAdjacentHTML('beforeend','<label class="text-xs"><input type="checkbox" id="incluir-pauta"> Incluir pauta docente en exportación</label><button class="border rounded px-2" onclick="respaldoHEVA()">Respaldo JSON</button><label class="border rounded px-2">Importar JSON<input type="file" accept=".json" style="display:none" onchange="importOnlineJSON(this.files[0])"></label>');
