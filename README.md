@@ -2,6 +2,10 @@
 
 Aplicación estática con funciones de Vercel y catálogo curricular en Supabase. Fuente de trabajo: este repositorio. AI Studio permite desarrollar o generar materiales, pero no sincroniza por sí solo con GitHub, Vercel, Supabase ni el Site de ChatGPT.
 
+## Mapa de funciones existentes y mejoras sin duplicar
+
+Antes de agregar nuevas apps, módulos, paneles o auditorías, consultar el [mapa canónico de las 12 áreas de HEVA](docs/HEVA_MAPA_CANONICO_SIN_DUPLICADOS_20261123.md). Allí están indicados los módulos que ya resuelven cada función, las verificaciones técnicas hechas y los pendientes que realmente necesitan contraste humano o una prueba de producción. Los OA EPJA ya están en Supabase; no reconstruirlos.
+
 ## Fuente única de objetivos EPJA (regla para no repetir trabajo)
 
 **Supabase HEVA (`curriculo_publicado`) es la fuente de verdad de los 407 OA vigentes.** Se comprobó directamente el 23 de noviembre de 2026 que hay 407 publicados, 407 vigentes, 407 claves únicas y otros 407 registros existentes en `curriculo_staging`. El archivo `catalogo-publicado.json` es únicamente una copia local para uso sin conexión: no se utiliza para regenerar ni reimportar los OA. **Las mejoras de HEVA deben reutilizar los OA actuales** y concentrarse en generación, diseño, exportación y revisión de materiales derivados. Cualquier discrepancia requiere un informe de diferencias de solo lectura, no escrituras automáticas. Las reglas de trabajo para agentes y colaboradores están en [`AGENTS.md`](AGENTS.md).
