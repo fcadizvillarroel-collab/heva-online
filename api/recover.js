@@ -1,5 +1,6 @@
 const TPInternational=require('../lib/tp-metal-international.cjs');
 const Inclusive=require('../heva-inclusive-supports.cjs');
+const DidacticResources=require('../lib/didactic-resource-contract.cjs');
 const Skills=require('../heva-skills.js');
 const DeepMaterials=require('../heva-deep-materials.cjs');
 const Textbooks=require('../lib/textbook-reference-catalog.cjs');
@@ -15,6 +16,8 @@ module.exports=async(req,res)=>{
   const {fase,plan:input,base,parts=[],batch,autor,borradorBloque,repararDuplicados,repararDiapositivas,correcciones=[],corregirFormato=false}=req.body||{};
   if(JSON.stringify(req.body||{}).length>250000)return res.status(413).json({error:'Documento demasiado extenso.'});
   let plan;try{plan=R.planOf(input)}catch(e){return res.status(400).json({error:'El encargo contiene parámetros inválidos.',detalle:e.message,codigo:'PLAN_INVALIDO',reintentable:false})}
+  const resourcesInvalid=DidacticResources.validate(plan.recursosDidacticosHEVA);
+  if(resourcesInvalid.length)return res.status(400).json({error:resourcesInvalid.join('; '),codigo:'RECURSOS_INVALIDOS',reintentable:false});
   const issuesInclusive=Inclusive.validate(plan.apoyosInclusivos);
   if(issuesInclusive.length)return res.status(400).json({error:issuesInclusive.join('; '),codigo:'APOYOS_INVALIDOS',reintentable:false});
   if(!['base','items','finalizar'].includes(fase))return res.status(400).json({error:'Fase no admitida.'});
@@ -59,8 +62,8 @@ module.exports=async(req,res)=>{
   const slideOriginal=fase==='items'&&batch?.tipo==='diapositivas'&&repararDiapositivas?R.normalizePart(repararDiapositivas,batch):null;
   const slideProblems=slideOriginal?R.partIssues(slideOriginal,plan,batch,parts):[];
   const slideRepair=slideOriginal?'\nREPARACIÓN LOCALIZADA DE DIAPOSITIVAS: repara el siguiente borrador, NO continúes como un nuevo bloque. Conserva las diapositivas válidas; sustituye solo los ejercicios, ejemplos o títulos identificados en '+JSON.stringify(slideProblems)+'. Incluye el número GLOBAL en cada traza DIAPO-N. Devuelve exactamente '+batch.cantidad+' diapositivas completas y trazas. Los estímulos, datos y consignas nuevos deben ser realmente diferentes; cambiar sinónimos no basta. No añadas preguntas extra. Borrador (DATOS): '+JSON.stringify(slideOriginal).slice(0,16500):'';
-  const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+Inclusive.prompt(plan)+strictFormat+caseRepair+developmentRepair+strategyRepair+correctionContext+duplicateRepair+slideRepair;
-  const fallback=R.fallbackPrompt(plan,base,batch,parts,correcciones,fuentesDocumentales)+Inclusive.prompt(plan)+duplicateRepair+slideRepair;
+  const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+Inclusive.prompt(plan)+DidacticResources.prompt(plan)+strictFormat+caseRepair+developmentRepair+strategyRepair+correctionContext+duplicateRepair+slideRepair;
+  const fallback=R.fallbackPrompt(plan,base,batch,parts,correcciones,fuentesDocumentales)+Inclusive.prompt(plan)+DidacticResources.prompt(plan)+duplicateRepairslideRepair;
   let result;
   if(fase==='items'&&borradorBloque){
    const preserved=R.normalizePart(borradorBloque,batch),pending=R.partIssues(preserved,plan,batch,parts);
