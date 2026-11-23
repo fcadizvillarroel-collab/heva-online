@@ -65,6 +65,6 @@ test('Las dos rutas de IA y la interfaz usan el mismo contrato opcional',()=>{
  for(const source of [g,r]){assert.match(source,/DidacticResources\.prompt\(plan\)/);assert.match(source,/International\.prompt\(plan\)/);assert.match(source,/DidacticResources\.validate/);}
  assert.match(ui,/recursosDidacticosHEVA:/);
  assert.match(repoFile('heva-recovery-ui.js'),/SLIDE_BLOCK_INCOMPLETE/);
- assert.match(repoFile('heva-recovery-ui.js'),/heva-resume-details/);
+ assert.match(repoFile('heva-recovery-ui.js'),/heva-resume-toggle/);
  assert.match(r,/R\.mergeSlideRepair/);
 });
