@@ -17,6 +17,19 @@ def normalize(s):
  s=unicodedata.normalize("NFKD",str(s)).lower()
  s="".join(x for x in s if not unicodedata.combining(x))
  return re.sub(r"[^a-z0-9]+","",s)
+def candidate_page(literal,pages):
+ # Candidate from long exact character anchors, not a textual match or approval.
+ normalized=normalize(literal)
+ if len(normalized)<45:return None,0,0
+ width=min(42,max(26,len(normalized)//8))
+ extent=len(normalized)-width
+ starts=sorted({round(extent*i/7) for i in range(8)})
+ anchors=[normalized[start:start+width] for start in starts]
+ scored=[(sum(anchor in page for anchor in anchors),idx+1) for idx,page in enumerate(pages)]
+ best_count,best_page=max(scored,default=(0,0))
+ return (best_page if best_count>=2 and best_count/len(anchors)>=0.25 else None,
+         best_count,len(anchors))
+
 def fetch(url):
  req=urllib.request.Request(url,headers={"User-Agent":"HEVA-EPJA-curricular-audit/1.0"})
  with urllib.request.urlopen(req,timeout=75) as f:
@@ -54,8 +67,13 @@ def run(out):
   cross=[i+1 for i,p in enumerate(doc["page_pairs"][:-1]) if literal and literal in p and (i+1) not in hits] if doc and not hits else []
   # PDF extraction can split words across page boundaries; do not treat absence as factual contradiction.
   status="COINCIDENCIA_LITERAL_PDF" if hits else ("COINCIDENCIA_ENTRE_PAGINAS" if cross else ("NO_LOCALIZADO_EN_EXTRACCION" if doc else "PDF_NO_DISPONIBLE"))
+  # A plausible source page is a queue for a human reader, NEVER a verified
+  # match. It must not increase 'coincidencia_literal_pdf'.
+  candidate,anchors,total_anchors=candidate_page(oa["texto_literal"],doc["pages"]) if doc and not (hits or cross) else (None,0,0)
   rows.append({"clave_interna":oa["clave_interna"],"marco":framework,"asignatura":oa["asignatura"],
    "pagina_catalogo":oa.get("pagina_oficial",""),"paginas_pdf_coincidentes":"|".join(map(str,hits or cross)),
+   "pagina_pdf_candidata_no_verificada":candidate or "",
+   "anclas_candidata":anchors,"anclas_probadas":total_anchors,
    "resultado":status,"url_original":doc["url"] if doc else SOURCES.get(framework,("", ""))[1],
    "sha256_pdf_original":doc["sha256"] if doc else "",
    "texto_objetivo":oa["texto_literal"]})
@@ -65,9 +83,11 @@ def run(out):
  "coincidencia_entre_paginas":sum(r["resultado"]=="COINCIDENCIA_ENTRE_PAGINAS" for r in rows),
  "no_localizados_en_texto_extraido":sum(r["resultado"]=="NO_LOCALIZADO_EN_EXTRACCION" for r in rows),
  "pdf_no_disponible":sum(r["resultado"]=="PDF_NO_DISPONIBLE" for r in rows),
+ "no_localizados_con_pagina_candidata":sum(r["resultado"]=="NO_LOCALIZADO_EN_EXTRACCION" and bool(r["pagina_pdf_candidata_no_verificada"]) for r in rows),
+ "no_localizados_sin_pagina_candidata":sum(r["resultado"]=="NO_LOCALIZADO_EN_EXTRACCION" and not r["pagina_pdf_candidata_no_verificada"] for r in rows),
  "fuentes":[{"marco":k,"id":v["id"],"url":v["url"],"sha256":v["sha256"],"paginas":len(v["pages"])} for k,v in docs.items()],
  "problemas_descarga":issues,
- "alcance":"Coincidencia literal con texto extraído de PDF ministerial, no prueba exactitud de explicaciones ni validez de ejemplos."}
+ "alcance":"Coincidencias literales con PDF ministerial; las páginas candidatas por anclas son pistas NO VERIFICADAS, no prueba exactitud de explicaciones ni ejemplos."}
  (out/"resumen_contraste_fuentes.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
  print(json.dumps(summary,ensure_ascii=False))
  if summary["objetivos"]!=407:raise SystemExit(1)
