@@ -28,6 +28,7 @@ with tempfile.TemporaryDirectory() as tmp:
     assert "Supabase" in summary
 catalog=json.loads((Path(__file__).resolve().parents[1]/"catalogo-publicado.json").read_text(encoding="utf-8"))
 supports=[lesson(oa)["accessibility"] for oa in catalog]
+assert all(lesson(oa)["scenario"].strip() in lesson(oa)["explanation"] for oa in catalog), "Complete expanded cases must be present in all 407 explanations"
 assert len(set(supports))>=9,"Accessibility must differ by curricular discipline"
 assert all("respuesta oral" in s and "teléfonos" in s and "ciegos" in s and "alto contraste" in s for s in supports)
 for subject,keyword in [("Estudios Sociales","cronologías"),("Educación Matemática","operación"),("Lengua Castellana","vocabulario"),("Ciencias Naturales","observaciones"),("Inglés","inglés")]:
