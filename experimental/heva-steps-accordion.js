@@ -58,8 +58,10 @@ function organizeStepTwo(step){
  const advanced=$('heva-ajustes-adicionales');
  // Se trasladan nodos EXISTENTES, sin duplicar OA, selectores, valores ni eventos.
  // Orden legible: objetivo EPJA -> tema -> estrategia -> ajustes y documentos.
- const sequence=[oa,topic,strategy].filter(Boolean);
- for(const element of sequence)if(content.contains(element))content.append(element);
+ // prepend en orden inverso: OA, luego tema y finalmente estrategia.
+ // Los insumos documentales conservan su lugar después de la estrategia.
+ const sequence=[strategy,topic,oa].filter(Boolean);
+ for(const element of sequence)if(content.contains(element))content.prepend(element);
  // Todo campo complementario sigue presente; los ajustes opcionales cierran el paso.
  if(advanced&&content.contains(advanced))content.append(advanced);
  const goalLabel=oa?.querySelector('label');
