@@ -10,7 +10,7 @@ test('No se crea otro currículo: EPJA Chile prevalece sobre los recursos de Mé
  assert.equal(I.applicable(plan),true);
  assert.equal(I.references(plan).length,3);
  assert.match(I.prompt(plan),/MINEDUC CHILE/);
- assert.match(I.prompt(plan),/OA EPJA/);
+ assert.match(I.prompt(plan),/catálogo EPJA/);
  assert.match(I.prompt(plan),/México|SEP|mexican/i);
  assert.match(I.prompt(plan),/Argentina|Educ.ar/);
  assert.match(I.prompt(plan),/sin grabación/);
@@ -22,7 +22,7 @@ test('Los recursos didácticos deben ser explícitos, sin inventar fotos o mapas
  assert.ok(D.validate(['texto','texto']).length);
  assert.ok(D.validate(['fotografia_no_verificada']).length);
  const p=D.prompt({tipoMaterial:'GUIA',recursosDidacticosHEVA:['texto','tabla','mapa']});
- assert.match(p,/CONTENIDO COMPLETO/);
+ assert.match(p,/voces completas/);
  assert.match(p,/filas concretas/);
  assert.match(p,/no inventará|nunca simules/i);
  assert.equal(D.prompt({tipoMaterial:'PLANIFICACION',recursosDidacticosHEVA:['texto']}),'');
@@ -33,7 +33,7 @@ test('Objetivo oral: el producto no se sustituye solo por respuestas escritas',(
  assert.match(p,/sin grabaciones|sin exigir grabaciones/i);
  assert.match(p,/tabla de apoyo/i);
  assert.match(p,/no reutilices el mismo correo/i);
- assert.match(p,/ejemplos modelados/i);
+ assert.match(p,/DIVERSIDAD SIN REDUNDANCIA/i);
 });
 test('Un plan de clase no se divide en bloques de diapositivas',()=>{
  const p={tipoMaterial:'PLANIFICACION',objetivoAprendizaje:'Expresarse oralmente',cantAlternativas:0,cantDesarrollo:0,cantCasos:0,asignatura:'Lenguaje y Comunicación'};
@@ -91,5 +91,5 @@ test('La recuperación usa el mismo catálogo de fuentes anterior y conserva bor
  assert.doesNotMatch(recover,/duplicateRepairslideRepair/);
  assert.match(recover,/SLIDE_BLOCK_INCOMPLETE/);
  assert.match(old,/repararDiapositivas/);
- assert.match(old,/heva-resume-details/);
+ assert.match(old,/heva-resume-toggle/);
 });
