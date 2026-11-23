@@ -18,7 +18,7 @@ const body={
 const out=path.join(__dirname,'../out/live-ai-production-smoke.json');
 fs.mkdirSync(path.dirname(out),{recursive:true});
 const report={fecha:new Date().toISOString(),endpoint:url,tipo:'GUIA',oaClave:oa.clave_interna,
- resultado:'NO_EJECUTADO',http:null,proveedor:null,modelo:null,alternativas:null,desarrollo:null,casos:null,
+ resultado:'NO_EJECUTADO',http:null,codigoServidor:null,proveedor:null,modelo:null,alternativas:null,desarrollo:null,casos:null,
  detalle:'Verificación en producción. El informe no acredita revisión docente.'};
 (async()=>{
  try{
@@ -26,6 +26,7 @@ const report={fecha:new Date().toISOString(),endpoint:url,tipo:'GUIA',oaClave:oa
     body:JSON.stringify(body),signal:AbortSignal.timeout(76000)});
   report.http=response.status;
   let data;try{data=await response.json()}catch{data={}};
+  report.codigoServidor=typeof data.codigo==='string'?data.codigo.slice(0,64):null;
   if(response.status===200&&data.exito===true&&data.material){
    const m=data.material;
    report.proveedor=m.autoriaIA?.proveedor||null;
@@ -42,7 +43,7 @@ const report={fecha:new Date().toISOString(),endpoint:url,tipo:'GUIA',oaClave:oa
    else {report.resultado='RESPUESTA_INCOMPLETA';report.detalle='HTTP 200 pero estructura, conteos o distractores no cumplen los requisitos del encargo.';}
   }else{
    report.resultado=({401:'ACCESO_DOCENTE_REQUERIDO',403:'ACCESO_DENEGADO',413:'SOLICITUD_DEMASIADO_GRANDE',422:'MATERIAL_INVALIDO',429:'CUOTA_IA_AGOTADA',502:'IA_RESPUESTA_INVALIDA',503:'PROVEEDORES_NO_DISPONIBLES'})[response.status]||'ERROR_GENERACION';
-   report.detalle='Código de servidor: '+String(data.codigo||response.status)+'. No se considera una generación aprobada.';
+   report.detalle='Código de servidor: '+String(data.codigo||response.status)+'. Una prueba fallida no autoriza declarar generación real validada.';
   }
  }catch(error){
   report.resultado=error?.name==='TimeoutError'?'TIEMPO_AGOTADO':'ERROR_DE_CONEXION';
