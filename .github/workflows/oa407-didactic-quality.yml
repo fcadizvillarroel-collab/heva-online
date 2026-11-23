@@ -10,6 +10,13 @@ on:
       - 'scripts/oa_specific_examples.py'
       - 'catalogo-publicado.json'
       - '.github/workflows/oa407-didactic-quality.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/audit_oa407_didactic_quality.py'
+      - 'scripts/test_oa407_didactic_audit.py'
+      - 'scripts/oa_lessons.py'
+      - '.github/workflows/oa407-didactic-quality.yml'
   workflow_dispatch:
 jobs:
   didactic-audit:
