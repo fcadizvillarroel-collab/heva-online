@@ -148,7 +148,18 @@ function dataChart(lines){
  const values=rows.map(x=>Number(x[2].replace(',','.')));if(values.some(x=>!Number.isFinite(x)||x>1000000000))return null;
  return{labels,values,unit:rows[0][3],source:lines.slice()};
 }
+// Pares semánticos provenientes del texto original, válidos en cualquier asignatura.
+function comparisonPairs(lines){
+ if(!Array.isArray(lines)||lines.length!==2)return null;
+ const matches=lines.map(x=>String(x||'').trim().match(/^([^:\n]{2,35}):\s*(\S[\s\S]{1,550})$/));
+ if(matches.some(x=>!x))return null;
+ const pairs=[['formal','informal'],['causa','consecuencia'],['problema','solucion'],['antes','despues'],['ventaja','desventaja'],['riesgo','prevencion'],['situacion','decision'],['hecho','interpretacion']];
+ const a=norm(matches[0][1]).trim(),b=norm(matches[1][1]).trim();
+ if(!pairs.some(([x,y])=>(a===x&&b===y)||(a===y&&b===x)))return null;
+ if(norm(matches[0][2])===norm(matches[1][2]))return null;
+ return matches.map(m=>({label:(norm(m[1])==='formal'?'Registro formal':norm(m[1])==='informal'?'Registro informal':m[1].trim()),text:m[2].trim()}));
+}
 function relation(lines){if(!Array.isArray(lines)||lines.length<2||lines.length>4)return null;const rows=lines.map(t=>String(t).match(/^\s*(Paso\s+\d+|Etapa\s+\d+|Causa|Consecuencia|Problema|Soluci[oó]n|Antes|Despu[eé]s)\s*:\s*(\S[\s\S]*)$/i));if(rows.some(x=>!x))return null;const labels=rows.map(x=>norm(x[1]));if(labels.every(x=>/^(paso|etapa) /.test(x))){const nums=labels.map(x=>Number(x.match(/\d+/)[0]));if(!nums.every((n,i)=>i===0||n===nums[i-1]+1))return null;return{kind:'steps',lines:lines.slice()};}if(rows.length===2&&['causa|consecuencia','problema|solucion','antes|despues'].includes(labels.join('|')))return{kind:'relation',lines:lines.slice()};return null;}
 function forAI(m){const base={...m};delete base.recursosVisualesHEVA;delete base.imagenGuiaHEVA;delete base.ocultarImagenGuiaHEVA;return{...base,...(Array.isArray(m?.diapositivas)?{diapositivas:m.diapositivas.map(d=>{const x={...d};delete x.imagenHEVA;delete x.ocultarImagenHEVA;return x;})}:{})};}
 function restoreImages(before,after){if(after&&before.objetivoAprendizaje===after.objetivoAprendizaje){const own=image(before.imagenGuiaHEVA);after={...after,...(before.recursosVisualesHEVA?{recursosVisualesHEVA:options(before)}:{}),...(own?{imagenGuiaHEVA:own}:{}),...(typeof before.ocultarImagenGuiaHEVA==='boolean'?{ocultarImagenGuiaHEVA:before.ocultarImagenGuiaHEVA}:{})};}if(!after||!Array.isArray(after.diapositivas))return after;const originals=before.diapositivas||[];return{...after,diapositivas:after.diapositivas.map(d=>{const matches=originals.filter(x=>String(x.titulo||'').trim()===String(d.titulo||'').trim());if(matches.length!==1)return d;const old=matches[0],picture=image(old.imagenHEVA);return{...d,...(picture?{imagenHEVA:picture}:{}),...(typeof old.ocultarImagenHEVA==='boolean'?{ocultarImagenHEVA:old.ocultarImagenHEVA}:{})};})};}
-return{resourceKeys,options,validateOptions,image,role,visualFamily,diagramPlan,decorate,contain,dataChart,relation,forAI,restoreImages};});
+return{resourceKeys,options,validateOptions,image,role,visualFamily,diagramPlan,decorate,contain,dataChart,comparisonPairs,relation,forAI,restoreImages};});

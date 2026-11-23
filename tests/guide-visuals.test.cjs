@@ -57,3 +57,12 @@ test('comparaciones de habla impiden representaciones redundantes',()=>{
  assert.equal(v.comparison.length,2);
  assert.equal(v.diagram,null);assert.equal(v.chart,null);
 });
+
+test('guías de Ciencias y TP muestran comparaciones semánticas como tabla editable',()=>{
+ const input=[{title:'Prevención de riesgos',path:'introduccionLectura',text:'Riesgo: Proyección de partículas al cortar metales.\nPrevención: Utilizar protección ocular y resguardos apropiados.'}];
+ const m={tipoMaterial:'GUIA',asignatura:'Construcciones Metálicas',recursosVisualesHEVA:{recuadros:true,imagenes:false,diagramas:true,graficos:true}};
+ const v=G.plan(m,input)[0].guideVisual;
+ assert.deepEqual(v.comparison.map(x=>x.label),['Riesgo','Prevención']);
+ assert.equal(v.diagram,null);assert.equal(v.chart,null);
+ assert.equal(G.plan({...m,recursosVisualesHEVA:{recuadros:false,imagenes:false,diagramas:false,graficos:false}},input)[0].guideVisual.comparison,null);
+});

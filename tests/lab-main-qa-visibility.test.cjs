@@ -44,7 +44,7 @@ test('planificación completa de 90 minutos puede aprobar estructura propia sin 
 
 test('la versión en caché cambia junto con los módulos de auditoría',()=>{
  const sw=source('sw.js');
- assert.match(sw,/heva-online-v71-vistas-reales/);
- const html=source('index.html');for(const asset of ['heva-quality-gate','heva-slide-design','heva-recovery-ui'])assert.ok(html.includes('/'+asset+'.js?v=20261123-armonizado'),asset);assert.ok(html.includes('/heva-office.js?v=20261123-cronologias'));assert.ok(html.includes('/heva-guide-visuals.js?v=20261123-vistas-reales'));assert.ok(html.includes('/heva-teacher-ui.js?v=20261123-vistas-reales'));
+ assert.match(sw,/heva-online-v72-comparaciones/);
+ const html=source('index.html');for(const asset of ['heva-quality-gate','heva-recovery-ui'])assert.ok(html.includes('/'+asset+'.js?v=20261123-armonizado'),asset);for(const asset of ['heva-slide-design','heva-office','heva-guide-visuals'])assert.ok(html.includes('/'+asset+'.js?v=20261123-comparaciones'),asset);assert.ok(html.includes('/heva-teacher-ui.js?v=20261123-vistas-reales'));
  assert.match(sw,/experimental\/material-view\.js/);
 });
