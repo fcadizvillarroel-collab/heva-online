@@ -44,6 +44,6 @@ test('planificación completa de 90 minutos puede aprobar estructura propia sin 
 
 test('la versión en caché cambia junto con los módulos de auditoría',()=>{
  const sw=source('sw.js');
- assert.match(sw,/heva-online-v67-acordeones-experimento/);
+ assert.match(sw,/heva-online-v68-apoyos-inclusivos-piloto/);
  assert.match(sw,/experimental\/material-view\.js/);
 });
