@@ -74,7 +74,7 @@ test('Una reparación de diapositivas truncada no reemplaza un bloque ya conserv
 });
 test('La revisión final conserva el borrador de las diapositivas observadas',()=>{
  const ui=fs.readFileSync(path.join(__dirname,'../heva-recovery-ui.js'),'utf8');
- assert.match(ui,/b\\?\.tipo==='diapositivas'&&checkpoint\.parts\[i\]/);
+ assert.ok(ui.includes("b?.tipo==='diapositivas'&&checkpoint.parts[i]"));
  assert.match(ui,/checkpoint\.pendingSlide=\{tipo:b\.tipo,inicio:b\.inicio,parte:checkpoint\.parts\[i\]\}/);
 });
 test('Ilustración del registro contiene frases comparables y criterio de uso',()=>{
