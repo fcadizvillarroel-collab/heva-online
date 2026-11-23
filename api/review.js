@@ -4,6 +4,7 @@ const Sources=require('../lib/document-sources.cjs');
 const Q=require('../heva-quality.cjs');
 const P=require('../heva-pedagogy.js');
 const H=require('../heva-core.js');
+const CurricularRegistry=require('../lib/oa-documentary-register.cjs');
 module.exports=async function(req,res){
  require('./_cors.cjs').applyCors(req,res,{methods:'POST,OPTIONS',headers:'Content-Type, Authorization'});
 
@@ -39,7 +40,10 @@ module.exports=async function(req,res){
    if(!contrasts.valid.length||contrasts.invalid.length){for(const id of ['fuentes','rigor']){const c=report.criterios.find(c=>c.id===id);if(c.estado==='cumple'){c.estado='no_verificable';c.fundamento='No hay contrastes documentales con citas literales válidas suficientes. Consultar una fuente no verifica automáticamente todas las afirmaciones.';}}}
    const contentContrasts=contrasts.valid.filter(c=>fuentesDocumentales.fragments.some(f=>f.id===c.fuenteId&&f.uso==='contenido'));
    if(!contentContrasts.length){const c=report.criterios.find(c=>c.id==='rigor');if(c.estado==='cumple'){c.estado='no_verificable';c.fundamento='No hay contrastes válidos con una fuente de contenido disciplinar. Un OA o una orientación didáctica no comprueban las afirmaciones factuales del material.';}}
-   if(fuentesDocumentales.objetivo!=='localizado_literalmente'){const c=report.criterios.find(c=>c.id==='alineacion');if(c.estado==='cumple'){c.estado='no_verificable';c.fundamento='Puede existir coherencia interna, pero el objetivo no fue localizado literalmente en la fuente curricular consultada. Revisar el objetivo y el marco.';}}
+   // La extracción textual de un PDF NO puede invalidar un OA ya publicado
+   // y comprobado en el catálogo EPJA. Esta puerta revisa alineación del
+   // material con el OA; no reabre la incorporación de los 407 objetivos.
+   if(CurricularRegistry.requiresCurricularSourceReview(material.planGeneracion||material,fuentesDocumentales.objetivo)){const c=report.criterios.find(c=>c.id==='alineacion');if(c?.estado==='cumple'){c.estado='no_verificable';c.fundamento='El OA no se pudo asociar inequívocamente con un registro curricular publicado ni localizar textualmente en la fuente consultada. Comprobar marco y objetivo de este encargo.';}}
    report=Q.classifyReview(report,updated,fuentesDocumentales);
    const revision={...report,auditoriaDisciplinar:{disciplina:discipline.disciplina,criterios:discipline.criterios,observacionesPrevias:discipline.incidencias.length,validacion:'pendiente_docente'},contrastesDocumentales:contrasts.valid,incidenciasDocumentales:[...evidence.invalid,...contrasts.invalid],estado:report.integridadInforme==='parcial'?'revision_parcial':report.hallazgos.length?'con_observaciones':'sin_observaciones_detectadas',proveedor:result.provider,modelo:result.model,autor:material.autoriaIA,fecha:new Date().toISOString(),huella:Q.fingerprint(updated),alcance:'Revisión independiente por IA con recuperación documental en línea. Solo las citas localizadas tienen trazabilidad; no certifica interpretación, cobertura completa ni vigencia normativa. Validación docente pendiente.'};
    return res.status(200).json({exito:true,revision,fuentesDocumentales,respaldoDocumental:evidence.valid,incidenciasDocumentales:evidence.invalid});
