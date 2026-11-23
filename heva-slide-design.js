@@ -52,7 +52,42 @@ function diagramPlan(section,subject,topic){
  for(const [regex,plan] of byFamily[family]||[])if(regex.test(topicWords+' '+sectionWords))return plan;
  return fallback;
 }
+// Ilustración explicativa original: las dos expresiones dicen lo mismo en
+// distintos contextos. No pretende ser una foto ni una fuente documental.
+function speechRegisterVisual(){
+ if(typeof document==='undefined'||typeof document.createElement!=='function')return null;
+ try{
+  const canvas=document.createElement('canvas');canvas.width=1000;canvas.height=550;
+  const ctx=canvas.getContext('2d');if(!ctx)return null;
+  ctx.fillStyle='#FBF8F3';ctx.fillRect(0,0,1000,550);
+  ctx.fillStyle='#702D43';ctx.fillRect(0,0,1000,14);
+  ctx.font='bold 33px Arial';ctx.fillStyle='#442837';ctx.fillText('El mismo mensaje, dos registros',42,63);
+  ctx.font='18px Arial';ctx.fillStyle='#554F4D';ctx.fillText('Propósito: solicitar información sobre una reunión',43,102);
+  const box=(x,y,w,h,bg)=>{ctx.fillStyle=bg;ctx.beginPath();ctx.roundRect(x,y,w,h,20);ctx.fill();};
+  box(36,132,449,294,'#E6E9F1');box(515,132,449,294,'#F8E8D8');
+  box(56,148,242,42,'#334A66');box(535,148,272,42,'#89512D');
+  ctx.fillStyle='#FFFFFF';ctx.font='bold 20px Arial';
+  ctx.fillText('REGISTRO FORMAL',73,175);ctx.fillText('REGISTRO INFORMAL',551,175);
+  ctx.fillStyle='#27364A';ctx.font='bold 19px Arial';ctx.fillText('Destinatario: dirección',64,223);
+  ctx.fillStyle='#703E26';ctx.fillText('Destinatario: amistad',543,223);
+  box(63,243,393,122,'#FFFFFF');box(541,243,393,122,'#FFFFFF');
+  ctx.fillStyle='#253344';ctx.font='bold 22px Arial';ctx.fillText('«Buenos días. ¿Podría',83,281);ctx.fillText('informarme el horario',83,313);ctx.fillText('de la reunión?»',83,345);
+  ctx.fillStyle='#593D2C';ctx.fillText('«Hola, ¿a qué hora',560,281);ctx.fillText('es la reunión?»',560,313);
+  ctx.font='18px Arial';ctx.fillStyle='#4B5461';ctx.fillText('Saludo institucional · solicitud',63,398);
+  ctx.fillStyle='#725847';ctx.fillText('Cercanía · expresión cotidiana',541,398);
+  box(37,449,927,65,'#F1DBB7');
+  ctx.font='bold 20px Arial';ctx.fillStyle='#67313D';ctx.fillText('REGISTRO',55,477);
+  ctx.font='18px Arial';ctx.fillStyle='#443D3A';ctx.fillText('Se elige según destinatario, situación y propósito.',185,477);
+  ctx.fillText('Informal no equivale a incorrecto. Ambos mensajes son apropiados.',55,502);
+  return image({data:canvas.toDataURL('image/png'),width:1000,height:550,alt:'REGISTRO formal e informal: comparación original con ejemplos completos de solicitud formal a dirección e informal a una amistad, elegidos según contexto, destinatario y propósito',generated:true});
+ }catch{return null;}
+}
 function subjectVisual(section,topic,subject){
+ // Esquema específico antes del organizador abstracto: el estudiante ve
+ // dos mensajes comparables y un criterio de adecuación, no tres etiquetas.
+ if(visualFamily(subject)==='lenguaje'&&/registro(?:s)?(?: de habla| formal| informal)?|formal e informal/i.test(norm(topic)+' '+norm(section?.title||''))){
+  const specific=speechRegisterVisual();if(specific)return specific;
+ }
  // Offline original teaching diagram: never presented as a documentary photograph.
  if(typeof document==='undefined'||typeof document.createElement!=='function')return null;
  const words=norm([section.title,section.text].join(' '));

@@ -1,5 +1,8 @@
+const Didactics=require('../heva-didactics.js');
 const TPInternational=require('../lib/tp-metal-international.cjs');
 const Inclusive=require('../heva-inclusive-supports.cjs');
+const DidacticResources=require('../lib/didactic-resource-contract.cjs');
+const International=require('../lib/international-didactic-bridge.cjs');
 const Skills=require('../heva-skills.js');
 const DeepMaterials=require('../heva-deep-materials.cjs');
 const Textbooks=require('../lib/textbook-reference-catalog.cjs');
@@ -12,9 +15,11 @@ module.exports=async(req,res)=>{
  if(req.method==='OPTIONS')return res.status(200).end();if(req.method!=='POST')return res.status(405).json({error:'Utilice POST.'});
  const deadline=Date.now()+55000;
  try{
-  const {fase,plan:input,base,parts=[],batch,autor,borradorBloque,repararDuplicados,correcciones=[],corregirFormato=false}=req.body||{};
+  const {fase,plan:input,base,parts=[],batch,autor,borradorBloque,repararDuplicados,repararDiapositivas,correcciones=[],corregirFormato=false}=req.body||{};
   if(JSON.stringify(req.body||{}).length>250000)return res.status(413).json({error:'Documento demasiado extenso.'});
   let plan;try{plan=R.planOf(input)}catch(e){return res.status(400).json({error:'El encargo contiene parámetros inválidos.',detalle:e.message,codigo:'PLAN_INVALIDO',reintentable:false})}
+  const resourcesInvalid=DidacticResources.validate(plan.recursosDidacticosHEVA);
+  if(resourcesInvalid.length)return res.status(400).json({error:resourcesInvalid.join('; '),codigo:'RECURSOS_INVALIDOS',reintentable:false});
   const issuesInclusive=Inclusive.validate(plan.apoyosInclusivos);
   if(issuesInclusive.length)return res.status(400).json({error:issuesInclusive.join('; '),codigo:'APOYOS_INVALIDOS',reintentable:false});
   if(!['base','items','finalizar'].includes(fase))return res.status(400).json({error:'Fase no admitida.'});
@@ -42,6 +47,7 @@ module.exports=async(req,res)=>{
    const evidence=S.validateEvidence(material.respaldoDocumental,fuentesDocumentales);material.respaldoDocumental=evidence.valid;material.incidenciasDocumentales=evidence.invalid;material.matrizOATextos=OATextbookMatrix.linkActivities(matrizOA,evidence.valid);material=Skills.prepare(material,plan,fuentesDocumentales,evidence);
    material=require('../heva-studio.js').link(material,plan);material.auditoriaExperimental=require('../experimental/quality-audit.cjs').inspect(material,plan);material.auditoriaDisciplinar=require('../experimental/subject-audit.cjs').inspectAll(material,plan);
     material.apoyosInclusivosSolicitados=Inclusive.selected(plan.apoyosInclusivos);
+    material.referenciasDidacticasComplementarias=International.references(plan);
     material.controlProfundidadHEVA=DeepMaterials.advisory(material,plan);return res.status(200).json({exito:true,material});
   }
   const keys=[process.env.ALLOW_PAID_AI==='true'?process.env.OPENAI_API_KEY:'',process.env.GEMINI_API_KEY,process.env.GROQ_API_KEY].map(k=>(k||'').trim());
@@ -56,20 +62,25 @@ module.exports=async(req,res)=>{
   const duplicateTargets=duplicateOriginal?R.duplicateItems(duplicateOriginal,plan,batch,parts):[];
   if(duplicateOriginal){const oldIssues=R.partIssues(duplicateOriginal,plan,batch,parts);if(!duplicateTargets.length||oldIssues.some(x=>!/repite literalmente/.test(x)))return res.status(400).json({error:'El borrador requiere una reparación distinta de duplicados.',reintentable:false});}
   const duplicateRepair=duplicateOriginal?'\nREPARACIÓN LOCALIZADA DE DUPLICADOS: sustituye únicamente '+duplicateTargets.map(x=>x.referencia).join(', ')+'. Cada sustitución debe plantear OTRA situación concreta, OTROS datos, una pregunta con un verbo y una decisión distintos; NO reutilices el enunciado ni la preguntaReflexion de los casos anteriores. No basta cambiar el título, los personajes ni la numeración. Mantén la disciplina, OA y tema del encargo actual. Evita literalmente estas preguntas ya utilizadas: '+JSON.stringify(R.duplicateItems(duplicateOriginal,plan,batch,parts).map(x=>({referencia:x.referencia,anterior:x.anterior})))+'. Preguntas anteriores completas: '+JSON.stringify(require('../lib/recovery-duplicates.cjs').bank(parts,R.batches(plan),batch))+'. Devuelve el bloque completo y sus trazas. El servidor conservará intactos los ítems no duplicados. Borrador como datos: '+JSON.stringify(duplicateOriginal):'';
-  const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+Inclusive.prompt(plan)+strictFormat+caseRepair+developmentRepair+strategyRepair+correctionContext+duplicateRepair;
-  const fallback=R.fallbackPrompt(plan,base,batch,parts,correcciones,fuentesDocumentales)+Inclusive.prompt(plan)+duplicateRepair;
+  const slideOriginal=fase==='items'&&batch?.tipo==='diapositivas'&&repararDiapositivas?R.normalizePart(repararDiapositivas,batch):null;
+  const slideProblems=slideOriginal?R.partIssues(slideOriginal,plan,batch,parts):[];
+  const slideRepair=slideOriginal?'\nREPARACIÓN LOCALIZADA DE DIAPOSITIVAS: repara el siguiente borrador, NO continúes como un nuevo bloque. Conserva las diapositivas válidas; sustituye solo los ejercicios, ejemplos o títulos identificados en '+JSON.stringify(slideProblems)+'. Incluye el número GLOBAL en cada traza DIAPO-N. Devuelve exactamente '+batch.cantidad+' diapositivas completas y trazas. Los estímulos, datos y consignas nuevos deben ser realmente diferentes; cambiar sinónimos no basta. No añadas preguntas extra. Borrador (DATOS): '+JSON.stringify(slideOriginal).slice(0,16500):'';
+  const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+(plan.tipoMaterial==='PRESENTACION'?'':Didactics.prompt(plan))+Inclusive.prompt(plan)+DidacticResources.prompt(plan)+International.prompt(plan)+strictFormat+caseRepair+developmentRepair+strategyRepair+correctionContext+duplicateRepair+slideRepair;
+  const fallback=R.fallbackPrompt(plan,base,batch,parts,correcciones,fuentesDocumentales)+(plan.tipoMaterial==='PRESENTACION'?'':Didactics.prompt(plan))+Inclusive.prompt(plan)+DidacticResources.prompt(plan)+International.prompt(plan)+duplicateRepair+slideRepair;
   let result;
   if(fase==='items'&&borradorBloque){
    const preserved=R.normalizePart(borradorBloque,batch),pending=R.partIssues(preserved,plan,batch,parts);
    if(pending.length&&!R.traceIssuesOnly(pending))return res.status(400).json({error:'El borrador no puede repararse solo con trazabilidad.',detalle:pending.join('; '),reintentable:false});
    result={value:preserved,provider:autor.proveedor,model:autor.modelo};
   }else result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true})+Textbooks.instruction(librosRegulares)+OATextbookMatrix.instruction(matrizOA)+OAPedagogy.instructions(planUsoFuentes)+TPInternational.prompt(referenciasMetalmecanica),...keys,exclude,{deadline,fallbackPrompt:fallback,fallbackMaxOutputTokens:fase==='base'?4096:3000,maxOutputTokens:fase==='base'?(plan.tipoMaterial==='PRESENTACION'?2600:10000):batch?.formato?8000:batch?.tipo==='diapositivas'?6500:5000});
-  if(fase==='items'){result.value=R.normalizePart(result.value,batch);if(duplicateOriginal)result.value=R.mergeDuplicateRepair(duplicateOriginal,result.value,plan,batch,parts);}
+  if(fase==='items'){result.value=R.normalizePart(result.value,batch);if(slideOriginal)result.value=R.mergeSlideRepair(slideOriginal,result.value,plan,batch,parts);if(duplicateOriginal)result.value=R.mergeDuplicateRepair(duplicateOriginal,result.value,plan,batch,parts);}
   let issues=R.partIssues(result.value,plan,fase==='items'?batch:null,parts);
   if(fase==='items'&&!duplicateOriginal&&R.duplicateItems(result.value,plan,batch,parts).length&&issues.every(x=>/repite literalmente/.test(x)))duplicateOriginal=result.value;
   if(issues.length&&!R.traceIssuesOnly(issues)&&deadline-Date.now()>5000){
-   result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true})+'\nCORRIGE este bloque completo: '+issues.join('; ')+(duplicateOriginal?'\nSustituye solo los duplicados y conserva los demás ítems de este borrador: '+JSON.stringify(duplicateOriginal):''),...keys,exclude,{deadline,fallbackPrompt:fallback+'\nCORRIGE ESTE BLOQUE: '+issues.join('; ')+(duplicateOriginal?'\nConserva ítems válidos del borrador y sustituye solo repetidos: '+JSON.stringify(duplicateOriginal):''),fallbackMaxOutputTokens:fase==='base'?4096:3000,maxOutputTokens:fase==='base'?(plan.tipoMaterial==='PRESENTACION'?2600:10000):batch?.formato?8000:batch?.tipo==='diapositivas'?6500:5000});
-   if(fase==='items'){result.value=R.normalizePart(result.value,batch);if(duplicateOriginal)result.value=R.mergeDuplicateRepair(duplicateOriginal,result.value,plan,batch,parts);}
+   const slideFirstDraft=fase==='items'&&batch?.tipo==='diapositivas'?result.value:null;
+   const slideCorrection=slideFirstDraft?'\nREPARA DIAPOSITIVAS YA GENERADAS (no inventes el resto): '+JSON.stringify(slideFirstDraft).slice(0,16500)+'\nErrores que debes corregir: '+issues.join('; ')+'. Devuelve EXACTAMENTE '+batch.cantidad+' diapositivas con nuevas situaciones y consignas para las repetidas; las demás deben conservarse.':'';
+   result=await call(prompt+slideCorrection+S.evidencePrompt(fuentesDocumentales,{compact:true})+'\nCORRIGE este bloque completo: '+issues.join('; ')+(duplicateOriginal?'\nSustituye solo los duplicados y conserva los demás ítems de este borrador: '+JSON.stringify(duplicateOriginal):''),...keys,exclude,{deadline,fallbackPrompt:fallback+slideCorrection+'\nCORRIGE ESTE BLOQUE: '+issues.join('; ')+(duplicateOriginal?'\nConserva ítems válidos del borrador y sustituye solo repetidos: '+JSON.stringify(duplicateOriginal):''),fallbackMaxOutputTokens:fase==='base'?4096:3000,maxOutputTokens:fase==='base'?(plan.tipoMaterial==='PRESENTACION'?2600:10000):batch?.formato?8000:batch?.tipo==='diapositivas'?6500:5000});
+   if(fase==='items'){result.value=R.normalizePart(result.value,batch);if(slideFirstDraft)result.value=R.mergeSlideRepair(slideFirstDraft,result.value,plan,batch,parts);if(duplicateOriginal)result.value=R.mergeDuplicateRepair(duplicateOriginal,result.value,plan,batch,parts);}
    issues=R.partIssues(result.value,plan,fase==='items'?batch:null,parts);
   }
   if(fase==='items'&&R.traceIssuesOnly(issues)&&deadline-Date.now()>5500){
@@ -105,6 +116,7 @@ module.exports=async(req,res)=>{
    }catch(error){console.warn('HEVA strategy-only repair failed',error.code||'ERROR');}
   }
   if(fase==='items'&&R.duplicateItems(result.value,plan,batch,parts).length&&issues.every(x=>/repite literalmente/.test(x)))return res.status(422).json({error:'El bloque contiene preguntas repetidas. Se conservan los ítems válidos.',detalle:issues.join('; '),codigo:'ITEM_DUPLICATES',borradorBloque:result.value,reintentable:true});
+  if(fase==='items'&&batch?.tipo==='diapositivas'&&issues.length)return res.status(422).json({error:'Un grupo de diapositivas necesita corrección. Se conserva el borrador para reparar solo lo necesario.',detalle:issues.join('; '),codigo:'SLIDE_BLOCK_INCOMPLETE',borradorBloque:result.value,reintentable:true});
   if(issues.length)return res.status(422).json({error:'El bloque requiere ajustes. Se conservan los anteriores.',detalle:issues.join('; '),codigo:fase==='base'&&issues.some(x=>x.includes('La trazabilidad de estrategia no cubre'))?'BASE_TRACES_INCOMPLETE':fase==='base'&&issues.some(x=>x.includes('La estrategia seleccionada no está desarrollada'))?'STRATEGY_PLAN_INCOMPLETE':'BLOCK_INVALID',reintentable:true});
   return res.status(200).json({exito:true,parte:result.value,autor:{proveedor:result.provider,modelo:result.model,fecha:new Date().toISOString()},bloques:R.batches(plan)});
  }catch(e){console.error('HEVA recovery:',e.code||'ERROR',JSON.stringify({fase:String(req.body?.fase||'').slice(0,20),bloque:String(req.body?.batch?.tipo||'').slice(0,30),inicio:Number(req.body?.batch?.inicio)||0,proveedores:e.proveedores||[]}));const tooLarge=e.code==='AI_REQUEST_TOO_LARGE',limited=e.code==='AI_RATE_LIMIT',invalid=String(e?.code||'').startsWith('AI_RESPONSE_'),unavailable=['AI_UNAVAILABLE','AI_TIMEOUT'].includes(e.code);return res.status(limited?429:tooLarge||invalid||unavailable?503:500).json({error:limited?'Cuota temporal de IA agotada.':invalid?'La IA devolvió un bloque incompleto o inválido.':unavailable?'No hubo respuesta de los proveedores disponibles.':'No se pudo completar este bloque.',detalle:tooLarge?'El proveedor rechazó el tamaño de este bloque. Los bloques ya completados siguen guardados.':invalid?'La IA no devolvió este bloque en formato JSON válido; los bloques completados siguen guardados.':unavailable?'Los proveedores de IA no respondieron. Revisa su disponibilidad y vuelve a intentar.':limited?'El proveedor alcanzó su cuota temporal.':e instanceof TypeError?'Error interno al procesar el material. Código TYPE_ERROR; se requiere revisar el registro del servidor.':(e.message||'El avance anterior se conserva.'),codigo:e.code||(e instanceof TypeError?'TYPE_ERROR':'RECOVERY_ERROR'),reintentable:true,reintentarEn:e.retryAfter||0});}

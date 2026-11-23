@@ -46,7 +46,7 @@ function mountVisualForm(){
  let initial;try{initial=JSON.parse(localStorage.getItem('heva-recursos-visuales-v1')||'null')}catch{}
  let savedPlacement;try{savedPlacement=localStorage.getItem('heva-imagen-ubicacion-v1')||'explicacion'}catch{savedPlacement='explicacion'}
  const panel=element('details',null,{id:'heva-visual-options-form',class:'no-print border rounded p-3 my-3'});
- panel.append(element('summary','Recursos visuales opcionales y ubicación'),
+ panel.append(element('summary','Recursos del material y apoyos visuales · opcional'),
  element('p','Las imágenes no son obligatorias. Decide si quieres fotos, diagramas, gráficos y recuadros, y dónde irá la imagen principal. Una fotografía de fuente externa solo se añade si está disponible y se ha comprobado su pertinencia y uso permitido.'));
  const fields=visualFields(initial||{},'heva-visual-nuevo',value=>{
   try{localStorage.setItem('heva-recursos-visuales-v1',JSON.stringify(value))}catch{}
@@ -62,10 +62,30 @@ function mountVisualForm(){
  const textbookNotice=element('p','Permite consultar catálogos educativos de Chile y México. No equipara cursos o campos formativos con niveles EPJA. Solo se usa contenido de documentos PDF efectivamente recuperados, pertinentes y verificados; nunca se copian libros completos.');
  textbookNotice.style.cssText='font-size:.83rem;color:#57534e';
  textbookInput.addEventListener('change',()=>{try{localStorage.setItem('heva-usar-textos-escolares-v1',String(textbookInput.checked))}catch{}});
- panel.append(textbookLine,textbookNotice,fields.box,position.box,cover.box,button('Con recursos para el material nuevo',()=>fields.set(true)),button('Solo texto para el material nuevo',()=>fields.set(false)));
+ const resourcesBox=element('fieldset',null,{id:'heva-didactic-resources'});
+ resourcesBox.style.cssText='padding:12px;border:1px solid #d8c7b8;border-radius:10px;margin:12px 0';
+ const legend=element('legend','Recursos que deben existir dentro de la guía o PPT');
+ legend.style.cssText='font-weight:bold;font-size:.91rem;color:#782f43';
+ const resourceHelp=element('p','Estos recursos son contenido didáctico, no decoración. Selecciona solo los necesarios: HEVA deberá aportar el texto, los datos y las consignas; si no dispone de un mapa auténtico, no inventará uno.');
+ resourceHelp.style.cssText='font-size:.81rem;margin:5px 0 9px';
+ resourcesBox.append(legend,resourceHelp);
+ const items={texto:'Texto o diálogo completo',noticia:'Noticia didáctica simulada',comparacion:'Comparación de situaciones',tabla:'Tabla con datos reales del ejercicio',mapa:'Mapa o esquema espacial pertinente'};
+ const savedResources=(()=>{try{const v=JSON.parse(localStorage.getItem('heva-recursos-didacticos-v1')||'[]');return Array.isArray(v)?v:[]}catch{return[]}})();
+ const resourceInputs=[];
+ for(const [id,label]of Object.entries(items)){
+  const row=element('label');row.style.cssText='display:flex;align-items:flex-start;gap:9px;padding:5px 2px;font-size:.85rem';
+  const cb=element('input',null,{type:'checkbox'});cb.value=id;cb.checked=savedResources.includes(id);cb.dataset.hevaResource=id;
+  row.append(cb,document.createTextNode(label));resourcesBox.append(row);resourceInputs.push(cb);
+  cb.addEventListener('change',()=>{try{localStorage.setItem('heva-recursos-didacticos-v1',JSON.stringify(resourceInputs.filter(e=>e.checked).map(e=>e.value)))}catch{}});
+ }
+ const materialType=byId('tipo-material');
+ const resourcesApplicable=()=>['GUIA','PRESENTACION','ACCESIBLE','TALLER'].includes(materialType?.value);
+ function refreshResources(){resourcesBox.hidden=!resourcesApplicable();}
+ materialType?.addEventListener('change',refreshResources);refreshResources();
+ panel.append(textbookLine,textbookNotice,resourcesBox,fields.box,position.box,cover.box,button('Con recursos para el material nuevo',()=>fields.set(true)),button('Solo texto para el material nuevo',()=>fields.set(false)));
  const anchor=byId('studio-documents');if(anchor)anchor.after(panel);else byId('panel-crear')?.append(panel);
  const previous=window.studioGenerationExtras;
- window.studioGenerationExtras=()=>({...previous?.(),recursosVisualesHEVA:fields.read(),usarTextosEscolares:textbookInput.checked});
+ window.studioGenerationExtras=()=>({...previous?.(),recursosVisualesHEVA:fields.read(),recursosDidacticosHEVA:resourcesApplicable()?resourceInputs.filter(x=>x.checked).map(x=>x.value):[],usarTextosEscolares:textbookInput.checked});
 }
 function balanceAnswerKeys(){
  const m=current();

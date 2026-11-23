@@ -19,5 +19,5 @@ for(const [asignatura,tema,expected] of cases)test('visual OA '+asignatura+' / '
  const sections=[{title:'Introducción',text:'Presentación'},{title:tema,text:'Ejemplo: analizamos el tema y sus efectos.'}];
  const output=context.HEVASlideDesign.decorate({tipoMaterial:'PRESENTACION',asignatura,temaEspecifico:tema,recursosVisualesHEVA:{imagenes:true,diagramas:true}},sections);
  assert.ok(output[1].image,tema);
- assert.ok(labels.includes(expected),tema+' labels: '+labels.join(','));
+ assert.ok(labels.some(text=>text.includes(expected)),tema+' labels: '+labels.join(','));
 });

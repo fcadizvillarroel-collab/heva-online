@@ -65,6 +65,10 @@ async function recuperarMaterialHEVA(plan,allowRepair=true,repairRound=0){
    checkpoint.pendingDuplicate={tipo:body.batch.tipo,inicio:body.batch.inicio,parte:data.borradorBloque};recoverySave(checkpoint);
    if(retry){if(message)message.textContent='Reparando solo las preguntas repetidas; se conservan los demás ítems y pautas…';return request({...body,borradorBloque:undefined,repararDuplicados:data.borradorBloque},false);}
   }
+  if(!response.ok&&body.fase==='items'&&body.batch?.tipo==='diapositivas'&&data.codigo==='SLIDE_BLOCK_INCOMPLETE'&&data.borradorBloque){
+   checkpoint.pendingSlide={tipo:body.batch.tipo,inicio:body.batch.inicio,parte:data.borradorBloque};recoverySave(checkpoint);
+   if(retry){if(message)message.textContent='Reparando solo las diapositivas observadas; los bloques completos están guardados…';return request({...body,repararDiapositivas:data.borradorBloque},false);}
+  }
   if(!response.ok&&body.fase==='items'&&data.codigo==='ITEM_TRACES_INCOMPLETE'&&data.borradorBloque){
    checkpoint.pendingPart={tipo:body.batch.tipo,inicio:body.batch.inicio,parte:data.borradorBloque};recoverySave(checkpoint);
    if(retry){if(message)message.textContent='Las preguntas están guardadas. Completando solo la trazabilidad, sin regenerarlas…';return request({...body,borradorBloque:data.borradorBloque},false);}
@@ -90,9 +94,9 @@ async function recuperarMaterialHEVA(plan,allowRepair=true,repairRound=0){
  for(let i=0;i<checkpoint.bloques.length;i++){
   if(checkpoint.parts[i])continue;
   if(message)message.textContent=`Completando actividades: bloque ${i+1} de ${checkpoint.bloques.length}…`;
-  const currentBatch=checkpoint.bloques[i],pending=checkpoint.pendingPart,duplicate=checkpoint.pendingDuplicate,repairDraft=checkpoint.repairDrafts?.[i]||(duplicate?.tipo===currentBatch.tipo&&duplicate?.inicio===currentBatch.inicio?duplicate.parte:null);
-  const data=await request({fase:'items',base:checkpoint.base,autor:checkpoint.autor,parts:checkpoint.parts,batch:currentBatch,correcciones:checkpoint.correcciones||[],...(repairDraft?{repararDuplicados:repairDraft}:{}),...(!repairDraft&&pending?.tipo===currentBatch.tipo&&pending?.inicio===currentBatch.inicio?{borradorBloque:pending.parte}:{})});
-  delete checkpoint.pendingPart;if(duplicate?.tipo===currentBatch.tipo&&duplicate?.inicio===currentBatch.inicio)delete checkpoint.pendingDuplicate;if(checkpoint.repairDrafts)delete checkpoint.repairDrafts[i];checkpoint.parts[i]=data.parte;recoverySave(checkpoint);
+  const currentBatch=checkpoint.bloques[i],pending=checkpoint.pendingPart,duplicate=checkpoint.pendingDuplicate,slide=checkpoint.pendingSlide,repairDraft=checkpoint.repairDrafts?.[i]||(duplicate?.tipo===currentBatch.tipo&&duplicate?.inicio===currentBatch.inicio?duplicate.parte:null);
+  const data=await request({fase:'items',base:checkpoint.base,autor:checkpoint.autor,parts:checkpoint.parts,batch:currentBatch,correcciones:checkpoint.correcciones||[],...(repairDraft?{repararDuplicados:repairDraft}:{}),...(slide?.tipo===currentBatch.tipo&&slide?.inicio===currentBatch.inicio?{repararDiapositivas:slide.parte}:{}),...(!repairDraft&&pending?.tipo===currentBatch.tipo&&pending?.inicio===currentBatch.inicio?{borradorBloque:pending.parte}:{})});
+  delete checkpoint.pendingPart;if(slide?.tipo===currentBatch.tipo&&slide?.inicio===currentBatch.inicio)delete checkpoint.pendingSlide;if(duplicate?.tipo===currentBatch.tipo&&duplicate?.inicio===currentBatch.inicio)delete checkpoint.pendingDuplicate;if(checkpoint.repairDrafts)delete checkpoint.repairDrafts[i];checkpoint.parts[i]=data.parte;recoverySave(checkpoint);
  }
  if(message)message.textContent='Comprobando objetivo, cantidades, casos y estructura…';
  const result=await request({fase:'finalizar',base:checkpoint.base,parts:checkpoint.parts,autor:checkpoint.autor});
@@ -136,7 +140,10 @@ function mostrarRecuperacionPendienteHEVA(){
  const nombre=nombres[tipo]||'material';
  const title=document.createElement('h3');title.className='font-bold text-sm text-amber-950';title.textContent='Generación de '+nombre+' interrumpida';
  const text=document.createElement('p');text.className='text-xs text-amber-900 mt-1';
- text.textContent='HEVA conservó un avance sin terminar: '+String(plan.cantAlternativas||0)+' alternativas, '+String(plan.cantDesarrollo||0)+' preguntas de desarrollo y '+String(plan.cantCasos||0)+' casos solicitados. Puedes continuar el encargo original o apartarlo de forma recuperable antes de iniciar otro. No es una actividad de la '+nombre+'.';
+ text.textContent=tipo==='PRESENTACION'
+ ?'Presentación guardada: '+String(saved.parts.filter(Boolean).length)+' de '+String(saved.bloques?.length||'?')+' bloques completos. No tiene relación con la planificación u otro material que estés creando.'
+ :'Avance guardado: '+String(saved.parts.filter(Boolean).length)+' de '+String(saved.bloques?.length||'?')+' bloques completos. Puedes continuar o apartar el encargo anterior; no forma parte del material actual.';
+ text.textContent+=' No es una actividad de la '+nombre+'.';
  const actions=document.createElement('div');actions.className='heva-recovery-actions flex flex-wrap gap-2 mt-2';
  const button=document.createElement('button');button.type='button';button.textContent='Continuar '+nombre+' pendiente';button.className='heva-recovery-action border rounded px-3 py-2 font-bold bg-amber-100 text-amber-950';button.disabled=hevaResumeBusy||!!document.getElementById('btn-generar')?.disabled;
  const discard=document.createElement('button');discard.type='button';discard.textContent='Apartar avance (recuperable)';discard.className='heva-recovery-action border rounded px-3 py-2 font-semibold bg-white text-stone-800';discard.disabled=hevaRecoveryRunning();
@@ -157,7 +164,27 @@ function mostrarRecuperacionPendienteHEVA(){
  catch(error){hevaResumeMessage=error.message||'La recuperación sigue pendiente. El avance se conserva.';status.textContent=hevaResumeMessage;}
  finally{hevaResumeBusy=false;if(generate)generate.disabled=false;button.disabled=false;}
  };
+ // Conservar los controles originales como hijos directos para reanudación,
+ // restauración y compatibilidad; mostrar solo un botón compacto hasta abrirlos.
  actions.append(button,discard);box.append(title,text,actions,status);
+ const toggle=document.createElement('div');toggle.id='heva-resume-toggle';
+ toggle.setAttribute('role','button');toggle.setAttribute('tabindex','0');
+ toggle.className='heva-recovery-action text-xs font-bold text-amber-950';
+ const chosen=document.getElementById('tipo-material')?.value;
+ const label=(chosen!==tipo?'Hay una '+nombre+' anterior guardada':'Avance de '+nombre+' recuperable');
+ let expanded=false;
+ const setExpanded=value=>{
+  expanded=!!value;
+  for(const n of [title,text,actions])n.hidden=!expanded;
+  status.hidden=!expanded&&!status.textContent;
+  toggle.textContent=label+(expanded?' · ocultar opciones':' · ver opciones');
+  toggle.setAttribute('aria-expanded',String(expanded));
+ };
+ toggle.onclick=()=>setExpanded(!expanded);
+ toggle.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault?.();setExpanded(!expanded);}};
+ box.append(toggle);setExpanded(false);
+ if(hevaResumeMessage)setExpanded(true);
 }
 mostrarRecuperacionPendienteHEVA();
+document.getElementById('tipo-material')?.addEventListener?.('change',mostrarRecuperacionPendienteHEVA);
 if(typeof MutationObserver==='function'&&document.getElementById('btn-generar'))new MutationObserver(mostrarRecuperacionPendienteHEVA).observe(document.getElementById('btn-generar'),{attributes:true,attributeFilter:['disabled']});
