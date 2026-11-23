@@ -51,7 +51,7 @@ def audit(output):
       "## Alertas por tipo",""]
     markdown.extend(f"- {flag}: {value} OA" for flag,value in sorted(counts.items(),key=lambda x:(-x[1],x[0])))
     markdown.extend(["","## Próximas acciones","Corregir primero las consignas repetidas entre distintos OA, aportar ejemplos disciplinares y pautas justificadas, y validar las fuentes antes de atribuirles procedencia.","La ausencia de alertas automáticas no equivale a aprobación humana."])
-    (output/"resumen_calidad_didactica.md").write_text("\\n".join(markdown)+"\\n",encoding="utf-8")
+    (output/"resumen_calidad_didactica.md").write_text("\n".join(markdown)+"\n",encoding="utf-8")
     print(json.dumps(summary,ensure_ascii=False))
     return summary
 
