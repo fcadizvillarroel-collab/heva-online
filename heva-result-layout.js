@@ -82,7 +82,14 @@ function arrange(){
  const empty=byId('heva-empty-preview');
  if(empty)empty.hidden=active;
  const stageFour=byId('heva-stage-4');
- if(stageFour)stageFour.hidden=!active;
+ if(stageFour){
+  // Orientación completa visible aun sin material: la disponibilidad cambia
+  // sin ocultar el número ni duplicar los controles.
+  stageFour.hidden=false;
+  const hint=stageFour.querySelector('.heva-inline-stage-hint');
+  const label=active?'Material disponible: puedes guardarlo o exportarlo.':'Disponible después de generar el material.';
+  if(hint&&hint.textContent!==label)hint.textContent=label;
+ }
  article.hidden=!active;
  edit.hidden=!active;
  review.hidden=!active;

@@ -34,7 +34,8 @@ function init(){
      hint.textContent=description;
      heading.append(hint);
    }
-   if(number===4)heading.hidden=true; // La exportación solo existe tras generar.
+   // El recorrido completo debe verse desde el inicio. Solo los botones
+   // de descarga permanecen inactivos hasta tener un material.
    anchor.before(heading);
  }
  const typeEl=document.getElementById('tipo-material');
@@ -44,7 +45,8 @@ function init(){
  placeStage(1,'Tipo y nivel',typeEl?.parentElement);
  placeStage(2,'Objetivo y estrategia',oaEl?.closest('div.border-t')||oaEl?.parentElement);
  placeStage(3,'Generar y revisar',generateEl,'Revisa el material en el panel de resultados.');
- placeStage(4,'Guardar o exportar',exportBar);
+ placeStage(4,'Guardar o exportar',document.getElementById('heva-empty-preview')||exportBar,
+   'Disponible después de generar el material.');
  // Cada etapa ya está marcada junto a su campo: no repetir una segunda lista de pasos.
  document.querySelectorAll('label').forEach(label=>{if(label.htmlFor)return;const wrapper=label.parentElement;if(!wrapper)return;const control=wrapper.querySelector(':scope > input,:scope > select,:scope > textarea');if(control?.id)label.htmlFor=control.id;});
  document.querySelectorAll('button').forEach(btn=>{if(btn.textContent.trim()==='Borrar todo el historial'){btn.addEventListener('click',e=>{if(!window.confirm('¿Borrar todos los materiales guardados en este navegador? Esta acción no se puede deshacer.')){e.stopImmediatePropagation();e.preventDefault();}},true);}});
