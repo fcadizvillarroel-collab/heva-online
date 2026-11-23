@@ -50,3 +50,13 @@ test('PowerPoint displays formal and informal messages as distinct editable pane
  assert.ok(visible.some(x=>x.includes('Hola,')));
  assert.ok(!visible.some(x=>x.includes('Comparar destinatario y situación')));
 });
+
+test('deep pedagogical requirements reach direct and staged generation',()=>{
+ const direct=fs.readFileSync(path.join(__dirname,'../api/generate.js'),'utf8');
+ const recovery=fs.readFileSync(path.join(__dirname,'../lib/recovery.cjs'),'utf8');
+ const deep=require('../heva-deep-materials.cjs');
+ assert.match(direct,/DeepMaterials\.guidance\(plan\)/);
+ assert.match(recovery,/heva-deep-materials\.cjs'\)\.guidance\(p\)/);
+ assert.match(deep.guidance({tipoMaterial:'GUIA',asignatura:'Estudios Sociales'}),/ejemplo modelado/i);
+ assert.match(deep.guidance({tipoMaterial:'PRESENTACION',asignatura:'Historia'}),/VARIEDAD VISUAL/);
+});
