@@ -77,6 +77,7 @@ const fs=require('node:fs/promises'), path=require('node:path');
    await page.locator('#heva-ajustes-adicionales > summary').click();
    await page.locator('#integrated-lab > summary').click();
    assert.ok(await page.locator('#lab-preview-plan').isVisible(),'LAB sigue accesible dentro del paso 2');
+   await page.locator('.heva-lab-close').click();
    await page.locator('#heva-stage-1 > summary').click();
    await page.locator('.heva-start').click();
    assert.equal(await page.locator('#heva-stage-1').evaluate(el=>el.open),true,'Comenzar a crear debe abrir el paso 1');
