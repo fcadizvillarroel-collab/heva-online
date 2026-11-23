@@ -1053,11 +1053,11 @@ function labMessage(title,message){
   const p=document.createElement('p');p.className='mt-2';p.textContent=message;
   resultLab.append(h,p);return resultLab;
 }
-$('heva-abrir-estrategias')?.addEventListener('click',()=>{
+$('heva-abrir-estrategias')?.addEventListener?.('click',()=>{
   const panel=$('integrated-lab');panel.open=true;
   panel.scrollIntoView({behavior:'smooth',block:'start'});
 });
-$('lab-preview-plan').addEventListener('click',()=>{
+$('lab-preview-plan')?.addEventListener?.('click',()=>{
  try{
   if(!$('lab-enabled').checked)throw Error('Marca “Usar estas estrategias combinadas al generar”.');
   const p=window.hevaExperimentalPlan();
@@ -1076,7 +1076,7 @@ $('lab-preview-plan').addEventListener('click',()=>{
   panel.append(list);
  }catch(e){labMessage('Revisa la selección antes de generar',e.message)}
 });
-$('lab-preview-model').addEventListener('click',async()=>{
+$('lab-preview-model')?.addEventListener?.('click',async()=>{
  const panel=labMessage('Guía modelo · Globalización',
    'Ejemplo demostrativo del visor, no generado por IA. Sus contenidos y OA deben revisarse antes de utilizarlos en una clase.');
  try{
