@@ -1,0 +1,32 @@
+name: HEVA production live AI single-request check
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/production_live_ai_smoke.cjs'
+      - '.github/workflows/heva-live-ai-production.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live-production-generation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check syntax without invoking providers
+        run: node --check scripts/production_live_ai_smoke.cjs
+      - name: Real HEVA generation (ONE controlled request; may use shared free quota)
+        run: node scripts/production_live_ai_smoke.cjs
+      - name: Preserve real response status and counts without student data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: heva-production-live-ai-smoke
+          path: out/live-ai-production-smoke.json
+          retention-days: 14
