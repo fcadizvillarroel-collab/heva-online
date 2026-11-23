@@ -79,7 +79,7 @@ function speechRegisterVisual(){
   ctx.font='bold 20px Arial';ctx.fillStyle='#67313D';ctx.fillText('REGISTRO',55,477);
   ctx.font='18px Arial';ctx.fillStyle='#443D3A';ctx.fillText('Se elige según destinatario, situación y propósito.',185,477);
   ctx.fillText('Informal no equivale a incorrecto. Ambos mensajes son apropiados.',55,502);
-  return image({data:canvas.toDataURL('image/png'),width:1000,height:550,alt:'Comparación original con ejemplos completos: solicitud formal a dirección y solicitud informal a una amistad; elegir según contexto, destinatario y propósito',generated:true});
+  return image({data:canvas.toDataURL('image/png'),width:1000,height:550,alt:'REGISTRO formal e informal: comparación original con ejemplos completos de solicitud formal a dirección e informal a una amistad, elegidos según contexto, destinatario y propósito',generated:true});
  }catch{return null;}
 }
 function subjectVisual(section,topic,subject){
