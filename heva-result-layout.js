@@ -87,7 +87,9 @@ function arrange(){
   // sin ocultar el número ni duplicar los controles.
   stageFour.hidden=false;
   const hint=stageFour.querySelector('.heva-inline-stage-hint');
-  const label=active?'Material disponible: puedes guardarlo o exportarlo.':'Disponible después de generar el material.';
+  const label=active
+   ?'Material disponible: comprueba el resultado y guarda o descarga en Word o PowerPoint.'
+   :'Disponible después de generar: revisa el material y luego guárdalo o expórtalo.';
   if(hint&&hint.textContent!==label)hint.textContent=label;
  }
  article.hidden=!active;
