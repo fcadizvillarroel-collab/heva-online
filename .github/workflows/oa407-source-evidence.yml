@@ -1,0 +1,38 @@
+name: HEVA 407 OA claim-level source evidence
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/oa_case_sources.py'
+      - 'scripts/audit_oa407_source_evidence.py'
+      - 'scripts/test_oa407_source_evidence.py'
+      - '.github/workflows/oa407-source-evidence.yml'
+  pull_request:
+    paths:
+      - 'scripts/oa_case_sources.py'
+      - 'scripts/audit_oa407_source_evidence.py'
+      - 'scripts/test_oa407_source_evidence.py'
+      - '.github/workflows/oa407-source-evidence.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check official source provenance and no fabricated approvals
+        run: python scripts/test_oa407_source_evidence.py
+      - name: Produce 407 OA evidence and reviewer queue
+        run: python scripts/audit_oa407_source_evidence.py out/evidencia_factual
+      - name: Preserve all per-OA evidence and pending statuses
+        uses: actions/upload-artifact@v4
+        with:
+          name: heva-407-oa-targeted-source-evidence
+          path: out/evidencia_factual/*
+          retention-days: 30
