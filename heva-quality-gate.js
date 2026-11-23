@@ -13,14 +13,21 @@ function inspect({material={},sections=[],visuals=[]}={}){
  // como "ejemplo" o encabezados vacíos "Paso 1". Son advertencias, nunca un
  // bloqueo automático de exportación ni una aprobación pedagógica.
  const rawSections=sections.map(x=>String(x?.text||''));
- const emptyStep=/(?:^|\n)\s*(?:paso|etapa)\s*\d{1,2}\s*[:.)-]?\s*(?=\n|$)/im;
- const placeholderStep=/(?:^|\n)\s*(?:paso|etapa)\s*\d{1,2}\s*[:.)-]?\s*(?:\.{2,}|por completar|desarrollar aqui|pendiente)\s*(?=\n|$)/im;
- if(teaching&&rawSections.some(t=>emptyStep.test(t)||placeholderStep.test(t)))
+ const stepHeading=/^(?:paso|etapa)\s*\d{1,2}\s*[:.)-]?\s*$/i;
+ const placeholder=/^(?:\.{2,}|por completar|desarrollar aqu[ií]|pendiente)$/i;
+ const missingStep=rawSections.some(t=>{
+  const lines=t.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  return lines.some((line,i)=>stepHeading.test(line)&&(i===lines.length-1||stepHeading.test(lines[i+1])||placeholder.test(lines[i+1])));
+ });
+ if(teaching&&missingStep)
   add('PASOS_SIN_DESARROLLO','Existen pasos o etapas numeradas sin explicación. Completar el procedimiento antes de usar el material.',18);
- const exampleHeading=/(?:^|\n)\s*(?:ejemplo(?:\s+(?:guiado|resuelto|modelado))?|caso\s+guiado|demostraci[oó]n)\s*[:.-]?\s*(?=\n|$)/im;
- const unfinishedExample=/(?:^|\n)\s*(?:ejemplo(?:\s+(?:guiado|resuelto|modelado))?|demostraci[oó]n)\s*:\s*(?:\.{2,}|por completar|pendiente)\s*(?=\n|$)/im;
- if(teaching&&rawSections.some(t=>unfinishedExample.test(t)||exampleHeading.test(t)&&!t.split(/\n+/).some(line=>norm(line).includes('solucion')||norm(line).includes('resultado')||norm(line).includes('comprobacion'))))
-  add('EJEMPLO_SIN_RESOLUCION','Hay un ejemplo o demostración sin resolución comprobable dentro de su apartado. Revisar el desarrollo y la pauta.',15);
+ const exampleHeading=/^(?:ejemplo(?:\s+(?:guiado|resuelto|modelado))?|caso\s+guiado|demostraci[oó]n)\s*[:.-]?\s*$/i;
+ const missingExample=rawSections.some(t=>{
+  const lines=t.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  return lines.some((line,i)=>exampleHeading.test(line)&&(i===lines.length-1||placeholder.test(lines[i+1])));
+ });
+ if(teaching&&missingExample)
+  add('EJEMPLO_SIN_RESOLUCION','Hay un ejemplo o demostración vacío o con texto provisional. Desarrollarlo antes de utilizar el material.',15);
  const cases=(material.casosEstudio||[]).map(q=>norm(q?.contextoReal).replace(/\s+/g,' ').trim()).filter(x=>x.length>=55);
  if(cases.length>=2&&new Set(cases).size<cases.length)
   add('CASOS_CONTEXTO_REPETIDO','Dos casos comparten exactamente la misma situación; utilizar contextos o datos diferentes.',16);
