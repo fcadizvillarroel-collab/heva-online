@@ -49,7 +49,7 @@ const path=require('node:path');
    assert.equal(await page.locator('.heva-steps').count(),0,'No conservar una segunda franja duplicada de pasos');
    assert.equal(before.duplicates,4,'No debe haber números repetidos');
    assert.deepEqual(before.stages.map(s=>s.label),[
-     'Tipo y nivel','Objetivo y estrategia','Generar y revisar','Guardar o exportar'
+     'Tipo y nivel','Objetivo, tema y estrategia','Generar y revisar','Guardar o exportar'
    ]);
    assert.ok(Object.values(before.matches).every(Boolean),'Los números deben acompañar a sus campos reales');
    assert.equal(before.stages[3].hidden,false,'Paso 4 debe estar visible aun antes de generar');
