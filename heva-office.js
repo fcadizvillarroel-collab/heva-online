@@ -119,6 +119,23 @@ function drawSemanticVisual(ppt,theme,slide,title,lines){
   steps.forEach((line,i)=>{const x=.86+i*(w+.18);shape(x,3.56,w,2.7,i%2?'F1E7DB':'FFFFFF');tx('TRANSFORMACIÓN '+(i+1),x+.18,3.82,w-.36,.38,13,theme.main,true);tx(line,x+.2,4.42,w-.4,1.32,n>2?19:23);});
   slide.hevaVisualType='diagram';return true;
  }
+ // Cronologías extensas: dos filas de tres hechos, con años tomados
+ // literalmente del texto. Cada etiqueta y descripción permanece editable.
+ if(kind==='chronology'&&lines.length>=5&&lines.length<=6){
+  const matches=lines.map(line=>String(line).match(/^\s*(\d{3,4})\s*:\s*(\S.+)$/));
+  if(matches.every(Boolean)&&matches.every(m=>fitsText([m[2]],3.18,1.13,21))){
+   tx(title,.8,.83,11.7,.9,31,theme.main,true);
+   matches.forEach((m,i)=>{
+    const col=i%3,row=Math.floor(i/3),x=.86+col*3.91,y=2.03+row*2.20;
+    shape(x,y,3.72,2.0,i%2?'F1E7DB':'FFFFFF');
+    shape(x+.19,y+.17,1.15,.51,theme.main);
+    tx(m[1],x+.27,y+.21,1.0,.37,20,'FFFFFF',true);
+    tx(m[2],x+.21,y+.82,3.3,1.06,21,theme.ink);
+   });
+   if(typeof slide.addNotes==='function')slide.addNotes('Cronología basada en los datos del material:\n'+lines.join('\n'));
+   slide.hevaVisualType='diagram';return true;
+  }
+ }
  if(kind==='process'||kind==='chronology'){
   const items=lines;if(!items.length||items.length>4||items.some(t=>!fitsText([t],(11.6-(items.length-1)*.16)/items.length-.46,1.98,26)))return false;
   tx(title,.8,.83,11.7,.9,31,theme.main,true);
