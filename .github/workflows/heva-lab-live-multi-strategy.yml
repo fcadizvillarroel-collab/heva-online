@@ -1,0 +1,71 @@
+name: HEVA LAB one-off live multi-strategy verification
+# Ejecución estrictamente manual: evita consumo repetido de cuota gratuita de IA.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  multi-strategy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # pinned v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # pinned v4.4.0
+        with:
+          node-version: '22'
+      - name: Verify catalog and construct a tiny 2-strategy EPJA request
+        run: |
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const catalog=require('./catalogo-publicado.json');
+          const oa=catalog.find(x=>x.clave_interna==='D257|MED|Estudios Sociales|N2|7');
+          if(!oa||oa.estado!=='APROBADO'||!oa.referencia_comprobada)throw Error('OA EPJA no encontrado en catálogo publicado');
+          const {plan,validate}=require('./experimental/integration.js');
+          const integrated=plan({
+            strategies:[{id:'casos',quantity:1},{id:'multicausalidad',quantity:1}],
+            counts:{alternativas:2,desarrollo:0,lecturas:1},
+            mode:'manual',
+            manual:{'casos-1':{alternativas:1,desarrollo:0,lecturas:1},'multicausalidad-1':{alternativas:1,desarrollo:0,lecturas:0}}
+          });
+          const verdict=validate(integrated);
+          if(!verdict.ok)throw Error(verdict.errors.join('; '));
+          const body={
+            asignatura:oa.asignatura,nivel:oa.nivel,marcoCurricular:oa.marco,
+            objetivoAprendizaje:oa.texto_literal,temaEspecifico:'Dimensiones de globalización: decisiones cotidianas',
+            tipoMaterial:'EVALUACION',estrategiaDidactica:'CASOS',
+            cantAlternativas:2,cantDesarrollo:0,cantCasos:1,planIntegrado:integrated,
+            modoReferencia:'NINGUNA',adecuacionesPIE:[],
+            instruccionesDocente:'Evaluación breve EPJA en papel, con dos situaciones diferentes y ejemplos de adultos; conservar pauta separada.'
+          };
+          fs.writeFileSync('/tmp/heva-lab-live-input.json',JSON.stringify(body));
+          console.log('Plan de prueba: 2 estrategias, 2 alternativas, 1 caso; OA EPJA literal confirmado.');
+          NODE
+      - name: Call production once (no production credentials or student data)
+        run: |
+          set -euo pipefail
+          STATUS=$(curl --silent --show-error --location --max-time 75 -o /tmp/heva-lab-live-result.json -w '%{http_code}' \
+            -H 'Content-Type: application/json' --data-binary @/tmp/heva-lab-live-input.json \
+            https://heva-online.vercel.app/api/generate) || STATUS=000
+          STATUS="$STATUS" node - <<'NODE'
+          const fs=require('node:fs');
+          let out={};
+          try{out=JSON.parse(fs.readFileSync('/tmp/heva-lab-live-result.json','utf8'))}catch(e){throw Error('La API no devolvió JSON legible; HTTP '+process.env.STATUS)}
+          const mat=out.material||{};
+          const plan=JSON.parse(fs.readFileSync('/tmp/heva-lab-live-input.json','utf8'));
+          const refs=(mat.trazabilidadEstrategia||[]).filter(x=>/^ALT-[12]$|^CASO-1$/.test(x.referencia||''));
+          const summary={http:process.env.STATUS,exito:out.exito===true,alternativas:mat.preguntasAlternativas?.length||0,
+            casos:mat.casosEstudio?.length||0,desarrollo:mat.preguntasDesarrollo?.length||0,
+            trazas:refs.map(x=>({ref:x.referencia,estrategias:x.estrategiasIntegradas||[]})),
+            codigo:out.codigo||null,error:String(out.error||'').slice(0,180),
+            detalle:String(out.detalle||'').slice(0,350)};
+          console.log('HEVA LAB live multi-strategy:',JSON.stringify(summary));
+          if(process.env.STATUS!=='200'||out.exito!==true)throw Error('Generación real no confirmada; consultar resumen de respuesta.');
+          if(mat.objetivoAprendizaje!==plan.objetivoAprendizaje)throw Error('El OA literal cambió.');
+          if(summary.alternativas!==2||summary.casos!==1||summary.desarrollo!==0)throw Error('Cantidad generada distinta del encargo.');
+          const keys=new Map(refs.map(x=>[x.referencia,x.estrategiasIntegradas||[]]));
+          for(const ref of ['ALT-1','CASO-1'])if(!keys.get(ref)?.includes('casos-1'))throw Error('Falta traza '+ref+' → casos-1');
+          if(!keys.get('ALT-2')?.includes('multicausalidad-1'))throw Error('Falta traza ALT-2 → multicausalidad-1');
+          console.log('Resultado: cantidades y vínculos de dos estrategias confirmados. La validación disciplinar sigue pendiente.');
+          NODE
