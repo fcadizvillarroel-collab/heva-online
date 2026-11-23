@@ -99,3 +99,18 @@ test('cronología usa fechas escritas por el docente sin inventar fechas nuevas'
  assert.ok(texts.includes('1914: Comienza la Primera Guerra Mundial.'));
  assert.equal(page.visualKind,'diagram');
 });
+
+test('comparaciones disciplinares se basan en dos afirmaciones concretas, no en etiquetas genéricas',()=>{
+ const pairs=[['Causa: La falta de materias primas reduce la producción.','Consecuencia: El taller retrasa la entrega.'],['Problema: Dos trabajadores discrepan sobre el turno.','Solución: Acuerdan un horario en mediación.'],['Riesgo: Cortar metal sin protección ocular.','Prevención: Utilizar protección facial apropiada.']];
+ for(const lines of pairs){const parsed=D.comparisonPairs(lines);assert.equal(parsed.length,2);assert.ok(parsed[0].text.length>12);}
+ for(const lines of [['Causa: A','Causa: B'],['Problema: El mismo texto','Solución: El mismo texto'],['Título sin datos','Conclusión sin datos']])assert.equal(D.comparisonPairs(lines),null);
+});
+test('PPT usa las causas y consecuencias originales en dos paneles editables',()=>{
+ const lines=['Causa: La falta de materias primas interrumpe la producción local.','Consecuencia: Los pedidos se entregan fuera de plazo.'];
+ const view=office().preview({tipoMaterial:'PRESENTACION',titulo:'Causa y consecuencia',recursosVisualesHEVA:{imagenes:false,diagramas:true,recuadros:true,graficos:false},diapositivas:[{titulo:'Relación entre causas y consecuencias',contenido:lines}]});
+ const page=view.pages[1];
+ assert.equal(page.visualKind,'diagram');
+ assert.ok(page.elements.some(e=>e.kind==='text'&&e.text==='CAUSA'));
+ assert.ok(page.elements.some(e=>e.kind==='text'&&e.text==='CONSECUENCIA'));
+ for(const line of lines)assert.ok(page.elements.some(e=>e.kind==='text'&&e.text===line.split(': ')[1]));
+});
