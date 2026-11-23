@@ -1,3 +1,4 @@
+const Didactics=require('../heva-didactics.js');
 const TPInternational=require('../lib/tp-metal-international.cjs');
 const Inclusive=require('../heva-inclusive-supports.cjs');
 const DidacticResources=require('../lib/didactic-resource-contract.cjs');
@@ -64,8 +65,8 @@ module.exports=async(req,res)=>{
   const slideOriginal=fase==='items'&&batch?.tipo==='diapositivas'&&repararDiapositivas?R.normalizePart(repararDiapositivas,batch):null;
   const slideProblems=slideOriginal?R.partIssues(slideOriginal,plan,batch,parts):[];
   const slideRepair=slideOriginal?'\nREPARACIÓN LOCALIZADA DE DIAPOSITIVAS: repara el siguiente borrador, NO continúes como un nuevo bloque. Conserva las diapositivas válidas; sustituye solo los ejercicios, ejemplos o títulos identificados en '+JSON.stringify(slideProblems)+'. Incluye el número GLOBAL en cada traza DIAPO-N. Devuelve exactamente '+batch.cantidad+' diapositivas completas y trazas. Los estímulos, datos y consignas nuevos deben ser realmente diferentes; cambiar sinónimos no basta. No añadas preguntas extra. Borrador (DATOS): '+JSON.stringify(slideOriginal).slice(0,16500):'';
-  const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+Inclusive.prompt(plan)+DidacticResources.prompt(plan)+International.prompt(plan)+strictFormat+caseRepair+developmentRepair+strategyRepair+correctionContext+duplicateRepair+slideRepair;
-  const fallback=R.fallbackPrompt(plan,base,batch,parts,correcciones,fuentesDocumentales)+Inclusive.prompt(plan)+DidacticResources.prompt(plan)+International.prompt(plan)+duplicateRepair+slideRepair;
+  const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+(plan.tipoMaterial==='PRESENTACION'?'':Didactics.prompt(plan))+Inclusive.prompt(plan)+DidacticResources.prompt(plan)+International.prompt(plan)+strictFormat+caseRepair+developmentRepair+strategyRepair+correctionContext+duplicateRepair+slideRepair;
+  const fallback=R.fallbackPrompt(plan,base,batch,parts,correcciones,fuentesDocumentales)+(plan.tipoMaterial==='PRESENTACION'?'':Didactics.prompt(plan))+Inclusive.prompt(plan)+DidacticResources.prompt(plan)+International.prompt(plan)+duplicateRepair+slideRepair;
   let result;
   if(fase==='items'&&borradorBloque){
    const preserved=R.normalizePart(borradorBloque,batch),pending=R.partIssues(preserved,plan,batch,parts);
