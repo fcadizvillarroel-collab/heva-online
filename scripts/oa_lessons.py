@@ -39,12 +39,28 @@ def lesson(oa):
       'Criterio específico de alineación: la producción debe demostrar la acción «'+action+
       '» respecto del contenido «'+focus+'». No basta responder sobre la asignatura en general.'
     )
+    # Formular preguntas a partir del OA específico, sin repetir la misma consigna
+    # genérica en las 407 guías ni revelar la solución de la pauta docente.
+    # No se sintetizan datos históricos, científicos ni numéricos ausentes.
+    skill=action.lower()
+    if curated:
+        guided_question=(
+          'Caso resuelto sobre «'+focus+'»: identifica los datos concretos de la situación, '
+          'reproduce el procedimiento de '+skill+' y explica qué evidencia permite '
+          'comprobar la conclusión.'
+        )
+    else:
+        guided_question=(
+          'Caso guiado para '+skill+' «'+focus+'»: distingue datos disponibles y faltantes '
+          'de la situación; propone una forma comprobable de conseguir información '
+          'sin inventar hechos, mediciones ni resultados.'
+        )
     return {
       'focus':focus,
       'explanation':('Contenido curricular del objetivo: '+oa_text+'\n\nOrientación didáctica: '+worked+'\n\nEvidencia esperada: '+evidence),
       'scenario':scenario,'worked':worked,'transfer':transfer,
       'questions':[
-        ('Caso resuelto: identifica los datos del caso y comprueba cada paso de la solución propuesta.' if curated else 'Caso guiado: identifica la información que falta y explica cómo desarrollarías la situación sin inventar datos.'),
+        guided_question,
         'Aplicación: '+transfer,
         'Análisis crítico: explica qué evidencia, cálculo, fuente, texto o procedimiento permitiría verificar la aplicación de «'+focus+'».',
         'Transferencia: plantea una situación nueva donde puedas demostrar la habilidad «'+action+'» vinculada con «'+focus+'», y justifica tu respuesta.'
