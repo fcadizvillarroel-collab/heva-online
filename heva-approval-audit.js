@@ -3,8 +3,8 @@
 'use strict';
 const plain=x=>String(x||'').trim();
 const isDate=x=>{const value=plain(x);return /^20\d{2}-(0[1-9]|1[0-2])-([0-2]\d|3[01])$/.test(value)&&!Number.isNaN(Date.parse(value))&&new Date(value).toISOString().slice(0,10)===value&&value<=new Date().toISOString().slice(0,10)};
-const named=x=>{const n=plain(x);return n.length>=6&&n.includes(' ')&&!/^(docente|revisor|pendiente|sin nombre|por definir|test|n\\/?a)$/i.test(n)};
-const evidence=x=>{const v=plain(x);if(/^sha256:[0-9a-f]{64}$/i.test(v))return true;if(!/^https:\/\/[a-z0-9.-]+(?:\/[^\\s]*)?$/i.test(v))return false;return !/^https:\/\/(?:example\.(?:org|com|net)|localhost)(?:\/|$)/i.test(v)};
+const named=x=>{const n=plain(x);return n.length>=6&&n.includes(' ')&&!/^(docente|revisor|pendiente|sin nombre|por definir|test|na)$/i.test(n)};
+const evidence=x=>{const v=plain(x);if(/^sha256:[0-9a-f]{64}$/i.test(v))return true;if(!/^https:\/\/[a-z0-9.-]+(?:\/[^\s]*)?$/i.test(v))return false;return !/^https:\/\/(?:example\.(?:org|com|net)|localhost)(?:\/|$)/i.test(v)};
 // The URL/hash is a traceable review reference, not a guarantee the document
 // exists or an independent expert signed it; only verified files may certify that.
 function review({material={},sections=[],visuals=[]}={}){
