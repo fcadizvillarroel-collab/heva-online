@@ -40,7 +40,7 @@ const assert=require('node:assert/strict');
    document.querySelector('#tipo-material').dispatchEvent(new Event('change',{bubbles:true}));
   });
   await page.locator('#lab-enabled').check();
-  const first=page.locator('#lab-strategies input[data-strategy]').first();
+  const first=page.locator('#lab-strategies details[open] input[data-strategy]:not([disabled])').first();
   await first.check();
   await page.locator('#lab-preview-plan').click();
   const text=await page.locator('#lab-preview-result').innerText();
