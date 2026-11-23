@@ -41,3 +41,23 @@ test('solo texto evita advertencias visuales, pero diagramas activados sí las p
  const r=Q.inspect({material:{tipoMaterial:'GUIA',recursosVisualesHEVA:{imagenes:false,diagramas:true,graficos:false}},sections});
  assert.ok(r.issues.some(x=>x.code==='VISUALES_AUSENTES'));
 });
+
+test('PPT detecta contenido extenso idéntico aunque los títulos sean distintos',()=>{
+ const repeated='La globalización permite intercambios entre distintos países y exige comparar sus consecuencias.';
+ const slides=[{titulo:'Producción y comercio',contenido:[repeated]},{titulo:'Relación entre territorios',contenido:[repeated]}];
+ const r=Q.inspect({material:{tipoMaterial:'PRESENTACION',objetivoAprendizaje:'Analizar relaciones económicas',diapositivas:slides},sections:slides.map(d=>({title:d.titulo,text:d.contenido.join(' ')}))});
+ assert.ok(r.issues.some(x=>x.code==='PPT_CONTENIDO_REPETIDO'));
+});
+test('PPT detecta explicación insuficiente y monotonía en una presentación extensa',()=>{
+ const slides=Array.from({length:10},(_,i)=>({titulo:'Concepto '+(i+1),funcion:'explicación',contenido:['Definición '+(i+1)]}));
+ const visuals=slides.map(()=>({visualKind:'cards',diagram:false,image:false,chart:false}));
+ const r=Q.inspect({material:{tipoMaterial:'PRESENTACION',objetivoAprendizaje:'Explicar una secuencia',diapositivas:slides},visuals});
+ assert.ok(r.issues.some(x=>x.code==='PPT_EXPLICACION_BREVE'));
+ assert.ok(r.issues.some(x=>x.code==='PPT_FORMATO_REPETITIVO'));
+ assert.equal(r.heuristic,true);
+});
+test('PPT con ejemplos diferentes no recibe alertas falsas de duplicación',()=>{
+ const slides=Array.from({length:10},(_,i)=>({titulo:'Explicación '+(i+1),contenido:['El caso '+(i+1)+' describe una relación diferente entre producción, consumo y trabajadores; se explica su contexto con datos concretos y consecuencias diferentes.']}));
+ const r=Q.inspect({material:{tipoMaterial:'PRESENTACION',diapositivas:slides},visuals:slides.map(()=>({visualKind:'diagram'}))});
+ assert.ok(!r.issues.some(x=>['PPT_CONTENIDO_REPETIDO','PPT_TITULOS_REPETIDOS','PPT_EXPLICACION_BREVE','PPT_FORMATO_REPETITIVO'].includes(x.code)));
+});
