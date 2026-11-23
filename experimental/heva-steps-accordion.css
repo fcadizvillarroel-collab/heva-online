@@ -1,0 +1,49 @@
+/* HEVA experimental: pasos desplegables integrados sin crear controles duplicados. */
+#panel-crear .heva-test-accordion{
+ min-width:0;max-width:100%;border:1px solid #dfd4c9;border-radius:13px;
+ background:#fffdf9;overflow:visible;margin:.9rem 0;scroll-margin-top:85px
+}
+#panel-crear .heva-test-accordion[open]{border-color:#bf9e8c;background:#fff}
+#panel-crear .heva-test-accordion>summary{
+ display:flex;align-items:center;gap:.68rem;padding:.9rem .95rem;cursor:pointer;
+ list-style:none;min-width:0;min-height:68px;border-radius:12px;
+ background:#f7f0e8;outline-offset:3px;
+}
+#panel-crear .heva-test-accordion>summary::-webkit-details-marker{display:none}
+#panel-crear .heva-test-accordion>summary:focus-visible{outline:3px solid #be8539}
+#panel-crear .heva-test-accordion[open]>summary{border-bottom:1px solid #e7ded5;border-radius:12px 12px 0 0;background:#f9f1e9}
+#panel-crear .heva-test-accordion .heva-inline-stage-number{
+ flex:0 0 34px;width:34px;height:34px;font-size:1rem
+}
+#panel-crear .heva-test-accordion-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:.15rem}
+#panel-crear .heva-inline-stage-label{font-size:1rem;font-weight:800;color:#723042}
+#panel-crear .heva-test-accordion .heva-inline-stage-hint{
+ padding-left:0;width:auto;display:block;font-size:.75rem;color:#66574e
+}
+#panel-crear .heva-test-chevron{flex-shrink:0;color:#853147;font-size:1.6rem;font-weight:800;line-height:1;transition:transform .15s}
+#panel-crear .heva-test-accordion[open]>.heva-test-accordion-summary .heva-test-chevron{transform:rotate(180deg)}
+#panel-crear .heva-test-accordion-body{padding:1rem;display:grid;gap:1rem;min-width:0}
+#panel-crear .heva-test-accordion-body>*{min-width:0;max-width:100%}
+#panel-crear #heva-step2-order{font-size:.76rem;font-weight:650;color:#795141;
+ border-left:3px solid #ba905f;padding:.4rem .65rem;line-height:1.5;background:#fff9f0;margin:0}
+#panel-crear #heva-stage-2 .heva-test-accordion-body>div:has(#select-oa){
+ padding-top:.35rem;border-top:0
+}
+#panel-crear .heva-test-accordion-body>#heva-ajustes-adicionales{margin-top:.15rem}
+#panel-crear .heva-test-accordion-body>#heva-unified-pedagogy{margin:0;padding:0;max-width:100%}
+#panel-crear #heva-stage-4 .heva-test-preview{padding:1rem;border:1px dashed #d9c9bc;
+ box-shadow:none;background:#fffdf9}
+#panel-crear #heva-stage-4 .heva-test-preview h2{font-size:1rem}
+#panel-crear #heva-stage-4 .heva-test-preview p{font-size:.8rem}
+#panel-crear .heva-test-accordion-body #barra-calidad{margin:0;min-width:0}
+#panel-crear .heva-test-accordion-body #barra-calidad button{max-width:100%}
+@media(max-width:640px){
+ #panel-crear .heva-test-accordion>summary{padding:.8rem .68rem;gap:.55rem}
+ #panel-crear .heva-test-accordion-body{padding:.72rem;gap:.8rem}
+ #panel-crear .heva-test-accordion .heva-inline-stage-number{width:32px;height:32px;flex-basis:32px}
+ #panel-crear .heva-inline-stage-label{font-size:.95rem}
+ #panel-crear .heva-test-accordion .heva-inline-stage-hint{font-size:.75rem}
+}
+@media print{#panel-crear .heva-test-accordion{border:0!important;background:transparent!important}
+ #panel-crear .heva-test-accordion>summary{display:none!important}
+ #panel-crear .heva-test-accordion-body{padding:0!important}}
