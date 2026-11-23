@@ -35,3 +35,30 @@ test('Gemini 429 pasa directamente a Groq sin gastar la misma cuota en otro mode
   assert.equal(gemini,1);assert.equal(groq,1);assert.equal(result.provider,'groq');
  }finally{global.fetch=old;}
 });
+
+test('HTTP 413 makes one compact Groq retry with the same model, not four identical oversized calls',async()=>{
+ const old=global.fetch, bodies=[];
+ try{
+  global.fetch=async(url,config)=>{
+   const body=JSON.parse(config.body);bodies.push(body);
+   if(bodies.length===1)return{ok:false,status:413,headers:{get:()=>null},json:async()=>({error:{message:'oversized'}})};
+   return{ok:true,status:200,headers:{get:()=>null},json:async()=>({choices:[{message:{content:'{"titulo":"Guía generada"}'},finish_reason:'stop'}]})};
+  };
+  const result=await call('A'.repeat(15000),null,null,'test',['gemini'],{
+   deadline:Date.now()+20000,oversizePrompt:'OBJETIVO EPJA: ejemplo concreto. '+ 'B'.repeat(400)});
+  assert.equal(result.value.titulo,'Guía generada');
+  assert.equal(result.provider,'groq');
+  assert.equal(bodies.length,2);
+  assert.equal(bodies[0].model,bodies[1].model);
+  assert.ok(bodies[1].messages[1].content.length<bodies[0].messages[1].content.length/2);
+ }finally{global.fetch=old;}
+});
+test('HTTP 429 never retries the compact Groq prompt after shared quota exhaustion',async()=>{
+ const old=global.fetch;let count=0;
+ try{
+  global.fetch=async()=>{count++;return{ok:false,status:429,headers:{get:()=> '120'},json:async()=>({error:{message:'quota'}})};};
+  await assert.rejects(()=>call('A'.repeat(15000),null,null,'test',['gemini'],{
+    deadline:Date.now()+16000,oversizePrompt:'B'.repeat(500)}),e=>e.code==='AI_RATE_LIMIT');
+  assert.equal(count,1);
+ }finally{global.fetch=old;}
+});
