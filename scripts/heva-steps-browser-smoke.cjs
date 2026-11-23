@@ -45,6 +45,7 @@ const path=require('node:path');
     };
    });
    const before=await state();
+   assert.equal(await page.locator('.heva-steps').count(),0,'No conservar una segunda franja duplicada de pasos');
    assert.equal(before.duplicates,4,'No debe haber números repetidos');
    assert.deepEqual(before.stages.map(s=>s.label),[
      'Tipo y nivel','Objetivo y estrategia','Generar y revisar','Guardar o exportar'
