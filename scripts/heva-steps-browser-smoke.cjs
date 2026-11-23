@@ -36,11 +36,10 @@ const path=require('node:path');
       stages,scrollWidth:document.documentElement.scrollWidth,width:innerWidth,
       duplicates:[...document.querySelectorAll('[id^="heva-stage-"]')].length,
       matches:{
-        first:s1?.nextElementSibling?.contains(type),
-        second:s2?.nextElementSibling?.contains(oa),
-        third:s3?.nextElementSibling===submit,
-        fourth:s4?.nextElementSibling===document.getElementById('heva-empty-preview')&&
-          s4?.parentElement===bar?.parentElement
+        first:s1?.contains(type),
+        second:s2?.contains(oa),
+        third:s3?.contains(submit),
+        fourth:s4?.contains(document.getElementById('heva-empty-preview'))&&s4?.contains(bar)
       },
       subNumbers:[...document.querySelectorAll('#heva-ajustes-adicionales summary')]
         .filter(x=>/^\s*[1-4]\./.test(x.textContent)).map(x=>x.textContent.trim())
@@ -50,7 +49,7 @@ const path=require('node:path');
    assert.equal(await page.locator('.heva-steps').count(),0,'No conservar una segunda franja duplicada de pasos');
    assert.equal(before.duplicates,4,'No debe haber números repetidos');
    assert.deepEqual(before.stages.map(s=>s.label),[
-     'Tipo y nivel','Objetivo y estrategia','Generar y revisar','Guardar o exportar'
+     'Tipo y nivel','Objetivo, tema y estrategia','Generar y revisar','Guardar o exportar'
    ]);
    assert.ok(Object.values(before.matches).every(Boolean),'Los números deben acompañar a sus campos reales');
    assert.equal(before.stages[3].hidden,false,'Paso 4 debe estar visible aun antes de generar');

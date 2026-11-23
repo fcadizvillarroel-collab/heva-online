@@ -90,7 +90,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
    const rect=x=>{const r=x.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}};
    return {actions:card.querySelectorAll('button').length,
     stepsInsideRecovery:card.contains(steps),stepsInsideButton:!!action?.contains(steps),
-    stepsInsideForm:form.contains(steps),stepsCount:document.querySelectorAll('.heva-inline-stage').length,
+    stepsInsideForm:form.contains(steps),stepsCount:document.querySelectorAll('details[id^="heva-stage-"]').length,
     cardRect:rect(card),actionRect:rect(action),stepsRect:rect(steps),
     data:localStorage.getItem('heva-recuperacion-v2'),
     buttons:[...card.querySelectorAll('button')].map(x=>x.textContent.trim())};

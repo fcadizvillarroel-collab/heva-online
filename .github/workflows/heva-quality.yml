@@ -105,6 +105,22 @@ jobs:
           name: heva-pasos-1-4-visual
           path: ${{ runner.temp }}/heva-pasos-qa/
           if-no-files-found: warn
+      - name: Validar acordeones y coherencia del paso 2 en HEVA de prueba
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/heva-acordeones.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          sleep 2
+          node scripts/heva-accordion-browser-smoke.cjs
+        env:
+          HEVA_ACCORDIONS_QA_DIR: ${{ runner.temp }}/heva-acordeones-qa
+      - name: Conservar capturas de la versión desplegable
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: heva-lab-acordeones-pasos
+          path: ${{ runner.temp }}/heva-acordeones-qa/
+          if-no-files-found: warn
       - name: Conservar captura de revisión visual
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
