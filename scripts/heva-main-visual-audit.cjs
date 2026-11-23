@@ -50,6 +50,9 @@ for(const width of [1365,768,390,320]){
      pageHasBanner:!!document.querySelector('#heva-abrir-estrategias')};
  },label);
  const base=await inspect('base');
+ assert.equal(await page.locator('#heva-empty-preview').isVisible(),true,'La vista inicial debe ser limpia');
+ assert.equal(await page.locator('#hoja-material').isVisible(),false,'No mostrar una prueba falsa o en blanco');
+ assert.equal(await page.locator('#barra-calidad').isVisible(),false,'No mostrar descargas sin contenido');
  assert.equal(base.pageHasBanner,false,'HEVA no debe repetir el acceso al LAB en el encabezado');
  assert.equal(base.labSelectionCount,1,'No repetir la activación del LAB');
  const order=await page.evaluate(()=>({
