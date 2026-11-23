@@ -64,10 +64,6 @@
 <body class="min-h-screen flex flex-col">
 
   <div id="heva-proposal-badge" class="no-print" style="background:#fff1ce;color:#633222;padding:10px 24px;font-weight:bold">HEVA · estrategias EPJA integradas · versión 2026.11.22</div>
-  <div class="no-print heva-lab-banner-compact" style="background:#f0f6ee;border-bottom:2px solid #4f7659;color:#243e2d">
-    <span><strong>HEVA unificado</strong> · Las estrategias combinadas y el modelo de guía están en este mismo generador.</span>
-    <button type="button" id="heva-abrir-estrategias" aria-controls="integrated-lab" style="border-radius:8px;background:#295c45;color:white;padding:9px 12px;font-weight:700">Configurar estrategias aquí</button>
-  </div>
   <!-- HEADER INSTITUCIONAL -->
   <header class="no-print bg-[#8B2635] text-white px-6 py-4 shadow-md flex flex-wrap justify-between items-center gap-3">
     <div>
@@ -1053,14 +1049,6 @@ function labMessage(title,message){
   const p=document.createElement('p');p.className='mt-2';p.textContent=message;
   resultLab.append(h,p);return resultLab;
 }
-$('heva-abrir-estrategias')?.addEventListener?.('click',()=>{
-  const panel=$('integrated-lab');if(!panel)return;
-  // HEVA Layout aloja estrategias dentro de otros acordeones cerrados.
-  // Abrir toda la cadena evita que el botón lleve a contenido invisible.
-  for(let node=panel;node;node=node.parentElement)
-    if(node.tagName==='DETAILS')node.open=true;
-  panel.scrollIntoView({behavior:'smooth',block:'start'});
-});
 $('lab-preview-plan')?.addEventListener?.('click',()=>{
  try{
   if(!$('lab-enabled').checked)throw Error('Marca “Usar estas estrategias combinadas al generar”.');
