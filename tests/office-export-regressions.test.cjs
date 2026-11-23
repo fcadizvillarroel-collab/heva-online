@@ -1,7 +1,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const code=fs.readFileSync(path.join(__dirname,'../heva-office.js'),'utf8');
 function office(){
- const sandbox={HEVA:{material:m=>m,blocks:m=>m.blocks||[]},HEVATemplates:{layout:()=>({theme:{main:'8B2635',accent:'C77638',background:'FFF7ED',ink:'302723'},wordSize:26})}};
+ const sandbox={HEVA:{material:m=>m,blocks:m=>m.blocks||[]},HEVAEvidenceGate:require('../heva-evidence-gate.js'),HEVATemplates:{layout:()=>({theme:{main:'8B2635',accent:'C77638',background:'FFF7ED',ink:'302723'},wordSize:26})}};
  sandbox.globalThis=sandbox;vm.runInNewContext(code,sandbox);return sandbox.HEVAOffice;
 }
 test('exporters and audit are available',()=>{const o=office();assert.equal(typeof o.word,'function');assert.equal(typeof o.powerpoint,'function');assert.equal(typeof o.auditExport,'function')});
@@ -59,4 +59,20 @@ test('deep pedagogical requirements reach direct and staged generation',()=>{
  assert.match(recovery,/heva-deep-materials\.cjs'\)\.guidance\(p\)/);
  assert.match(deep.guidance({tipoMaterial:'GUIA',asignatura:'Estudios Sociales'}),/ejemplo modelado/i);
  assert.match(deep.guidance({tipoMaterial:'PRESENTACION',asignatura:'Historia'}),/VARIEDAD VISUAL/);
+});
+
+test('auditoría de exportación no pierde procedencia de imágenes documentales declaradas',()=>{
+ const image={data:'data:image/png;base64,iVBORw0KGgo=',width:400,height:250,id:'mapa-epja',alt:'Mapa histórico',documentary:true,sourceUrl:'https://archivo.example/mapa.png'};
+ const m={titulo:'Fuentes históricas',tipoMaterial:'PRESENTACION',objetivoAprendizaje:'Analizar fuentes históricas con sentido crítico',diapositivas:[{titulo:'Mapa del periodo',contenido:['Mapa para analizar localización y territorio en una investigación de fuentes históricas.'],imagenHEVA:image}],fuentesVisualesVerificadas:[]};
+ const audit=office().auditExport(m);
+ assert.ok(audit.issues.some(i=>i.code==='FUENTE_DOCUMENTAL_NO_VERIFICADA'));
+ assert.equal(audit.documentaryEvidence.documentaryImagesChecked,1);
+});
+test('evidencia completa de procedencia distingue una imagen documental de una ilustración docente',()=>{
+ const picture={data:'data:image/png;base64,iVBORw0KGgo=',width:400,height:250,id:'map1',alt:'Mapa citado',documentary:true,sourceUrl:'https://archivo.example/map1'};
+ const m={tipoMaterial:'GUIA',objetivoAprendizaje:'Interpretar mapas',imagenGuiaHEVA:picture,fuentesVisualesVerificadas:[{id:'map1',titulo:'Mapa documentado',autorInstitucion:'Archivo público',url:'https://archivo.example/map1',licencia:'CC BY',pertinenciaOA:'Localización espacial',verificada:true}]};
+ const audit=office().auditExport(m);
+ assert.equal(audit.documentaryEvidence.documentaryImagesChecked,1);
+ assert.ok(!audit.issues.some(i=>i.code==='FUENTE_DOCUMENTAL_NO_VERIFICADA'));
+ assert.ok(audit.issues.some(i=>i.code==='REVISION_PEDAGOGICA_PENDIENTE'));
 });
