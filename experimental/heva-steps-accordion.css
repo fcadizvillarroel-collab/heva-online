@@ -47,3 +47,23 @@
 @media print{#panel-crear .heva-test-accordion{border:0!important;background:transparent!important}
  #panel-crear .heva-test-accordion>summary{display:none!important}
  #panel-crear .heva-test-accordion-body{padding:0!important}}
+
+/* Apoyos inclusivos dentro del desplegable existente: lectura legible y táctil. */
+#heva-access-details .heva-support-choice{
+ display:flex;align-items:flex-start;gap:.7rem;padding:.58rem .64rem;border-radius:9px;
+ background:#fff;border:1px solid #e6d9ce;font-size:.87rem;line-height:1.55;
+ cursor:pointer;color:#41332e;max-width:100%;
+}
+#heva-access-details .heva-support-choice:has(input:checked){
+ background:#fff7ed;border-color:#b88e76;
+}
+#heva-access-details .heva-support-choice input{
+ flex:0 0 18px;width:18px;height:18px;margin-top:.2rem;
+ accent-color:#832d42;
+}
+#heva-access-details .heva-support-choice span{min-width:0;overflow-wrap:anywhere}
+#heva-access-details .heva-support-choice strong{font-weight:750;color:#692e40}
+#heva-access-details #heva-inclusive-selected{font-size:.78rem;line-height:1.45}
+@media(max-width:640px){
+ #heva-access-details .heva-support-choice{font-size:.89rem;padding:.7rem .62rem}
+}
