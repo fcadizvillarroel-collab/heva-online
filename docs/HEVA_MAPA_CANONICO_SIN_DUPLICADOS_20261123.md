@@ -14,8 +14,8 @@ Antes de agregar un archivo, módulo, ruta, panel o flujo de CI:
 
 | Área | Reutilizar / ruta existente | Qué NO repetir | Evidencia o límite pendiente |
 | --- | --- | --- | --- |
-| 1. OA EPJA 407 | Supabase `public.curriculo_publicado`; `api/curriculum/admin.js`; instantánea `catalogo-publicado.json` | No importar ni regenerar OA | 407 OA ya presentes. Cotejo literal oficial: 235 localizados, 172 no localizados por extracción; páginas candidatas son NO VERIFICADAS |
-| 2. Generación IA gratuita | `api/generate.js`, `api/_providers.cjs`, `lib/compact-generator-prompt.cjs`, `lib/recovery.cjs` | No crear otro generador ni activar IA de pago | Último intento real previo a la corrección devolvió 413; repetir una vez y registrar resultado |
+| 1. OA EPJA 407 | Supabase `public.curriculo_publicado`; `api/curriculum/admin.js`; instantánea `catalogo-publicado.json` | No importar ni regenerar OA | 407 OA ya presentes y textos sincronizados con Supabase: TAREA CURRICULAR CERRADA. El informe de localización en PDF es diagnóstico opcional del extractor, nunca OA faltantes ni bloqueo de generación |
+| 2. Generación IA gratuita | `api/generate.js`, `api/_providers.cjs`, `lib/compact-generator-prompt.cjs`, `lib/recovery.cjs` | No crear otro generador ni activar IA de pago | Ya se comprobó una generación real: HTTP 200 con Groq y 1 ALT, 1 DES, 1 CASO. Las demás combinaciones se verifican únicamente cuando haya un fallo reproducible |
 | 3. Calidad didáctica y disciplina | `heva-deep-materials.cjs`, `heva-pedagogy.js`, `experimental/subject-audit.cjs`, `scripts/audit_oa407_didactic_quality.py` | No confundir 407 borradores con 407 aprobaciones | Los controles automáticos NO sustituyen especialistas |
 | 4. Guías Word | `heva-office.js`, `heva-guide-visuals.js`, `heva-teacher-ui.js` | No construir exportador paralelo | Revisar páginas de documentos específicos por docentes |
 | 5. PowerPoint y diseño visual | `heva-office.js`, `heva-slide-design.js`, `heva-teacher-ui.js` | No duplicar cronologías, diagramas, editor o visor | Legibilidad y pertinencia de ilustraciones requieren revisión real |
@@ -44,3 +44,9 @@ Antes de agregar un archivo, módulo, ruta, panel o flujo de CI:
 - `scripts/audit_oa407_source_evidence.py` trata **hechos focalizados**; `scripts/verify_407_official_pdfs.py` trata **localización literal del OA**; `heva-approval-audit.js` exige **evidencia de revisión del material**. Estas salidas no son intercambiables.
 - Un test que pasa autoriza declarar `PRUEBA_AUTOMATICA_SUPERADA` de aquello que realmente evalúa, no `EXACTITUD_PEDAGOGICA_APROBADA`.
 - Para tareas futuras sobre diseño, IA o materiales EPJA: encontrar primero el módulo propietario en esta tabla, añadir la corrección y una prueba específica, e impedir nuevas versiones paralelas sin justificación funcional.
+
+## Cierre explícito para evitar discusiones circulares
+
+**No es pendiente de HEVA:** recuperar, localizar, ingresar, corregir o volver a cotejar automáticamente los **407 OA de Supabase**. La coincidencia de texto con PDF (235 exactas, otras 172 no detectadas) mide el extractor, no la existencia, validez curricular o autorización de uso del OA. Las 52 páginas sugeridas son solo pistas para investigación documental futura, no una acción de reparación del catálogo. En la revisión IA, si el OA está confirmado en el registro curricular, una coincidencia PDF ausente **no puede convertir por sí sola su alineación curricular en no verificable**.
+
+**Pendientes reales y acotados:** revisar la calidad de una salida docente específica; mejorar el diseño cuando exista un defecto reproducible; y obtener evidencia humana de las fuentes, derechos y aprobaciones de los materiales efectivamente utilizados. No agregar tareas de 407 nuevas guías ni repetir el control documental ministerial ante cambios de interfaz.
