@@ -18,7 +18,8 @@ for key, (scenario, solution, transfer) in CASES.items():
     assert len(l['scenario'].strip())>=65,key
     assert l['ejemplo_resuelto_con_datos'] is True,key
     assert solution in l['answer_guide'][0], ('Missing actual case answer key',key)
-    assert 'Caso resuelto:' in l['questions'][0], ('Exercise does not match solved case',key)
+    assert l['questions'][0].startswith('Caso resuelto sobre «'), ('Exercise does not match solved case',key)
+    assert l['focus'] in l['questions'][0], ('Exercise does not reference its literal OA focus',key)
     assert l['status']=='BORRADOR_DIDACTICO_NO_VALIDADO',key
 n_topic=sum(bool(specific_example(o)) for o in catalog)
 print(json.dumps({'catalog':len(catalog),'curated_exact_oa':len(CASES),'topic_rule_matches':n_topic,'expert_approved':0},ensure_ascii=False))
