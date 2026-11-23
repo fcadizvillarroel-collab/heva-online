@@ -89,3 +89,13 @@ test('auditoría de exportación cuenta gráficos realmente renderizados, no sol
  assert.ok(rendered.visualSummary.charts>=10);
  assert.ok(!report.issues.some(x=>x.code==='COBERTURA_VISUAL_BAJA'));
 });
+
+test('cronología usa fechas escritas por el docente sin inventar fechas nuevas',()=>{
+ const m={tipoMaterial:'PRESENTACION',titulo:'Cronología',asignatura:'Estudios Sociales',recursosVisualesHEVA:{imagenes:false,diagramas:true},diapositivas:[{titulo:'Línea de tiempo del proceso',funcion:'explicación',contenido:['1914: Comienza la Primera Guerra Mundial.','1918: Termina la Primera Guerra Mundial.'],notasDocente:'Contextualizar las fechas'}]};
+ const page=office().preview(m).pages[1];
+ const texts=page.elements.filter(e=>e.kind==='text').map(e=>e.text);
+ assert.ok(texts.includes('1914'));
+ assert.ok(texts.includes('1918'));
+ assert.ok(texts.includes('1914: Comienza la Primera Guerra Mundial.'));
+ assert.equal(page.visualKind,'diagram');
+});

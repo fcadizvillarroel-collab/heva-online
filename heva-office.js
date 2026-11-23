@@ -24,7 +24,7 @@ async function word(m,teacher=false){
   children.push(new Paragraph({text:block.title,heading:HeadingLevel.HEADING_2,spacing:{before:220,after:110},keepNext:true}));
   if(block.kind==='planning-moment'){for(const field of block.fields){children.push(line(field.title,{bold:true,color:main,keepNext:true,after:70}));for(const paragraph of field.text.split(/\n+/).filter(Boolean))children.push(line(paragraph,{after:140}));}continue;}
   const extra=block.guideVisual;
-  if(!extra?.chart&&!extra?.diagram&&!extra?.comparison)for(const paragraph of String(block.text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean)){
+  if(!extra?.chart&&!extra?.diagram&&!extra?.comparison&&!extra?.timeline)for(const paragraph of String(block.text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean)){
    children.push(line(paragraph,{after:140,box:!!extra?.box,keepNext:block.kind==='question'||/^ejemploGuiado\.pasos\.\d+\.accion$/.test(block.path||'')}));
   }
   if(extra)children.push(...root.HEVAGuideVisuals.render(root.docx,extra,line,visual.theme));
@@ -123,7 +123,9 @@ function drawSemanticVisual(ppt,theme,slide,title,lines){
   const items=lines;if(!items.length||items.length>4||items.some(t=>!fitsText([t],(11.6-(items.length-1)*.16)/items.length-.46,1.98,26)))return false;
   tx(title,.8,.83,11.7,.9,31,theme.main,true);
   const n=items.length,w=(11.6-(n-1)*.16)/n;
-  items.forEach((line,i)=>{const x=.86+i*(w+.16);shape(x,2.35,w,3.65,i%2?'F1E7DB':'FFFFFF');shape(x+.22,2.68,.68,.68,theme.main);tx(String(i+1),x+.28,2.74,.54,.5,21,'FFFFFF',true);tx(line.replace(/^\s*\d+[.)]\s*/,''),x+.23,3.58,w-.46,1.98,n>=4?22:26);if(i<n-1)tx('→',x+w-.03,3.13,.3,.35,17,theme.accent,true)});
+  // Las fechas deben venir del material: nunca reconstruirlas ni inventarlas.
+  const dates=kind==='chronology'?items.map(line=>line.match(/^\s*(\d{3,4})\s*:\s*(\S.+)$/)):[],dated=dates.length===n&&dates.every(Boolean);
+  items.forEach((line,i)=>{const x=.86+i*(w+.16),label=dated?dates[i][1]:String(i+1);shape(x,2.35,w,3.65,i%2?'F1E7DB':'FFFFFF');shape(x+.22,2.68,dated?1.36:.68,.68,theme.main);tx(label,x+.28,2.74,dated?1.24:.54,.5,dated?21:21,'FFFFFF',true);tx(line.replace(/^\s*\d+[.)]\s*/,''),x+.23,3.58,w-.46,1.98,n>=4?22:26);if(i<n-1)tx('→',x+w-.03,3.13,.3,.35,17,theme.accent,true)});
   slide.hevaVisualType='diagram';return true;
  }
  return false;
