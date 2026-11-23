@@ -29,3 +29,15 @@ test('Word guide keeps two oral registers in an editable table when enabled',()=
  assert.ok(!G.plan({...material,recursosVisualesHEVA:{recuadros:false}},input)[1].guideVisual.comparison);
  assert.deepEqual(input[1].text,'Formal: Buenos días, ¿podría informarme del horario?\nInformal: Hola, ¿a qué hora es?');
 });
+
+test('Word muestra cronología con fechas originales sin inventar ni perder textos',()=>{
+ const rows=[{title:'Objetivo',text:'Ubicar acontecimientos',path:'titulo'},{title:'Cronología del proceso',text:'1914: Comienza la guerra.\n1918: Termina la guerra.',path:'introduccionLectura'}];
+ const m={tipoMaterial:'GUIA',asignatura:'Estudios Sociales',recursosVisualesHEVA:{imagenes:false,diagramas:true}};
+ const out=G.plan(m,rows);
+ assert.equal(out[1].guideVisual.timeline.length,2);
+ assert.equal(out[1].guideVisual.timeline[0].fecha,'1914');
+ assert.equal(out[1].guideVisual.timeline[1].hecho,'Termina la guerra.');
+ const plain=G.plan({...m,recursosVisualesHEVA:{imagenes:false,diagramas:false}},rows);
+ assert.equal(plain[1].guideVisual.timeline,null);
+ assert.ok(!G.plan(m,[{title:'Texto',text:'Primero se analiza.\nLuego se compara.'}])[0].guideVisual.timeline);
+});
