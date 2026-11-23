@@ -64,6 +64,9 @@ function paginatePresentation(section,large=false){
  const size=26,height=section.image?4.1:activity?3.65:4.05,width=section.image?6.7:11.0;
  const dataRows=slideText(section.text).split(/\n+/).map(x=>x.trim()).filter(Boolean);
  if(section.visualOptions?.graficos!==false&&root.HEVASlideDesign?.role(section)!=='activity'&&root.HEVASlideDesign?.dataChart(dataRows)&&fitsText([dataRows.join('\n')],5.15,3.9,26))return[dataRows];
+ // Keep five or six short, explicitly dated events together for a readable
+ // two-row timeline. Long events retain the normal pagination instead.
+ if(section.visualOptions?.diagramas!==false&&!section.image&&visualKind(section.title,dataRows)==='chronology'&&dataRows.length>=5&&dataRows.length<=6&&dataRows.every(line=>/^\d{3,4}\s*:\s*\S/.test(line)&&fitsText([line.replace(/^\d{3,4}\s*:\s*/,'')],3.18,1.13,21)))return[dataRows];
  const source=slideText(section.text).split(/\n+/).map(x=>x.trim()).filter(Boolean),pieces=[];
  for(const paragraph of source){if(fitsText([paragraph],width,height,size)){pieces.push(paragraph);continue;}
   // Prefer sentence boundaries. Very long sentences continue at word boundaries.
