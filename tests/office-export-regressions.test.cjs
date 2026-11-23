@@ -36,3 +36,17 @@ test('presentation exports teacher notes and real news provenance',async()=>{
 });
 test('dense presentation paragraphs paginate without losing content in normal and large print',async()=>{const phrase='Esta explicación conecta el concepto con una situación concreta y explica su significado.';const paragraph=Array.from({length:30},()=>phrase).join(' ');for(const large of [false,true]){const slides=await renderDeck({titulo:'Contenido extenso',tipoMaterial:'PRESENTACION',diapositivas:[{titulo:'Ejercicio de aplicación',contenido:[paragraph],notasDocente:'Criterios docentes'}]},large);assert.ok(slides.length>4);const text=slides.flatMap(s=>s.texts).join(' ');assert.equal(text.split(phrase).length-1,30);for(const box of slides.flatMap(s=>s.boxes)){assert.ok(box.y+box.h<=7.5);if(box.y>=3.2&&box.fontSize>=23)assert.ok(box.text.length<650);}}});
 test('dense cards fall back to full-width reading instead of overflowing narrow boxes',async()=>{const text='Una explicación desarrollada del concepto con un ejemplo concreto para interpretar sus relaciones. '.repeat(4);const slides=await renderDeck({titulo:'Conceptos',tipoMaterial:'PRESENTACION',diapositivas:[{titulo:'Características',contenido:[text,text]}]});const body=slides.flatMap(s=>s.boxes).filter(b=>b.text.includes('Una explicación'));assert.ok(body.length>=2);assert.ok(body.every(b=>b.w>=10));});
+
+test('PowerPoint displays formal and informal messages as distinct editable panels',async()=>{
+ const slides=await renderDeck({titulo:'Registro oral',tipoMaterial:'PRESENTACION',diapositivas:[{
+   titulo:'Dos registros para una solicitud',
+   contenido:['Formal: Buenos días, ¿podría indicarme cuándo comienza la reunión?','Informal: Hola, ¿a qué hora es la reunión?'],
+   funcion:'explicación',notasDocente:'Comparar destinatario y situación'
+ }]});
+ const visible=slides.flatMap(x=>x.texts);
+ assert.ok(visible.includes('REGISTRO FORMAL'));
+ assert.ok(visible.includes('REGISTRO INFORMAL'));
+ assert.ok(visible.some(x=>x.includes('Buenos días')));
+ assert.ok(visible.some(x=>x.includes('Hola,')));
+ assert.ok(!visible.some(x=>x.includes('Comparar destinatario y situación')));
+});
