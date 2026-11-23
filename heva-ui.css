@@ -69,3 +69,19 @@ body.alto-contraste main .bg-white,body.alto-contraste main .bg-stone-100{backgr
 #hoja-material.heva-access,#hoja-material.heva-access [contenteditable],#hoja-material.heva-access .text-sm{font-family:var(--heva-reader-font,Arial)!important;font-size:var(--heva-reader-size,16px)!important;line-height:var(--heva-reader-line,1.5)!important;letter-spacing:var(--heva-reader-space,0)!important}
 #hoja-material.heva-access-contrast,#hoja-material.heva-access-contrast *{background:#fff!important;color:#000!important;border-color:#000!important}
 @media(max-width:680px){.heva-diff-grid{grid-template-columns:1fr}}
+
+/* Etapas dentro del formulario y del visor; no son tarjetas ni controles extra. */
+.heva-inline-stage{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;min-width:0;
+  margin:1.1rem 0 .55rem;padding:.6rem 0 .15rem;border-top:1px solid #e6dbd1;
+  color:#632739;scroll-margin-top:90px}
+.heva-inline-stage-number{display:inline-grid;place-items:center;flex:0 0 30px;
+  width:30px;height:30px;border-radius:50%;background:#832d42;color:white;
+  font-size:.9rem;font-weight:800;line-height:1}
+.heva-inline-stage-label{font-size:.97rem;font-weight:800;line-height:1.35}
+.heva-inline-stage-hint{width:100%;padding-left:calc(30px + .55rem);
+  font-size:.77rem;color:#685c55;line-height:1.45}
+.heva-inline-stage[hidden]{display:none!important}
+@media(max-width:640px){.heva-inline-stage{margin:.9rem 0 .45rem}
+  .heva-inline-stage-number{width:32px;height:32px;flex-basis:32px}
+  .heva-inline-stage-label{font-size:.96rem}}
+@media print{.heva-inline-stage{display:none!important}}

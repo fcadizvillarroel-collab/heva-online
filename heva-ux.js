@@ -11,19 +11,41 @@ function init(){
  const hero=document.createElement('section');hero.className='heva-welcome no-print';hero.setAttribute('aria-label','Inicio rápido');hero.innerHTML='<div><p class="heva-eyebrow">ESPACIO DOCENTE · EPJA</p><h2>¿Qué necesitas preparar hoy?</h2><p>Selecciona el tipo de material, vincula el objetivo curricular y revisa el resultado antes de exportarlo.</p></div><button type="button" class="heva-start">Comenzar a crear</button>';
  main.insertBefore(hero,main.firstChild);
  hero.querySelector('button').addEventListener('click',()=>{const tab=document.getElementById('tab-crear');if(tab)tab.click();const target=document.getElementById('tipo-material');target?.scrollIntoView({block:'center',behavior:'smooth'});target?.focus({preventScroll:true});syncTabs();});
- const form=document.getElementById('panel-crear');if(form){
- // Nunca seleccionar el primer .bg-white del panel: puede ser el botón
- // "Apartar avance" de la recuperación pendiente y anidaría los pasos dentro de él.
- const materialType=document.getElementById('tipo-material');
- const mainForm=materialType?.closest('div.bg-white');
- if(mainForm&&form.contains(mainForm)&&!mainForm.querySelector(':scope > .heva-steps')){
-  const guide=document.createElement('div');
-  guide.className='heva-steps no-print';
-  guide.setAttribute('aria-label','Pasos para crear material');
-  guide.innerHTML='<span><b>1</b> Tipo y nivel</span><span><b>2</b> Objetivo y estrategia</span><span><b>3</b> Generar y revisar</span><span><b>4</b> Guardar o exportar</span>';
-  mainForm.insertBefore(guide,mainForm.children[1]||null);
+ // Los números del recorrido aparecen junto a sus campos reales, no solo
+ // como una leyenda superior. No se crean copias de formularios ni botones.
+ function placeStage(number,label,anchor,description){
+   if(!anchor||document.getElementById('heva-stage-'+number))return;
+   const heading=document.createElement('div');
+   heading.id='heva-stage-'+number;
+   heading.className='heva-inline-stage no-print';
+   heading.setAttribute('role','heading');
+   heading.setAttribute('aria-level','3');
+   const numberEl=document.createElement('span');
+   numberEl.className='heva-inline-stage-number';
+   numberEl.setAttribute('aria-hidden','true');
+   numberEl.textContent=String(number);
+   const words=document.createElement('span');
+   words.className='heva-inline-stage-label';
+   words.textContent=label;
+   heading.append(numberEl,words);
+   if(description){
+     const hint=document.createElement('small');
+     hint.className='heva-inline-stage-hint';
+     hint.textContent=description;
+     heading.append(hint);
+   }
+   if(number===4)heading.hidden=true; // La exportación solo existe tras generar.
+   anchor.before(heading);
  }
- }
+ const typeEl=document.getElementById('tipo-material');
+ const oaEl=document.getElementById('select-oa');
+ const generateEl=document.getElementById('btn-generar');
+ const exportBar=document.getElementById('barra-calidad');
+ placeStage(1,'Tipo y nivel',typeEl?.parentElement);
+ placeStage(2,'Objetivo y estrategia',oaEl?.closest('div.border-t')||oaEl?.parentElement);
+ placeStage(3,'Generar y revisar',generateEl,'Revisa el material en el panel de resultados.');
+ placeStage(4,'Guardar o exportar',exportBar);
+ // Cada etapa ya está marcada junto a su campo: no repetir una segunda lista de pasos.
  document.querySelectorAll('label').forEach(label=>{if(label.htmlFor)return;const wrapper=label.parentElement;if(!wrapper)return;const control=wrapper.querySelector(':scope > input,:scope > select,:scope > textarea');if(control?.id)label.htmlFor=control.id;});
  document.querySelectorAll('button').forEach(btn=>{if(btn.textContent.trim()==='Borrar todo el historial'){btn.addEventListener('click',e=>{if(!window.confirm('¿Borrar todos los materiales guardados en este navegador? Esta acción no se puede deshacer.')){e.stopImmediatePropagation();e.preventDefault();}},true);}});
  const status=document.createElement('p');status.id='heva-ui-status';status.className='sr-only';status.setAttribute('role','status');status.setAttribute('aria-live','polite');document.body.appendChild(status);

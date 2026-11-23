@@ -80,17 +80,17 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
    localStorage.setItem('heva-recuperacion-v2',JSON.stringify({version:2,planKey:JSON.stringify(plan),parts:[]}));
   });
   await recovery.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded',timeout:30000});
-  await recovery.waitForFunction(()=>Boolean(document.querySelector('#heva-resume-recovery .heva-recovery-actions')&&document.querySelector('.heva-steps')),{timeout:30000});
+  await recovery.waitForFunction(()=>Boolean(document.querySelector('#heva-resume-recovery .heva-recovery-actions')&&document.querySelector('#heva-stage-1')),{timeout:30000});
   const layout=await recovery.evaluate(()=>{
    const card=document.getElementById('heva-resume-recovery');
    const action=[...card.querySelectorAll('button')].find(x=>x.textContent.includes('Apartar'));
-   const steps=document.querySelector('.heva-steps');
+   const steps=document.querySelector('#heva-stage-1');
    const type=document.getElementById('tipo-material');
    const form=type.closest('div.bg-white');
    const rect=x=>{const r=x.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}};
    return {actions:card.querySelectorAll('button').length,
     stepsInsideRecovery:card.contains(steps),stepsInsideButton:!!action?.contains(steps),
-    stepsInsideForm:form.contains(steps),stepsCount:document.querySelectorAll('.heva-steps').length,
+    stepsInsideForm:form.contains(steps),stepsCount:document.querySelectorAll('.heva-inline-stage').length,
     cardRect:rect(card),actionRect:rect(action),stepsRect:rect(steps),
     data:localStorage.getItem('heva-recuperacion-v2'),
     buttons:[...card.querySelectorAll('button')].map(x=>x.textContent.trim())};
@@ -99,10 +99,10 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
   assert.equal(layout.stepsInsideRecovery,false,'Los pasos no pueden estar dentro de la recuperación');
   assert.equal(layout.stepsInsideButton,false,'Los pasos no pueden estar dentro del botón Apartar');
   assert.equal(layout.stepsInsideForm,true,'Los pasos deben estar en el formulario del tipo de material');
-  assert.equal(layout.stepsCount,1,'Los cuatro pasos deben aparecer una sola vez');
+  assert.equal(layout.stepsCount,4,'Deben existir cuatro etapas en el cuerpo, sin otra lista repetida');
   assert.ok(layout.actionRect.top>=layout.cardRect.top&&layout.actionRect.bottom<=layout.cardRect.bottom+1,'Apartar debe quedar dentro de la tarjeta');
   assert.ok(layout.actionRect.width>=190&&layout.actionRect.height>=44,'Botón Apartar legible y usable');
-  assert.ok(layout.stepsRect.top>=layout.cardRect.bottom-1,'Los pasos no deben superponerse a la recuperación');
+  assert.ok(layout.stepsRect.top>=layout.cardRect.bottom-1,'El paso 1 no debe superponerse a la recuperación');
   const saved=JSON.parse(layout.data);
   assert.equal(saved.version,2,'Mantener versión del checkpoint');
   assert.equal(saved.parts.length,0,'No agregar ni borrar bloques del avance');

@@ -30,10 +30,10 @@ function mount(){
  advanced.append(help);
  // Los controles de diseño y profundidad los monta el flujo anterior. Se conservan sus ID y valores.
  // Orden didáctico: nivel de profundidad -> diseño de tareas -> apoyos -> combinaciones.
- if(depth){advanced.append(depth);depth.classList.add('heva-fold-nested');const d=depth.querySelector('summary');if(d)d.textContent='1. Profundidad y contextualización';}
- if(design){advanced.append(design);design.classList.add('heva-fold-nested');const d=design.querySelector('summary');if(d)d.textContent='2. Secuencia didáctica, habilidades y evaluación';}
- if(access){advanced.append(access);access.classList.add('heva-fold-nested');const d=access.querySelector('summary');if(d)d.textContent='3. Accesibilidad, adecuaciones y recuperación';}
- if(lab){advanced.append(lab);lab.classList.add('heva-fold-nested');const d=lab.querySelector('summary');if(d)d.textContent='4. Combinar estrategias complementarias · opcional';}
+ if(depth){advanced.append(depth);depth.classList.add('heva-fold-nested');const d=depth.querySelector('summary');if(d)d.textContent='Profundidad y contextualización';}
+ if(design){advanced.append(design);design.classList.add('heva-fold-nested');const d=design.querySelector('summary');if(d)d.textContent='Secuencia didáctica, habilidades y evaluación';}
+ if(access){advanced.append(access);access.classList.add('heva-fold-nested');const d=access.querySelector('summary');if(d)d.textContent='Accesibilidad, adecuaciones y recuperación';}
+ if(lab){advanced.append(lab);lab.classList.add('heva-fold-nested');const d=lab.querySelector('summary');if(d)d.textContent='Combinar estrategias complementarias · opcional';}
  const before=get('btn-generar');
  if(before)before.before(advanced);else form.append(advanced);
  // Preguntas/casos tras la estrategia y antes de los ajustes avanzados.
@@ -42,6 +42,10 @@ function mount(){
  ppt.classList.add('heva-ppt-conditional');
  ppt.setAttribute('aria-label','Diseño visual específico para PowerPoint');
  if(counts){counts.id='heva-conteos-material';counts.before(ppt);}else advanced.before(ppt);
+ // Paso 3 siempre se presenta después de las opciones y justo antes del botón
+ // Generar, aunque el panel avanzado se reubique al cargar la interfaz.
+ const third=get('heva-stage-3');
+ if(third&&before)before.before(third);
  const refresh=()=>{
   const isPpt=type.value==='PRESENTACION';
   ppt.hidden=!isPpt;
