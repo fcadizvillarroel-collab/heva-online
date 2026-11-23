@@ -156,7 +156,7 @@ function addContent(ppt,theme,slide,title,lines,section,index=0,scene={}){
  }
  // Pares disciplinarios editables basados exclusivamente en el texto real.
  const pair=resources.recuadros&&!illustration?root.HEVASlideDesign?.comparisonPairs(clean):null;
- if(pair&&pair.every(entry=>fitsText([entry.text],5.0,2.75,25))){
+ if(pair&&!relation&&pair.every(entry=>fitsText([entry.text],5.0,2.75,25))){
    pair.forEach((entry,j)=>{
      const x=.86+j*6.03;
      slide.addShape(ppt.ShapeType.roundRect,{x,y:2.4,w:5.6,h:3.85,rectRadius:.13,
