@@ -82,7 +82,7 @@ async function hevaAuditBeforeExport(format){
   if(panel){
    panel.dataset.ultimaExportacion=format;
    panel.setAttribute('role','status');
-   if(!panel.textContent.includes('Revisión previa a exportar'))panel.textContent='Revisión previa a exportar '+format+' (orientativa; validación docente pendiente)\\n'+panel.textContent;
+   if(!panel.textContent.includes('Revisión previa a exportar'))panel.textContent='Revisión previa a exportar '+format+' (orientativa; validación docente pendiente)\n'+panel.textContent;
   }
  }catch(error){
   console.warn('HEVA: el informe previo a la exportación no pudo actualizarse.',error?.message);
