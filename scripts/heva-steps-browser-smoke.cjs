@@ -36,11 +36,10 @@ const path=require('node:path');
       stages,scrollWidth:document.documentElement.scrollWidth,width:innerWidth,
       duplicates:[...document.querySelectorAll('[id^="heva-stage-"]')].length,
       matches:{
-        first:s1?.nextElementSibling?.contains(type),
-        second:s2?.nextElementSibling?.contains(oa),
-        third:s3?.nextElementSibling===submit,
-        fourth:s4?.nextElementSibling===document.getElementById('heva-empty-preview')&&
-          s4?.parentElement===bar?.parentElement
+        first:s1?.contains(type),
+        second:s2?.contains(oa),
+        third:s3?.contains(submit),
+        fourth:s4?.contains(document.getElementById('heva-empty-preview'))&&s4?.contains(bar)
       },
       subNumbers:[...document.querySelectorAll('#heva-ajustes-adicionales summary')]
         .filter(x=>/^\s*[1-4]\./.test(x.textContent)).map(x=>x.textContent.trim())
