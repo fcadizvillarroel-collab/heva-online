@@ -45,19 +45,7 @@ function init(){
  placeStage(2,'Objetivo y estrategia',oaEl?.closest('div.border-t')||oaEl?.parentElement);
  placeStage(3,'Generar y revisar',generateEl,'Revisa el material en el panel de resultados.');
  placeStage(4,'Guardar o exportar',exportBar);
- const form=document.getElementById('panel-crear');if(form){
- // Nunca seleccionar el primer .bg-white del panel: puede ser el botón
- // "Apartar avance" de la recuperación pendiente y anidaría los pasos dentro de él.
- const materialType=document.getElementById('tipo-material');
- const mainForm=materialType?.closest('div.bg-white');
- if(mainForm&&form.contains(mainForm)&&!mainForm.querySelector(':scope > .heva-steps')){
-  const guide=document.createElement('div');
-  guide.className='heva-steps no-print';
-  guide.setAttribute('aria-label','Pasos para crear material');
-  guide.innerHTML='<span><b>1</b> Tipo y nivel</span><span><b>2</b> Objetivo y estrategia</span><span><b>3</b> Generar y revisar</span><span><b>4</b> Guardar o exportar</span>';
-  mainForm.insertBefore(guide,mainForm.children[1]||null);
- }
- }
+ // Cada etapa ya está marcada junto a su campo: no repetir una segunda lista de pasos.
  document.querySelectorAll('label').forEach(label=>{if(label.htmlFor)return;const wrapper=label.parentElement;if(!wrapper)return;const control=wrapper.querySelector(':scope > input,:scope > select,:scope > textarea');if(control?.id)label.htmlFor=control.id;});
  document.querySelectorAll('button').forEach(btn=>{if(btn.textContent.trim()==='Borrar todo el historial'){btn.addEventListener('click',e=>{if(!window.confirm('¿Borrar todos los materiales guardados en este navegador? Esta acción no se puede deshacer.')){e.stopImmediatePropagation();e.preventDefault();}},true);}});
  const status=document.createElement('p');status.id='heva-ui-status';status.className='sr-only';status.setAttribute('role','status');status.setAttribute('aria-live','polite');document.body.appendChild(status);
