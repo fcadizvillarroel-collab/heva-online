@@ -55,9 +55,22 @@ def lesson(oa):
           'de la situación; propone una forma comprobable de conseguir información '
           'sin inventar hechos, mediciones ni resultados.'
         )
+    # El desarrollo se construye con el caso realmente asociado a ESTE OA,
+    # su resolución y una transferencia contextualizada. No sustituye revisión
+    # disciplinar ni usa el objetivo literal como único contenido de enseñanza.
+    caso_original = solved_record[0].strip() if curated else scenario.strip()
+    solucion = solved_record[1].strip() if curated else worked.strip()
+    transferencia = solved_record[2].strip() if curated else transfer.strip()
+    explicacion = (
+        'Aprendizaje: '+oa_text+'\n\n'
+        'Situación concreta para comprenderlo: '+caso_original+'\n\n'
+        'Razonamiento y solución explicada: '+solucion+'\n\n'
+        'Comprobación del aprendizaje: '+evidence+'\n\n'
+        'Aplicación a una situación nueva: '+transferencia
+    )
     return {
       'focus':focus,
-      'explanation':('Contenido curricular del objetivo: '+oa_text+'\n\nOrientación didáctica: '+worked+'\n\nEvidencia esperada: '+evidence),
+      'explanation':explicacion,
       'scenario':scenario,'worked':worked,'transfer':transfer,
       'questions':[
         guided_question,
