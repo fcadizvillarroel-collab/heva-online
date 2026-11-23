@@ -13,18 +13,18 @@ function inspect({material={},sections=[],visuals=[]}={}){
  // como "ejemplo" o encabezados vacíos "Paso 1". Son advertencias, nunca un
  // bloqueo automático de exportación ni una aprobación pedagógica.
  const rawSections=sections.map(x=>String(x?.text||''));
- const emptyStep=/(?:^|\\n)\\s*(?:paso|etapa)\\s*\\d{1,2}\\s*[:.)-]?\\s*(?=\\n|$)/im;
- const placeholderStep=/(?:^|\\n)\\s*(?:paso|etapa)\\s*\\d{1,2}\\s*[:.)-]?\\s*(?:\\.{2,}|por completar|desarrollar aqui|pendiente)\\s*(?=\\n|$)/im;
+ const emptyStep=/(?:^|\n)\s*(?:paso|etapa)\s*\d{1,2}\s*[:.)-]?\s*(?=\n|$)/im;
+ const placeholderStep=/(?:^|\n)\s*(?:paso|etapa)\s*\d{1,2}\s*[:.)-]?\s*(?:\.{2,}|por completar|desarrollar aqui|pendiente)\s*(?=\n|$)/im;
  if(teaching&&rawSections.some(t=>emptyStep.test(t)||placeholderStep.test(t)))
   add('PASOS_SIN_DESARROLLO','Existen pasos o etapas numeradas sin explicación. Completar el procedimiento antes de usar el material.',18);
- const exampleHeading=/(?:^|\\n)\\s*(?:ejemplo(?:\\s+(?:guiado|resuelto|modelado))?|caso\\s+guiado|demostraci[oó]n)\\s*[:.-]?\\s*(?=\\n|$)/im;
- const unfinishedExample=/(?:^|\\n)\\s*(?:ejemplo(?:\\s+(?:guiado|resuelto|modelado))?|demostraci[oó]n)\\s*:\\s*(?:\\.{2,}|por completar|pendiente)\\s*(?=\\n|$)/im;
- if(teaching&&rawSections.some(t=>unfinishedExample.test(t)||exampleHeading.test(t)&&!t.split(/\\n+/).some(line=>norm(line).includes('solucion')||norm(line).includes('resultado')||norm(line).includes('comprobacion'))))
+ const exampleHeading=/(?:^|\n)\s*(?:ejemplo(?:\s+(?:guiado|resuelto|modelado))?|caso\s+guiado|demostraci[oó]n)\s*[:.-]?\s*(?=\n|$)/im;
+ const unfinishedExample=/(?:^|\n)\s*(?:ejemplo(?:\s+(?:guiado|resuelto|modelado))?|demostraci[oó]n)\s*:\s*(?:\.{2,}|por completar|pendiente)\s*(?=\n|$)/im;
+ if(teaching&&rawSections.some(t=>unfinishedExample.test(t)||exampleHeading.test(t)&&!t.split(/\n+/).some(line=>norm(line).includes('solucion')||norm(line).includes('resultado')||norm(line).includes('comprobacion'))))
   add('EJEMPLO_SIN_RESOLUCION','Hay un ejemplo o demostración sin resolución comprobable dentro de su apartado. Revisar el desarrollo y la pauta.',15);
- const cases=(material.casosEstudio||[]).map(q=>norm(q?.contextoReal).replace(/\\s+/g,' ').trim()).filter(x=>x.length>=55);
+ const cases=(material.casosEstudio||[]).map(q=>norm(q?.contextoReal).replace(/\s+/g,' ').trim()).filter(x=>x.length>=55);
  if(cases.length>=2&&new Set(cases).size<cases.length)
   add('CASOS_CONTEXTO_REPETIDO','Dos casos comparten exactamente la misma situación; utilizar contextos o datos diferentes.',16);
- const justifications=(material.preguntasAlternativas||[]).map(q=>norm(q?.justificacion).replace(/\\s+/g,' ').trim()).filter(x=>x.length>=12);
+ const justifications=(material.preguntasAlternativas||[]).map(q=>norm(q?.justificacion).replace(/\s+/g,' ').trim()).filter(x=>x.length>=12);
  const genericJustification=justifications.some(j=>/^(?:porque|ya que) (?:es|corresponde a) (?:la )?(?:respuesta|alternativa|opcion) correcta[.!]?$/.test(j));
  if(genericJustification||(justifications.length>=3&&new Set(justifications).size<justifications.length))
   add('PAUTAS_POCO_ESPECIFICAS','Existen justificaciones de alternativas idénticas o genéricas. Explicar el razonamiento de cada respuesta.',14);
