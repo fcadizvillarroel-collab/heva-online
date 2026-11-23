@@ -50,8 +50,19 @@ for(const width of [1365,768,390,320]){
      pageHasBanner:!!document.querySelector('#heva-abrir-estrategias')};
  },label);
  const base=await inspect('base');
+ assert.equal(base.pageHasBanner,false,'HEVA no debe repetir el acceso al LAB en el encabezado');
+ assert.equal(base.labSelectionCount,1,'No repetir la activación del LAB');
+ const order=await page.evaluate(()=>({
+   tema:document.querySelector('#tema-especifico').closest('div')?.getBoundingClientRect().top,
+   estrategia:document.querySelector('#heva-unified-pedagogy')?.getBoundingClientRect().top,
+   explanationFold:document.querySelector('#heva-strategy-evidence')?.open
+ }));
+ assert.ok(order.tema<order.estrategia,'El tema debe mostrarse antes de estrategias');
+ assert.equal(order.explanationFold,false,'Explicación de estrategia debe comenzar cerrada');
+ assert.ok(base.scrollWidth<=width+2,'Se detectó desbordamiento horizontal en el formulario');
  await page.screenshot({path:path.join(dir,'heva-'+width+'-inicio.png'),fullPage:width===1365||width===390});
- await page.locator('#heva-abrir-estrategias').click();
+ await page.locator('#heva-ajustes-adicionales > summary').click();
+ await page.locator('#integrated-lab > summary').click();
  await page.locator('#heva-lab-drawer').waitFor({state:'visible',timeout:9000});
  const drawer=await inspect('drawer');
  await page.screenshot({path:path.join(dir,'heva-'+width+'-estrategias.png')});
