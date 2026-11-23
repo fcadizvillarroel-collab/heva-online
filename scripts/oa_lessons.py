@@ -86,8 +86,10 @@ def lesson(oa):
     }
     accessibility=(
         'Lectura guiada: '+supports.get(b['dominio'],supports['general'])+
-        ' Para personas con baja visión, facilitar letra ampliada y contraste alto; '
-        'permitir respuesta oral, dictada o escrita, y no exigir teléfonos ni internet.'
+        ' Para estudiantes ciegos, leer íntegramente los estímulos y describir '
+        'imágenes, gráficos, mapas y diagramas; para baja visión, facilitar letra '
+        'ampliada y alto contraste. Permitir respuesta oral, dictada o escrita '
+        'y no exigir teléfonos ni internet.'
     )
     return {
       'focus':focus,
