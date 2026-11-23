@@ -289,7 +289,8 @@ Responde ÚNICAMENTE en JSON:
   } catch (error) {
     console.error('Fallo de generación HEVA:',error.code||'ERROR',JSON.stringify(error.proveedores||[]));
     if(error.code==='AI_TIMEOUT'||error.code==='AI_UNAVAILABLE')return res.status(503).json({error:error.code==='AI_TIMEOUT'?'Las IA no respondieron dentro del tiempo disponible.':'Los proveedores de IA no están disponibles.',detalle:'Se conserva tu selección. Los PowerPoint se completan por grupos de diapositivas para reducir el tiempo de cada solicitud.',codigo:error.code,reintentable:true});
-    if(error.code==='AI_RATE_LIMIT')return res.status(503).json({error:'Los proveedores de IA están temporalmente saturados.',detalle:'Espera unos minutos y vuelve a intentar. El material anterior permanece disponible.',codigo:error.code,reintentable:true});
+    if(error.code==='AI_REQUEST_TOO_LARGE')return res.status(413).json({error:'La solicitud excede la capacidad del proveedor gratuito.',detalle:'HEVA puede conservar el encargo y dividir las tareas en bloques más pequeños. La conectividad de las IA no garantiza que acepten solicitudes largas.',codigo:error.code,reintentable:true});
+     if(error.code==='AI_RATE_LIMIT')return res.status(503).json({error:'Los proveedores de IA están temporalmente saturados.',detalle:'Espera unos minutos y vuelve a intentar. El material anterior permanece disponible.',codigo:error.code,reintentable:true});
     if(error.code?.startsWith('AI_RESPONSE_'))return res.status(502).json({error:'La IA devolvió una respuesta incompleta o con formato inválido.',detalle:'No se pudo recuperar un documento completo. Se conserva el material anterior y tu selección. Puedes volver a generar.',codigo:error.code,reintentable:true});
     return res.status(500).json({
       error: 'Error de IA',
