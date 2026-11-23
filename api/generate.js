@@ -11,6 +11,7 @@ const HEVA = require('../heva-core.js');
 const LabBridge = require('../lib/lab-strategy.cjs');
 const LabMaterialView = require('../experimental/material-view.js');
 const Inclusive = require('../heva-inclusive-supports.cjs');
+const DidacticResources=require('../lib/didactic-resource-contract.cjs');
 // api/generate.js — Motor Multi-IA Suite: ChatGPT / Gemini con Prosa Andragógica y RAG
 
 module.exports = async function handler(req, res) {
@@ -66,6 +67,8 @@ module.exports = async function handler(req, res) {
   for(const [name,value] of [['disenoPedagogico',disenoPedagogico],['planIntegrado',planIntegrado],['preguntaARegenerar',preguntaARegenerar],['adecuacionesPIE',adecuacionesPIE]]){
     if(value!=null&&(typeof value!=='object'||JSON.stringify(value).length>200000))return res.status(400).json({error:'Campo '+name+' inválido o demasiado largo.'});
   }
+  const resourceErrors=DidacticResources.validate(req.body?.recursosDidacticosHEVA);
+  if(resourceErrors.length)return res.status(400).json({error:resourceErrors.join('; '),codigo:'RECURSOS_INVALIDOS'});
   const inclusiveErrors=Inclusive.validate(apoyosInclusivos);
   if(inclusiveErrors.length)return res.status(400).json({error:inclusiveErrors.join('; '),codigo:'APOYOS_INVALIDOS'});
   if (typeof objetivoAprendizaje !== 'string' || typeof textoReferencia !== 'string' || textoReferencia.length > 60000) return res.status(400).json({error:'Objetivo o texto de referencia inválido o demasiado extenso.'});
@@ -182,7 +185,7 @@ Responde ÚNICAMENTE en JSON:
     // Cada material tiene un contrato propio y una estrategia observable en sus tareas.
     if (!Object.hasOwn(Pedagogy.contracts, tipoMaterial)) return res.status(400).json({error:'Tipo de material no admitido.'});
     if (!objetivoAprendizaje.trim()) return res.status(400).json({error:'Selecciona un objetivo curricular antes de generar.'});
-    const plan = {...Object.fromEntries(["documentosBase","plantillaVisual","derivacion","usarNoticias","noticiaDidacticaModo","instrumentosEvaluacion","planificacionClase","usarTextosEscolares"].filter(k=>req.body[k]!=null).map(k=>[k,req.body[k]])),asignatura,nivel,marcoCurricular,objetivoAprendizaje,temaEspecifico,estrategiaDidactica,instruccionesDocente,disenoPedagogico,planIntegrado,textoReferencia,modoReferencia,adecuacionesPIE,apoyosInclusivos:Inclusive.selected(apoyosInclusivos),tipoMaterial,...cantidadesEfectivas,incluirTicketSalida};
+    const plan = {...Object.fromEntries(["documentosBase","plantillaVisual","derivacion","usarNoticias","noticiaDidacticaModo","instrumentosEvaluacion","planificacionClase","usarTextosEscolares","recursosDidacticosHEVA"].filter(k=>req.body[k]!=null).map(k=>[k,req.body[k]])),asignatura,nivel,marcoCurricular,objetivoAprendizaje,temaEspecifico,estrategiaDidactica,instruccionesDocente,disenoPedagogico,planIntegrado,textoReferencia,modoReferencia,adecuacionesPIE,apoyosInclusivos:Inclusive.selected(apoyosInclusivos),tipoMaterial,...cantidadesEfectivas,incluirTicketSalida};
     const extraIssues=require('../heva-studio.js').validateExtras(plan);if(extraIssues.length)return res.status(400).json({error:extraIssues.join('; ')});
     const designIssues=require('../heva-design.js').validate(disenoPedagogico,plan);
     if(designIssues.length)return res.status(400).json({error:designIssues.join('; ')});
@@ -195,7 +198,7 @@ Responde ÚNICAMENTE en JSON:
     const planUsoFuentes=OAPedagogy.build(plan,matrizOA);
     const referenciasMetalmecanica=TPInternational.bibliography(plan);
     const presentationGuidance=tipoMaterial==='PRESENTACION'?'\nMODO PRESENTACIÓN: genera 14 a 24 diapositivas completas en una respuesta JSON. Incluye objetivos, explicación progresiva, ejemplo modelado, actividades de aplicación y cierre. Cada diapositiva requiere título, función, contenido desarrollado y notas docentes. Crea una trazabilidadEstrategia con una referencia DIAPO-1, DIAPO-2, etc. para CADA diapositiva real, con habilidad, evidencia observable y criterio específicos. Incluye además las referencias de otras tareas reales si existen; no inventes referencias ni agregues preguntas por encima de las cantidades solicitadas. REGLA DE COHERENCIA DISCIPLINAR: desarrolla exclusivamente la asignatura, el tema y el objetivo seleccionados. No mezcles Matemática y Lenguaje ni otras asignaturas salvo que el docente solicite explícitamente una integración interdisciplinaria. AUTOSUFICIENCIA: toda actividad que mencione un segundo texto, fuente, noticia, tabla, gráfico, caso o párrafo debe incluir el estímulo completo en la misma diapositiva o en otra diapositiva identificada; nunca remitas a un material inexistente. Evita fuentes inventadas o nombres de empresas ficticias presentadas como reales; etiqueta ejemplos simulados. Diseña diapositivas con 2-4 ideas explicadas y ejemplos específicos, no instrucciones genéricas de relleno. Las notas docentes deben desarrollar lo que no cabe visualmente.':'';
-    const promptRedactor = Pedagogy.prompt(plan)+Inclusive.prompt(plan)+LabBridge.promptMany(estrategiasLab,tipoMaterial)+presentationGuidance+Sources.evidencePrompt(fuentesDocumentales)+Textbooks.instruction(librosRegulares)+OATextbookMatrix.instruction(matrizOA)+OAPedagogy.instructions(planUsoFuentes)+TPInternational.prompt(referenciasMetalmecanica);
+    const promptRedactor = Pedagogy.prompt(plan)+Inclusive.prompt(plan)+DidacticResources.prompt(plan)+LabBridge.promptMany(estrategiasLab,tipoMaterial)+presentationGuidance+Sources.evidencePrompt(fuentesDocumentales)+Textbooks.instruction(librosRegulares)+OATextbookMatrix.instruction(matrizOA)+OAPedagogy.instructions(planUsoFuentes)+TPInternational.prompt(referenciasMetalmecanica);
     const metadata = {objetivoAprendizaje,asignatura,nivel,marcoCurricular,temaEspecifico,tipoMaterial,estrategiaDidactica:Pedagogy.strategy(estrategiaDidactica).name};
     let author;
     const draft = async prompt => { const r = await call(prompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY,[],{deadline:generationDeadline}); author={proveedor:r.provider,modelo:r.model,fecha:new Date().toISOString()}; return r.value; };
