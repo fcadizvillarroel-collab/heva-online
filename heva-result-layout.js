@@ -85,7 +85,7 @@ function arrange(){
  edit.hidden=!active;
  review.hidden=!active;
  const bar=byId('barra-calidad');
- if(bar){bar.hidden=!active;bar.classList.add('heva-result-compact-top');}
+ if(bar){bar.hidden=!active;bar.style.display=active?'':'none';bar.classList.add('heva-result-compact-top');}
 }
 let scheduled=false,observer=null,observedRoot=null;
 function schedule(){
