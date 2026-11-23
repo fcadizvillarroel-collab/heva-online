@@ -68,6 +68,27 @@ def lesson(oa):
         'Comprobación del aprendizaje: '+evidence+'\n\n'
         'Aplicación a una situación nueva: '+transferencia
     )
+    # Accesibilidad funcional según la disciplina y el contexto EPJA:
+    # apoyos realizables con lectura docente, papel y respuestas orales.
+    # Ninguna actividad exige dispositivos personales dentro del recinto.
+    supports={
+        'matematica':'dictar los datos y las unidades, verbalizar cada operación y comprobar el resultado en voz alta; ofrecer impresión ampliada y una tabla lineal legible.',
+        'ciencias':'describir verbalmente observaciones, materiales y variables; explicar los diagramas sin depender del color; permitir una hipótesis o conclusión oral razonada.',
+        'historia':'leer la fuente o relato y decir las fechas y relaciones espaciales en voz alta; describir mapas y cronologías con palabras antes de preguntar.',
+        'lenguaje':'leer el texto completo de forma pausada, aclarar el vocabulario por contexto y permitir reformular la respuesta oralmente o dictarla.',
+        'ingles':'leer las expresiones en inglés lentamente, explicar su propósito comunicativo y permitir ensayar primero la respuesta de manera oral.',
+        'laboral':'describir la secuencia de trabajo y sus riesgos mediante instrucciones verbales, verificar la comprensión antes de la aplicación y evitar depender exclusivamente de figuras.',
+        'convivencia':'leer por separado cada perspectiva del dilema y permitir argumentación oral sin exigir experiencias personales sensibles.',
+        'economia':'verbalizar precios, condiciones y cálculos, presentar cada comparación de forma lineal y permitir justificar oralmente la decisión.',
+        'arte':'describir formas, técnicas y contexto sin depender solo de la imagen, y permitir un análisis oral o escrito de la composición.',
+        'fisica':'explicar movimientos con instrucciones verbales graduales y permitir describir esfuerzos y adaptaciones sin ejecutar prácticas inseguras.',
+        'general':'leer el caso en voz alta, explicar vocabulario y ofrecer respuesta oral, dictada o escrita con tiempo flexible.'
+    }
+    accessibility=(
+        'Lectura guiada: '+supports.get(b['dominio'],supports['general'])+
+        ' Para personas con baja visión, facilitar letra ampliada y contraste alto; '
+        'permitir respuesta oral, dictada o escrita, y no exigir teléfonos ni internet.'
+    )
     return {
       'focus':focus,
       'explanation':explicacion,
@@ -84,8 +105,8 @@ def lesson(oa):
         'Verificación específica: '+b['actividades'][2]+' La revisión debe señalar el error, explicar la corrección y conservar evidencia comprobable.',
         'Respuesta abierta: evaluar pertinencia del caso, justificación y respeto por la experiencia personal.'
       ],
-      'accessibility':'Lectura guiada: el docente puede leer el caso y las preguntas en voz alta; permitir respuesta oral, dictada o escrita. Evitar depender exclusivamente de la imagen.',
-      'exit_ticket':'En una frase: ¿qué aprendí, dónde lo aplicaría y qué necesito practicar?',
+      'accessibility':accessibility,
+      'exit_ticket':'Cierre breve: ¿qué aprendí sobre «'+focus+'», qué evidencia puedo mostrar y en qué situación adulta lo aplicaría?',
       'status':'BORRADOR_DIDACTICO_NO_VALIDADO',
       'tipo_pauta':'EJEMPLO_RESUELTO_Y_CRITERIOS' if curated else 'CRITERIOS_ORIENTATIVOS_SIN_SOLUCION_UNICA',
       'ejemplo_resuelto_con_datos':curated,
