@@ -64,6 +64,7 @@ for(const width of [1365,768,390,320]){
  assert.equal(order.explanationFold,false,'Explicación de estrategia debe comenzar cerrada');
  assert.ok(base.scrollWidth<=width+2,'Se detectó desbordamiento horizontal en el formulario');
  await page.screenshot({path:path.join(dir,'heva-'+width+'-inicio.png'),fullPage:width===1365||width===390});
+ await page.locator('#heva-stage-2 > summary').click();
  await page.locator('#heva-ajustes-adicionales > summary').click();
  await page.locator('#integrated-lab > summary').click();
  await page.locator('#heva-lab-drawer').waitFor({state:'visible',timeout:9000});
