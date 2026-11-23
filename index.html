@@ -1054,7 +1054,11 @@ function labMessage(title,message){
   resultLab.append(h,p);return resultLab;
 }
 $('heva-abrir-estrategias')?.addEventListener?.('click',()=>{
-  const panel=$('integrated-lab');panel.open=true;
+  const panel=$('integrated-lab');if(!panel)return;
+  // HEVA Layout aloja estrategias dentro de otros acordeones cerrados.
+  // Abrir toda la cadena evita que el botón lleve a contenido invisible.
+  for(let node=panel;node;node=node.parentElement)
+    if(node.tagName==='DETAILS')node.open=true;
   panel.scrollIntoView({behavior:'smooth',block:'start'});
 });
 $('lab-preview-plan')?.addEventListener?.('click',()=>{
