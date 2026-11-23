@@ -76,7 +76,7 @@ function mount(){
  const badge=get('heva-proposal-badge');
  if(badge)badge.hidden=true;
  const banner=document.querySelector('body > div.no-print[style*="background:#f0f6ee"]');
- if(banner){banner.classList.add('heva-lab-banner-compact');const intro=banner.querySelector('span');if(intro)intro.hidden=true;}
+ if(banner){banner.classList.add('heva-lab-banner-compact');const intro=banner.querySelector('span');if(intro&&!banner.querySelector('#heva-abrir-estrategias'))intro.hidden=true;}
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 })();
