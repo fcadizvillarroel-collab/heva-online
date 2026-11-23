@@ -32,7 +32,7 @@ def audit(output):
         # A genuine worked explanation must include the real original situation,
         # reasoning with its actual solution, and a transferable challenge.
         if case:
-            case_present=norm(case[0]) in norm(m.get("explanation",""))
+            case_present=norm(m["scenario"]) in norm(m.get("explanation",""))
             solved_present=norm(case[1]) in norm(m.get("explanation",""))
             transfer_present=norm(case[2]) in norm(m.get("explanation",""))
             if not (case_present and solved_present and transfer_present):
