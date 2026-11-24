@@ -21,7 +21,7 @@ function panel(){
  if(!anchor)return;
  const el=document.createElement('section');el.id='studio-panel';el.className='no-print';
  el.style.cssText='padding:14px;margin:14px 0;background:#fff7ed;border:1px solid #c9bba9;border-radius:12px;color:#302723';
- el.innerHTML='<details open><summary style="cursor:pointer;font-weight:700;color:#8b2635">Editar y adaptar con IA</summary>'+
+ el.innerHTML='<details><summary style="cursor:pointer;font-weight:700;color:#8b2635">Editar y adaptar con IA</summary>'+
  '<p style="font-size:12px;margin:10px 0">Edita una sección o crea una adaptación vinculada al original. La revisión global está en este mismo espacio.</p>'+
  '<div style="border-top:1px solid #e2cbb3;padding-top:10px;margin-top:10px"><strong style="font-size:13px">1. Mejorar una sección con IA</strong>'+
  '<p style="font-size:12px;margin:5px 0">Elige qué parte quieres cambiar. La IA propondrá una redacción nueva para que la revises antes de aceptarla.</p>'+
