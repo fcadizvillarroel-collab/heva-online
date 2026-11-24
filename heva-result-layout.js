@@ -21,7 +21,7 @@ function arrange(){
  const viewer=article.parentElement;
  let edit=byId('heva-result-edit');
  let review=byId('heva-result-review');
- if(!edit){edit=fold('heva-result-edit','Editar y adaptar el material');article.after(edit);}
+ if(!edit){edit=fold('heva-result-edit','Editar, adaptar y perfeccionar el material');const go=element('button','heva-review-open-tab','Abrir HEVA Studio · Edición y revisión IA');go.type='button';go.addEventListener('click',()=>window.cambiarHerramienta('review-studio'));edit.append(go);article.after(edit);}
  if(!review){
   review=fold('heva-result-review','Revisión pedagógica y fuentes');
   const note=element('p','heva-review-note','Aquí se resumen las advertencias y estrategias. Los informes extensos y el control de exportación permanecen en la pestaña «Revisión y fuentes».');
