@@ -86,61 +86,20 @@ module.exports = async function handler(req, res) {
       if (!comprobadoDocumentalmente) return res.status(400).json({error:'Debe cotejar la referencia documental antes de publicar.'});
       if (!validId(stagingId)) return res.status(400).json({ error: 'stagingId debe ser un UUID válido.' });
 
-      // Obtener el registro de staging
-      const rItem = await fetch(`${SUPABASE_URL}/rest/v1/curriculo_staging?id=eq.${encodeURIComponent(stagingId)}&select=*`, { headers: headersSupabase });
-      const lista = await rItem.json();
-      if(!rItem.ok||!Array.isArray(lista))throw new Error('No fue posible consultar staging');
-      const item = lista[0];
-
-      if (!item) return res.status(404).json({ error: 'Registro no encontrado en Supabase.' });
-
-      // Activar únicamente después de desplegar y probar la RPC transaccional.
-      if(process.env.HEVA_CURRICULUM_ATOMIC_RPC==='true'){
-        const response=await fetch(`${SUPABASE_URL}/rest/v1/rpc/heva_aprobar_objetivo`,{
-          method:'POST',headers:headersSupabase,
-          body:JSON.stringify({p_staging_id:stagingId,p_comprobado:true,p_notas:typeof notas==='string'?notas:'',p_usuario:user.id})
-        });
-        const publicado=await response.json().catch(()=>null);
-        if(!response.ok||!publicado?.id)throw new Error('La aprobación transaccional no se completó');
-        return res.status(200).json({exito:true,publicado,atomico:true});
-      }
-      // Ruta histórica provisional: no es atómica. Mantener desactivada al habilitar RPC.
-      // Publicar en curriculo_publicado con las columnas reales
-      const pubPayload = {
-        staging_id: item.id,
-        clave_interna: item.clave_interna,
-        codigo_oficial: item.clave_interna || item.numero || 'OF-OFICIAL',
-        marco: item.marco || 'DECRETO_257_2009',
-        nivel: item.nivel || item.etapa || 'III_BASICO',
-        asignatura: item.asignatura || 'General',
-        tipo: item.tipo || 'OF',
-        eje: item.eje || '',
-        texto_literal: item.texto,
-        fuente_documento: item.fuente,
-        pagina_oficial: item.pagina_pdf || 'S/P',
-        vigente: true
-      };
-
-      const rPub = await fetch(`${SUPABASE_URL}/rest/v1/curriculo_publicado`, {
-        method: 'POST',
-        headers: headersSupabase,
-        body: JSON.stringify(pubPayload)
+      // Ruta única desde ahora: la RPC aplica publicación, estado y auditoría
+      // en una sola transacción. Si la RPC no está disponible, fallar sin publicar.
+      const response=await fetch(`${SUPABASE_URL}/rest/v1/rpc/heva_aprobar_objetivo`,{
+        method:'POST',headers:headersSupabase,
+        body:JSON.stringify({
+          p_staging_id:stagingId,
+          p_comprobado:true,
+          p_notas:typeof notas==='string'?notas.slice(0,4000):'',
+          p_usuario:user.id
+        })
       });
-
-      const publicado = await rPub.json();
-      if (!rPub.ok) throw new Error(publicado.message || 'Fallo al publicar objetivo');
-
-      // Operación provisional no atómica: comprobar cada escritura; la migración RPC
-      // transaccional propuesta debe reemplazar esta secuencia antes de uso crítico.
-      await write(`${SUPABASE_URL}/rest/v1/curriculo_staging?id=eq.${encodeURIComponent(stagingId)}`,'PATCH',{
-        estado:'APROBADO',referencia_comprobada:Boolean(comprobadoDocumentalmente),
-        notas_revision:notas,revisado_at:new Date().toISOString()
-      });
-      await write(`${SUPABASE_URL}/rest/v1/curriculo_auditoria`,'POST',{
-        staging_id:stagingId,accion:'APROBACION_Y_PUBLICACION',estado_anterior:item.estado,
-        estado_nuevo:'APROBADO',cambios_json:{notas,comprobadoDocumentalmente}
-      });
-      return res.status(200).json({ exito: true, publicado });
+      const publicado=await response.json().catch(()=>null);
+      if(!response.ok||!publicado?.id)throw new Error('La aprobación transaccional no se completó');
+      return res.status(200).json({exito:true,publicado,atomico:true});
     }
 
     // 3. RECHAZAR O CORREGIR
