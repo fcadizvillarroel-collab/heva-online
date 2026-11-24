@@ -39,6 +39,7 @@ const path=require('node:path');
         first:s1?.contains(type),
         second:s2?.contains(oa),
         third:s3?.contains(submit),
+        fifth:s3?.nextElementSibling===document.getElementById('heva-result-edit')&&!s3.contains(document.getElementById('heva-result-edit')),
         fourth:s4?.contains(document.getElementById('heva-empty-preview'))&&s4?.contains(bar)
       },
       subNumbers:[...document.querySelectorAll('#heva-ajustes-adicionales summary')]
@@ -51,7 +52,8 @@ const path=require('node:path');
    assert.deepEqual(before.stages.map(s=>s.label),[
      'Tipo y nivel','Objetivo, tema y estrategia','Generar y revisar','Guardar o exportar'
    ]);
-   assert.ok(Object.values(before.matches).every(Boolean),'Los números deben acompañar a sus campos reales');
+   assert.ok(Object.values(before.matches).every(Boolean),'Los números deben acompañar a sus campos reales: '+JSON.stringify(before.matches));
+   assert.equal(await page.locator('#heva-result-edit').isVisible(),false,'Paso 5 no disponible antes de generar');
    assert.equal(before.stages[3].hidden,false,'Paso 4 debe estar visible aun antes de generar');
    assert.match(before.stages[3].hint,/Disponible después de generar/,'Avisar que la exportación requiere material');
    assert.equal(await page.locator('#barra-calidad').isVisible(),false,'Los botones permanecen ocultos sin material');
@@ -76,7 +78,12 @@ const path=require('node:path');
    const after=await state();
    assert.equal(after.stages[3].hidden,false,'Paso 4 sigue visible tras recibir material');
    assert.match(after.stages[3].hint,/Material disponible/,'Indicar disponibilidad al generar material');
-   assert.equal(after.duplicates,4,'Números conservados después de generar');
+   assert.equal(after.duplicates,4,'Etapas originales conservadas después de generar');
+   assert.ok(after.matches.fifth&&after.matches.third,'Paso 5 independiente y generación dentro del paso 3');
+   assert.equal(await page.locator('#heva-result-edit').isVisible(),true,'Paso 5 disponible tras generar');
+   await page.locator('#heva-result-edit > summary').click();
+   assert.equal(await page.locator('#heva-result-edit #heva-review-existing').isVisible(),true,'Revisión disponible en el paso 5');
+   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'Sin desbordamiento con paso 5 abierto');
    assert.ok(after.scrollWidth<=width+2,'Desbordamiento horizontal después de generar');
    assert.equal(calls,0,'Prueba no debe consumir IA');
    await page.screenshot({path:path.join(dir,'pasos-'+width+'-resultado.png')});
