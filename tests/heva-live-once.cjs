@@ -23,19 +23,19 @@ async function request(url,opts={},max=12000){
    report.motivo=status.data?.error||status.fragmentoError||'No hay proveedor con conectividad confirmada';
    write();process.exitCode=2;return;
   }
-  const payload={modoHerramienta:'GENERADOR_ESTANDAR',tipoMaterial:'GUIA',
+  const payload={modoHerramienta:'GENERADOR_ESTANDAR',tipoMaterial:'PRESENTACION',
    asignatura:'Estudios Sociales',nivel:'II Nivel Medio',marcoCurricular:'Decreto Supremo N° 257/2009 EPJA',
    objetivoAprendizaje:'Comprender diferentes ámbitos en los que se expresa el fenómeno de la globalización a nivel nacional y a escala planetaria distinguiendo efectos positivos y negativos en la realidad vivida.',
-   temaEspecifico:'Globalización y decisiones cotidianas',
+   temaEspecifico:'Globalización, economía, cultura y decisiones familiares',
    estrategiaDidactica:'Análisis de contenido disciplinar formativo',
-   instruccionesDocente:'Ensayo técnico de una guía corta de EPJA con un ejemplo completo sobre compras o trabajo, una actividad diferente y lenguaje adulto. No atribuir datos a fuentes reales inexistentes.',
+   instruccionesDocente:'Ensayo técnico único: 14 diapositivas EPJA con explicación sustantiva, ejemplo completo y actividades diferentes de cada caso; sin cifras atribuidas a fuentes no recuperadas. Conserva todas las consignas distintas y añade notas docentes.',
    modoReferencia:'NINGUNA',cantAlternativas:0,cantDesarrollo:0,cantCasos:0,incluirTicketSalida:false};
   const result=await request(base+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)},85000);
   const data=result.data||{};
   const material=data.material||data.borrador||null;
   report.pruebas.push({nombre:'generacion_real',statusHTTP:result.status,exito:data.exito===true,codigo:data.codigo||null,
    error:data.error||null,detalle:String(data.detalle||'').slice(0,900),
-   cantidadAlternativas:material?.preguntasAlternativas?.length??null,
+   cantidadAlternativas:material?.preguntasAlternativas?.length??null,numeroDiapositivas:material?.diapositivas?.length??null,
    versionPedagogica:material?.versionPedagogica??null,
    titulo:material?.titulo||null,autorIA:material?.autoriaIA?.proveedor||null,
    tieneObjetivo:!!material?.objetivoAprendizaje,tieneEjemplo:!!material?.ejemploGuiado,
