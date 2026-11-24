@@ -47,7 +47,7 @@ function moveFollowing(stage,end){
  let sibling=stage.nextElementSibling;
  while(sibling&&sibling!==end){
   const next=sibling.nextElementSibling;
-  content.append(sibling);
+  if(sibling.id!=='heva-result-edit')content.append(sibling);
   sibling=next;
  }
 }
@@ -86,7 +86,8 @@ function mount(){
  // didácticas. Paso 3: generar y revisar. El visor permanece independiente.
  moveFollowing(one,two);
  moveFollowing(two,three);
- moveFollowing(three,$('heva-result-edit'));
+ moveFollowing(three,null);
+ const edit=$('heva-result-edit');if(edit)three.after(edit);
  organizeStepTwo(two);
  const part4=four.querySelector(':scope > .heva-test-accordion-body');
  for(const id of ['heva-empty-preview','barra-calidad']){
