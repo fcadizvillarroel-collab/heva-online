@@ -28,11 +28,17 @@ Antes de agregar nuevas apps, módulos, paneles o auditorías, consultar el [map
 
 Las operaciones list/approve/correct/reject necesitan `Authorization: Bearer <token de sesión Supabase>` válido y rol `administrador` en `heva_perfiles`. No se entrega una clave service_role al navegador. El inicio de sesión administrativo todavía debe integrarse; la pantalla de revisión informa acceso restringido. La consulta docente de objetivos publicados funciona sin el rol administrador. No es necesario aprobar nuevamente los 407 registros existentes.
 
-No se cambiaron tablas ni políticas en Supabase. La inspección detectó RLS desactivado en curriculo_staging y curriculo_publicado. Antes de usar registros privados, debe definirse la política de lectura/escritura y probarse con anon y docentes; habilitar RLS sin políticas bloquearía el uso existente. Ver SEGURIDAD_PENDIENTE.md.
+Estado contrastado el 23-11-2026: **RLS está activo** en `curriculo_publicado` y `curriculo_staging`. El catálogo mantiene lectura `SELECT` de objetivos vigentes para `anon` y `authenticated`, sin permiso directo de escritura; `curriculo_staging` no concede acceso directo a esos roles. Se revocó y verificó `TRUNCATE` para `anon`/`authenticated` en `curriculo_auditoria` y `heva_perfiles`, pero sus demás privilegios amplios aún requieren una limpieza probada. La RPC de cuota y la aprobación curricular atómica no están desplegadas según la inspección. **No ejecutar sin revisión** el SQL pendiente: ver [`SEGURIDAD_PENDIENTE.md`](SEGURIDAD_PENDIENTE.md).
+
+## HEVA Review y QA integrado (23-11-2026)
+
+La PR [#70](https://github.com/fcadizvillarroel-collab/heva-online/pull/70) integra **HEVA Review · Perfeccionar** en el generador principal. El flujo reutiliza `/api/review`, el material HEVA actual, su OA y `heva-office.js`: **generar → revisar con proveedor independiente → corregir exclusivamente errores comprobados → volver a revisar**. Conserva original y propuesta; **aplicar una corrección requiere intervención explícita** y el expediente puede descargarse en JSON. La propuesta de aplicación separada #58 queda sustituida: **no crear ni fusionar otro revisor**. Si no hay segundo proveedor o cuota, se conserva el material y la revisión queda pendiente.
+
+Las PR #68 y #69 complementan los controles existentes de pasos incompletos, ejemplos repetidos y revisión previa a exportar; son alertas heurísticas y comprobaciones técnicas, no un rediseño automático de PPT ni una aprobación docente. La publicación de la integración quedó `READY` en Vercel para el commit `65cb7aed03c6b544ce8da6f0fb0588561c94d68d`. La calidad real de Word/PPT debe inspeccionarse en documentos específicos.
 
 ## Pruebas
 
-`node --test tests/core.test.cjs`. Pruebas de catálogo real sin modificarlo, ruta API con fetch simulado, detección de secciones incompletas y separación de pauta. Descargas DOCX/PPTX probadas en Chrome con casos y desarrollo; ZIP/XML verificados y sin recorte de contenido. No se realizó una llamada de generación con claves de producción ni se verificó consumo o facturación.
+`node --test tests/core.test.cjs`. Pruebas de catálogo real sin modificarlo, ruta API con fetch simulado, detección de secciones incompletas y separación de pauta. Descargas DOCX/PPTX probadas en Chrome con casos y desarrollo; ZIP/XML verificados y sin recorte de contenido. Se registró una **prueba de generación real, pequeña y acotada**, con respuesta HTTP 200 de Groq (1 alternativa, 1 desarrollo y 1 caso); no certifica el conjunto de estrategias o formatos, la cuota disponible hoy, el consumo/facturación ni la calidad pedagógica de todos los materiales.
 
 ## Uso sin internet
 
