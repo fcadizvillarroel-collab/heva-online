@@ -154,7 +154,7 @@ function audit(material, type='GUIA', expected={}){
         visuals:[]
       });
       for(const finding of result.issues||[])if(
-        ['PPT_CONTENIDO_REPETIDO','PPT_TITULOS_REPETIDOS','PPT_EXPLICACION_BREVE'].includes(finding.code)
+        ['PPT_CONTENIDO_REPETIDO','PPT_TITULOS_REPETIDOS','PPT_EXPLICACION_BREVE','PPT_CONSIGNA_REITERADA','CIFRA_ATRIBUIDA_SIN_RESPALDO','EJEMPLO_SIN_ESTIMULO'].includes(finding.code)
       )warnings.push('Revisión visual: '+finding.detail);
     }
   }
@@ -178,6 +178,12 @@ function audit(material, type='GUIA', expected={}){
     warnings.push('El taller necesita un procedimiento completo y verificable.');
   if(type==='ACCESIBLE'&&!material.glosario?.length)
     warnings.push('La versión accesible necesita apoyos de vocabulario explícitos.');
+  if(type!=='PRESENTACION'&&QualityGate&&typeof QualityGate.inspect==='function'){
+    const result=QualityGate.inspect({material,sections:[],visuals:[]});
+    for(const issue of result.issues||[])if(
+      ['CIFRA_ATRIBUIDA_SIN_RESPALDO','EJEMPLO_SIN_ESTIMULO'].includes(issue.code)
+    )warnings.push('Revisión de contenido: '+issue.detail);
+  }
   warnings.push('La validación documental, disciplinar y visual final requiere revisión docente.');
   return {ok:issues.length===0,issues,warnings,sections:sections.length};
 }
