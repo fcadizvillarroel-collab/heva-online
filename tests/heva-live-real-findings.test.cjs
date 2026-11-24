@@ -62,5 +62,5 @@ test('el prompt obliga a integrar fuentes y estímulos sin desbordar el OA',()=>
  assert.match(prompt,/DATOS Y FUENTES/);
  assert.match(prompt,/EJEMPLO SIMULADO/);
  assert.match(prompt,/estímulo íntegro/);
- assert.match(prompt,/objetivo/i);
+ assert.match(prompt,/\bOA\b/);
 });
