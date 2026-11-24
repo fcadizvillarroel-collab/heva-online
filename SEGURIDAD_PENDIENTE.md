@@ -1,31 +1,38 @@
-# HEVA · seguridad: estado verificado y pasos pendientes
-**Corte:** 23 de noviembre de 2026 (Chile). **Base:** proyecto Supabase HEVA `lpzrtfguvbxvoqufaylv`, comprobaciones SQL de solo lectura y revocación puntual verificada. El archivo anterior describía un estado **ya superado**: no debe usarse como diagnóstico actual.
+# HEVA · seguridad y cuotas: estado verificado y límites reales
 
-## Hechos verificados en la base real
+**Corte:** 23 de noviembre de 2026 (24/11 UTC). **Fuente única:** Supabase `lpzrtfguvbxvoqufaylv` y GitHub `heva-online`. Esta hoja es el **registro canónico**, no otra aplicación ni catálogo.
 
-| Objeto | Estado actual | Alcance |
-| --- | --- | --- |
-| `public.curriculo_publicado` | **RLS activo**; `anon` y `authenticated` tienen **solo SELECT**; política de lectura de `vigente = true` | Fuente curricular oficial de HEVA; **407 filas totales, 407 vigentes y 407 con `aprobado_at`**. No reimportar OA |
-| `public.curriculo_staging` | **RLS activo**; `anon` y `authenticated` sin privilegios directos de tabla | La revisión administrativa debe seguir por servidor autorizado |
-| `public.curriculo_auditoria` | **RLS activo**; `TRUNCATE` revocado a `anon` y `authenticated`; persisten otros `GRANT` amplios | La política RLS actual no autoriza acceso a filas para dichos roles, pero los privilegios excesivos deben reducirse después de pruebas |
-| `public.heva_perfiles` | **RLS activo**; `TRUNCATE` revocado a `anon` y `authenticated`; persisten otros `GRANT` amplios | No confundir RLS con mínimo privilegio |
-| Políticas amplias del catálogo | **0 políticas `ALL`** en `curriculo_publicado` y `curriculo_staging` | No volver a ejecutar acciones para quitar políticas que ya no existen |
-| `public.fn_preparar_staging_curriculo()` | `SECURITY INVOKER`; `search_path` no fijado | Pendiente inspeccionar el cuerpo y dependencias del trigger antes de corregirlo |
-| RPC `heva_consumir_cuota_ia`, `heva_consumir_cuota_piloto`, `heva_aprobar_objetivo` | **No encontradas** en `public` en la inspección | Los SQL de propuesta siguen sin desplegar; no activar las variables que dependen de esas RPC |
+## Cambios realizados directamente en Supabase
 
-**Cambio efectivo ya aplicado y comprobado:** `REVOKE TRUNCATE ON public.curriculo_auditoria, public.heva_perfiles FROM anon, authenticated`. Se comprobó que los cuatro pares tabla/rol ya devuelven `false` para `TRUNCATE` y que `service_role` conserva su permiso. **No se modificaron los 407 OA, las políticas RLS ni los datos.**
+| Área | Estado comprobado |
+| --- | --- |
+| Currículo | **407 filas totales, 407 vigentes, 407 con aprobación en catálogo; 407 en staging**. No se importó ni cambió un OA |
+| Publicación | `curriculo_publicado` tiene **RLS activo**, política `vigente = true` y **solo SELECT** para `anon` y `authenticated` |
+| Staging | **RLS activo**; sin permisos directos para `anon` y `authenticated` |
+| Auditoría y perfiles | **RLS activo**; se revocaron **TODOS** los privilegios directos a `anon` y `authenticated` sobre `curriculo_auditoria` y `heva_perfiles`. `service_role` conserva su acceso |
+| Preparación de staging | `fn_preparar_staging_curriculo()` mantiene `SECURITY INVOKER` y tiene `search_path=pg_catalog`. Se inspeccionó su cuerpo: las referencias a tablas usan `public.`; no había triggers actuales que la invocaran |
+| Piloto compartido | Tabla `heva_piloto_consumo` con RLS y función `heva_consumir_cuota_piloto(integer)`, accesible **solo por `service_role`** |
+| Cuota individual | `heva_consumir_cuota_ia(uuid,integer)`, accesible **solo por `service_role`**; incremento atómico `ON CONFLICT` sobre clave única `(user_id,fecha)` |
+| Aprobación atómica | `heva_aprobar_objetivo(uuid,boolean,text,uuid)`, **solo `service_role`**, valida fuente, evita duplicados, bloquea registros resueltos y escribe publicación, staging y auditoría en una transacción |
 
-## Qué sigue pendiente (no declarar como completado)
+Se registraron tres migraciones: `heva_harden_admin_grants_and_staging_search_path_20261123`, `heva_quota_rpcs_service_role_only_20261123`, `heva_atomic_curriculum_approval_service_only_20261123`. Los archivos SQL históricos `docs/*_PENDIENTE.sql` se sincronizan como **referencias de migraciones aplicadas**, sin autorizar reejecución.
 
-1. **Mínimo privilegio:** comprobar los consumidores del área administrativa y aplicar, en ensayo y con plan de reversión, la propuesta acotada `docs/HEVA_SEGURIDAD_SQL_PENDIENTE.sql` que elimina los `GRANT` sobrantes de `curriculo_auditoria` y `heva_perfiles`. No revocar la lectura pública vigente de `curriculo_publicado`.
-2. **Funciones:** inspeccionar el cuerpo de `fn_preparar_staging_curriculo()` y las referencias SQL antes de fijar su `search_path`. Una alteración automática sin análisis podría romper triggers.
-3. **Autenticación y cuota IA:** el código `api/_ai-access.cjs` ya tiene puertas opcionales; los controles efectivos de producción **no fueron certificados por esta revisión**. Probar con cuentas y tokens reales antes de activar `HEVA_AI_REQUIRE_AUTH=true`, o con cuota compartida antes de activar `HEVA_PILOT_SHARED_QUOTA=true`. Las RPC requeridas no existen todavía.
-4. **Publicación curricular atómica:** `docs/HEVA_APROBACION_ATOMICA_PENDIENTE.sql` es una propuesta, no una migración aplicada. No activar `HEVA_CURRICULUM_ATOMIC_RPC=true`.
-5. **Seguridad integral:** ejecutar Security Advisors, pruebas negativas como `anon`/`authenticated`, y verificaciones de lectura del catálogo, administración y generación desde el navegador, con registro de evidencias.
-6. **Revisión pedagógica:** la seguridad técnica **no equivale** a aprobación docente de materiales ni a cotejo documental individual.
+## Pruebas efectivas, no supuestas
 
-## Orden seguro
+- Consulta de permisos: `anon`/`authenticated` **sin SELECT/INSERT/UPDATE/DELETE/TRUNCATE** para auditoría y perfiles; servicio conserva permisos.
+- Las tres RPC tienen `EXECUTE=false` para `anon` y `authenticated`, `true` para `service_role`.
+- Cuota compartida: en transacción con `SET LOCAL ROLE service_role`, con límite 2, dos llamadas verdaderas y tercera falsa; se **revirtió**.
+- Aprobación atómica: registro **sintético y reversible**, con estado, publicación y auditoría coherentes; `ROLLBACK` y verificación posterior de **407** OA, **407** staging, **0** auditorías del ensayo.
+- Cuota individual: existencia, clave única y permisos verificados; **no hay cuentas en `auth.users` (0)**, por lo que no se pudo ejecutar un escenario completo con un usuario real. No inventar un usuario ni dar ese test como aprobado.
+- Supabase Security Advisors posterior: desapareció la advertencia `function_search_path_mutable`; quedan avisos **INFO** `rls_enabled_no_policy` sobre 12 tablas privadas. En esas tablas, RLS sin política implementa denegación por defecto, no un fallo de exposición.
 
-**Inventariar dependencias → respaldo/ensayo → ejecutar ajustes restantes → comprobar privilegios/RLS y API → validar interfaz → registrar evidencias → producción.** No ejecutar los scripts pendientes directamente sobre producción por aparecer en el repositorio.
+## Pendientes reales, acotados
 
-El catálogo y la revisión automática se describen en [mapa canónico](docs/HEVA_MAPA_CANONICO_SIN_DUPLICADOS_20261123.md); no crear una segunda base o revisión. El estado `READY` de Vercel indica publicación del código, no validación de sus resultados.
+1. **Activación del control de cuota:** las RPC están instaladas, pero el proyecto Vercel no tiene configuradas `HEVA_PILOT_SHARED_QUOTA` ni `HEVA_AI_REQUIRE_AUTH`. No afirmar que un límite funciona en el sitio mientras esos flags no estén habilitados y comprobados. El piloto escogido sigue sin inicio de sesión: la cuota compartida **no identifica** a diez docentes ni sustituye un control de acceso.
+2. **Administración curricular:** la API canónica cambia a RPC atómica únicamente; se requiere el despliegue del commit nuevo. Actualmente hay **0 cuentas de Supabase Auth**, por lo que falta probarla en navegador con un administrador real. No dar de alta cuentas ni activar pago por defecto.
+3. **Vercel:** tras la PR #71, el límite del plan Hobby impidió desplegar el siguiente commit; el último confirmado en producción fue `65cb7aed` (Review #70). Los cambios de esta rama no deben declararse publicados antes de SHA `READY`.
+4. **Calidad pedagógica:** los tests DOCX/PPTX y heurísticos NO sustituyen revisión de exactitud, licencias, imágenes, tablas, legibilidad ni aprobación docente de materiales concretos.
+
+**No es pendiente:** recuperar, extraer de PDF, reimportar o "revisar la existencia" de los 407 OA. El estado del extractor PDF es independiente del catálogo ya registrado.
+
+Más contexto en [mapa canónico](docs/HEVA_MAPA_CANONICO_SIN_DUPLICADOS_20261123.md). Las verificaciones futuras deben tomar esta hoja como referencia y actualizarla cuando haya nueva evidencia, sin crear nuevos paneles ni registros paralelos.

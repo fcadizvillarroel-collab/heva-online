@@ -85,12 +85,13 @@ async function generateReview(){
  var bridge=window.HEVAReviewBridge;
  if(!bridge){status('Conexión con HEVA no disponible.');return}
  var before=bridge.getMaterial();
+ var beforeSnapshot=before?JSON.stringify(before):null;
  lock(true);stage('Generación HEVA');status('Generando con las opciones seleccionadas en HEVA…');
  try{
   if(typeof window.generarMaterialReal!=='function')throw new Error('Generador HEVA no disponible.');
   await window.generarMaterialReal('GENERADOR_ESTANDAR');
   var after=bridge.getMaterial();
-  if(!after||after===before)throw new Error('HEVA no entregó un material nuevo. Revisa los mensajes del generador; no se reutilizará un documento anterior.');
+  if(!after||(beforeSnapshot!==null&&JSON.stringify(after)===beforeSnapshot))throw new Error('HEVA no entregó un material nuevo. Revisa los mensajes del generador; no se reutilizará un documento anterior.');
   lock(false);window.cambiarHerramienta('review-studio');
   await review(material());
  }catch(e){status(e.message)}finally{lock(false)}

@@ -18,7 +18,7 @@ test('HEVA documental: el catálogo Supabase no se reabre ni se describe RLS ant
 
 test('HEVA documental: la propuesta de seguridad no corta lectura de OA',()=>{
  const sql=read('docs/HEVA_SEGURIDAD_SQL_PENDIENTE.sql');
- assert.match(sql,/NO EJECUTADA/);
+ assert.match(sql,/APLICADA/);
  assert.match(sql,/curriculo_publicado YA permite SELECT/);
  assert.doesNotMatch(sql,/^\s*REVOKE\s+ALL\s+PRIVILEGES\s+ON\s+TABLE\s+public\.curriculo_publicado/mi);
  assert.doesNotMatch(sql,/^\s*DROP\s+POLICY/mi);

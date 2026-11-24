@@ -30,6 +30,14 @@ Antes de implementar cualquier mejora, consultar **[el mapa canónico de módulo
 4. Probar el generador con los OA existentes y modificar únicamente el código o los materiales derivados.
 5. Mantener separación clara entre: **catálogo existente**, **material generado**, **auditoría técnica** y **validación docente**.
 
+### Seguridad implementada (24-11 UTC)
+
+- No repetir SQL de RLS, revocación de perfiles/auditoría ni instalación de cuotas como si faltaran: **ya fueron aplicados y verificados** en Supabase; consultar `SEGURIDAD_PENDIENTE.md`.
+- La ruta de aprobación curricular solo debe usar `/rest/v1/rpc/heva_aprobar_objetivo`, con autenticación administrativa. **Prohibido volver al esquema de tres escrituras independientes.**
+- RPC existentes: `heva_consumir_cuota_piloto`, `heva_consumir_cuota_ia`, `heva_aprobar_objetivo`. Ejecutables solo con `service_role`; nunca colocar esa credencial en el cliente.
+- `HEVA_PILOT_SHARED_QUOTA` y `HEVA_AI_REQUIRE_AUTH` no se presumen activos por existir las funciones. El piloto sin login no acredita la identidad de diez docentes. No declarar pruebas de cuentas reales sin cuentas de Auth.
+- Los archivos `docs/*_PENDIENTE.sql` mantienen nombre histórico por compatibilidad, pero ahora **registran migraciones ya aplicadas**: no reejecutarlos sin cotejar el estado vivo.
+
 ### Pruebas y revisión
 - `node --test tests/catalog-integrity.cjs tests/catalog-authority.cjs`
 - En CI, asegurar que la ruta verificada consulte Supabase con `vigente=eq.true`, mientras que el JSON local no sea tratado como escritura de base de datos.

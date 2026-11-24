@@ -56,4 +56,10 @@ Antes de agregar un archivo, módulo, ruta, panel o flujo de CI:
 
 ## Alineación de seguridad (consulta en vivo, 23-11-2026)
 
-Supabase mantiene **407 OA registrados, 407 vigentes y 407 con aprobación de catálogo**. `curriculo_publicado` y `curriculo_staging` tienen **RLS activo**, sin políticas `ALL` permisivas. `curriculo_publicado` ofrece solo lectura filtrada a `anon`/`authenticated`; `curriculo_staging` no les concede privilegios directos. Se revocó `TRUNCATE` en `curriculo_auditoria` y `heva_perfiles` para esos dos roles; siguen pendientes sus otros permisos directos amplios, comprobación de seguridad y cuotas IA. **Estado y plan único:** [`SEGURIDAD_PENDIENTE.md`](../SEGURIDAD_PENDIENTE.md), no volver a describir RLS como desactivado ni reabrir los OA.
+Supabase mantiene **407 OA registrados, 407 vigentes y 407 con aprobación de catálogo**. `curriculo_publicado` y `curriculo_staging` tienen **RLS activo**, sin políticas `ALL` permisivas. `curriculo_publicado` ofrece solo lectura filtrada a `anon`/`authenticated`; `curriculo_staging` no les concede privilegios directos. Se revocaron **todos los permisos directos** de `anon` y `authenticated` sobre `curriculo_auditoria` y `heva_perfiles`, se fijó el `search_path` de staging y se instalaron las tres RPC protegidas (cuota piloto, cuota docente y publicación atómica). Probadas bajo transacciones revertidas cuando fue posible; la habilitación de cuotas y autenticación en Vercel **sigue pendiente**. **Estado y plan único:** [`SEGURIDAD_PENDIENTE.md`](../SEGURIDAD_PENDIENTE.md), no volver a describir RLS como desactivado ni reabrir los OA.
+
+## Corrección funcional posterior (24-11 UTC)
+
+- La publicación curricular deja de ser una secuencia HTTP no atómica: `api/curriculum/admin.js` usa la RPC `heva_aprobar_objetivo`, ya presente en Supabase, con denegación si falla. No reponer la lógica antigua.
+- Los archivos SQL históricos con sufijo `_PENDIENTE.sql` son registros de las **migraciones aplicadas**; la activación de cuotas mediante variables de entorno no es parte de su instalación.
+- El alcance de las pruebas de IA, Word y PowerPoint sigue separado del cotejo disciplinar y la aprobación docente: que un test produzca un ZIP válido no implica que la guía o las diapositivas sean correctas.
