@@ -35,7 +35,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
   await page.waitForFunction(()=>{
    const article=document.getElementById('hoja-material');
    const edit=document.getElementById('heva-result-edit'),review=document.getElementById('heva-result-review');
-   return edit?.previousElementSibling===article&&review?.previousElementSibling===edit
+   return edit?.previousElementSibling===document.getElementById('heva-stage-3')&&review?.previousElementSibling===article
      &&document.getElementById('heva-teacher-tools')?.parentElement===edit
      &&document.getElementById('heva-experimental-audit')?.parentElement===review
      &&document.getElementById('heva-export-control')?.closest('#revision-contenido')
@@ -56,6 +56,8 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
    };
   });
   assert.equal(result.editHidden,false);
+  assert.equal(await page.locator('#heva-result-edit #panel-review-studio').count(),1,'Una sola ubicación de edición y revisión');
+  assert.equal(await page.locator('#tab-review-studio,#heva-review-inline,#heva-review-quick').count(),0,'Sin pestaña ni botones redundantes');
   assert.equal(result.reviewHidden,false);
   assert.equal(await page.locator('#hoja-material').isVisible(),true,'Mostrar documento al disponer de material');
   assert.equal(await page.locator('#barra-calidad').isVisible(),true,'Habilitar zona de exportaciones al disponer de material');
