@@ -1,42 +1,31 @@
-# Seguridad pendiente de aplicación en Supabase HEVA
+# HEVA · seguridad: estado verificado y pasos pendientes
+**Corte:** 23 de noviembre de 2026 (Chile). **Base:** proyecto Supabase HEVA `lpzrtfguvbxvoqufaylv`, comprobaciones SQL de solo lectura y revocación puntual verificada. El archivo anterior describía un estado **ya superado**: no debe usarse como diagnóstico actual.
 
-**Estado:** SQL preparado en `docs/HEVA_SEGURIDAD_SQL_PENDIENTE.sql`; **NO ejecutado**. Requiere ventana de mantenimiento, respaldo y verificación funcional del catálogo y administración.
+## Hechos verificados en la base real
 
-## Hallazgos verificados
-- `curriculo_staging` y `curriculo_publicado`: RLS desactivado y políticas `ALL USING(true) WITH CHECK(true)` para `authenticated`.
-- `anon` y `authenticated`: permisos amplios, incluido `TRUNCATE`, en ambas tablas y en `curriculo_auditoria` y `heva_perfiles`.
-- `fn_preparar_staging_curriculo`: `SECURITY INVOKER`, pero `search_path` no fijado.
-- La ruta pública `verified` utiliza `service_role` desde el servidor; debe mantenerse operativa sin permisos directos para visitantes.
+| Objeto | Estado actual | Alcance |
+| --- | --- | --- |
+| `public.curriculo_publicado` | **RLS activo**; `anon` y `authenticated` tienen **solo SELECT**; política de lectura de `vigente = true` | Fuente curricular oficial de HEVA; **407 filas totales, 407 vigentes y 407 con `aprobado_at`**. No reimportar OA |
+| `public.curriculo_staging` | **RLS activo**; `anon` y `authenticated` sin privilegios directos de tabla | La revisión administrativa debe seguir por servidor autorizado |
+| `public.curriculo_auditoria` | **RLS activo**; `TRUNCATE` revocado a `anon` y `authenticated`; persisten otros `GRANT` amplios | La política RLS actual no autoriza acceso a filas para dichos roles, pero los privilegios excesivos deben reducirse después de pruebas |
+| `public.heva_perfiles` | **RLS activo**; `TRUNCATE` revocado a `anon` y `authenticated`; persisten otros `GRANT` amplios | No confundir RLS con mínimo privilegio |
+| Políticas amplias del catálogo | **0 políticas `ALL`** en `curriculo_publicado` y `curriculo_staging` | No volver a ejecutar acciones para quitar políticas que ya no existen |
+| `public.fn_preparar_staging_curriculo()` | `SECURITY INVOKER`; `search_path` no fijado | Pendiente inspeccionar el cuerpo y dependencias del trigger antes de corregirlo |
+| RPC `heva_consumir_cuota_ia`, `heva_consumir_cuota_piloto`, `heva_aprobar_objetivo` | **No encontradas** en `public` en la inspección | Los SQL de propuesta siguen sin desplegar; no activar las variables que dependen de esas RPC |
 
-## Secuencia segura
-1. Hacer respaldo y revisar consumidores directos de las tablas.
-2. Probar SQL en un proyecto de ensayo con el mismo esquema, no en producción.
-3. Verificar catálogo docente, inicio de sesión administrador, publicación y auditoría.
-4. Confirmar denegación de lectura/escritura directa para `anon` y `authenticated` y ausencia de privilegio `TRUNCATE`.
-5. Aplicar en producción solo tras aprobar resultados, con plan de reversión.
-6. Ejecutar Supabase Security Advisors y registrar resultados.
+**Cambio efectivo ya aplicado y comprobado:** `REVOKE TRUNCATE ON public.curriculo_auditoria, public.heva_perfiles FROM anon, authenticated`. Se comprobó que los cuatro pares tabla/rol ya devuelven `false` para `TRUNCATE` y que `service_role` conserva su permiso. **No se modificaron los 407 OA, las políticas RLS ni los datos.**
 
-## Advertencias
-- Activar RLS sin eliminar las políticas `ALL/true` **no resuelve** el acceso de usuarios autenticados.
-- RLS no protege `TRUNCATE`; es obligatorio revocar privilegios.
-- `service_role` omite RLS; validar autorización y entradas en las API.
-- La aprobación curricular actual sigue siendo una secuencia de operaciones HTTP, no una transacción atómica. Una RPC transaccional exige diseñar y probar su esquema antes de reemplazarla.
-- Las rutas de IA requieren una política de autenticación y cuota compatible con el piloto docente antes de abrir acceso público.
+## Qué sigue pendiente (no declarar como completado)
 
-## Protección de llamadas a IA (experimental)
-Se añadió `api/_ai-access.cjs` a generate/review/recover/studio/diagram. **No está activado** por defecto para no bloquear el piloto sin interfaz de inicio de sesión.
-- Primero desplegar y probar `docs/HEVA_CUOTA_IA_PENDIENTE.sql` en Supabase de ensayo.
-- Integrar inicio de sesión docente y enviar `Authorization: Bearer <access_token>` desde cada cliente de IA. No guardar credenciales de servicio en navegador.
-- Configurar `HEVA_AI_REQUIRE_AUTH=true` únicamente después de verificar el flujo completo.
-- `HEVA_AI_DAILY_LIMIT` controla el máximo diario por usuario (valor predeterminado 20, máximo 100); se cuenta cada llamada de IA, incluidas fases de recuperación.
-- Si la RPC falla o la sesión no es válida, se rechaza la solicitud sin llamar al proveedor.
-- Revisar controles adicionales de Vercel (firewall, protección del despliegue, límites por IP). La autenticación es opcional hasta completar el piloto.
-- La aprobación curricular atómica requiere desplegar y probar `docs/HEVA_APROBACION_ATOMICA_PENDIENTE.sql` y después activar `HEVA_CURRICULUM_ATOMIC_RPC=true`.
-- No activar estas variables ni ejecutar migraciones directamente en producción sin respaldo y pruebas de integración.
+1. **Mínimo privilegio:** comprobar los consumidores del área administrativa y aplicar, en ensayo y con plan de reversión, la propuesta acotada `docs/HEVA_SEGURIDAD_SQL_PENDIENTE.sql` que elimina los `GRANT` sobrantes de `curriculo_auditoria` y `heva_perfiles`. No revocar la lectura pública vigente de `curriculo_publicado`.
+2. **Funciones:** inspeccionar el cuerpo de `fn_preparar_staging_curriculo()` y las referencias SQL antes de fijar su `search_path`. Una alteración automática sin análisis podría romper triggers.
+3. **Autenticación y cuota IA:** el código `api/_ai-access.cjs` ya tiene puertas opcionales; los controles efectivos de producción **no fueron certificados por esta revisión**. Probar con cuentas y tokens reales antes de activar `HEVA_AI_REQUIRE_AUTH=true`, o con cuota compartida antes de activar `HEVA_PILOT_SHARED_QUOTA=true`. Las RPC requeridas no existen todavía.
+4. **Publicación curricular atómica:** `docs/HEVA_APROBACION_ATOMICA_PENDIENTE.sql` es una propuesta, no una migración aplicada. No activar `HEVA_CURRICULUM_ATOMIC_RPC=true`.
+5. **Seguridad integral:** ejecutar Security Advisors, pruebas negativas como `anon`/`authenticated`, y verificaciones de lectura del catálogo, administración y generación desde el navegador, con registro de evidencias.
+6. **Revisión pedagógica:** la seguridad técnica **no equivale** a aprobación docente de materiales ni a cotejo documental individual.
 
-## Decisión de piloto — noviembre de 2026
-Por ahora HEVA se utiliza **sin inicio de sesión ni cuentas docentes**. Se mantiene `HEVA_AI_REQUIRE_AUTH` sin activar. Se propone un grupo de hasta **10 docentes invitados**, pero el software sin identificación **no puede garantizar diez personas o sesiones simultáneas**. Para limitar realmente el acceso al grupo, usar protección de acceso en Vercel o una red institucional; no confundir la cuota con control de identidad.
+## Orden seguro
 
-Se añadió la cuota **compartida** opcional `HEVA_PILOT_SHARED_QUOTA=true`, que requiere ejecutar y verificar antes `docs/HEVA_PILOTO_SIN_LOGIN_CUOTA_PENDIENTE.sql`. `HEVA_PILOT_DAILY_REQUESTS` define el máximo de llamadas diarias compartidas (predeterminado 100); cada llamada de generación, revisión, recuperación o diagrama puede consumir una unidad. **No activarla sin la función SQL**, pues fallaría en modo seguro (503).
+**Inventariar dependencias → respaldo/ensayo → ejecutar ajustes restantes → comprobar privilegios/RLS y API → validar interfaz → registrar evidencias → producción.** No ejecutar los scripts pendientes directamente sobre producción por aparecer en el repositorio.
 
-No se ha ejecutado SQL ni cambiado variables de Vercel; estos pasos requieren prueba de integración antes de activarse.
+El catálogo y la revisión automática se describen en [mapa canónico](docs/HEVA_MAPA_CANONICO_SIN_DUPLICADOS_20261123.md); no crear una segunda base o revisión. El estado `READY` de Vercel indica publicación del código, no validación de sus resultados.
