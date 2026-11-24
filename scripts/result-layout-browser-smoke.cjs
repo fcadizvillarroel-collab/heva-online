@@ -81,6 +81,11 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
   });
   await recovery.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded',timeout:30000});
   await recovery.waitForFunction(()=>Boolean(document.querySelector('#heva-resume-recovery .heva-recovery-actions')&&document.querySelector('#heva-stage-1')),{timeout:30000});
+  const toggle=recovery.locator('#heva-resume-toggle');
+  const actions=recovery.locator('#heva-resume-recovery .heva-recovery-actions');
+  assert.equal(await actions.isVisible(),false,'Los controles deben iniciar contraídos');
+  await toggle.click();
+  assert.equal(await actions.isVisible(),true,'El docente puede desplegar las opciones');
   const layout=await recovery.evaluate(()=>{
    const card=document.getElementById('heva-resume-recovery');
    const action=[...card.querySelectorAll('button')].find(x=>x.textContent.includes('Apartar'));
@@ -95,7 +100,8 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
     data:localStorage.getItem('heva-recuperacion-v2'),
     buttons:[...card.querySelectorAll('button')].map(x=>x.textContent.trim())};
   });
-  assert.equal(layout.actions,2,'La recuperación debe tener dos botones');
+  assert.equal(layout.actions,3,'La recuperación debe ofrecer continuar, apartar y descartar');
+  assert.ok(layout.buttons.some(x=>x.includes('Descartar definitivamente')),'Debe existir descarte explícito');
   assert.equal(layout.stepsInsideRecovery,false,'Los pasos no pueden estar dentro de la recuperación');
   assert.equal(layout.stepsInsideButton,false,'Los pasos no pueden estar dentro del botón Apartar');
   assert.equal(layout.stepsInsideForm,true,'Los pasos deben estar en el formulario del tipo de material');
@@ -109,6 +115,9 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=r
   assert.equal(JSON.parse(saved.planKey).cantAlternativas,6,'Conservar cantidad de alternativas solicitadas');
   assert.equal(JSON.parse(saved.planKey).cantDesarrollo,2,'Conservar desarrollo solicitado');
   assert.equal(JSON.parse(saved.planKey).cantCasos,2,'Conservar casos solicitados');
+  await toggle.click();
+  assert.equal(await actions.isVisible(),false,'Los controles deben poder ocultarse nuevamente');
+  assert.equal(await recovery.evaluate(()=>localStorage.getItem('heva-recuperacion-v2')),layout.data,'Contraer no modifica el avance');
   await recovery.screenshot({path:path.join(out,'heva-prueba-pendiente-sin-superposicion.png'),fullPage:true});
   console.log('Recuperación visual de prueba comprobada: controles separados, pasos en formulario y checkpoint intacto.');
  }finally{await browser.close();}
