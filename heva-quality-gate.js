@@ -37,16 +37,16 @@ function inspect({material={},sections=[],visuals=[]}={}){
  ];
  const verifiedSources=Array.isArray(material.respaldoDocumental)?material.respaldoDocumental:[];
  const unverifiedStatistics=inspectable.some(value=>{
-  const s=norm(value).replace(/\\s+/g,' ');
-  return /\\b(?:estudio|encuesta|censo|informe|investigacion|segun [^.!?]{3,90})[^.!?]{0,180}\\b\\d{1,3}(?:[.,]\\d+)?\\s*%/.test(s)&&
-   !/\\b(?:simulad[oa]|hipotetic[oa]|fictici[oa]|datos inventados)\\b/.test(s);
+  const s=norm(value).replace(/\s+/g,' ');
+  return /\b(?:estudio|encuesta|censo|informe|investigacion|segun [^.!?]{3,90})[^.!?]{0,180}\b\d{1,3}(?:[.,]\d+)?\s*%/.test(s)&&
+   !/\b(?:simulad[oa]|hipotetic[oa]|fictici[oa]|datos inventados)\b/.test(s);
  });
  if(unverifiedStatistics&&!verifiedSources.length)
   add('CIFRA_ATRIBUIDA_SIN_RESPALDO','Una actividad atribuye porcentajes a un estudio o informe sin respaldo documental validado. Aporte fuente verificable o marque el dato como SIMULADO.',18);
  const guided=material.ejemploGuiado||{};
  const stimulus=String(guided?.situacion||'');
- const quoted=/(?:[«“"][^»”"]{45,}[»”"]|\\b(?:texto|fragmento|fuente)\\s*:\\s*[\\s\\S]{150,})/i.test(stimulus);
- if(teaching&&/\\b(?:se analiza|analice|se lee|lea)\\s+(?:un|el)\\s+(?:fragmento|texto|documento|noticia)\\b/i.test(stimulus)&&
+ const quoted=/(?:[«“"][^»”"]{45,}[»”"]|\b(?:texto|fragmento|fuente)\s*:\s*[\s\S]{150,})/i.test(stimulus);
+ if(teaching&&/\b(?:se analiza|analice|se lee|lea)\s+(?:un|el)\s+(?:fragmento|texto|documento|noticia)\b/i.test(stimulus)&&
    !quoted&&!String(guided?.texto||guided?.lectura||guided?.fragmento||'').trim())
   add('EJEMPLO_SIN_ESTIMULO','El ejemplo guiado pide analizar un fragmento o texto que no está incorporado en el ejemplo. Incluya el estímulo completo antes de las preguntas.',16);
  const cases=(material.casosEstudio||[]).map(q=>norm(q?.contextoReal).replace(/\s+/g,' ').trim()).filter(x=>x.length>=55);
@@ -82,9 +82,9 @@ function inspect({material={},sections=[],visuals=[]}={}){
   // las explicaciones de las diapositivas sean diferentes.
   const prompts=new Map();
   slides.forEach((d,i)=>{
-   const lines=Array.isArray(d?.contenido)?d.contenido:typeof d?.contenido==='string'?d.contenido.split(/\\n+/):[];
-   const perSlide=new Set(lines.flatMap(value=>typeof value==='string'?value.split(/\\n+/):[]).map(value=>norm(value).replace(/\\s+/g,' ').trim()).filter(line=>
-    line.length>=55&&(/^(?:pregunta|consigna|actividad|desafio)\\b/.test(line)||/[¿?]$/.test(line))
+   const lines=Array.isArray(d?.contenido)?d.contenido:typeof d?.contenido==='string'?d.contenido.split(/\n+/):[];
+   const perSlide=new Set(lines.flatMap(value=>typeof value==='string'?value.split(/\n+/):[]).map(value=>norm(value).replace(/\s+/g,' ').trim()).filter(line=>
+    line.length>=55&&(/^(?:pregunta|consigna|actividad|desafio)\b/.test(line)||/[¿?]$/.test(line))
    ));
    for(const line of perSlide)prompts.set(line,(prompts.get(line)||0)+1);
   });
