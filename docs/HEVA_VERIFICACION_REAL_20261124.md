@@ -26,3 +26,14 @@ Fecha: 24-11-2026 (UTC). Este registro se limita al encargo probado; no equivale
 - Publicación del último SHA de main en Vercel: el plan Hobby devolvió HTTP 402 por alcanzar el límite diario de despliegues. No se habilita pago.
 - Una generación real exitosa NO confirma los restantes formatos, materias, docentes, casos con adaptaciones, recuperación por lotes o consistencia factual de todas las salidas.
 - Validación humana de fuentes, imágenes, mapas, rigor curricular, accesibilidad y pertinencia de cada material. **No declarar aprobación docente o documental por la sola prueba CI.**
+
+## Prueba real de PowerPoint por bloques y revisión posterior
+- Ejecución: https://github.com/fcadizvillarroel-collab/heva-online/actions/runs/45322701569
+- Contra producción anterior, GET /api/status confirmó conectividad Gemini y Groq (200). POST /api/recover fase base: 200. Seis bloques items: **todos 200** con cantidades 3, 3, 3, 3, 3, 1. Finalizar: **HTTP 200, exito=true, 16 diapositivas**; autor Gemini 3.5 flash-lite. La ruta de la interfaz es /api/recover; una llamada directa a /api/generate para todo el PPT tuvo HTTP 413, pero **no representa el recorrido principal normal**.
+- Título: «La globalización en nuestra vida cotidiana: economía y cultura». Su JSON de respuesta y su checkpoint se conservaron como artefactos de la prueba.
+- Revisión de contenido: la diapositiva 7 atribuye a un supuesto «informe económico regional de 2022» aumentos de importaciones de maquinaria del 35 % y reducciones de personal del 20 %, **sin fuente documental validada**. No presentar como datos históricos reales; aportar la fuente o convertir explícitamente en ejemplo SIMULADO.
+- La diapositiva 8 pide identificar un autor o procedencia de un documento SIMULADO sin ofrecerlo: pregunta no respondible si ese dato se desconoce.
+- La auditoría disciplinar marcó algunas diapositivas con estímulos «no incluidos», aun cuando el texto SIMULADO aparecía completo dentro de comillas simples (p. ej., diapositivas 9, 10 y 13): **falso positivo heurístico**.
+- La mayor parte de las aplicaciones usa textos ficticios y ejercicios escritos; para uso docente real conviene más variedad de desempeño, revisión de las fuentes y adecuaciones a lectores adultos. La superación técnica de 16 diapositivas no certifica su exactitud disciplinar.
+- Este lote extiende la auditoría canónica para **detectar estadísticas atribuidas sin respaldo dentro de las diapositivas**, advertir sobre solicitudes de autoría de fuente simulada sin ficha y reconocer citas completas con comillas simples. No es una certificación docente ni una aprobación documental automática.
+
