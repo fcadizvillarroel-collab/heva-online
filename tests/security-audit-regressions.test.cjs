@@ -15,10 +15,12 @@ test('Groq fallback stops when remaining deadline is insufficient',()=>{
  assert.match(source,/for \(const mod of modelosGroq\) \{\s*if\(deadline-Date\.now\(\)<=1500\)break/);
 });
 
-test('atomic curriculum approval is gated and SQL is restricted',()=>{
+test('atomic curriculum approval is the only publishing path and SQL is restricted',()=>{
  const api=fs.readFileSync(path.join(__dirname,'../api/curriculum/admin.js'),'utf8');
  const sql=fs.readFileSync(path.join(__dirname,'../docs/HEVA_APROBACION_ATOMICA_PENDIENTE.sql'),'utf8');
- assert.match(api,/HEVA_CURRICULUM_ATOMIC_RPC==='true'/);
+ assert.doesNotMatch(api,/HEVA_CURRICULUM_ATOMIC_RPC/);
+ assert.doesNotMatch(api,/const pubPayload/);
+ assert.doesNotMatch(api,/APROBACION_Y_PUBLICACION.*estado_anterior:item/);
  assert.match(api,/\/rest\/v1\/rpc\/heva_aprobar_objetivo/);
  assert.match(sql,/FOR UPDATE/);
  assert.match(sql,/REVOKE ALL ON FUNCTION[\s\S]+FROM PUBLIC, anon, authenticated/);
@@ -27,7 +29,7 @@ test('atomic curriculum approval is gated and SQL is restricted',()=>{
 test('database hardening proposal preserves curricular read and scopes remaining grants',()=>{
  const sql=fs.readFileSync(path.join(__dirname,'../docs/HEVA_SEGURIDAD_SQL_PENDIENTE.sql'),'utf8');
  const state=fs.readFileSync(path.join(__dirname,'../SEGURIDAD_PENDIENTE.md'),'utf8');
- assert.match(sql,/NO EJECUTADA/);
+ assert.match(sql,/APLICADA/);
  assert.match(sql,/curriculo_publicado YA permite SELECT/);
  assert.match(sql,/REVOKE ALL PRIVILEGES ON TABLE public.curriculo_auditoria FROM anon, authenticated/);
  assert.match(sql,/REVOKE ALL PRIVILEGES ON TABLE public.heva_perfiles FROM anon, authenticated/);
@@ -48,7 +50,7 @@ test('quota guard fails closed when enabled and quotas are unavailable',()=>{
  assert.match(source,/HEVA_AI_REQUIRE_AUTH/);
  assert.match(source,/rest\/v1\/rpc\/heva_consumir_cuota_ia/);
  assert.match(source,/status\(503\)/);
- assert.match(sql,/pg_advisory_xact_lock/);
+ assert.match(sql,/ON CONFLICT\(user_id,fecha\) DO UPDATE/);
  assert.match(sql,/REVOKE ALL ON FUNCTION[\s\S]+FROM PUBLIC,anon,authenticated/);
 });
 
