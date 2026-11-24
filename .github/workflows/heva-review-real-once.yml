@@ -1,0 +1,38 @@
+name: HEVA revisión IA independiente única
+on:
+  push:
+    branches: [qa/heva-review-real-once-20261124]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  revisar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Descargar rama de diagnóstico
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Preparar Node 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Recuperar guía Gemini del primer ensayo real
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p qa-source
+          gh api repos/fcadizvillarroel-collab/heva-online/actions/artifacts/14887527009/zip > /tmp/heva-guia-ensayo.zip
+          unzip -q /tmp/heva-guia-ensayo.zip -d qa-source
+          test -s qa-source/material-recibido.json
+      - name: Revisar con IA distinta de la autora sin reintentos
+        run: node tests/heva-review-live-once.cjs
+      - name: Guardar dictamen y diagnóstico
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: heva-revision-real-unica-20261124
+          path: qa-review/
+          if-no-files-found: warn
+          retention-days: 7
