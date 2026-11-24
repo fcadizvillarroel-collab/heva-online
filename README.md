@@ -28,7 +28,15 @@ Antes de agregar nuevas apps, módulos, paneles o auditorías, consultar el [map
 
 Las operaciones list/approve/correct/reject necesitan `Authorization: Bearer <token de sesión Supabase>` válido y rol `administrador` en `heva_perfiles`. No se entrega una clave service_role al navegador. El inicio de sesión administrativo todavía debe integrarse; la pantalla de revisión informa acceso restringido. La consulta docente de objetivos publicados funciona sin el rol administrador. No es necesario aprobar nuevamente los 407 registros existentes.
 
-Estado contrastado el 23-11-2026: **RLS está activo** en `curriculo_publicado` y `curriculo_staging`. El catálogo mantiene lectura `SELECT` de objetivos vigentes para `anon` y `authenticated`, sin permiso directo de escritura; `curriculo_staging` no concede acceso directo a esos roles. Se revocó y verificó `TRUNCATE` para `anon`/`authenticated` en `curriculo_auditoria` y `heva_perfiles`, pero sus demás privilegios amplios aún requieren una limpieza probada. La RPC de cuota y la aprobación curricular atómica no están desplegadas según la inspección. **No ejecutar sin revisión** el SQL pendiente: ver [`SEGURIDAD_PENDIENTE.md`](SEGURIDAD_PENDIENTE.md).
+Estado real comprobado al 24/11 UTC: **RLS está activo** en `curriculo_publicado` y `curriculo_staging`. El catálogo permite **solo lectura de OA vigentes** a `anon` y `authenticated`, mientras staging permanece sin permisos públicos. Se revocaron **todos los privilegios directos** sobre `curriculo_auditoria` y `heva_perfiles` a esos dos roles, y se fijó el `search_path` de la función de staging. Ya se desplegaron en Supabase las tres RPC protegidas: cuota compartida, cuota individual y aprobación curricular atómica. **No están activados los modos de cuota en Vercel** y la API curricular dejará de utilizar las escrituras no atómicas cuando se publique este código. Ver [`SEGURIDAD_PENDIENTE.md`](SEGURIDAD_PENDIENTE.md).
+
+## Cierre de seguridad y cuotas (Supabase, 24/11 UTC)
+
+**Implementado y verificado en la base real:** tres migraciones de mínimo privilegio, cuota compartida, cuota docente y publicación curricular transaccional. Las pruebas de cuota compartida (2 solicitudes permitidas, tercera denegada) y aprobación transaccional fueron realizadas bajo `ROLLBACK`, sin consumos ni objetivos de prueba persistentes. `service_role` es el único rol que puede ejecutar esas RPC.
+
+La ruta administrativa `/api/curriculum/admin?action=approve` utiliza exclusivamente `heva_aprobar_objetivo`, **sin respaldo al procedimiento anterior de varias escrituras**. Su actualización necesita llegar a la versión publicada en Vercel; GitHub actualizado no equivale a despliegue.
+
+**Control efectivo en el sitio:** el proyecto Vercel aún no tenía las variables `HEVA_PILOT_SHARED_QUOTA` ni `HEVA_AI_REQUIRE_AUTH` en la consulta realizada. No afirmar que limitan solicitudes hasta configurarlas y probar la API publicada. La cuenta Supabase no tenía docentes Auth al inspeccionarla; una cuota individual real no se ha probado con usuario identificado. No contratar servicios de pago ni crear cuentas automáticamente.
 
 ## HEVA Review y QA integrado (23-11-2026)
 
