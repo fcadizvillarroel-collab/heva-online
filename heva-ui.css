@@ -85,3 +85,8 @@ body.alto-contraste main .bg-white,body.alto-contraste main .bg-stone-100{backgr
   .heva-inline-stage-number{width:32px;height:32px;flex-basis:32px}
   .heva-inline-stage-label{font-size:.96rem}}
 @media print{.heva-inline-stage{display:none!important}}
+
+/* Ocultar realmente los controles contraídos, incluso con Tailwind/flex. */
+#heva-resume-recovery [hidden]{display:none!important}
+#heva-resume-recovery{padding:.35rem .65rem!important}
+#heva-resume-recovery #heva-resume-toggle{min-height:36px;min-width:0;padding:.25rem .5rem;justify-content:flex-start;text-align:left}
