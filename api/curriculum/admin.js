@@ -83,7 +83,7 @@ module.exports = async function handler(req, res) {
     // 2. APROBAR OBJETIVO Y PUBLICAR EN CATÁLOGO DOCENTE
     if (req.method === 'POST' && action === 'approve') {
       const { stagingId, comprobadoDocumentalmente, notas } = req.body || {};
-      if (!comprobadoDocumentalmente) return res.status(400).json({error:'Debe cotejar la referencia documental antes de publicar.'});
+      if (comprobadoDocumentalmente !== true) return res.status(400).json({error:'Debe cotejar la referencia documental antes de publicar.'});
       if (!validId(stagingId)) return res.status(400).json({ error: 'stagingId debe ser un UUID válido.' });
 
       // Ruta única desde ahora: la RPC aplica publicación, estado y auditoría
