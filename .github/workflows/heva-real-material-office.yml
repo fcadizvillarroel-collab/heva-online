@@ -1,0 +1,69 @@
+name: HEVA exportación de materiales reales Gemini
+on:
+  push:
+    branches:
+      - qa/real-material-export-20261124
+  workflow_dispatch:
+    inputs:
+      ppt_artifact_id:
+        description: "ID de artefacto GitHub Actions con presentacion-real.json"
+        required: true
+        type: string
+      types_artifact_id:
+        description: "ID de artefacto GitHub Actions con otros cuatro materiales reales"
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+jobs:
+  export-real-materials:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Descargar código del HEVA principal
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Preparar Node 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Verificar sintaxis
+        run: node --check scripts/heva-real-material-office-smoke.cjs
+      - name: Descargar SOLO artefactos de ensayos reales anteriores
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PPT_ARTIFACT: ${{ inputs.ppt_artifact_id || '14887319620' }}
+          TYPES_ARTIFACT: ${{ inputs.types_artifact_id || '14888667209' }}
+        run: |
+          mkdir -p qa-source/ppt qa-source/types
+          gh api "repos/fcadizvillarroel-collab/heva-online/actions/artifacts/${PPT_ARTIFACT}/zip" > /tmp/heva-real-ppt.zip
+          gh api "repos/fcadizvillarroel-collab/heva-online/actions/artifacts/${TYPES_ARTIFACT}/zip" > /tmp/heva-real-types.zip
+          unzip -q /tmp/heva-real-ppt.zip -d qa-source/ppt
+          unzip -q /tmp/heva-real-types.zip -d qa-source/types
+          test -s qa-source/ppt/presentacion-real.json
+          test -s qa-source/types/evaluacion-material.json
+      - name: Dependencias de exportación y Playwright
+        run: |
+          npm install --ignore-scripts --no-audit --no-fund
+          npm install --no-save --ignore-scripts --no-audit --no-fund playwright@1.56.1
+          npx playwright install chromium
+      - name: Exportar el PPTX y cuatro Word reales y verificar su contenido
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 >/tmp/heva-qa-real-http.log 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          sleep 2
+          node scripts/heva-real-material-office-smoke.cjs
+        env:
+          HEVA_REAL_QA_SOURCE: ${{ github.workspace }}/qa-source
+          HEVA_REAL_QA_OUT: ${{ runner.temp }}/heva-real-office
+      - name: Conservar resultados reales y errores para revisión docente
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: heva-ofimatica-gemini-real
+          path: ${{ runner.temp }}/heva-real-office/
+          retention-days: 14
+          if-no-files-found: warn
