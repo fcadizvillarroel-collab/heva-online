@@ -18,7 +18,7 @@ function showQuality(){
   panel.insertBefore(section,panel.querySelector('#quality-run'));
  }
  
- panel.querySelector('#quality-correct')?.addEventListener('click',()=>window.HEVAReviewStudio?window.HEVAReviewStudio.open():runVerifiedCorrection());
+
 }
 async function qualityRequest(action){
  syncEdits();const original=materialActual,snapshot=qualitySnapshot(original);
