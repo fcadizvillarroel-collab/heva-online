@@ -78,26 +78,11 @@ async function review(m){
  }catch(e){job.incident=e.name==='AbortError'?'Revisión detenida; se conserva lo avanzado.':'Revisión pendiente: '+e.message;status(job.incident)}
  finally{save();lock(false);draw()}
 }
+function openWorkspace(){const host=$('heva-result-edit');if(host){host.open=true;host.scrollIntoView?.({behavior:'smooth',block:'start'});}}
 async function reviewExisting(){
  if(running||window.HEVAStudioUI?.isBusy())return;
- try{var m=material();window.cambiarHerramienta('review-studio');await review(m)}
+ try{var m=material();openWorkspace();await review(m)}
  catch(e){window.cambiarHerramienta('review-studio');status(e.message)}
-}
-async function generateReview(){
- if(running||window.HEVAStudioUI?.isBusy())return;
- var bridge=window.HEVAReviewBridge;
- if(!bridge){status('Conexión con HEVA no disponible.');return}
- var before=bridge.getMaterial();
- var beforeSnapshot=before?JSON.stringify(before):null;
- lock(true);stage('Generación HEVA');status('Generando con las opciones seleccionadas en HEVA…');
- try{
-  if(typeof window.generarMaterialReal!=='function')throw new Error('Generador HEVA no disponible.');
-  await window.generarMaterialReal('GENERADOR_ESTANDAR');
-  var after=bridge.getMaterial();
-  if(!after||(beforeSnapshot!==null&&JSON.stringify(after)===beforeSnapshot))throw new Error('HEVA no entregó un material nuevo. Revisa los mensajes del generador; no se reutilizará un documento anterior.');
-  lock(false);window.cambiarHerramienta('review-studio');
-  await review(material());
- }catch(e){status(e.message)}finally{lock(false)}
 }
 function content(m){
  if(m&&window.HEVAPedagogy?.blocks)return window.HEVAPedagogy.blocks(m,false).map(b=>b.title+'\n'+b.text).join('\n\n');
@@ -171,29 +156,16 @@ function init(){
  var style=document.createElement('style');
  style.textContent='.heva-review-panel.hidden{display:none!important}.heva-review-panel{display:grid;gap:14px;font:14px/1.55 system-ui;color:#30413e}.heva-review-panel .review-card{border:1px solid #dedfd8;background:#fff;border-radius:12px;padding:18px}.heva-review-panel .review-hero{background:#fff8f1}.heva-review-panel h2{font-size:23px;font-weight:800;color:#773347}.heva-review-panel h3{font-size:16px;font-weight:800;color:#31545b;margin:0 0 9px}.heva-review-panel .review-actions{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0}.heva-review-panel button{border:1px solid #75384a;border-radius:7px;padding:9px 12px;color:#fff;background:#75384a;font-weight:700;font-size:12px}.heva-review-panel button.secondary{color:#31545b;background:#eff7f4;border-color:#c4d9d1}.heva-review-panel button:disabled{opacity:.5}.heva-review-panel #heva-review-status{background:#f1f6f3;border-left:4px solid #639987;padding:11px}.heva-review-panel .review-columns{display:grid;grid-template-columns:1fr 1fr;gap:12px}.heva-review-panel pre{font:12px/1.6 monospace;background:#f6f8f6;border-radius:8px;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}.heva-review-list{padding-left:20px}.heva-review-list li{padding:5px 0}@media(max-width:760px){.heva-review-panel .review-columns{grid-template-columns:1fr}}';
  document.head.appendChild(style);
- var tab=document.createElement('button');tab.id='tab-review-studio';tab.type='button';tab.className='py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap';tab.textContent='HEVA Studio · Editar y mejorar';
- tab.addEventListener('click',function(){window.cambiarHerramienta('review-studio')});
- (document.querySelector('nav.no-print')||document.querySelector('nav')).appendChild(tab);
- var panel=document.createElement('section');panel.id='panel-review-studio';panel.className='hidden heva-review-panel no-print';panel.setAttribute('aria-label','HEVA Review, perfeccionamiento avanzado');
- panel.innerHTML='<div class="review-card review-hero"><h2>HEVA Studio · Edición, adaptación y revisión</h2><p>Reutiliza el motor IA, los 407 OA ya registrados, la revisión independiente y la auditoría Office de HEVA. No reimporta ni revalida el catálogo.</p><div class="review-actions"><button id="heva-review-existing" type="button">Revisar y perfeccionar material actual</button><button id="heva-review-generate" class="secondary" type="button">Generar con revisión IA desde el formulario</button><button id="heva-review-stop" class="secondary" disabled type="button">Detener</button></div><p id="heva-review-status" role="status" aria-live="polite">Genera o recupera un material antes de perfeccionarlo.</p><p style="font-size:12px">Sólo se corrigen errores comprobados. Las sugerencias y la calidad visual requieren decisión docente. Depende de un segundo proveedor IA habilitado.</p></div><div id="heva-review-result" hidden><div class="review-card"><h3 id="heva-review-title"></h3><p id="heva-review-meta"></p><p id="heva-review-phase"></p><div class="review-actions"><button id="heva-review-apply" disabled type="button">Aplicar versión corregida en HEVA</button><button id="heva-review-restore" class="secondary" disabled type="button">Restaurar original</button><button id="heva-review-download" class="secondary" type="button">Descargar expediente JSON</button></div></div><div class="review-card"><h3>Comparación de versiones</h3><div class="review-columns"><div><b>Original</b><pre id="heva-review-before"></pre></div><div><b id="heva-review-caption">Corregido</b><pre id="heva-review-after"></pre></div></div></div><div class="review-columns"><div class="review-card"><h3>Informe independiente</h3><div id="heva-review-first"></div></div><div class="review-card"><h3>Informe posterior</h3><div id="heva-review-second"></div></div></div><div class="review-card"><h3>Observaciones didácticas y visuales</h3><p>No equivalen a rediseño automático de las diapositivas. Se reutiliza el control Office de HEVA, sin auditar nuevamente los OA.</p><ul id="heva-review-advice" class="heva-review-list"></ul></div></div>';
- const tools=document.createElement('div');tools.id='heva-studio-workspace';panel.insertBefore(tools,panel.querySelector('#heva-review-result'));document.querySelector('main').appendChild(panel);
- var btn=$('btn-generar');
- if(btn){var inline=document.createElement('button');inline.id='heva-review-inline';inline.type='button';inline.className='w-full py-3 border border-[#8B2635] text-[#8B2635] bg-rose-50 hover:bg-rose-100 rounded font-bold text-sm';inline.textContent='Generar con revisión IA';inline.addEventListener('click',generateReview);btn.insertAdjacentElement('afterend',inline)}
- var toolbar=$('barra-calidad')&&$('barra-calidad').querySelector('.no-print');
- if(toolbar){var quick=document.createElement('button');quick.type='button';quick.id='heva-review-quick';quick.className='px-3 py-1.5 bg-[#315d5b] text-white rounded text-xs font-bold';quick.textContent='✨ Perfeccionar este material';quick.addEventListener('click',reviewExisting);toolbar.appendChild(quick)}
- var orig=window.cambiarHerramienta;
- if(typeof orig==='function')window.cambiarHerramienta=function(name){
-   if(name!=='review-studio'){panel.classList.add('hidden');tab.className='py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap'}
-   var val=orig(name);if(name==='review-studio'){panel.classList.remove('hidden');window.HEVAStudioUI?.mount();draw()}return val;
- };
+ var panel=document.createElement('section');panel.id='panel-review-studio';panel.className='heva-review-panel no-print';panel.setAttribute('aria-label','Edición, adaptación y mejora del material');
+ panel.innerHTML='<div class="review-card review-hero"><h3>Revisión y mejora integral con IA</h3><p>Una segunda IA revisa el material ya creado. Si encuentra errores comprobados, propone una versión corregida para que decidas si aplicarla.</p><div class="review-actions"><button id="heva-review-existing" type="button">Revisar y perfeccionar material actual</button><button id="heva-review-stop" class="secondary" disabled type="button">Detener</button></div><p id="heva-review-status" role="status" aria-live="polite">Genera o recupera un material antes de perfeccionarlo.</p><p style="font-size:12px">Sólo se corrigen errores comprobados. Las sugerencias y la calidad visual requieren decisión docente. Depende de un segundo proveedor IA habilitado.</p></div><div id="heva-review-result" hidden><div class="review-card"><h3 id="heva-review-title"></h3><p id="heva-review-meta"></p><p id="heva-review-phase"></p><div class="review-actions"><button id="heva-review-apply" disabled type="button">Aplicar versión corregida en HEVA</button><button id="heva-review-restore" class="secondary" disabled type="button">Restaurar original</button><button id="heva-review-download" class="secondary" type="button">Descargar expediente JSON</button></div></div><div class="review-card"><h3>Comparación de versiones</h3><div class="review-columns"><div><b>Original</b><pre id="heva-review-before"></pre></div><div><b id="heva-review-caption">Corregido</b><pre id="heva-review-after"></pre></div></div></div><div class="review-columns"><div class="review-card"><h3>Informe independiente</h3><div id="heva-review-first"></div></div><div class="review-card"><h3>Informe posterior</h3><div id="heva-review-second"></div></div></div><div class="review-card"><h3>Observaciones didácticas y visuales</h3><p>No equivalen a rediseño automático de las diapositivas. Se reutiliza el control Office de HEVA, sin auditar nuevamente los OA.</p><ul id="heva-review-advice" class="heva-review-list"></ul></div></div>';
+ const tools=document.createElement('div');tools.id='heva-studio-workspace';panel.insertBefore(tools,panel.querySelector('#heva-review-result'));const host=$('heva-result-edit');if(!host)return;host.append(panel);
  $('heva-review-existing').addEventListener('click',reviewExisting);
- $('heva-review-generate').addEventListener('click',generateReview);
  $('heva-review-stop').addEventListener('click',function(){if(ctrl)ctrl.abort()});
  $('heva-review-apply').addEventListener('click',function(){apply('corrected')});
  $('heva-review-restore').addEventListener('click',function(){apply('original')});
  $('heva-review-download').addEventListener('click',download);
  try{var history=JSON.parse(localStorage.getItem('heva-review-studio-history')||'[]');if(Array.isArray(history)&&history[0]&&history[0].original){job=history[0];reviewedKey=key(job.original);draw();status('Se recuperó el último expediente local.')}}catch(e){}
- window.HEVAReviewStudio={reviewExisting:reviewExisting,generateReview:generateReview,getJob:function(){return job},isBusy:function(){return running}};window.HEVAStudioUI?.mount();
+ window.HEVAReviewStudio={reviewExisting:reviewExisting,open:openWorkspace,getJob:function(){return job},isBusy:function(){return running}};window.HEVAStudioUI?.mount();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
