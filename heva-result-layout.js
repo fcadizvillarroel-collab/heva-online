@@ -58,7 +58,7 @@ function arrange(){
   const guideImage=byId('heva-guide-image-action');
   if(guideImage&&guideImage.textContent!=='Añadir o cambiar imagen de apoyo')guideImage.textContent='Añadir o cambiar imagen de apoyo';
  }
- const sources=['heva-experimental-audit','heva-audit-fold','heva-strategy-delivery','heva-teaching-report','heva-textbook-references','heva-metal-sources','heva-depth-advisories','heva-tp-document-evidence'];
+ const sources=['heva-quality-panel','heva-experimental-audit','heva-audit-fold','heva-strategy-delivery','heva-teaching-report','heva-textbook-references','heva-metal-sources','heva-depth-advisories','heva-tp-document-evidence'];
  for(const id of sources){
   const node=byId(id);
   if(node && node.parentElement!==review)review.append(node);
