@@ -37,3 +37,36 @@ Fecha: 24-11-2026 (UTC). Este registro se limita al encargo probado; no equivale
 - La mayor parte de las aplicaciones usa textos ficticios y ejercicios escritos; para uso docente real conviene más variedad de desempeño, revisión de las fuentes y adecuaciones a lectores adultos. La superación técnica de 16 diapositivas no certifica su exactitud disciplinar.
 - Este lote extiende la auditoría canónica para **detectar estadísticas atribuidas sin respaldo dentro de las diapositivas**, advertir sobre solicitudes de autoría de fuente simulada sin ficha y reconocer citas completas con comillas simples. No es una certificación docente ni una aprobación documental automática.
 
+
+## Ensayo real de los otros cuatro formatos
+
+Ejecución: https://github.com/fcadizvillarroel-collab/heva-online/actions/runs/45323195239
+Todos estos materiales se solicitaron contra la versión publicada anterior de HEVA con el mismo OA oficial de Globalización de II Nivel Medio. No se hicieron llamadas de proveedor repetidas automáticamente y no se tocaron los OA de Supabase.
+
+| Tipo | HTTP | Resultado técnico | Hallazgo o límite |
+|---|---:|---|---|
+| EVALUACION | 200 | Material completo con cuatro alternativas | Claves reales **B,B,B,A**; balancer respondió `requiere_revision` porque el razonamiento incluía referencias de letras. Corregido en `heva-skills.js` (PR #77), aún **sin desplegar** |
+| PLANIFICACION | 200 | Inicio 15 min, Desarrollo 60 min, Cierre 15 min | Suma 90 minutos, pero eso no comprueba factibilidad de todas las actividades o calidad disciplinar |
+| TALLER | 200 | Procedimiento completo de tres pasos | Necesita pertinencia docente y revisión del contenido antes de aula |
+| ACCESIBLE | 200 | Glosario y modalidad de respuesta oral o escrita | Requiere comprobación real de legibilidad, formato accesible y adaptación a condiciones particulares |
+
+El equilibrador de claves ya existente no se reemplazó: se hizo más competente para reescribir referencias explícitas a letras de las opciones sin alterar el texto correcto. Si alguna justificación usa letras ambiguamente, **no se reordena** y se conserva el aviso para revisión, como corresponde.
+
+## HEVA Review: revisión independiente efectivamente ejecutada
+
+- Ejecución con respuesta y artefacto completos: https://github.com/fcadizvillarroel-collab/heva-online/actions/runs/45323863632
+- Material: **guía real** «Globalización y Decisiones Cotidianas en Nuestra Vida», autora Gemini (`gemini-3.5-flash-lite`).
+- POST `/api/review` con `accion:revisar`: **HTTP 200, exito=true**. Revisor de otro proveedor **Groq**, modelo `openai/gpt-oss-120b`.
+- Informe con **ocho criterios**, `integridadInforme=completo`, `estado=con_observaciones`.
+- Criterios: alineación, habilidades, andragogía, accesibilidad, estrategia y evaluación = `cumple` según el revisor; **rigor y fuentes = `no_verificable`** por ausencia de contrastes documentales válidos para las afirmaciones. Este «cumple» es **dictamen de IA, no una certificación docente**.
+- Hallazgo puntual: `actividadesGuiadas[0].consigna` atribuye un 70 % a un «estudio de mercado» sin autor, fecha ni fuente validada. El revisor recomienda incluir evidencia documental o reemplazar la afirmación, sin inventar su procedencia. No se aplicó corrección automática a un punto `no_verificable`.
+- Una primera ejecución del mismo examen tuvo respuesta de Review HTTP 200 pero el script de QA falló al guardar el archivo (directorio inexistente); se arregló exclusivamente la captura de pruebas. La segunda guardó `revision-real.json` íntegro y terminó correctamente.
+- **No puede declararse aprobada la guía real** sin resolver la afirmación cuantitativa y verificar su pertinencia didáctica.
+
+## Criterio de cierre técnico y publicación
+
+- Catálogo curricular oficial **407 OA**, conservado, fuente única Supabase. No reimportar ni volver a cotejar cada OA por activar libros escolares complementarios.
+- **Generación real completada** para seis formatos: GUIA, PRESENTACION (por seis bloques), EVALUACION, PLANIFICACION, TALLER y ACCESIBLE, con Gemini; prueba independiente Review mediante Groq.
+- **Exportación DOCX/PPTX:** pruebas de Chromium con archivos de ejemplo y compatibilidad completadas en las suites de GitHub. **No se exportó todavía el JSON real del PPT a un PPTX mediante la interfaz publicada**, por lo que no debe proclamarse inspección visual exhaustiva del archivo real.
+- **Vercel:** `heva-online` ajustado de Node 26.x a Node 22.x según el repositorio. Producción aún usa commit antiguo `65cb7aed...` por límite diario de despliegues de Hobby (HTTP 402 `api-deployments-free-per-day`). No habilitar pago.
+- Aún no existe validación independiente y humana completa de las fuentes, cálculos, contenido, imágenes y accesibilidad de cada material. El dictamen de IA y las pruebas sintácticas son evidencia **parcial**, no autorización docente.
