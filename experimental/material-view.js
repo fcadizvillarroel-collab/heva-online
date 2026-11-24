@@ -1,8 +1,11 @@
 (function(root,factory){
-  const api=factory();
+  const quality=(typeof module==='object'&&module.exports)
+    ?require('../heva-quality-gate.js')
+    :root.HEVAQualityGate;
+  const api=factory(quality);
   if(typeof module==='object'&&module.exports)module.exports=api;
   else root.HEVALabMaterialView=api;
-})(typeof globalThis!=='undefined'?globalThis:this,function(){
+})(typeof globalThis!=='undefined'?globalThis:this,function(QualityGate){
 'use strict';
 const clean=x=>String(x??'').trim();
 const escape=x=>clean(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -142,6 +145,18 @@ function audit(material, type='GUIA', expected={}){
     slides.forEach((slide,i)=>{
       if(!clean(slide?.titulo)||!truth(slide?.contenido))issues.push('Diapositiva '+(i+1)+': falta título o contenido visible.');
     });
+    // Reutiliza la auditoría de HEVA principal. No crea otro detector:
+    // las tablas y los textos estructurados se comparan en un solo lugar.
+    if(QualityGate&&typeof QualityGate.inspect==='function'){
+      const result=QualityGate.inspect({
+        material:{...material,tipoMaterial:'PRESENTACION'},
+        sections:slides.map(s=>({title:s?.titulo||'',text:text(s?.contenido)})),
+        visuals:[]
+      });
+      for(const finding of result.issues||[])if(
+        ['PPT_CONTENIDO_REPETIDO','PPT_TITULOS_REPETIDOS','PPT_EXPLICACION_BREVE'].includes(finding.code)
+      )warnings.push('Revisión visual: '+finding.detail);
+    }
   }
   if(type==='EVALUACION'){
     const count=['preguntasAlternativas','preguntasDesarrollo','casosEstudio']
