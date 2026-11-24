@@ -97,8 +97,8 @@ function inspect({material={},sections=[],visuals=[]}={}){
   // que el propio estímulo lo declare. Advertencia, no un dato inventado.
   const missingSimulatedAuthor=slides.some(d=>{
    const body=Array.isArray(d?.contenido)?d.contenido.join(' '):String(d?.contenido||'');
-   return /simulad[oa]/i.test(body)&&/(?:identifi(?:que|car)|señal(?:e|ar)|indiqu(?:e|ar))\\s+(?:el\\s+)?(?:autor|procedencia)/i.test(body)&&
-     !/\\b(?:autor|autora|procedencia|entidad emisora)\\s*:\\s*\\S{3,}/i.test(body);
+   return /simulad[oa]/i.test(body)&&/(?:identifi(?:que|car)|señal(?:e|ar)|indiqu(?:e|ar))\s+(?:el\s+)?(?:autor|procedencia)/i.test(body)&&
+     !/\b(?:autor|autora|procedencia|entidad emisora)\s*:\s*\S{3,}/i.test(body);
   });
   if(missingSimulatedAuthor)
    add('FUENTE_SIMULADA_SIN_AUTORIA','Un ejercicio pide identificar la autoría o procedencia de un documento SIMULADO sin proporcionar ese dato. Incluya una ficha explícita o reformule la pregunta.',12);
