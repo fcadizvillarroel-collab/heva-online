@@ -55,7 +55,7 @@ test('approval denies missing documentary attestation without network write',asy
    throw new Error('Unexpected request');
   };
   const out=res();
-  await handler({method:'POST',query:{action:'approve'},headers:{authorization:'Bearer simulated'},body:{stagingId,comprobadoDocumentalmente:false}},out);
+  await handler({method:'POST',query:{action:'approve'},headers:{authorization:'Bearer simulated'},body:{stagingId,comprobadoDocumentalmente:'false'}},out);
   assert.equal(out.statusCode,400);
   assert.equal(touched,false);
  }finally{
