@@ -9,12 +9,27 @@ const registry=[
 function instructions(p){return '\nPROCEDIMIENTOS PEDAGÓGICOS HEVA v1:\nDiseño curricular: el OA literal y el marco son inmutables. Cada tarea debe producir evidencia de una habilidad del objetivo con criterio propio, reflejada en trazabilidadEstrategia. No basta nombrar una habilidad.\nEvaluaciones: incluye el estímulo completo cuando una pregunta dependa de un texto, aviso, tabla o datos. Cada alternativa tiene una sola clave defendible y justificación docente; evita opciones combinadas o alusiones a letras de otras opciones. Las preguntas no deben revelar respuestas entre sí. Mantén exactamente las cantidades; cero es válido. Rúbricas y soluciones son docentes.\nRevisión: no declares revisión independiente ni verificación documental por generar el material; son etapas separadas y pueden quedar pendientes.\n'+Didactics.prompt(p)+(typeof module==='object'&&module.exports?require('./experimental/strategy-delivery.js'):globalThis.HEVAStrategyDelivery)?.prompt(p);}
 function generationIssues(m,p){const copy=P.finalize(JSON.parse(JSON.stringify({...m,planGeneracion:p})),p);const delivery=typeof module==='object'&&module.exports?require('./experimental/strategy-delivery.js'):globalThis.HEVAStrategyDelivery;const issues=[...(delivery?.audit(copy,p).errores||[]),...Audit.inspect(copy).errores.map(x=>x.ubicacion+': '+x.problema)];if(!String(copy.introduccionLectura||'').trim()&&copy.preguntasAlternativas.some(q=>/segun el (texto|aviso|relato)|de acuerdo (con|al) (el )?(texto|aviso)|texto estimulo/.test(Audit.norm(q.enunciado))))issues.push('Falta el texto o aviso al que remiten las preguntas. Inclúyelo completo en introduccionLectura.');return [...new Set(issues)];}
 function remapJustification(value,map){
- let unresolved=String(value||'');
- const patterns=[/(\b(?:alternativa|opci[oó]n|respuesta|letra)\s+(?:correcta\s+(?:es\s+)?)?[“"']?)([ABCD])\b/gi,/(\b(?:la\s+)?correcta\s+(?:es\s+)?)([ABCD])\b/gi,/(^\s*)([ABCD])([).:]\s)/g];
- for(const rx of patterns)unresolved=unresolved.replace(rx,(match,prefix,letter,suffix)=>prefix+'[opcion]'+(typeof suffix==='string'?suffix:''));
- if(/\b[ABCD]\b/.test(unresolved))return null;
- let rewritten=String(value||'');for(const rx of patterns)rewritten=rewritten.replace(rx,(match,prefix,letter,suffix)=>prefix+(map[String(letter).toUpperCase()]||letter)+(typeof suffix==='string'?suffix:''));
- return rewritten;
+ const original=String(value||'');
+ if(original.includes('§HEVA_REF_'))return null;
+ let annotated=original;
+ const refs=[];
+ const mark=letter=>{const i=refs.length;refs.push(String(letter).toUpperCase());return '§HEVA_REF_'+i+'§';};
+ const patterns=[
+  /(\b(?:clave|alternativa|opci[oó]n|respuesta|letra|opciones|alternativas|respuestas)\s+(?:correcta\s+(?:es\s+)?)?[“"']?)([ABCD])\b/gi,
+  /(\b(?:la\s+)?correcta\s+(?:es\s+)?)([ABCD])\b/gi,
+  /(^\s*)([ABCD])([).:]\s)/g
+ ];
+ for(const rx of patterns)annotated=annotated.replace(rx,(match,prefix,letter,suffix)=>prefix+mark(letter)+(typeof suffix==='string'?suffix:''));
+ // Tras identificar referencias explícitas, una secuencia "C y D"
+ // también se entiende como letras de opciones, no prosa general.
+ if(/\b(?:clave|alternativa|opci[oó]n|letra|respuesta)s?\b/i.test(original)){
+  annotated=annotated.replace(/\b([ABCD])\s+(y|o|\/)\s+([ABCD])\b/g,
+   (match,a,connector,b)=>mark(a)+' '+connector+' '+mark(b));
+ }
+ // Referencias no interpretables (p.ej. "A través" o "B corresponde")
+ // permanecen bloqueadas; no alterar una explicación ambigua.
+ if(/\b[ABCD]\b/.test(annotated))return null;
+ return annotated.replace(/§HEVA_REF_(\d+)§/g,(match,i)=>map[refs[Number(i)]]||refs[Number(i)]);
 }
 function balanceKeys(m,random=Math.random){
  const items=m.preguntasAlternativas||[],letters=['A','B','C','D'];if(items.length<2)return{changed:0,status:'no_necesario'};
