@@ -21,18 +21,19 @@ function arrange(){
  const viewer=article.parentElement;
  let edit=byId('heva-result-edit');
  let review=byId('heva-result-review');
- if(!edit){edit=fold('heva-result-edit','5. Editar, adaptar y mejorar el material');article.after(edit);}
+ if(!edit){edit=fold('heva-result-edit','5. Editar, adaptar y mejorar el material');(byId('heva-stage-3')||article).after(edit);}
  if(!review){
   review=fold('heva-result-review','Revisión pedagógica y fuentes');
   const note=element('p','heva-review-note','Aquí se resumen las advertencias y estrategias. Los informes extensos y el control de exportación permanecen en la pestaña «Revisión y fuentes».');
   const go=element('button','heva-review-open-tab','Abrir revisión completa');
   go.type='button';
   go.addEventListener('click',()=>byId('tab-revision')?.click());
-  review.append(note,go);edit.after(review);
+  review.append(note,go);article.after(review);
  }
  // El documento debe ser el primer contenido extenso. Solo las descargas rápidas permanecen arriba.
- if(edit.previousElementSibling!==article)article.after(edit);
- if(review.previousElementSibling!==edit)edit.after(review);
+ const step3=byId('heva-stage-3');
+ if(step3&&edit.previousElementSibling!==step3)step3.after(edit);
+ if(review.previousElementSibling!==article)article.after(review);
  const toolbar=byId('heva-teacher-tools');
  if(toolbar){
   if(toolbar.parentElement!==edit)edit.append(toolbar);
