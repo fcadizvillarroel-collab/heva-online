@@ -23,7 +23,7 @@ const save=()=>{fs.mkdirSync('qa-review',{recursive:true});fs.writeFileSync('qa-
    contrastesDocumentales:r.contrastesDocumentales?.length||0,
    alcance:r.alcance||null
   }:null;
-  if(r)fs.writeFileSync('qa-review/revision-real.json',JSON.stringify(r,null,2));
+  if(r){fs.mkdirSync('qa-review',{recursive:true});fs.writeFileSync('qa-review/revision-real.json',JSON.stringify(r,null,2));}
   save();console.log('REVISION_REAL '+JSON.stringify(output).slice(0,5200));
   output.estado=output.exito?'revisor_independiente_confirmado':'revision_fallida_o_bloqueada';
   save();if(!output.exito)process.exitCode=2;
