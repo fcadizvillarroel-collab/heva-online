@@ -83,7 +83,7 @@
   <nav class="no-print bg-white border-b border-stone-200 px-6 flex gap-4 text-xs md:text-sm font-medium overflow-x-auto">
     <button onclick="cambiarHerramienta('crear')" id="tab-crear" class="py-3 border-b-2 border-[#8B2635] text-[#8B2635] font-bold whitespace-nowrap">🎓 Generador de Instrumentos</button>
     <button onclick="cambiarHerramienta('revision')" id="tab-revision" class="py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap">🔎 Revisión y fuentes</button>
-    <button onclick="cambiarHerramienta('staging')" id="tab-staging" class="py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap">🛠️ Revisión Staging (407 Registros)</button>
+    <button onclick="cambiarHerramienta('staging')" id="tab-staging" class="py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap">🛠️ Administración curricular</button>
     <button onclick="cambiarHerramienta('guardados')" id="tab-guardados" class="py-3 border-b-2 border-transparent text-stone-600 hover:text-stone-900 whitespace-nowrap">💾 Mis Materiales</button>
   </nav>
 
@@ -106,7 +106,7 @@
     <section id="panel-revision" class="hidden space-y-4 no-print" aria-label="Revisión pedagógica y fuentes"><div class="bg-white border rounded-lg p-5"><h2 class="text-lg font-bold text-[#8B2635]">Revisión pedagógica y fuentes documentales</h2><p class="text-sm text-stone-600">Consulta las verificaciones de tu material y las fuentes oficiales sin interrumpir la lectura ni la edición. La consulta manual de fuentes es opcional.</p><button type="button" id="revision-volver" class="mt-3 border rounded px-3 py-2 text-sm font-bold" onclick="cambiarHerramienta('crear')">Volver al material</button></div><div id="revision-contenido" class="space-y-4"></div></section>
 
     <!-- ====================================================================== -->
-    <!-- PESTAÑA: REVISIÓN DE STAGING (407 REGISTROS DE SUPABASE LADO A LADO) -->
+    <!-- PESTAÑA: ADMINISTRACIÓN CURRICULAR (SOLO ADMINISTRADORES) -->
     <!-- ====================================================================== -->
     <div id="panel-staging" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-lg border border-stone-200 shadow-sm space-y-4">
@@ -117,7 +117,7 @@
               <span>🛠️ Cotejo y Verificación Curricular de Staging</span>
             </h2>
             <p class="text-xs text-stone-600 mt-1">
-              Revise lado a lado los 407 registros importados en Supabase frente a su fuente y página declarada. Los registros aprobados pasan al catálogo oficial docente.
+              Los 407 objetivos EPJA existentes ya están publicados y aprobados en el catálogo. Esta área restringida se utiliza solo para revisar modificaciones futuras; no es necesario importar ni aprobar nuevamente los objetivos actuales.
             </p>
           </div>
           <div class="flex items-center gap-3">
@@ -138,7 +138,7 @@
               <option value="CORREGIDO">Corregidos en Staging</option>
             </select>
           </div>
-          <span id="contador-staging-registros" class="text-stone-500 font-mono text-xs font-bold">Cargando 407 registros...</span>
+          <span id="contador-staging-registros" class="text-stone-500 font-mono text-xs font-bold">Cargando registros administrativos...</span>
         </div>
 
         <!-- Visor Lado a Lado -->
