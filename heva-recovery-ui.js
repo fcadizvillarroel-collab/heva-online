@@ -43,7 +43,7 @@ function hevaAutoSaveMaterial(material){
  const identical=stored.some(record=>record?.data?.titulo===material.titulo&&record?.data?.tipoMaterial===material.tipoMaterial&&JSON.stringify(record.data)===JSON.stringify(material));
  if(!identical){
   stored.unshift({id:'MAT-'+Date.now(),fecha:new Date().toLocaleDateString('es-CL'),data:material});
-  localStorage.setItem('heva_historial',JSON.stringify(stored.slice(0,20)));
+  localStorage.setItem('heva_historial',JSON.stringify(stored));
  }
  return true;
 }
@@ -126,11 +126,11 @@ function mostrarRecuperacionPendienteHEVA(){
   if(!archived){if(box)box.hidden=true;return;}
   if(!box){box=document.createElement('section');box.id='heva-resume-recovery';box.className='no-print border rounded p-3 bg-amber-50';box.style.gridColumn='1 / -1';host.prepend(box);}
   box.hidden=false;box.replaceChildren();
-  const message=document.createElement('p');message.textContent='Existe un avance de una prueba o guía apartado de forma segura. Puedes recuperarlo para continuar.';
+  const message=document.createElement('p');message.textContent='Existe un avance de material apartado de forma segura. Puedes recuperarlo para continuar.';
   const restore=document.createElement('button');restore.type='button';restore.textContent='Recuperar avance apartado';restore.className='heva-recovery-action border rounded px-3 py-2 font-bold';restore.disabled=hevaRecoveryRunning();
   const status=document.createElement('p');status.setAttribute('role','status');
   restore.onclick=()=>{try{hevaRestoreCheckpoint();}catch(error){status.textContent=error.message;}};
-  box.append(message,restore,status);
+  const remove=document.createElement('button');remove.type='button';remove.textContent='Descartar avance apartado';remove.className='heva-recovery-action border rounded px-3 py-2';remove.disabled=hevaRecoveryRunning();remove.onclick=()=>{if(hevaRecoveryRunning()||!window.confirm('¿Eliminar definitivamente el avance apartado?'))return;try{if(hevaArchiveRead()?.planKey!==archived.planKey)throw Error('El avance cambió.');localStorage.removeItem(HEVA_RECOVERY_ARCHIVE_KEY);mostrarRecuperacionPendienteHEVA();}catch(error){status.textContent=error.message;}};box.append(message,restore,remove,status);
   return;
  }
  if(!box){box=document.createElement('section');box.id='heva-resume-recovery';box.className='no-print border rounded p-3 bg-amber-50';box.style.gridColumn='1 / -1';host.prepend(box);}
@@ -166,7 +166,7 @@ function mostrarRecuperacionPendienteHEVA(){
  };
  // Conservar los controles originales como hijos directos para reanudación,
  // restauración y compatibilidad; mostrar solo un botón compacto hasta abrirlos.
- actions.append(button,discard);box.append(title,text,actions,status);
+ const remove=document.createElement('button');remove.type='button';remove.textContent='Descartar definitivamente';remove.className='heva-recovery-action border rounded px-3 py-2';remove.disabled=hevaRecoveryRunning();remove.onclick=()=>{if(hevaRecoveryRunning())return;if(!window.confirm('¿Eliminar definitivamente este avance de '+nombre+'? No se eliminarán materiales guardados.'))return;try{const current=JSON.parse(localStorage.getItem(HEVA_RECOVERY_KEY)||'null');if(current?.planKey!==saved.planKey)throw Error('El avance cambió; no se eliminó.');localStorage.removeItem(HEVA_RECOVERY_KEY);hevaResumeMessage='';mostrarRecuperacionPendienteHEVA();}catch(error){status.textContent=error.message;}};actions.append(button,discard,remove);
  const toggle=document.createElement('div');toggle.id='heva-resume-toggle';
  toggle.setAttribute('role','button');toggle.setAttribute('tabindex','0');
  toggle.className='heva-recovery-action text-xs font-bold text-amber-950';
@@ -182,7 +182,7 @@ function mostrarRecuperacionPendienteHEVA(){
  };
  toggle.onclick=()=>setExpanded(!expanded);
  toggle.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault?.();setExpanded(!expanded);}};
- box.append(toggle);setExpanded(false);
+ box.append(title,text,actions,status,toggle);setExpanded(false);
  if(hevaResumeMessage)setExpanded(true);
 }
 mostrarRecuperacionPendienteHEVA();

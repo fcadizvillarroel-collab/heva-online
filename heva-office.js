@@ -253,7 +253,7 @@ function addContent(ppt,theme,slide,title,lines,section,index=0,scene={}){
   // Every remaining interior receives a real composition, including legacy
   // decks without role metadata and topics with no matching illustration.
   const mono=theme.main==='111111';
-  if(!activity&&clean.length===2&&clean.every(t=>fitsText([t],4.9,3.35,26))){
+  if(!activity&&clean.length===2&&index%3===0&&clean.every(t=>fitsText([t],4.9,3.35,26))){
    clean.forEach((line,j)=>{const x=.85+j*6.03,dark=j===0&&!mono;slide.addShape(ppt.ShapeType.roundRect,{x,y:2.3,w:5.6,h:4.15,rectRadius:.12,line:{color:theme.main,width:1,transparency:dark?100:75},fill:{color:dark?theme.main:(theme.panel||'FFFFFF')}});text(line,x+.35,2.72,4.9,3.35,26,dark?'FFFFFF':ink);});
   }else{
    const heights=clean.map(t=>lineCount(t,10.9,26)*26*1.28/72+.34),total=heights.reduce((a,n)=>a+n,0)+Math.max(0,clean.length-1)*.17;
