@@ -66,7 +66,7 @@ function paginatePresentation(section,large=false){
  if(section.visualOptions?.graficos!==false&&root.HEVASlideDesign?.role(section)!=='activity'&&root.HEVASlideDesign?.dataChart(dataRows)&&fitsText([dataRows.join('\n')],5.15,3.9,26))return[dataRows];
  // Una secuencia real de tres pasos permanece unida si cada texto cabe en un panel grande.
  if(section.visualOptions?.diagramas!==false&&!section.image&&
-    root.HEVASlideDesign?.structuredFlow?.(dataRows)?.items.every(entry=>fitsText([entry.text],3.1,2.22,26)))return[dataRows];
+    root.HEVASlideDesign?.structuredFlow?.(dataRows)?.items.every(entry=>fitsText([entry.text],3.08,2.55,26)))return[dataRows];
  // Keep five or six short, explicitly dated events together for a readable
  // two-row timeline. Long events retain the normal pagination instead.
  if(section.visualOptions?.diagramas!==false&&!section.image&&visualKind(section.title,dataRows)==='chronology'&&dataRows.length>=5&&dataRows.length<=6&&dataRows.every(line=>/^\d{3,4}\s*:\s*\S/.test(line)&&fitsText([line.replace(/^\d{3,4}\s*:\s*/,'')],3.18,1.13,21)))return[dataRows];
@@ -180,7 +180,7 @@ function addContent(ppt,theme,slide,title,lines,section,index=0,scene={}){
  // Diagrama nativo basado en tres evidencias explícitas del contenido original.
  // Los títulos, los argumentos y sus relaciones permanecen editables en PowerPoint.
  const triplet=resources.diagramas&&!activity&&!illustration?root.HEVASlideDesign?.structuredFlow?.(clean):null;
- if(triplet&&triplet.items.every(entry=>fitsText([entry.text],3.1,2.22,26))){
+ if(triplet&&triplet.items.every(entry=>fitsText([entry.text],3.08,2.55,26))){
   triplet.items.forEach((entry,j)=>{
    const x=.86+j*3.92,w=3.55;
    slide.addShape(ppt.ShapeType.roundRect,{x,y:2.36,w,h:3.94,rectRadius:.14,
@@ -188,8 +188,8 @@ function addContent(ppt,theme,slide,title,lines,section,index=0,scene={}){
     fill:{color:j===1?(theme.soft||'F1E7DB'):(theme.panel||'FFFFFF')}});
    slide.addShape(ppt.ShapeType.rect,{x:x+.25,y:2.65,w:.62,h:.08,
     line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});
-   text(entry.label.toUpperCase(),x+.24,2.92,3.07,.48,17,theme.main,true);
-   text(entry.text,x+.24,3.61,3.08,2.22,25,theme.ink);
+   text(entry.label.toUpperCase(),x+.24,2.84,3.07,.49,17,theme.main,true);
+   text(entry.text,x+.24,3.43,3.08,2.55,25,theme.ink);
    if(j<2)text('→',x+3.59,4.06,.30,.5,20,theme.accent,true);
   });
   slide.hevaVisualType='diagram';return;
