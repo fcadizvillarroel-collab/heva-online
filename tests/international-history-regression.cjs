@@ -1,0 +1,2 @@
+const test=require('node:test');const assert=require('node:assert/strict');const bridge=require('../lib/international-didactic-bridge.cjs');
+test('industrial history reference never leaks to other subjects',()=>{const p={asignatura:'Estudios Sociales',temaEspecifico:'Revolución Industrial',tipoMaterial:'GUIA'};assert.ok(bridge.references(p).some(x=>x.pais==='España'));assert.match(bridge.prompt(p),/OA literal EPJA/);assert.equal(bridge.references({...p,asignatura:'Matemática'}).length,0);assert.equal(bridge.references({...p,temaEspecifico:'Edad Media'}).length,0);});
