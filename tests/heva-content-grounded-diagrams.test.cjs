@@ -59,3 +59,16 @@ test('funciona con secuencias de ciencias, matemática y resolución dialogada',
   ['Problema: Dos vecinos discrepan sobre un horario.','Diálogo: Ambos explican sus necesidades y límites.','Acuerdo: Proponen turnos y revisan el resultado.']
  ])assert.ok(D.structuredFlow(rows),rows.join(' / '));
 });
+
+test('el generador solicita un ejemplo visual sustentado sin forzarlo ni repetirlo',()=>{
+ const deep=require('../heva-deep-materials.cjs');
+ const hint=deep.guidance({tipoMaterial:'PRESENTACION',asignatura:'Estudios Sociales',temaEspecifico:'Globalización'});
+ assert.match(hint,/DIAGRAMA EDITABLE BASADO EN CONTENIDOS/);
+ assert.match(hint,/COMO MÁXIMO UNA/);
+ assert.match(hint,/Antecedentes:/);
+ assert.match(hint,/nunca inventes datos/i);
+ const without=deep.guidance({tipoMaterial:'PRESENTACION',asignatura:'Estudios Sociales',recursosVisualesHEVA:{diagramas:false}});
+ assert.doesNotMatch(without,/DIAGRAMA EDITABLE BASADO EN CONTENIDOS/);
+ const guide=deep.guidance({tipoMaterial:'GUIA',asignatura:'Estudios Sociales'});
+ assert.doesNotMatch(guide,/DIAGRAMA EDITABLE BASADO EN CONTENIDOS/);
+});
