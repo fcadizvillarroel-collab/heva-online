@@ -137,7 +137,9 @@ function subjectVisual(section,topic,subject){
   return image({data:canvas.toDataURL('image/png'),width:1000,height:550,alt:'Organizador visual: '+group.labels.join(' → '),generated:true});
  }catch{return null;}
 }
-function decorate(m,sections,assets={}){const topic=norm([m.asignatura,m.titulo,m.temaEspecifico,m.objetivoAprendizaje,m.planGeneracion?.temaEspecifico].join(' ')),family=visualFamily(m.asignatura||m.planGeneracion?.asignatura||m.titulo||''),used=new Set();let generatedCount=0;return sections.map((s,i)=>{const prefs=options(m),out={...s,design:role(s),visualOptions:prefs},own=image(s.image);if(!prefs.imagenes||s.hideImage)return{...out,image:null};if(own)return{...out,image:own};if(!['PRESENTACION','GUIA','TALLER','ACCESIBLE'].includes(m.tipoMaterial)||m.accesibilidadVisual?.contraste||i===0||out.design==='activity'||out.design==='closing'||out.design==='opening')return out;const words=norm(s.title+' '+s.text);for(const rule of rules){const asset=image(assets[rule.id]);if(asset&&!used.has(rule.id)&&rule.topic.test(topic)&&rule.slide.test(words)&&(rule.id!=='seguridad'||family==='tecnica')&&!(family==='tecnica'&&rule.id==='lenguaje')){used.add(rule.id);return{...out,image:asset};}}if(generatedCount<3&&prefs.diagramas){const generated=subjectVisual(s,topic,m.asignatura||m.planGeneracion?.asignatura||'');const key='infografia:'+String(generated?.alt||'');if(generated&&!used.has(key)){used.add(key);generatedCount++;return{...out,image:generated};}}return out;});}
+function decorate(m,sections,assets={}){const topic=norm([m.asignatura,m.titulo,m.temaEspecifico,m.objetivoAprendizaje,m.planGeneracion?.temaEspecifico].join(' ')),family=visualFamily(m.asignatura||m.planGeneracion?.asignatura||m.titulo||''),used=new Set();let generatedCount=0;return sections.map((s,i)=>{const prefs=options(m),out={...s,design:role(s),visualOptions:prefs},own=image(s.image);if(!prefs.imagenes||s.hideImage)return{...out,image:null};if(own)return{...out,image:own};if(!['PRESENTACION','GUIA','TALLER','ACCESIBLE'].includes(m.tipoMaterial)||m.accesibilidadVisual?.contraste||i===0||out.design==='activity'||out.design==='closing'||out.design==='opening')return out;const words=norm(s.title+' '+s.text);for(const rule of rules){const asset=image(assets[rule.id]);if(asset&&!used.has(rule.id)&&rule.topic.test(topic)&&rule.slide.test(words)&&(rule.id!=='seguridad'||family==='tecnica')&&!(family==='tecnica'&&rule.id==='lenguaje')){used.add(rule.id);return{...out,image:asset};}}// Preferir una secuencia de contenido editable antes de un organizador genérico.
+ if(prefs.diagramas&&structuredFlow(String(s.text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean)))return out;
+ if(generatedCount<3&&prefs.diagramas){const generated=subjectVisual(s,topic,m.asignatura||m.planGeneracion?.asignatura||'');const key='infografia:'+String(generated?.alt||'');if(generated&&!used.has(key)){used.add(key);generatedCount++;return{...out,image:generated};}}return out;});}
 function contain(asset,box){const ratio=asset.width/asset.height,w=Math.min(box.w,box.h*ratio),h=w/ratio;return{x:box.x+(box.w-w)/2,y:box.y+(box.h-h)/2,w,h};}
 function dataChart(lines){
  if(!Array.isArray(lines)||lines.length<2||lines.length>6)return null;
@@ -159,7 +161,31 @@ function comparisonPairs(lines){
  if(norm(matches[0][2])===norm(matches[1][2]))return null;
  return matches.map(m=>({label:(norm(m[1])==='formal'?'Registro formal':norm(m[1])==='informal'?'Registro informal':m[1].trim()),text:m[2].trim()}));
 }
+// Secuencias editables que se apoyan íntegramente en ejemplos y evidencias del material.
+// Solo reconocer etiquetas explícitas; nunca inventar etapas ni datos históricos.
+function structuredFlow(lines){
+ if(!Array.isArray(lines)||lines.length!==3)return null;
+ const parts=lines.map(line=>String(line||'').trim().match(/^([^:\n]{3,32}):\s*(\S[\s\S]{7,240})$/u));
+ if(parts.some(p=>!p))return null;
+ const labels=parts.map(p=>norm(p[1]).trim().replace(/\s+/g,' '));
+ const sequences=[
+  ['antecedentes','desarrollo','consecuencias'],
+  ['antecedente','desarrollo','consecuencia'],
+  ['causa','proceso','consecuencia'],
+  ['origen','conexion','impacto'],
+  ['datos','procedimiento','comprobacion'],
+  ['situacion','accion','resultado'],
+  ['problema','dialogo','acuerdo'],
+  ['observacion','analisis','conclusion'],
+  ['preparar','ejecutar','verificar'],
+  ['requisitos','accion','evaluacion']
+ ];
+ if(!sequences.some(group=>group.every((name,i)=>name===labels[i])))return null;
+ const details=parts.map(p=>p[2].trim());
+ if(new Set(details.map(norm)).size!==3)return null;
+ return{items:parts.map(p=>({label:p[1].trim(),text:p[2].trim()})),source:lines.slice()};
+}
 function relation(lines){if(!Array.isArray(lines)||lines.length<2||lines.length>4)return null;const rows=lines.map(t=>String(t).match(/^\s*(Paso\s+\d+|Etapa\s+\d+|Causa|Consecuencia|Problema|Soluci[oó]n|Antes|Despu[eé]s)\s*:\s*(\S[\s\S]*)$/i));if(rows.some(x=>!x))return null;const labels=rows.map(x=>norm(x[1]));if(labels.every(x=>/^(paso|etapa) /.test(x))){const nums=labels.map(x=>Number(x.match(/\d+/)[0]));if(!nums.every((n,i)=>i===0||n===nums[i-1]+1))return null;return{kind:'steps',lines:lines.slice()};}if(rows.length===2&&['causa|consecuencia','problema|solucion','antes|despues'].includes(labels.join('|')))return{kind:'relation',lines:lines.slice()};return null;}
 function forAI(m){const base={...m};delete base.recursosVisualesHEVA;delete base.imagenGuiaHEVA;delete base.ocultarImagenGuiaHEVA;return{...base,...(Array.isArray(m?.diapositivas)?{diapositivas:m.diapositivas.map(d=>{const x={...d};delete x.imagenHEVA;delete x.ocultarImagenHEVA;return x;})}:{})};}
 function restoreImages(before,after){if(after&&before.objetivoAprendizaje===after.objetivoAprendizaje){const own=image(before.imagenGuiaHEVA);after={...after,...(before.recursosVisualesHEVA?{recursosVisualesHEVA:options(before)}:{}),...(own?{imagenGuiaHEVA:own}:{}),...(typeof before.ocultarImagenGuiaHEVA==='boolean'?{ocultarImagenGuiaHEVA:before.ocultarImagenGuiaHEVA}:{})};}if(!after||!Array.isArray(after.diapositivas))return after;const originals=before.diapositivas||[];return{...after,diapositivas:after.diapositivas.map(d=>{const matches=originals.filter(x=>String(x.titulo||'').trim()===String(d.titulo||'').trim());if(matches.length!==1)return d;const old=matches[0],picture=image(old.imagenHEVA);return{...d,...(picture?{imagenHEVA:picture}:{}),...(typeof old.ocultarImagenHEVA==='boolean'?{ocultarImagenHEVA:old.ocultarImagenHEVA}:{})};})};}
-return{resourceKeys,options,validateOptions,image,role,visualFamily,diagramPlan,decorate,contain,dataChart,comparisonPairs,relation,forAI,restoreImages};});
+return{resourceKeys,options,validateOptions,image,role,visualFamily,diagramPlan,decorate,contain,dataChart,comparisonPairs,structuredFlow,relation,forAI,restoreImages};});
