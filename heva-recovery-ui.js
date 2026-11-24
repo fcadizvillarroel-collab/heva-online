@@ -166,7 +166,7 @@ function mostrarRecuperacionPendienteHEVA(){
  };
  // Conservar los controles originales como hijos directos para reanudación,
  // restauración y compatibilidad; mostrar solo un botón compacto hasta abrirlos.
- const remove=document.createElement('button');remove.type='button';remove.textContent='Descartar definitivamente';remove.className='heva-recovery-action border rounded px-3 py-2';remove.disabled=hevaRecoveryRunning();remove.onclick=()=>{if(hevaRecoveryRunning())return;if(!window.confirm('¿Eliminar definitivamente este avance de '+nombre+'? No se eliminarán materiales guardados.'))return;try{const current=JSON.parse(localStorage.getItem(HEVA_RECOVERY_KEY)||'null');if(current?.planKey!==saved.planKey)throw Error('El avance cambió; no se eliminó.');localStorage.removeItem(HEVA_RECOVERY_KEY);hevaResumeMessage='';mostrarRecuperacionPendienteHEVA();}catch(error){status.textContent=error.message;}};actions.append(button,discard,remove);box.append(title,text,actions,status);
+ const remove=document.createElement('button');remove.type='button';remove.textContent='Descartar definitivamente';remove.className='heva-recovery-action border rounded px-3 py-2';remove.disabled=hevaRecoveryRunning();remove.onclick=()=>{if(hevaRecoveryRunning())return;if(!window.confirm('¿Eliminar definitivamente este avance de '+nombre+'? No se eliminarán materiales guardados.'))return;try{const current=JSON.parse(localStorage.getItem(HEVA_RECOVERY_KEY)||'null');if(current?.planKey!==saved.planKey)throw Error('El avance cambió; no se eliminó.');localStorage.removeItem(HEVA_RECOVERY_KEY);hevaResumeMessage='';mostrarRecuperacionPendienteHEVA();}catch(error){status.textContent=error.message;}};actions.append(button,discard,remove);
  const toggle=document.createElement('div');toggle.id='heva-resume-toggle';
  toggle.setAttribute('role','button');toggle.setAttribute('tabindex','0');
  toggle.className='heva-recovery-action text-xs font-bold text-amber-950';
@@ -182,7 +182,7 @@ function mostrarRecuperacionPendienteHEVA(){
  };
  toggle.onclick=()=>setExpanded(!expanded);
  toggle.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault?.();setExpanded(!expanded);}};
- box.prepend(toggle);setExpanded(false);
+ box.append(title,text,actions,status,toggle);setExpanded(false);
  if(hevaResumeMessage)setExpanded(true);
 }
 mostrarRecuperacionPendienteHEVA();
