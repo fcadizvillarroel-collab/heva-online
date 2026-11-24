@@ -13,13 +13,15 @@ function fixture(fails=false){
   constructor(id=''){this.id=id;this.className='';this.hidden=false;this.disabled=false;this.textContent='';this.children=[];this.classList={add(){},remove(){}};if(id)nodes.set(id,this)}
   set innerHTML(value){const re=/id="([^"]+)"/g;let m;while((m=re.exec(value)))if(!nodes.has(m[1]))new Node(m[1])}
   appendChild(el){this.children.push(el);if(el.id)nodes.set(el.id,el);return el}
+  append(...items){for(const item of items)this.appendChild(item)}
+  insertBefore(el,before){this.appendChild(el);}
   replaceChildren(...items){this.children=items}
   insertAdjacentElement(_,el){this.appendChild(el)}
   addEventListener(){}
   setAttribute(){}
   querySelector(){return nodes.get('toolbar')}
  }
- for(const id of ['head','main','nav','toolbar','btn-generar','barra-calidad'])new Node(id);
+ for(const id of ['head','main','nav','toolbar','btn-generar','barra-calidad','heva-result-edit'])new Node(id);
  const document={head:nodes.get('head'),readyState:'complete',getElementById:id=>nodes.get(id)||null,createElement:()=>new Node(),querySelector:q=>q==='main'?nodes.get('main'):q.startsWith('nav')?nodes.get('nav'):null};
  const orig={titulo:'Guía EPJA',tipoMaterial:'GUIA',versionPedagogica:3,asignatura:'Estudios Sociales',nivel:'III NB',objetivoAprendizaje:'Analizar fuentes',autoriaIA:{proveedor:'groq'},introduccionLectura:'Texto original',preguntasAlternativas:[],preguntasDesarrollo:[],casosEstudio:[],planGeneracion:{tipoMaterial:'GUIA',asignatura:'Estudios Sociales',nivel:'III NB',objetivoAprendizaje:'Analizar fuentes'}};
  let active=orig;const calls=[];
@@ -57,12 +59,11 @@ test('con fallo de proveedor se conserva el material sin inventar correcciones',
  assert.match(j.incident,/pendiente/i);
 });
 
-test('no revisa un documento anterior si la generación no cambió el material',async()=>{
+test('no existe generación duplicada y se reutiliza la revisión de la misma versión',async()=>{
  const f=fixture();
- const current=f.getActive();
- f.window.HEVAReviewBridge.getMaterial=()=>({...current});
- f.window.generarMaterialReal=async()=>{};
- await f.window.HEVAReviewStudio.generateReview();
- assert.equal(f.window.HEVAReviewStudio.getJob(),null);
+ assert.equal(f.window.HEVAReviewStudio.generateReview,undefined);
  assert.deepEqual(f.calls,[]);
+ await f.window.HEVAReviewStudio.reviewExisting();
+ await f.window.HEVAReviewStudio.reviewExisting();
+ assert.deepEqual(f.calls.map(x=>x.action),['revisar','corregir','revisar']);
 });
