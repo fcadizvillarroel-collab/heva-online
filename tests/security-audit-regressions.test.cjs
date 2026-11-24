@@ -24,11 +24,16 @@ test('atomic curriculum approval is gated and SQL is restricted',()=>{
  assert.match(sql,/REVOKE ALL ON FUNCTION[\s\S]+FROM PUBLIC, anon, authenticated/);
  assert.match(sql,/GRANT EXECUTE ON FUNCTION[\s\S]+TO service_role/);
 });
-test('database hardening proposal removes permissive policies and table grants',()=>{
+test('database hardening proposal preserves curricular read and scopes remaining grants',()=>{
  const sql=fs.readFileSync(path.join(__dirname,'../docs/HEVA_SEGURIDAD_SQL_PENDIENTE.sql'),'utf8');
- assert.match(sql,/DROP POLICY IF EXISTS "Acceso publicado autenticado"/);
- assert.match(sql,/ALTER TABLE public.curriculo_publicado ENABLE ROW LEVEL SECURITY/);
+ const state=fs.readFileSync(path.join(__dirname,'../SEGURIDAD_PENDIENTE.md'),'utf8');
+ assert.match(sql,/NO EJECUTADA/);
+ assert.match(sql,/curriculo_publicado YA permite SELECT/);
+ assert.match(sql,/REVOKE ALL PRIVILEGES ON TABLE public.curriculo_auditoria FROM anon, authenticated/);
  assert.match(sql,/REVOKE ALL PRIVILEGES ON TABLE public.heva_perfiles FROM anon, authenticated/);
+ assert.doesNotMatch(sql,/^\s*DROP POLICY/m);
+ assert.doesNotMatch(sql,/^\s*REVOKE ALL PRIVILEGES ON TABLE public.curriculo_publicado/m);
+ assert.match(state,/RLS activo/);
 });
 
 test('all four active AI endpoints require the shared access guard',()=>{
