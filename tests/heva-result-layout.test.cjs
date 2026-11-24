@@ -4,9 +4,9 @@ const root=path.join(__dirname,'..');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const ui=fs.readFileSync(path.join(root,'heva-result-layout.js'),'utf8');
 const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
-test('guía se muestra antes de herramientas secundarias',()=>{
- assert.match(ui,/article\.after\(edit\)/);
- assert.match(ui,/edit\.after\(review\)/);
+test('edición en paso 5 y fuentes después de la guía',()=>{
+ assert.match(ui,/step3\.after\(edit\)/);
+ assert.match(ui,/article\.after\(review\)/);
  assert.match(ui,/toolbar\.parentElement!==edit/);
  assert.match(ui,/const sources=/);
  assert.doesNotMatch(ui,/'heva-export-control'/);
