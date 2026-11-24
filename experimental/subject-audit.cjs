@@ -62,7 +62,8 @@ function inspectAll(material,plan={}){
   const title=String(d?.titulo||''),body=Array.isArray(d?.contenido)?d.contenido.join(' '):String(d?.contenido||'');
   const ref='DIAPO-'+(i+1),all=title+' '+body;
   if(body.trim().length<55)incidencias.push({tipo:'desarrollo',referencia:ref,detalle:'Contenido demasiado breve; comprobar explicación, ejemplo o actividad.'});
-  if(/(?:segundo|otro|siguiente)\s+(?:texto|fragmento|caso|gr[aá]fico|tabla|fuente)/i.test(all)&&!/["“”]|(?:texto|fragmento|caso|tabla|fuente)\s*:/i.test(body))incidencias.push({tipo:'autosuficiencia',referencia:ref,detalle:'Se menciona un estímulo que podría no estar incluido.'});
+  const quotedSource=/(?:["“«][^"”»]{45,}|'[^']{45,}'|(?:texto|fragmento|caso|tabla|fuente)\\s*:\\s*.{45,})/i.test(body);
+  if(/(?:segundo|otro|siguiente)\\s+(?:texto|fragmento|caso|gr[aá]fico|tabla|fuente)/i.test(all)&&!quotedSource)incidencias.push({tipo:'autosuficiencia',referencia:ref,detalle:'Se menciona un estímulo que podría no estar incluido.'});
   if(area==='matematica'&&/resoluci[oó]n|despej|comprobaci[oó]n/i.test(title)&&!/[=]/.test(body))incidencias.push({tipo:'matematica',referencia:ref,detalle:'Procedimiento matemático sin ecuación explícita verificable.'});
   if(area==='sociales'&&/l[ií]nea de tiempo|cronolog/i.test(title)&&!/\b(?:1[0-9]{3}|20[0-9]{2})\b/.test(body))incidencias.push({tipo:'historia',referencia:ref,detalle:'Cronología sin fechas identificables; revisar la secuencia temporal.'});
   if(area==='lenguaje'&&/comprensi[oó]n lectora|analiza el texto/i.test(all)&&body.length<140)incidencias.push({tipo:'lenguaje',referencia:ref,detalle:'La tarea de lectura puede carecer del texto completo.'});
