@@ -1137,5 +1137,21 @@ function refresh(){
 }
 type.addEventListener('change',refresh);refresh();
 })();
-</script><script src="/experimental/heva-unified-ui.js?v=20261122-modo-coherente"></script><script src="/heva-strategy-delivery-ui.js?v=20261115-verificacion"></script><script src="/heva-assessment-ui.js?v=20261115-planificacion"></script><script src="/heva-planning-ui.js?v=20261115-planificacion"></script><script src="/heva-teacher-ui.js?v=20261123-vistas-reales"></script><script src="/heva-layout-ui.js?v=20261122-diseno-coherente"></script><script src="/heva-result-layout.js?v=20261122-armonizado"></script><script src="/experimental/heva-steps-accordion.js?v=lab-20261123-inclusivo"></script></body>
+</script><script src="/experimental/heva-unified-ui.js?v=20261122-modo-coherente"></script><script src="/heva-strategy-delivery-ui.js?v=20261115-verificacion"></script><script src="/heva-assessment-ui.js?v=20261115-planificacion"></script><script src="/heva-planning-ui.js?v=20261115-planificacion"></script><script src="/heva-teacher-ui.js?v=20261123-vistas-reales"></script><script src="/heva-layout-ui.js?v=20261122-diseno-coherente"></script><script src="/heva-result-layout.js?v=20261122-armonizado"></script><script src="/experimental/heva-steps-accordion.js?v=lab-20261123-inclusivo"></script>
+<script>
+/* Enlace local de solo material: no copia OA ni comparte credenciales. */
+window.HEVAReviewBridge={
+ getMaterial:function(){
+  try{if(typeof syncEdits==='function'&&materialActual)syncEdits()}catch(e){console.warn('HEVA: edición pendiente no sincronizada',e)}
+  return materialActual;
+ },
+ applyMaterial:function(m){
+  if(!m||typeof m!=='object'||m.versionPedagogica!==3||!m.planGeneracion)throw new Error('Versión corregida inválida');
+  materialActual=m;
+  renderizarDocumentoEnPantalla();
+  cambiarHerramienta('crear');
+ }
+};
+</script>
+<script src="/heva-review-studio.js?v=20261123-integracion-1"></script></body>
 </html>
