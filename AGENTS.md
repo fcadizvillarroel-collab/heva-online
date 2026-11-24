@@ -4,7 +4,7 @@
 
 Antes de implementar cualquier mejora, consultar **[el mapa canónico de módulos y 12 áreas](docs/HEVA_MAPA_CANONICO_SIN_DUPLICADOS_20261123.md)**. Si ya existe exportador Word/PPT, revisión IA, panel de documentos, catálogo OA, editor o auditoría, corregirlo y probarlo en su sitio; **no crear otro módulo o aplicación**. No repetir una auditoría completa de 407 documentos cuando solo cambie un texto de documentación. Mantener los estados `implementado/probado`, `pendiente de prueba real`, y `pendiente de revisión humana` separados.
 
-**Propuesta no integrada #58:** revisar y aprovechar únicamente las funciones nuevas antes de fusionar una segunda interfaz HEVA Review; el generador principal ya tiene herramientas para previsualizar, editar, comparar versiones y solicitar revisión IA.
+**HEVA Review integrado:** PR **#70** ya incorporó el flujo único de generar → revisar → corregir errores comprobados → verificar en la aplicación principal, con `heva-review-studio.js`, `api/review.js` y los módulos pedagógicos/Office existentes. La propuesta autónoma **#58** queda reemplazada: **no fusionar `/review/index.html` ni crear un segundo catálogo, exportador o revisor**. Los informes automáticos no son aprobación docente. Para estado de seguridad actual, leer `SEGURIDAD_PENDIENTE.md` antes de proponer SQL.
 
 ## Autoridad curricular: NO volver a crear los 407 OA
 
