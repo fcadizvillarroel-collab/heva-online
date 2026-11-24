@@ -1147,10 +1147,10 @@ window.HEVAReviewBridge={
  },
  applyMaterial:function(m){
   if(!m||typeof m!=='object'||m.versionPedagogica!==3||!m.planGeneracion)throw new Error('Versión corregida inválida');
-  if(materialActual)hevaAutoSaveMaterial(materialActual);
-  hevaAutoSaveMaterial(m);
+  if(materialActual)guardarEnHistorial(false);
   materialActual=m;
   renderizarDocumentoEnPantalla();
+  guardarEnHistorial(false);
   cambiarHerramienta('crear');
  }
 };
