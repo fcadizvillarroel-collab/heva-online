@@ -108,7 +108,7 @@ function mount(){
  for(const item of supportItems)item.addEventListener('change',refreshSupports);
  refreshSupports();
  const hero=document.querySelector('.heva-eyebrow');
- if(hero)hero.textContent='HEVA DE PRUEBA · MENÚS DESPLEGABLES';
+ if(hero)hero.textContent='HEVA · GENERADOR PEDAGÓGICO EPJA';
  const starter=document.querySelector('.heva-start');
  if(starter)starter.addEventListener('click',()=>{one.open=true},{capture:true});
  // Cuando se genera o falla una solicitud, el botón y los avisos siguen accesibles.
