@@ -32,5 +32,12 @@
 
 - **PR #68 y #69 integradas:** control heurístico de pasos/repeticiones y auditoría existente visible antes de Word/PPT sin una segunda ventana.
 - **PR #70 integrada:** HEVA Review funciona sobre el generador principal y `/api/review`; conserva material previo, propone correcciones de errores comprobados y exige aplicación explícita. GitHub CI de la rama tuvo tres comprobaciones exitosas y Vercel marcó `READY` para `65cb7aed03c6b544ce8da6f0fb0588561c94d68d`.
-- **Supabase, comprobación en vivo:** 407 OA publicados, 407 vigentes y 407 aprobados en **catálogo**; RLS activo en publicado/staging. El permiso `TRUNCATE` en auditoría y perfiles se revocó para `anon`/`authenticated` y se verificó. **Quedan permisos amplios adicionales y funciones de cuota pendientes**, como registra [SEGURIDAD_PENDIENTE.md](../SEGURIDAD_PENDIENTE.md).
+- **Supabase, comprobación en vivo:** 407 OA publicados, 407 vigentes y 407 aprobados en **catálogo**; RLS activo en publicado/staging. Se revocaron **todos los permisos directos** en auditoría y perfiles a `anon`/`authenticated`, se corrigió el `search_path` de staging y se instalaron tres RPC protegidas para cuota piloto, cuota docente y aprobación curricular atómica. **La activación en Vercel y las pruebas de docentes reales siguen pendientes**, como registra [SEGURIDAD_PENDIENTE.md](../SEGURIDAD_PENDIENTE.md).
 - **Límites:** no interpretar como aprobaciones individuales de 407 materiales distintos, ni dar por completadas pruebas reales de todas las estrategias, accesibilidad visual, calidad de fuentes o revisiones docentes.
+
+## Evidencia de cierre real de seguridad y límites (24-11 UTC)
+
+- **Aplicado en Supabase:** migraciones `heva_harden_admin_grants_and_staging_search_path_20261123`, `heva_quota_rpcs_service_role_only_20261123`, `heva_atomic_curriculum_approval_service_only_20261123`.
+- **Pruebas revertidas:** 2 consumos de cuota compartida permitidos y tercero denegado; publicación de un registro sintético, marcado de staging y auditoría correctos, con `ROLLBACK`. No quedan datos ni OA de prueba.
+- **Permisos:** las tres RPC ejecutables solo por `service_role`; roles `anon`/`authenticated` sin acceso directo a auditoría/perfiles. Catálogo público conserva SELECT filtrado; 407/407/407.
+- **No afirmar completado:** cuota activa en Vercel, acceso autenticado de diez docentes, validación en producción de código HTTP nuevo, inspección didáctica de cada documento, ni aprobación docente o licencias de imágenes.
