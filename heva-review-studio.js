@@ -79,12 +79,12 @@ async function review(m){
  finally{save();lock(false);draw()}
 }
 async function reviewExisting(){
- if(running)return;
+ if(running||window.HEVAStudioUI?.isBusy())return;
  try{var m=material();window.cambiarHerramienta('review-studio');await review(m)}
  catch(e){window.cambiarHerramienta('review-studio');status(e.message)}
 }
 async function generateReview(){
- if(running)return;
+ if(running||window.HEVAStudioUI?.isBusy())return;
  var bridge=window.HEVAReviewBridge;
  if(!bridge){status('Conexión con HEVA no disponible.');return}
  var before=bridge.getMaterial();
@@ -192,7 +192,7 @@ function init(){
  $('heva-review-apply').addEventListener('click',function(){apply('corrected')});
  $('heva-review-restore').addEventListener('click',function(){apply('original')});
  $('heva-review-download').addEventListener('click',download);
- try{var history=JSON.parse(localStorage.getItem('heva-review-studio-history')||'[]');if(Array.isArray(history)&&history[0]&&history[0].original){job=history[0];draw();status('Se recuperó el último expediente local.')}}catch(e){}
+ try{var history=JSON.parse(localStorage.getItem('heva-review-studio-history')||'[]');if(Array.isArray(history)&&history[0]&&history[0].original){job=history[0];reviewedKey=key(job.original);draw();status('Se recuperó el último expediente local.')}}catch(e){}
  window.HEVAReviewStudio={reviewExisting:reviewExisting,generateReview:generateReview,getJob:function(){return job},isBusy:function(){return running}};window.HEVAStudioUI?.mount();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
