@@ -32,20 +32,32 @@ function inspect({material={},sections=[],visuals=[]}={}){
  // estudio. Sin una cita documental comprobada no debe tratarse como dato real.
  // Es advertencia heurística; jamás sustituye la verificación de la fuente.
  const inspectable=[
+  String(material.introduccionLectura||''),
   ...((Array.isArray(material.actividadesGuiadas)?material.actividadesGuiadas:[]).map(a=>String(a?.consigna||''))),
   ...((Array.isArray(material.casosEstudio)?material.casosEstudio:[]).map(a=>String(a?.contextoReal||''))),
+  String(material.actividadAutonoma?.consigna||''),
   ...((Array.isArray(material.diapositivas)?material.diapositivas:[]).flatMap(d=>
    Array.isArray(d?.contenido)?d.contenido.filter(x=>typeof x==='string'):
    typeof d?.contenido==='string'?[d.contenido]:[]))
  ];
+ // Document evidence is filtered on the server by Sources.validateEvidence.
+ // A citation for an unrelated claim must not silence an unsupported number.
+ // This is a textual provenance check, NOT scientific verification.
  const verifiedSources=Array.isArray(material.respaldoDocumental)?material.respaldoDocumental:[];
+ const percentageList=value=>[...norm(value).matchAll(/\b\d{1,3}(?:[.,]\d+)?\s*%/g)]
+  .map(m=>m[0].replace(/\s+/g,'').replace(',','.'));
+ const hasExactCitation=pct=>verifiedSources.some(r=>
+  typeof r?.fuenteId==='string'&&r.fuenteId.length>0&&
+  Number.isInteger(r?.page)&&r.page>0&&
+  typeof r?.cita==='string'&&percentageList(r.cita).includes(pct));
  const unverifiedStatistics=inspectable.some(value=>{
   const s=norm(value).replace(/\s+/g,' ');
-  return /\b(?:estudio|encuesta|censo|informe|investigacion|segun [^.!?]{3,90})[^.!?]{0,180}\b\d{1,3}(?:[.,]\d+)?\s*%/.test(s)&&
-   !/\b(?:simulad[oa]|hipotetic[oa]|fictici[oa]|datos inventados)\b/.test(s);
+  const attributed=/\b(?:estudio|encuesta|censo|informe|investigacion|segun [^.!?]{3,90})[^.!?]{0,180}\b\d{1,3}(?:[.,]\d+)?\s*%/.test(s);
+  const simulated=/\b(?:simulad[oa]|hipotetic[oa]|fictici[oa]|datos inventados)\b/.test(s);
+  return attributed&&!simulated&&percentageList(s).some(pct=>!hasExactCitation(pct));
  });
- if(unverifiedStatistics&&!verifiedSources.length)
-  add('CIFRA_ATRIBUIDA_SIN_RESPALDO','Una actividad atribuye porcentajes a un estudio o informe sin respaldo documental validado. Aporte fuente verificable o marque el dato como SIMULADO.',18);
+ if(unverifiedStatistics)
+  add('CIFRA_ATRIBUIDA_SIN_RESPALDO','Una actividad o explicación atribuye porcentajes a un estudio o informe sin una cita documental validada que contenga esas mismas cifras. Verifique la fuente y su correspondencia o marque explícitamente los datos como SIMULADOS.',18);
  const guided=material.ejemploGuiado||{};
  const stimulus=String(guided?.situacion||'');
  const quoted=/(?:[«“"][^»”"]{45,}[»”"]|\b(?:texto|fragmento|fuente)\s*:\s*[\s\S]{150,})/i.test(stimulus);
