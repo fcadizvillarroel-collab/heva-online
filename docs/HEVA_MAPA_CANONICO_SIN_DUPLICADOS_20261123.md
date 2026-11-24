@@ -1,5 +1,5 @@
 # HEVA · Arquitectura consolidada y prevención de doble trabajo
-**Estado verificado:** 23-11-2026 · Repositorio `fcadizvillarroel-collab/heva-online`. Este inventario no equivale a validación docente de 407 materiales.
+**Estado actualizado tras PR #70:** 23-11-2026 · Repositorio `fcadizvillarroel-collab/heva-online`. Este inventario no equivale a validación docente de 407 materiales.
 
 ## Regla operativa: buscar → reutilizar → reparar → verificar
 
@@ -24,7 +24,7 @@ Antes de agregar un archivo, módulo, ruta, panel o flujo de CI:
 | 8. Inclusión y offline | `heva-inclusive-supports.cjs`, `sw.js`, `heva-teacher-ui.js` | No inventar una segunda interfaz accesible | Verificar con usuarios reales la lectura, descripción visual y accesibilidad |
 | 9. Fuentes primarias y textos internacionales | `lib/document-sources.cjs`, `lib/oa-textbook-matrix.cjs`, `lib/international-didactic-bridge.cjs` | No confundir catálogos candidatos con páginas comprobadas | Cotejar textos, hechos y licencias individuales; Chile/México/Argentina como apoyo, no autoridad EPJA |
 | 10. Cobertura documental de los 407 OA | `lib/oa-documentary-register.cjs`, `api/oa-documentary-coverage.js`, `heva-documentary-ui.js`, `data/matriz-documental-407-oa.csv` | **No crear un segundo banco, API ni panel** | `scripts/audit_oa407_source_evidence.py` aporta hechos cotejados (3 OA) y es evidencia complementaria, **no** otro registro de libros |
-| 11. Edición/revisión/versiones | `heva-teacher-ui.js`, `api/review.js`, `heva-approval-audit.js`, `scripts/close_stage2_evidence.py` | No fusionar sin conciliación `review/index.html` de PR #58; duplica funciones | Revisiones documentales y aprobaciones humanas faltan; auditoría automática no firma nada |
+| 11. Edición/revisión/versiones | `heva-teacher-ui.js`, `heva-review-studio.js` (**PR #70 integrada**), `api/review.js`, `heva-approval-audit.js` | No fusionar aplicación independiente `/review/index.html` de PR #58, ya reemplazada por integración canónica | Revisión con otra IA sujeta a proveedor/cuota; aplicación explícita; aprobación docente individual pendiente |
 | 12. QA y publicación | `tests/`, `qa/`, `.github/workflows/`, Vercel `heva-online` | No volver a ejecutar 407 exportaciones sin cambio que afecte su contenido o renderizado | Exigir SHA publicado READY y prueba real de IA para afirmar flujo extremo a extremo |
 
 ## Estado real de cambios cercanos
@@ -34,7 +34,10 @@ Antes de agregar un archivo, módulo, ruta, panel o flujo de CI:
 - PR **#63**: ejecutó prueba única de generación real: el resultado fue **HTTP 413** y no fue exitoso. Ambos PDF originales descargaron bien; 235 OA localizados literalmente y 172 no localizados mediante extracción. No se reimportan.
 - PR **#64**: reintento corto específico para solicitudes simples con respuesta Groq 413, reutilizando `api/generate.js` y `api/_providers.cjs`.
 - PR **#65**: agrega sugerencias **no verificadas** de página al verificador de PDF existente, sin crear otro verificador.
-- PR **#58**: propuesta independiente `review/index.html`, **no incorporada al principal**. Antes de integrar, comparar funciones una por una con `heva-teacher-ui.js`, `api/review.js` y `heva-approval-audit.js`; incorporar solo las funcionalidades genuinamente nuevas como mejoras de los módulos existentes.
+- PR **#58**: propuesta autónoma `review/index.html`, **sustituida por PR #70**. No fusionarla, porque duplicaría interfaz, flujo de revisión y gestión del material. Las funciones útiles están incorporadas a la aplicación principal.
+- PR **#68**: auditoría heurística adicional de pasos vacíos, ejemplos incompletos y repeticiones, sin bloquear falsamente materiales válidos.
+- PR **#69**: catálogo Supabase prevalece cuando su respuesta válida es vacía; control pedagógico existente visible antes de exportar Word y PowerPoint.
+- PR **#70**: **fusionada en `main`**, integra `heva-review-studio.js` con `api/review.js` y el editor/exportador canónico. Tres comprobaciones automatizadas completadas en la rama de la PR; publicación Vercel `READY` para SHA `65cb7aed03c6b544ce8da6f0fb0588561c94d68d`.
 
 ## Reglas de integración
 
@@ -50,3 +53,7 @@ Antes de agregar un archivo, módulo, ruta, panel o flujo de CI:
 **No es pendiente de HEVA:** recuperar, localizar, ingresar, corregir o volver a cotejar automáticamente los **407 OA de Supabase**. La coincidencia de texto con PDF (235 exactas, otras 172 no detectadas) mide el extractor, no la existencia, validez curricular o autorización de uso del OA. Las 52 páginas sugeridas son solo pistas para investigación documental futura, no una acción de reparación del catálogo. En la revisión IA, si el OA está confirmado en el registro curricular, una coincidencia PDF ausente **no puede convertir por sí sola su alineación curricular en no verificable**.
 
 **Pendientes reales y acotados:** revisar la calidad de una salida docente específica; mejorar el diseño cuando exista un defecto reproducible; y obtener evidencia humana de las fuentes, derechos y aprobaciones de los materiales efectivamente utilizados. No agregar tareas de 407 nuevas guías ni repetir el control documental ministerial ante cambios de interfaz.
+
+## Alineación de seguridad (consulta en vivo, 23-11-2026)
+
+Supabase mantiene **407 OA registrados, 407 vigentes y 407 con aprobación de catálogo**. `curriculo_publicado` y `curriculo_staging` tienen **RLS activo**, sin políticas `ALL` permisivas. `curriculo_publicado` ofrece solo lectura filtrada a `anon`/`authenticated`; `curriculo_staging` no les concede privilegios directos. Se revocó `TRUNCATE` en `curriculo_auditoria` y `heva_perfiles` para esos dos roles; siguen pendientes sus otros permisos directos amplios, comprobación de seguridad y cuotas IA. **Estado y plan único:** [`SEGURIDAD_PENDIENTE.md`](../SEGURIDAD_PENDIENTE.md), no volver a describir RLS como desactivado ni reabrir los OA.
