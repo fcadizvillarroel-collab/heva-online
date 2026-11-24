@@ -56,7 +56,8 @@ test('con fallo de proveedor se conserva el material sin inventar correcciones',
  assert.equal(j.corrected,null);
  assert.match(j.incident,/pendiente/i);
 });
-\ntest('no revisa un documento anterior si la generación no cambió el material',async()=>{
+
+test('no revisa un documento anterior si la generación no cambió el material',async()=>{
  const f=fixture();
  const current=f.getActive();
  f.window.HEVAReviewBridge.getMaterial=()=>({...current});
