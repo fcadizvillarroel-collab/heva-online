@@ -39,7 +39,13 @@ El inventario histórico y sus límites están documentados también en `docs/AU
 ## Armonización de estados posterior (23-11-2026)
 
 - **Currículo:** 407 OA publicados, vigentes y aprobados en el catálogo Supabase; no extraer ni importar de nuevo. El respaldo JSON es **offline**, no otra fuente de verdad.
-- **Seguridad:** RLS ya está activo en las tablas curriculares; se revocó `TRUNCATE` en dos tablas auxiliares, pero quedan permisos amplios, validación de funciones RPC y controles de acceso pendientes. Ver [estado real](../SEGURIDAD_PENDIENTE.md) y no reutilizar el diagnóstico antiguo.
+- **Seguridad:** RLS activo en tablas curriculares, con lectura filtrada de los OA vigentes. Ya se revocaron **todos** los privilegios directos de `anon` y `authenticated` sobre auditoría y perfiles; el `search_path` de staging quedó fijo. Tres RPC restringidas a `service_role` (cuota piloto, cuota docente, aprobación atómica) están instaladas y verificadas. Los flags de Vercel, el acceso de docentes y el despliegue de la API modificada **no se dan por aprobados**. Ver [estado real](../SEGURIDAD_PENDIENTE.md).
 - **Review:** la PR #70 está **fusionada**; usa el material original, `/api/review`, el editor y Office existentes. La PR #58 de Review independiente está **sustituida** para evitar doble funcionalidad.
 - **Exportación y didáctica:** #68/#69 aplican controles heurísticos, no arreglan automáticamente el diseño de todas las diapositivas. Evaluar salidas concretas de guía, prueba, PPT y planificación, sin atribuir revisión humana inexistente.
 - **Publicación:** Vercel confirmó estado `READY` en producción para commit `65cb7aed03c6b544ce8da6f0fb0588561c94d68d` de #70. Nuevos cambios requieren verificar de nuevo su propio SHA.
+
+## Cierre funcional posterior (24-11 UTC)
+
+- **Publicación curricular:** API actualizada para una única llamada transaccional `/rpc/heva_aprobar_objetivo`; desaparece el respaldo de tres peticiones independientes, que podía publicar parcialmente. La función ya existe en Supabase y pasó ensayo sintético revertido. Su código HTTP nuevo necesita despliegue.
+- **Cuotas:** las RPC separadas del piloto compartido y docente se instalaron y aislaron de roles públicos; la compartida pasó prueba de límite 2+1 revertida. El uso por cuentas docentes reales sigue pendiente porque hay 0 cuentas Auth y no se habilitaron flags.
+- **Fuente única:** ninguna de estas operaciones importa o modifica los 407 OA EPJA. Pruebas de cambios posteriores deben comprobar esa invariancia antes y después.
