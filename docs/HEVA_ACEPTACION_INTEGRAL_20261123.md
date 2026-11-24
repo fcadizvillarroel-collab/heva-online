@@ -27,3 +27,10 @@
 - Para una aprobación curricular/documental, evidencia individual con fuente verificable y responsable de la revisión.
 
 **Este registro no equivale a aprobar los 407 OA ni a cerrar la validación pedagógica.**
+
+## Estado posterior a la integración y seguridad (23-11-2026)
+
+- **PR #68 y #69 integradas:** control heurístico de pasos/repeticiones y auditoría existente visible antes de Word/PPT sin una segunda ventana.
+- **PR #70 integrada:** HEVA Review funciona sobre el generador principal y `/api/review`; conserva material previo, propone correcciones de errores comprobados y exige aplicación explícita. GitHub CI de la rama tuvo tres comprobaciones exitosas y Vercel marcó `READY` para `65cb7aed03c6b544ce8da6f0fb0588561c94d68d`.
+- **Supabase, comprobación en vivo:** 407 OA publicados, 407 vigentes y 407 aprobados en **catálogo**; RLS activo en publicado/staging. El permiso `TRUNCATE` en auditoría y perfiles se revocó para `anon`/`authenticated` y se verificó. **Quedan permisos amplios adicionales y funciones de cuota pendientes**, como registra [SEGURIDAD_PENDIENTE.md](../SEGURIDAD_PENDIENTE.md).
+- **Límites:** no interpretar como aprobaciones individuales de 407 materiales distintos, ni dar por completadas pruebas reales de todas las estrategias, accesibilidad visual, calidad de fuentes o revisiones docentes.
