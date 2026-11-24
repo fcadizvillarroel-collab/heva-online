@@ -44,7 +44,17 @@ function inspect({material={},sections=[],visuals=[]}={}){
  // Auditoría del contenido original de las diapositivas, no solo de la hoja Word.
  // Un hallazgo heurístico orienta la revisión; no modifica ni certifica el material.
  if(String(material.tipoMaterial||'').toUpperCase()==='PRESENTACION'&&Array.isArray(material.diapositivas)){
-  const slides=material.diapositivas,bodyOf=d=>(Array.isArray(d?.contenido)?d.contenido.join(' '):String(d?.contenido||'')).replace(/\s+/g,' ').trim();
+  const slides=material.diapositivas;
+  // Tablas y estímulos estructurados también forman parte del contenido:
+  // String(objeto) devuelve "[object Object]" y oculta repeticiones reales.
+  const contentText=value=>{
+   if(value==null)return '';
+   if(typeof value==='string'||typeof value==='number')return String(value);
+   if(Array.isArray(value))return value.map(contentText).join(' ');
+   if(typeof value==='object')return Object.keys(value).sort().map(key=>key+': '+contentText(value[key])).join(' ');
+   return '';
+  };
+  const bodyOf=d=>contentText(d?.contenido).replace(/\s+/g,' ').trim();
   const bodies=slides.map(d=>norm(bodyOf(d))).filter(x=>x.length>=45);
   if(bodies.length>=2&&new Set(bodies).size<bodies.length)add('PPT_CONTENIDO_REPETIDO','Dos o más diapositivas repiten exactamente el mismo desarrollo; comprueba su función didáctica.',20);
   const titles=slides.map(d=>norm(d?.titulo).replace(/\s*·\s*continuacion(?:\s*\(\d+\))?$/,'').trim()).filter(x=>x.length>=8);
