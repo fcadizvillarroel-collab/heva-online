@@ -86,7 +86,7 @@ function mount(){
  // didácticas. Paso 3: generar y revisar. El visor permanece independiente.
  moveFollowing(one,two);
  moveFollowing(two,three);
- moveFollowing(three,null);
+ moveFollowing(three,$('heva-result-edit'));
  organizeStepTwo(two);
  const part4=four.querySelector(':scope > .heva-test-accordion-body');
  for(const id of ['heva-empty-preview','barra-calidad']){
