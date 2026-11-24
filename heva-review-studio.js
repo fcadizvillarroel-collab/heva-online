@@ -12,7 +12,7 @@ function status(s){var n=$('heva-review-status');if(n)n.textContent=s}
 function stage(s){var n=$('heva-review-phase');if(n)n.textContent=s}
 function lock(value){
  running=value;
- ['heva-review-existing','heva-review-generate','heva-review-inline','heva-review-quick','btn-generar'].forEach(function(id){if($(id))$(id).disabled=value});
+ ['heva-review-existing','btn-generar'].forEach(function(id){if($(id))$(id).disabled=value});
  if($('heva-review-stop'))$('heva-review-stop').disabled=!value;
  if($('heva-review-apply'))$('heva-review-apply').disabled=value||!job||!job.corrected;
  if($('heva-review-restore'))$('heva-review-restore').disabled=value||!job||!job.corrected;
@@ -82,7 +82,7 @@ function openWorkspace(){const host=$('heva-result-edit');if(host){host.open=tru
 async function reviewExisting(){
  if(running||window.HEVAStudioUI?.isBusy())return;
  try{var m=material();openWorkspace();await review(m)}
- catch(e){window.cambiarHerramienta('review-studio');status(e.message)}
+ catch(e){openWorkspace();status(e.message)}
 }
 function content(m){
  if(m&&window.HEVAPedagogy?.blocks)return window.HEVAPedagogy.blocks(m,false).map(b=>b.title+'\n'+b.text).join('\n\n');
@@ -152,7 +152,7 @@ function download(){
  a.href=url;a.download='HEVA_Review_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1200)
 }
 function init(){
- if($('panel-review-studio')||!document.querySelector('main'))return;
+ if($('panel-review-studio')||!$('heva-result-edit'))return;
  var style=document.createElement('style');
  style.textContent='.heva-review-panel.hidden{display:none!important}.heva-review-panel{display:grid;gap:14px;font:14px/1.55 system-ui;color:#30413e}.heva-review-panel .review-card{border:1px solid #dedfd8;background:#fff;border-radius:12px;padding:18px}.heva-review-panel .review-hero{background:#fff8f1}.heva-review-panel h2{font-size:23px;font-weight:800;color:#773347}.heva-review-panel h3{font-size:16px;font-weight:800;color:#31545b;margin:0 0 9px}.heva-review-panel .review-actions{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0}.heva-review-panel button{border:1px solid #75384a;border-radius:7px;padding:9px 12px;color:#fff;background:#75384a;font-weight:700;font-size:12px}.heva-review-panel button.secondary{color:#31545b;background:#eff7f4;border-color:#c4d9d1}.heva-review-panel button:disabled{opacity:.5}.heva-review-panel #heva-review-status{background:#f1f6f3;border-left:4px solid #639987;padding:11px}.heva-review-panel .review-columns{display:grid;grid-template-columns:1fr 1fr;gap:12px}.heva-review-panel pre{font:12px/1.6 monospace;background:#f6f8f6;border-radius:8px;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}.heva-review-list{padding-left:20px}.heva-review-list li{padding:5px 0}@media(max-width:760px){.heva-review-panel .review-columns{grid-template-columns:1fr}}';
  document.head.appendChild(style);
