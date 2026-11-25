@@ -12,6 +12,20 @@ function evaluateSimple(expression){
  function sum(){let v=product();while(s[i]==='+'||s[i]==='-'){const op=s[i++],n=product();v=op==='+'?v+n:v-n}return v}
  try{const result=sum();return i===s.length&&Number.isFinite(result)?result:null}catch{return null}
 }
+// Narrow, conservative checks for two actual failure modes found in generated guides.
+function wordProblemIssues(value){
+ const n=normalize(value),issues=[];
+ const question=n.match(/(?:cuantos|cuantas)\s+([a-z]+)\s+(?:compro|adquirio|recibio|vendio)\s*\?/);
+ if(question){const before=n.slice(0,question.index);const unit=question[1];const given=new RegExp('\\b(?:compra|compro|adquiere|adquirio|recibe|recibio|vende|vendio)\\s+\\d+\\s+'+unit+'\\b');if(given.test(before))issues.push({tipo:'ambiguedad',detalle:'La cantidad solicitada como incógnita ya aparece explícitamente en el enunciado. Revisar si realmente evalúa el procedimiento.'});}
+ const limit=n.match(/precio unitario (?:sea|es) mayor a\s*\$?\s*([\d.]+)/);
+ const discount=n.match(/descuento fijo de\s*\$?\s*([\d.]+)/);
+ const paid=n.match(/paga\s*\$?\s*([\d.]+)\s+por\s+(una|dos|tres|cuatro|cinco|\d+)\s+unidades/);
+ if(limit&&discount&&paid&&/precio unitario original/.test(n)&&!/por cada unidad|por unidad|descuento por producto/.test(n)){
+ const money=s=>Number(s.replace(/\./g,'')),q=({una:1,dos:2,tres:3,cuatro:4,cinco:5})[paid[2]]||Number(paid[2]);
+ if(q>0&&(money(paid[1])+money(discount[1]))/q<=money(limit[1]))issues.push({tipo:'ambiguedad',detalle:'Si el descuento fijo se aplica una vez a la compra, el precio calculado no supera el mínimo estricto indicado. Revisar condición y alcance del descuento.'});
+ }
+ return issues;
+}
 function inspect(material,plan={}){
  const asignatura=plan.asignatura||material?.asignatura||'';
  if(!mathSubject(asignatura))return {asignatura,aplica:false,estado:'no_aplica',incidencias:[],verificaciones:[]};
@@ -22,6 +36,7 @@ function inspect(material,plan={}){
   const key=String(q?.claveCorrecta||'').trim().toUpperCase();
   const keyed=opts.find(o=>String(o?.letra||'').toUpperCase()===key);
   if(opts.length!==4||new Set(opts.map(o=>String(o?.letra||'').toUpperCase())).size!==4||!keyed)incidencias.push({tipo:'estructura',referencia:'ALT-'+(i+1),detalle:'Alternativas o clave incompletas'});
+  for(const issue of wordProblemIssues(q?.enunciado))incidencias.push({...issue,referencia:'ALT-'+(i+1)});
   const promptText=normalize(String(q?.enunciado||''));
   // A diagnosis question must show the student's actual step, not only a wrong result.
   // Advisory only: does not presume which operation the pupil performed.
@@ -37,6 +52,7 @@ function inspect(material,plan={}){
   if(matches.length!==1||matches[0].letra!==key)incidencias.push({tipo:'resultado',referencia:'ALT-'+(i+1),detalle:'La clave no coincide con el cálculo verificable o hay varias respuestas correctas'});
   else verificaciones.push({referencia:'ALT-'+(i+1),tipo:'aritmetica',resultado:'coincide'});
  });
+ (material?.preguntasDesarrollo||[]).forEach((q,i)=>{for(const issue of wordProblemIssues(q?.enunciado))incidencias.push({...issue,referencia:'DES-'+(i+1)});});
  return {asignatura,aplica:true,estado:incidencias.length?'requiere_revision':'revision_parcial',incidencias,verificaciones,operacionesComprobadas:checked,advertencia:'Solo se comprueban operaciones aritméticas simples con cuatro opciones numéricas. Fórmulas, problemas verbales, procedimientos, OA y demás resultados requieren revisión especializada independiente y docente.'};
 }
 
