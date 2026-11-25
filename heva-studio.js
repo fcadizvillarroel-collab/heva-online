@@ -58,9 +58,12 @@ function improve(m,proposal){
   const ref=x=>[x.referencia,x.estrategiasIntegradas||[]];
   if(JSON.stringify(m.trazabilidadEstrategia.map(ref))!==JSON.stringify((next.trazabilidadEstrategia||[]).map(ref)))throw Error('La mejora cambia referencias o estrategias de trazabilidad.');
  }
+ if(m.tipoMaterial==='EVALUACION'&&next.preguntasAlternativas?.some(q=>!Array.isArray(q.alternativas)||q.alternativas.length!==4||new Set(q.alternativas.map(a=>a.letra)).size!==4||!q.alternativas.some(a=>a.letra===q.claveCorrecta)))throw Error('Alternativas o clave inválidas.');
  if(!Object.keys(src).some(k=>k!=='respaldoDocumental'&&JSON.stringify(allowed[k])!==JSON.stringify(next[k])))throw Error('La propuesta no incorpora cambios pedagógicos.');
  // An old quotation cannot be inherited as evidence for a rewritten statement.
  next.respaldoDocumental=Array.isArray(src.respaldoDocumental)?clone(src.respaldoDocumental):[];
+ // Keep citations for unchanged sections only when the entire content field is unchanged.
+ delete next.aprobacionDocente;delete next.aprobacionPedagogica;
  delete next.auditoriaDisciplinar;delete next.auditoriaExperimental;delete next.incidenciasDocumentales;
  invalidate(next,m);return next;
 }
