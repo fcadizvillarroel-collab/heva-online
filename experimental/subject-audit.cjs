@@ -74,9 +74,9 @@ function inspectAll(material,plan={}){
  const full=[...slides.map(d=>String(d?.titulo||'')+' '+(Array.isArray(d?.contenido)?d.contenido.join(' '):String(d?.contenido||''))),...prompts.map(p=>p.text)].join(' ');
  const has=(re)=>re.test(full);
  const recommend=(reference,detail)=>incidencias.push({tipo:'revision_especializada',referencia:reference,detalle:detail});
- if(area==='matematica'&&has(/\b(?:x|y)\s*[+\-=]|\d+\s*[xy]\b/i)&&!has(/comprob|verific|reemplaz|sustitu/i))recommend('MAT-COMPROBACION','Se utilizan ecuaciones sin comprobación visible de resultados.');
+ if(area==='matematica'&&(plan.tipoMaterial||material?.tipoMaterial)!=='EVALUACION'&&has(/\b(?:x|y)\s*[+\-=]|\d+\s*[xy]\b/i)&&!has(/comprob|verific|reemplaz|sustitu/i))recommend('MAT-COMPROBACION','Se utilizan ecuaciones sin comprobación visible de resultados.');
  if(area==='sociales'&&has(/fuente hist[oó]rica|documento hist[oó]rico|testimonio/i)&&!has(/autor|fecha|procedencia|contexto/i))recommend('SOC-FUENTES','El análisis de fuentes necesita autoría, fecha o contexto identificable.');
- if(area==='lenguaje'&&has(/comprensi[oó]n lectora|lee el texto|seg[uú]n el texto/i)&&!has(/lectura:|texto:|noticia:|fragmento:|p[aá]rrafo 1/i))recommend('LEN-ESTIMULO','Comprobar que el texto íntegro esté incluido en el material.');
+ if(area==='lenguaje'&&has(/comprensi[oó]n lectora|lee el texto|seg[uú]n el texto/i)&&!has(/lectura:|texto:|noticia:|fragmento:|p[aá]rrafo 1/i)&&String(material?.introduccionLectura||'').trim().length<160&&String(material?.noticiaDidactica?.cuerpo||'').trim().length<160)recommend('LEN-ESTIMULO','Comprobar que el texto íntegro esté incluido en el material.');
  if(area==='ingles'&&has(/translate|traduc|vocabulary|vocabulario/i)&&!has(/example|ejemplo|dialogue|di[aá]logo/i))recommend('ING-MODELO','La tarea lingüística no muestra un ejemplo o diálogo contextualizado.');
 
  if(area==='ciencias'&&has(/experimento|hip[oó]tesis|laboratorio/i)&&!has(/registro|observaci[oó]n|resultado|evidencia/i))recommend('CIE-EVIDENCIA','La actividad experimental no indica cómo registrar o interpretar resultados.');
