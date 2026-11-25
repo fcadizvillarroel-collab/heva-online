@@ -52,6 +52,20 @@ const discipline=s=>{
  if(/convivencia|insercion|laboral|instrumental/.test(n))return 'instrumental';
  return 'general';
 };
+// An explicit paper-only task is not operation of equipment. Mere topic
+// mentions are not practical instructions. Ambiguous tasks stay reviewable.
+function practicalSafetyRisk(text,area,funcion=''){
+ const n=normalize(text),f=normalize(funcion);
+ const hazards=area==='ciencias'?/experimento|laboratorio|practica experimental/:/soldadura|soldar|corte|cortar|esmeril|maquina|taladro/;
+ if(!hazards.test(n))return false;
+ const operational=/\b(?:enciend[ae]|enciende[nr]?|conect[ae]|conecta[nr]?|manipul[ae]|manipula[nr]?|oper[ae]|opera[nr]?|ejecut[ae]|ejecuta[nr]?|utiliz[ae]|utiliza[nr]?|usa|usen|usar|realiz[ae]|realicen|realizar|practic[ae]|practiquen|practicar|mezcl[ae]|mezclar|corta|corten|cortar|suelda|suelden|soldar|perfor[ae]|perforar)\b/;
+ const explicitPaper=/\b(?:en papel|sin operar|sin manipulacion|sin ejecutar|sin realizar|solo teoric[oa]|simulacion escrita|caso ficticio|analisis documental)\b/;
+ const analytical=/\b(?:analiza|analizar|identifica|identificar|compara|comparar|describe|describir|explica|explicar|interpreta|interpretar|clasifica|clasificar|observa el esquema|observa la imagen)\b/;
+ if(explicitPaper.test(n)&&!/(?:enciende|conecta|manipula|opera|ejecuta)\s+(?:la|el|una|un|los|las)\b/.test(n))return false;
+ if(operational.test(n))return true;
+ if(analytical.test(n))return false;
+ return /practica|aplicacion|actividad|procedimiento/.test(f)||/\b(?:practica experimental|actividad practica|trabajo en laboratorio)\b/.test(n);
+}
 function inspectAll(material,plan={}){
  const asignatura=plan.asignatura||material?.asignatura||'',area=discipline(asignatura);
  const base=inspect(material,plan),incidencias=[...base.incidencias],verificaciones=[...base.verificaciones];
@@ -67,8 +81,8 @@ function inspectAll(material,plan={}){
   if(area==='matematica'&&/resoluci[oó]n|despej|comprobaci[oó]n/i.test(title)&&!/[=]/.test(body))incidencias.push({tipo:'matematica',referencia:ref,detalle:'Procedimiento matemático sin ecuación explícita verificable.'});
   if(area==='sociales'&&/l[ií]nea de tiempo|cronolog/i.test(title)&&!/\b(?:1[0-9]{3}|20[0-9]{2})\b/.test(body))incidencias.push({tipo:'historia',referencia:ref,detalle:'Cronología sin fechas identificables; revisar la secuencia temporal.'});
   if(area==='lenguaje'&&/comprensi[oó]n lectora|analiza el texto/i.test(all)&&body.length<140)incidencias.push({tipo:'lenguaje',referencia:ref,detalle:'La tarea de lectura puede carecer del texto completo.'});
-  if(area==='ciencias'&&/experimento|laboratorio|pr[aá]ctica experimental/i.test(all)&&!/seguridad|precauci[oó]n|protecci[oó]n/i.test(all))incidencias.push({tipo:'seguridad',referencia:ref,detalle:'Revisar las medidas de seguridad para la actividad experimental.'});
-  if(area==='tecnico'&&/soldadura|corte|esmeril|m[aá]quina/i.test(all)&&!/epp|protecci[oó]n|seguridad|riesgo/i.test(all))incidencias.push({tipo:'seguridad',referencia:ref,detalle:'Actividad técnica sin indicación visible de prevención de riesgos.'});
+  if(area==='ciencias'&&practicalSafetyRisk(all,area,d?.funcion)&&!/seguridad|precauci[oó]n|protecci[oó]n/i.test(all))incidencias.push({tipo:'seguridad',referencia:ref,detalle:'Revisar las medidas de seguridad para la actividad experimental.'});
+  if(area==='tecnico'&&practicalSafetyRisk(all,area,d?.funcion)&&!/epp|protecci[oó]n|seguridad|riesgo/i.test(all))incidencias.push({tipo:'seguridad',referencia:ref,detalle:'Actividad técnica sin indicación visible de prevención de riesgos.'});
  });
  const prompts=[...(material?.preguntasAlternativas||[]).map((q,i)=>({ref:'ALT-'+(i+1),text:String(q?.enunciado||'')})),...(material?.preguntasDesarrollo||[]).map((q,i)=>({ref:'DES-'+(i+1),text:String(q?.enunciado||'')}))];
  const full=[...slides.map(d=>String(d?.titulo||'')+' '+(Array.isArray(d?.contenido)?d.contenido.join(' '):String(d?.contenido||''))),...prompts.map(p=>p.text)].join(' ');
@@ -127,4 +141,4 @@ function inspectAll(material,plan={}){
  const alcanceProfundo={objetivo:objetivo?'Declarado; alineación semántica pendiente':'Ausente',criterios,validacion:'pendiente_revision_independiente_y_docente',exportacion:'pendiente_inspeccion_archivo_final'};
  return {asignatura,disciplina:area,criterios,alcanceProfundo,aplica:true,estado:incidencias.length?'requiere_revision':'revision_docente_pendiente',incidencias,verificaciones,alcance:'Auditoría heurística interdisciplinaria. No certifica OA, exactitud factual, idioma, seguridad ni calidad visual final; requiere validación de fuentes y revisión docente.'};
 }
-module.exports={inspect,evaluateSimple,mathSubject,inspectAll,discipline};
+module.exports={inspect,evaluateSimple,mathSubject,inspectAll,discipline,practicalSafetyRisk};

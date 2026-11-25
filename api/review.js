@@ -2,6 +2,7 @@ const {call}=require('./_providers.cjs');
 const Skills=require('../heva-skills.js');
 const Sources=require('../lib/document-sources.cjs');
 const Q=require('../heva-quality.cjs');
+const Provenance=require('../lib/review-provenance.cjs');
 const P=require('../heva-pedagogy.js');
 const H=require('../heva-core.js');
 const CurricularRegistry=require('../lib/oa-documentary-register.cjs');
@@ -15,6 +16,8 @@ module.exports=async function(req,res){
   if(!(await require('./_ai-access.cjs').protect(req,res)))return;
  const author=material.autoriaIA?.proveedor,keys=[process.env.ALLOW_PAID_AI==='true'?process.env.OPENAI_API_KEY:'',process.env.GEMINI_API_KEY,process.env.GROQ_API_KEY].map(k=>(k||'').trim());
  if(!['openai','gemini','groq'].includes(author))return res.status(409).json({error:'Autoría desconocida. Genera una nueva versión para asegurar un revisor de otro proveedor.'});
+ const contributors=Provenance.contributors(material);
+ if(accion==='revisar'&&!Provenance.independent(material,keys).length)return res.status(409).json({codigo:'REVIEW_NO_INDEPENDENT_PROVIDER',error:'No hay un proveedor habilitado que no haya participado en la autoría o edición de esta versión. Se conserva el material; revisión docente pendiente.',proveedoresParticipantes:contributors,reintentable:false});
  let stage='fuentes';const deadline=Date.now()+55000;
  try{
   if(accion==='revisar'){
@@ -28,12 +31,12 @@ module.exports=async function(req,res){
    const strategyReport=require('../experimental/strategy-delivery.js').audit(updated,material.planGeneracion||material);
    const reviewPrompt=Q.prompt(clean)+subjectPrompt+'\nESTRATEGIAS SOLICITADAS Y EVIDENCIA REAL: '+JSON.stringify(strategyReport)+'\nLa sección noticiaDidactica es un estímulo SIMULADO: no exijas una noticia periodística real para sus personajes o hechos ficticios; sí revisa los conceptos disciplinares y que no se atribuya a medios reales. Revisa también repeticiones: una lectura compartida puede aparecer una sola vez, pero ejemplo resuelto, práctica guiada y aplicación autónoma requieren contextos o datos y razonamientos distintos. Comprueba cada actividad integrada por su ID, recursos completos, consigna y producto. Una etiqueta estrategiasIntegradas o un planEstrategia no prueba cumplimiento. Señala las estrategias ausentes o solo nominales como requiere_ajuste, con la referencia exacta.'+Sources.evidencePrompt(fuentesDocumentales)+'\nAdemás devuelve contrastesDocumentales:[{seccion,afirmacion,fuenteId,cita}]. Citas literales breves. Una orientación o el OA no prueban hechos disciplinares. Fundamentos concisos y específicos, hallazgos sin repeticiones; conserva los ocho criterios.';
    const compactReviewPrompt=Q.compactPrompt(clean,fuentesDocumentales);
-   let result=await call(reviewPrompt,...keys,[author],{maxOutputTokens:4096,fallbackPrompt:compactReviewPrompt,fallbackMaxOutputTokens:2600,deadline});
+   let result=await call(reviewPrompt,...keys,contributors,{maxOutputTokens:4096,fallbackPrompt:compactReviewPrompt,fallbackMaxOutputTokens:2600,deadline});
    stage='informe';
    let report;
    try{report=Q.readReview(result.value)}catch(e){
     stage='llamada';
-    result=await call(reviewPrompt+'\nEl informe anterior no cumple el esquema: '+e.message+' Devuelve TODOS los ocho criterios, y hallazgos con todos los campos; cada requiere_ajuste debe tener un hallazgo. No cambies ni reescribas el material.',...keys,[author],{maxOutputTokens:4096,fallbackPrompt:compactReviewPrompt+'\nReintento: devuelve los ocho criterios completos y hallazgos íntegros; no cambies el material.',fallbackMaxOutputTokens:2600,deadline});
+    result=await call(reviewPrompt+'\nEl informe anterior no cumple el esquema: '+e.message+' Devuelve TODOS los ocho criterios, y hallazgos con todos los campos; cada requiere_ajuste debe tener un hallazgo. No cambies ni reescribas el material.',...keys,contributors,{maxOutputTokens:4096,fallbackPrompt:compactReviewPrompt+'\nReintento: devuelve los ocho criterios completos y hallazgos íntegros; no cambies el material.',fallbackMaxOutputTokens:2600,deadline});
     stage='informe';report=Q.readReview(result.value);
    }
    const contrasts=Sources.validateEvidence(result.value.contrastesDocumentales,fuentesDocumentales);
@@ -45,11 +48,11 @@ module.exports=async function(req,res){
    // material con el OA; no reabre la incorporación de los 407 objetivos.
    if(CurricularRegistry.requiresCurricularSourceReview(material.planGeneracion||material,fuentesDocumentales.objetivo)){const c=report.criterios.find(c=>c.id==='alineacion');if(c?.estado==='cumple'){c.estado='no_verificable';c.fundamento='El OA no se pudo asociar inequívocamente con un registro curricular publicado ni localizar textualmente en la fuente consultada. Comprobar marco y objetivo de este encargo.';}}
    report=Q.classifyReview(report,updated,fuentesDocumentales);
-   const revision={...report,auditoriaDisciplinar:{disciplina:discipline.disciplina,criterios:discipline.criterios,observacionesPrevias:discipline.incidencias.length,validacion:'pendiente_docente'},contrastesDocumentales:contrasts.valid,incidenciasDocumentales:[...evidence.invalid,...contrasts.invalid],estado:report.integridadInforme==='parcial'?'revision_parcial':report.hallazgos.length?'con_observaciones':'sin_observaciones_detectadas',proveedor:result.provider,modelo:result.model,autor:material.autoriaIA,fecha:new Date().toISOString(),huella:Q.fingerprint(updated),alcance:'Revisión independiente por IA con recuperación documental en línea. Solo las citas localizadas tienen trazabilidad; no certifica interpretación, cobertura completa ni vigencia normativa. Validación docente pendiente.'};
+   const revision={...report,auditoriaDisciplinar:{disciplina:discipline.disciplina,criterios:discipline.criterios,observacionesPrevias:discipline.incidencias.length,validacion:'pendiente_docente'},contrastesDocumentales:contrasts.valid,incidenciasDocumentales:[...evidence.invalid,...contrasts.invalid],estado:report.integridadInforme==='parcial'?'revision_parcial':report.hallazgos.length?'con_observaciones':'sin_observaciones_detectadas',proveedor:result.provider,modelo:result.model,autor:material.autoriaIA,proveedoresParticipantes:contributors,fecha:new Date().toISOString(),huella:Q.fingerprint(updated),alcance:'Revisión independiente por IA con recuperación documental en línea. Solo las citas localizadas tienen trazabilidad; no certifica interpretación, cobertura completa ni vigencia normativa. Validación docente pendiente.'};
    return res.status(200).json({exito:true,revision,fuentesDocumentales,respaldoDocumental:evidence.valid,incidenciasDocumentales:evidence.invalid});
   }
   const review=material.revisionIA,plan=material.planGeneracion;
-  if(!plan||!review||review.huella!==Q.fingerprint(material)||review.proveedor===author||!review.hallazgos?.length)return res.status(409).json({error:'Revisa la versión actual antes de corregirla.'});
+  if(!plan||!review||review.huella!==Q.fingerprint(material)||contributors.includes(review.proveedor)||!review.hallazgos?.length)return res.status(409).json({error:'Revisa la versión actual antes de corregirla.'});
   Q.validateReview(review);
   const fuentesDocumentales=await Sources.retrieve(plan);
   const classified=Q.classifyReview(Q.validateReview(review),material,fuentesDocumentales);
@@ -66,6 +69,8 @@ module.exports=async function(req,res){
   const evidence=Sources.validateEvidence(corrected.respaldoDocumental,fuentesDocumentales);corrected.respaldoDocumental=evidence.valid;corrected.incidenciasDocumentales=evidence.invalid;corrected=Skills.prepare(corrected,plan,fuentesDocumentales,evidence);
   corrected.auditoriaExperimental=require('../experimental/quality-audit.cjs').inspect(corrected,plan);
   corrected.auditoriaDisciplinar=require('../experimental/subject-audit.cjs').inspectAll(corrected,plan);
+  corrected.edicionesIA=result.local?(material.edicionesIA||[]):[...(material.edicionesIA||[]),{seccion:'INTEGRAL',modo:'CORRECCION_REVISION',proveedor:result.provider,modelo:result.model,fecha:new Date().toISOString()}];
+  if(!result.local&&material.autoriaIA?.proveedor!==result.provider)corrected.edicionesIA.unshift({seccion:'AUTORIA_PREVIA',proveedor:material.autoriaIA.proveedor,modelo:material.autoriaIA.modelo,fecha:material.autoriaIA.fecha});
   corrected.historialRevisionIA=[...(material.historialRevisionIA||[]),review];
   return res.status(200).json({exito:true,material:corrected,pendiente:'Revisar nuevamente la corrección.'});
  }catch(e){console.warn('HEVA review',JSON.stringify({etapa:stage,codigo:e.code||'REVIEW_ERROR',proveedores:e.proveedores||[]}));return res.status(503).json({etapa:stage,codigo:e.code==='AI_RATE_LIMIT'?'cuota_o_limite':e.code,reintentable:true,reintentarEn:e.retryAfter||0,proveedores:e.proveedores,detalle:stage==='informe'?String(e.message).slice(0,180):undefined,error:'No se pudo completar la revisión o corrección independiente. Se conserva el material; revisión pendiente.'})}
