@@ -1,8 +1,8 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.HEVATemplates=api})(typeof globalThis!=='undefined'?globalThis:this,function(){
 const themes={
- azul:{name:'Gemini · institucional azul',main:'254B84',accent:'C99054',background:'F0F5FB',ink:'22344A',panel:'FFFFFF',soft:'E5EDF7',font:'Aptos',cover:'254B84',layout:'clean'},
- gemini_calido:{name:'Gemini · cálido',main:'975C3D',accent:'D69B56',background:'F8EFE3',ink:'3B302B',panel:'FFFDF9',soft:'EFE0D0',font:'Aptos',cover:'86503B',layout:'warm'},
- editorial_calido:{name:'Z.ai · editorial cálido',main:'782F40',accent:'BF9464',background:'F6F0E9',ink:'342E32',panel:'FFFDF9',soft:'E9DCD0',font:'Georgia',cover:'612C3B',layout:'editorial'},
+ azul:{name:'Institucional azul',main:'254B84',accent:'C99054',background:'F0F5FB',ink:'22344A',panel:'FFFFFF',soft:'E5EDF7',font:'Aptos',cover:'254B84',layout:'clean'},
+ gemini_calido:{name:'Cálido · cobre y arena',main:'975C3D',accent:'D69B56',background:'F8EFE3',ink:'3B302B',panel:'FFFDF9',soft:'EFE0D0',font:'Aptos',cover:'86503B',layout:'warm'},
+ editorial_calido:{name:'Editorial cálido · burdeos y crema',main:'782F40',accent:'BF9464',background:'F6F0E9',ink:'342E32',panel:'FFFDF9',soft:'E9DCD0',font:'Georgia',cover:'612C3B',layout:'editorial'},
  calida:{name:'Cálida · terracota y crema',main:'8B2635',accent:'C77638',background:'FFF7ED',ink:'302723',panel:'FFFFFF',soft:'F1E7DB',font:'Aptos',cover:'8B2635',layout:'warm'},
  institucional:{name:'Institucional · verde y arena',main:'285E49',accent:'A86A32',background:'F4F3E9',ink:'22372F',panel:'FFFFFF',soft:'ECE8D8',font:'Aptos',cover:'285E49',layout:'clean'},
  contraste:{name:'Alto contraste · blanco y negro',main:'111111',accent:'111111',background:'FFFFFF',ink:'111111',panel:'FFFFFF',soft:'EEEEEE',font:'Arial',cover:'111111',layout:'clean'}

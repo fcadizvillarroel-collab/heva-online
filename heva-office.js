@@ -4,13 +4,13 @@ function download(blob,name){let a=document.createElement('a'),url=URL.createObj
 async function word(m,teacher=false){
  if(!root.docx)throw Error('No se cargó el exportador Word local. Recarga la página.');
  const material=HEVA.material(m),visual=root.HEVATemplates.layout(material);
- const {Document,Packer,Paragraph,TextRun,HeadingLevel,AlignmentType}=root.docx;
+ const {Document,Packer,Paragraph,TextRun,HeadingLevel,AlignmentType,Footer,PageNumber}=root.docx;
  const originalBlocks=HEVA.blocks(material,teacher),blocks=root.HEVAGuideVisuals?.plan(material,originalBlocks,root.HEVAContextAssets,HEVA.blocks(material,false).length)||originalBlocks;
  const main=visual.theme.main,ink=visual.theme.ink,children=[];
- const line=(value,opts={})=>new Paragraph({children:[new TextRun({text:String(value),size:opts.size||visual.wordSize,font:material.accesibilidadVisual?.fuente||'Arial',characterSpacing:Math.round((material.accesibilidadVisual?.espaciado||0)*(opts.size||visual.wordSize)*10),bold:!!opts.bold,color:opts.color||ink})],spacing:{before:opts.before||0,after:opts.after??110},...(opts.box?{shading:{type:'clear',fill:visual.theme.background},border:{left:{color:main,size:16,space:8,style:'single'}},indent:{left:160,right:100}}:{}),keepNext:!!opts.keepNext});
- children.push(line('ESCUELA HÉCTOR VALENZUELA CEA · EPJA',{bold:true,color:main,size:20,after:260}));
+ const line=(value,opts={})=>new Paragraph({children:[new TextRun({text:String(value),size:opts.size||visual.wordSize,font:material.accesibilidadVisual?.fuente||'Arial',characterSpacing:Math.round((material.accesibilidadVisual?.espaciado||0)*(opts.size||visual.wordSize)*10),bold:!!opts.bold,color:opts.color||ink})],spacing:{before:opts.before||0,after:opts.after??110},...(opts.box?{shading:{type:'clear',fill:opts.fill||visual.theme.background},border:{left:{color:opts.rule||main,size:16,space:8,style:'single'}},indent:{left:160,right:100}}:{}),keepNext:!!opts.keepNext,keepLines:!!opts.keepLines});
+ children.push(line('ESCUELA HÉCTOR VALENZUELA CEA · EPJA',{bold:true,color:main,size:Math.max(20,visual.large?visual.wordSize:20),after:160,keepNext:true}));
  children.push(new Paragraph({text:material.titulo||'Material educativo',heading:HeadingLevel.TITLE,spacing:{after:220},keepNext:true}));
- children.push(line([material.asignatura,material.nivel,material.temaEspecifico].filter(Boolean).join(' · '),{color:main,after:260}));
+ children.push(line([material.asignatura,material.nivel,material.temaEspecifico].filter(Boolean).join(' · '),{color:main,bold:true,after:220,box:true,keepNext:true}));
  for(const [blockIndex,block] of blocks.entries()){
   if(block.path==='titulo'||(block===blocks[0]&&block.title===material.titulo))continue;
   if(block.kind==='option'){
@@ -18,25 +18,27 @@ async function word(m,teacher=false){
    // solo al final de una página y las opciones aparezcan en la siguiente.
    const next=blocks[blockIndex+1];
    const keepNext=Boolean(next?.kind==='option'&&next.group===block.group);
-   children.push(line(block.title+' '+block.text,{after:115,keepNext}));
+   children.push(line(block.title+' '+block.text,{after:115,keepNext,keepLines:true}));
    continue;
   }
-  children.push(new Paragraph({text:block.title,heading:HeadingLevel.HEADING_2,spacing:{before:220,after:110},keepNext:true}));
+  const purpose=wordPurpose(block),tinted=root.HEVASlideDesign?.options(material)?.recuadros!==false&&!visual.large;
+  children.push(new Paragraph({text:block.title,heading:HeadingLevel.HEADING_2,spacing:{before:purpose==='activity'?300:240,after:110},keepNext:true,...(tinted&&purpose!=='reading'?{shading:{type:'clear',fill:visual.theme.soft||visual.theme.background},border:{left:{color:purpose==='activity'?visual.theme.accent:main,size:18,space:8,style:'single'}}}:{} )}));
   if(block.kind==='planning-moment'){for(const field of block.fields){children.push(line(field.title,{bold:true,color:main,keepNext:true,after:70}));for(const paragraph of field.text.split(/\n+/).filter(Boolean))children.push(line(paragraph,{after:140}));}continue;}
   const extra=block.guideVisual;
   if(!extra?.chart&&!extra?.diagram&&!extra?.comparison&&!extra?.timeline)for(const paragraph of String(block.text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean)){
-   children.push(line(paragraph,{after:140,box:!!extra?.box,keepNext:block.kind==='question'||/^ejemploGuiado\.pasos\.\d+\.accion$/.test(block.path||'')}));
+   children.push(line(paragraph,{after:140,box:!visual.large&&tinted&&(!!extra?.box||purpose==='objective'||purpose==='example'),rule:purpose==='example'?visual.theme.accent:main,keepNext:block.kind==='question'||/^ejemploGuiado\.pasos\.\d+\.accion$/.test(block.path||'')}));
   }
   if(extra)children.push(...root.HEVAGuideVisuals.render(root.docx,extra,line,visual.theme));
   if(!teacher&&/preguntaReflexion$|actividadesGuiadas\.\d+\.consigna$|actividadAutonoma\.consigna$/.test(block.path||'')){
-   for(let j=0;j<3;j++)children.push(line('___________________________________________________________________',{size:19,color:'9A9A9A',after:155}));
+   for(let j=0;j<3;j++)children.push(new Paragraph({children:[new TextRun({text:' ',size:visual.wordSize})],border:{bottom:{color:'8A8A8A',size:4,style:'single'}},spacing:{after:155}}));
   }
  }
- const doc=new Document({styles:{paragraphStyles:[{id:'Heading2',name:'Heading 2',basedOn:'Normal',next:'Normal',run:{font:material.accesibilidadVisual?.fuente||'Arial',size:Math.max(visual.wordSize,28),bold:true,color:main},paragraph:{keepNext:true}},{id:'Title',name:'Title',basedOn:'Normal',next:'Normal',run:{font:material.accesibilidadVisual?.fuente||'Arial',size:Math.max(visual.wordSize+8,36),bold:true,color:main},paragraph:{keepNext:true}}],default:{document:{run:{font:material.accesibilidadVisual?.fuente||'Arial',size:visual.wordSize},paragraph:{spacing:{line:Math.round(240*(material.accesibilidadVisual?.interlineado||1.3)),lineRule:'auto'}}}}},sections:[{properties:{page:{margin:{top:1080,bottom:1080,left:1080,right:1080}}},children}]});
+ const doc=new Document({styles:{paragraphStyles:[{id:'Heading2',name:'Heading 2',basedOn:'Normal',next:'Normal',run:{font:material.accesibilidadVisual?.fuente||'Arial',size:Math.max(visual.wordSize,28),bold:true,color:main},paragraph:{keepNext:true}},{id:'Title',name:'Title',basedOn:'Normal',next:'Normal',run:{font:material.accesibilidadVisual?.fuente||'Arial',size:Math.max(visual.wordSize+8,36),bold:true,color:main},paragraph:{keepNext:true}}],default:{document:{run:{font:material.accesibilidadVisual?.fuente||'Arial',size:visual.wordSize},paragraph:{spacing:{line:Math.round(240*(material.accesibilidadVisual?.interlineado||1.3)),lineRule:'auto'}}}}},sections:[{properties:{page:{margin:{top:1080,bottom:1080,left:1080,right:1080}}},...(Footer&&PageNumber?{footers:{default:new Footer({children:[new Paragraph({alignment:AlignmentType.RIGHT,children:[new TextRun({text:'HEVA · '+(teacher?'Docente':'Estudiante')+'   |   ',size:20,color:main}),new TextRun({children:[PageNumber.CURRENT],size:20,color:main})]})]})}}:{}),children}]});
  const blob=await Packer.toBlob(doc);
  download(blob,safeName(material.titulo)+(teacher?'_docente':'_estudiante')+'.docx');
  return blob;
 }
+function wordPurpose(block){const p=String(block.path||''),t=String(block.title||'');if(/objetivo/i.test(p)||/^Objetivo curricular/i.test(t))return'objective';if(/ejemploGuiado|modelamiento/i.test(p)||/ejemplo resuelto|ejemplo guiado/i.test(t))return'example';if(block.kind==='question'||/actividadesGuiadas|actividadAutonoma|preguntas|casosEstudio|ejerciciosEvaluacion/.test(p)||/^Actividad|^Ejercicio|^Caso|^Pregunta/i.test(t))return'activity';return'reading';}
 function wrap(text,max=66){let out=[],line='';String(text).split('\n').forEach(par=>{par.split(/\s+/).forEach(w=>{if((line+' '+w).length>max){if(line)out.push(line);line=w}else line+=(line?' ':'')+w});out.push(line);line=''});return out}
 function slideText(value){return (Array.isArray(value)?value.join('\n'):String(value??'')).replace(/\r/g,'').trim()}
 function chunksOf(value,maxChars=850,maxItems=5){
@@ -161,7 +163,7 @@ function drawBalance(ppt,theme,slide){
 }
 function addContent(ppt,theme,slide,title,lines,section,index=0,scene={}){
  const resources=scene.visualOptions||{imagenes:true,diagramas:true,graficos:true,recuadros:true},illustration=resources.imagenes?scene.image:null;
- if(resources.diagramas&&!illustration){if(drawSemanticVisual(ppt,theme,slide,title,lines))return;}
+ if(resources.diagramas&&!illustration&&scene.design!=='activity'&&classifySlide(title,lines,index)!=='activity'){if(drawSemanticVisual(ppt,theme,slide,title,lines))return;}
  const kind=classifySlide(title,lines,index),clean=lines.map(x=>x.replace(/^[-•]\s*/,'').trim()).filter(Boolean);
  const activity=scene.design==='activity'||kind==='activity',activityStyle=activity&&resources.recuadros,ink=activityStyle?'FFFFFF':theme.ink,main=activityStyle?'FFFFFF':theme.main;
  // A single canvas: no nested cards, decorative counters or repeated panel grids.
@@ -214,11 +216,21 @@ function addContent(ppt,theme,slide,title,lines,section,index=0,scene={}){
  }
  if(illustration){addPicture();text(clean.join('\n\n'),.86,2.35,6.7,4.1,26,ink);return;}
  if(!resources.recuadros){text(clean.join('\n\n'),.86,2.4,11.0,4.05,26,ink);return;}
+ // Composiciones con propósito pedagógico; ningún texto inventado ni eliminado.
+ if(scene.design==='opening'&&clean.length>=1&&fitsText(clean,10.5,3.2,28)){
+  slide.addShape(ppt.ShapeType.rect,{x:.86,y:2.35,w:.18,h:3.85,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});
+  text('PROPÓSITO DE APRENDIZAJE',1.23,2.35,10.4,.43,16,theme.main,true);
+  text(clean.join('\n\n'),1.23,3.02,10.5,3.2,28,theme.ink);slide.hevaVisualType='purpose';return;
+ }
+ if(!activity&&scene.design==='concept'&&clean.length===1&&fitsText(clean,10.65,3.05,30)){
+  slide.addShape(ppt.ShapeType.rect,{x:.86,y:2.38,w:11.65,h:.08,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});
+  text(clean[0],1.08,2.85,10.65,3.05,30,theme.ink);slide.hevaVisualType='feature';return;
+ }
  if(activity)text('TRABAJO EN CLASE',.86,2.14,11.4,.32,14,'FFFFFF',true);
  const top=activity?2.7:2.4;
  // Tres tarjetas editables, con colores del tema elegido.
  if(!activity&&resources.recuadros&&clean.length===3&&
-    clean.every(line=>fitsText([line],3.36,2.82,21))&&
+    clean.every(line=>fitsText([line],3.24,2.25,scene.large?26:21))&&
     (kind==='cards'||scene.design==='concept'||theme.layout==='editorial')){
    const width=3.72,gap=.19;
    clean.forEach((line,j)=>{
@@ -226,7 +238,7 @@ function addContent(ppt,theme,slide,title,lines,section,index=0,scene={}){
      slide.addShape(ppt.ShapeType.roundRect,{x,y:2.55,w:width,h:3.64,rectRadius:.12,line:{color:theme.soft||theme.accent,width:1},fill:{color:j%2===0?(theme.panel||'FFFFFF'):(theme.soft||'F1E7DB')}});
      slide.addShape(ppt.ShapeType.rect,{x:x+.2,y:2.83,w:.7,h:.08,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});
      text(String(j+1).padStart(2,'0'),x+.2,3.06,.65,.42,17,theme.main,true);
-     text(line,x+.24,3.68,width-.48,2.25,21,theme.ink);
+     text(line,x+.24,3.68,width-.48,2.25,scene.large?26:21,theme.ink);
    });
    slide.hevaVisualType='cards';
    return;
@@ -281,7 +293,7 @@ function presentationPages(material,teacher=false){
  }
  const story=root.HEVAPedagogy?.newsText(material);if(isPresentation&&story)sections.unshift({title:'Noticia didáctica · SIMULADA',text:story,kind:'resource'});
  sections=root.HEVASlideDesign?.decorate(material,sections,root.HEVAGuideVisuals?.enabled(material)&&root.HEVASlideDesign.image(material.imagenGuiaHEVA)?{}:root.HEVAContextAssets)||sections;
- sections=sections.map(s=>({...s,visualOptions:root.HEVASlideDesign?.options(material)||{imagenes:true,diagramas:true,graficos:true,recuadros:true},allowDataChart:['PRESENTACION','GUIA','TALLER','ACCESIBLE'].includes(material.tipoMaterial)}));
+ sections=sections.map(s=>({...s,large:visual.large,visualOptions:root.HEVASlideDesign?.options(material)||{imagenes:true,diagramas:true,graficos:true,recuadros:true},allowDataChart:['PRESENTACION','GUIA','TALLER','ACCESIBLE'].includes(material.tipoMaterial)}));
  const pages=sections.flatMap((section,index)=>{
   // Keep a complete multiple-choice question and its alternatives together.
   const isQuestion=/selección múltiple|alternativa|pregunta\s*\d+/i.test(section.title);
@@ -309,7 +321,7 @@ function renderCover(ppt,theme,material,total){
   cover.addShape(ppt.ShapeType.rect,{x:.85,y:1.56,w:2.25,h:.07,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});
  }else if(clean){
   cover.addShape(ppt.ShapeType.rect,{x:0,y:0,w:13.333,h:.12,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});
-  cover.addShape(ppt.ShapeType.roundRect,{x:9.9,y:1.1,w:2.35,h:4.35,rectRadius:.18,line:{color:theme.accent,transparency:100},fill:{color:theme.accent,transparency:18}});
+  cover.addShape(ppt.ShapeType.rect,{x:12.87,y:1.1,w:.14,h:4.35,line:{color:theme.accent,transparency:100},fill:{color:theme.accent}});
  }
  cover.addText('HEVA  /  APRENDER Y APLICAR',{x:.85,y:.7,w:7,h:.4,fontFace:theme.font||'Aptos',fontSize:14,bold:true,color,margin:0});
  cover.addText(title,{x:.85,y:2,w:image&&!contrast?6.25:11.6,h:2.8,fontFace:theme.font||'Aptos',fontSize:size,bold:true,color,margin:0,valign:'mid',fit:'shrink'});
@@ -364,4 +376,4 @@ function auditExport(m,teacher=false){
   .map(v=>({id:v.id||'',documentary:v.documentary===true,sourceUrl:v.sourceUrl||'',fuenteDocumental:v.fuenteDocumental||''}));
  const sectionData=isPresentation&&Array.isArray(material.diapositivas)?material.diapositivas.map(d=>({title:d.titulo||'',text:slideText(d.contenido)})):blocks.map(b=>({title:b.title,text:b.text})); const q=root.HEVAQualityGate?.inspect({material,sections:sectionData,visuals:renderedVisuals}); if(q)for(const issue of q.issues)issues.push({level:'warning',code:issue.code,detail:issue.detail}); const evidence=root.HEVAEvidenceGate?.inspect({material,sections:sectionData,visuals:[...renderedVisuals,...declaredDocumentary]}); if(evidence)for(const issue of evidence.issues)issues.push({level:'warning',code:issue.code,detail:issue.detail}); const approval=root.HEVAApprovalAudit?.review({material,sections:sectionData,visuals:renderedVisuals}); if(approval)for(const issue of approval.issues)issues.push({level:'warning',code:issue.code,detail:issue.detail}); return {estimatedSlides:slides,issues,qualityScore:q?.score??null,qualityScoreIsHeuristic:true,pedagogicallyApproved:approval?approval.aprobado:false,documentaryEvidence:evidence||null,approvalEvidence:approval||null,wordAndPowerpointShareContent:true};
 }
-root.HEVAOffice={word,powerpoint,download,auditExport,preview,presentationPages,paginatePresentation,classifySlide};})(typeof globalThis!=='undefined'?globalThis:this);
+root.HEVAOffice={word,powerpoint,download,auditExport,preview,presentationPages,paginatePresentation,classifySlide,wordPurpose};})(typeof globalThis!=='undefined'?globalThis:this);
