@@ -1,0 +1,2 @@
+const test=require('node:test'),assert=require('node:assert/strict'),S=require('../heva-studio.js');
+test('Production regression: depth cannot shorten a guide from 219 to 196 words',()=>{const m={tipoMaterial:'GUIA',introduccionLectura:'original '.repeat(219).trim()};assert.throws(()=>S.improve(m,{contenido:{introduccionLectura:'revisado '.repeat(196).trim()}},'PROFUNDIDAD'),/no amplía/);const n=S.improve(m,{contenido:{introduccionLectura:'ampliado '.repeat(320).trim()}},'PROFUNDIDAD');assert.equal(n.introduccionLectura.split(/\s+/).length,320);});
