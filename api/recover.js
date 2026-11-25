@@ -76,6 +76,10 @@ module.exports=async(req,res)=>{
   if(fase==='items'){result.value=R.normalizePart(result.value,batch);if(slideOriginal)result.value=R.mergeSlideRepair(slideOriginal,result.value,plan,batch,parts);if(duplicateOriginal)result.value=R.mergeDuplicateRepair(duplicateOriginal,result.value,plan,batch,parts);}
   let issues=R.partIssues(result.value,plan,fase==='items'?batch:null,parts);
   if(fase==='items'&&!duplicateOriginal&&R.duplicateItems(result.value,plan,batch,parts).length&&issues.every(x=>/repite literalmente/.test(x)))duplicateOriginal=result.value;
+  // Repair the news before regenerating an otherwise usable base.
+  if(fase==='base'&&issues.some(require('../lib/news-repair.cjs').isNewsIssue)&&deadline-Date.now()>6500){
+   try{const fixed=await require('../lib/news-repair.cjs').repair(result.value,plan,issues,v=>R.partIssues(v,plan,null),async q=>(await call(q,...keys,exclude,{deadline,maxOutputTokens:1800,fallbackMaxOutputTokens:1800})).value);if(fixed.changed){result.value=fixed.base;issues=fixed.issues;}}catch(error){console.warn('HEVA news-only repair pending',error.code||'ERROR');}
+  }
   if(issues.length&&!R.traceIssuesOnly(issues)&&deadline-Date.now()>5000){
    const slideFirstDraft=fase==='items'&&batch?.tipo==='diapositivas'?result.value:null;
    const slideCorrection=slideFirstDraft?'\nREPARA DIAPOSITIVAS YA GENERADAS (no inventes el resto): '+JSON.stringify(slideFirstDraft).slice(0,16500)+'\nErrores que debes corregir: '+issues.join('; ')+'. Devuelve EXACTAMENTE '+batch.cantidad+' diapositivas con nuevas situaciones y consignas para las repetidas; las demás deben conservarse.':'';
