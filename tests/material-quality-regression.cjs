@@ -4,7 +4,7 @@ const planning=require('../heva-planning.js');
 const visuals=require('../heva-guide-visuals.js');
 test('compact fallback retains teaching, assessment and accessibility guidance',()=>{
  const p={tipoMaterial:'GUIA',objetivoAprendizaje:'Interpretar información de situaciones cotidianas',temaEspecifico:'Lectura de avisos',cantAlternativas:2,cantDesarrollo:1,cantCasos:1};
- const result=compact.build(p,{schema:()=>({titulo:'ejemplo'}),strategy:()=>({id:'guiada'})});
+ const result=compact.build(p,require('../heva-pedagogy.js'));
  assert.match(result,/distractores basados en errores conceptuales/);assert.match(result,/contraejemplos/);assert.match(result,/verbaliza los datos/);
 });
 test('planning asks for usable resources and observable evidence',()=>{

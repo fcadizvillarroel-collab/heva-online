@@ -209,7 +209,7 @@ Responde ÚNICAMENTE en JSON:
     const compactFallback=CompactPrompt.build(plan,Pedagogy,{estrategiasLaboratorioActivas:estrategiasLab.length>0});
     const metadata = {objetivoAprendizaje,asignatura,nivel,marcoCurricular,temaEspecifico,tipoMaterial,estrategiaDidactica:Pedagogy.strategy(estrategiaDidactica).name};
     let author;
-    const draft = async (prompt,allowCompact=false) => { const r = await call(prompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY,[],{deadline:generationDeadline,oversizePrompt:allowCompact?compactFallback:undefined,oversizeMaxOutputTokens:6000}); author={proveedor:r.provider,modelo:r.model,fecha:new Date().toISOString()}; return r.value; };
+    const draft = async (prompt,allowCompact=false) => { const r = await call(prompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY,[],{deadline:generationDeadline,oversizePrompt:typeof allowCompact==='string'?allowCompact:allowCompact?compactFallback:undefined,oversizeMaxOutputTokens:6000}); author={proveedor:r.provider,modelo:r.model,fecha:new Date().toISOString()}; return r.value; };
     const normalize = raw => {
       const normalized=Pedagogy.normalizeStrategyPlan(raw,plan);
       const counted=Pedagogy.enforceRequestedCounts(normalized,plan);
@@ -231,7 +231,9 @@ Responde ÚNICAMENTE en JSON:
       const missingStrategyFields=['habilidadCentral','aplicacionConcreta','evidenciaEsperada','retroalimentacionDocente'].filter(k=>typeof strategyPlan[k]!=='string'||!strategyPlan[k].trim());
       const strategyRepair=issues.some(x=>x.includes('La estrategia seleccionada no está desarrollada'))?
         '\nPLAN DE ESTRATEGIA OBLIGATORIO: planEstrategia.id debe ser exactamente '+selectedStrategy.id+'. Completa planEstrategia.habilidadCentral, aplicacionConcreta, evidenciaEsperada y retroalimentacionDocente con textos específicos del objetivo y de las tareas reales. Campos actualmente vacíos: '+missingStrategyFields.join(', ')+'. No copies una plantilla genérica; describe cómo se aplica la estrategia y cómo se revisará el trabajo.':'';
-      material = normalize(await draft(promptRedactor+'\nCORRIGE LA RESPUESTA COMPLETA. Se detectaron estas incidencias: '+issues.join('; ')+(missingRefs.length?'\nTRAZABILIDAD OBLIGATORIA: agrega exactamente una entrada con habilidad, evidencia y criterio específicos para cada referencia real que falta: '+missingRefs.join(', ')+'. No inventes actividades ni referencias.':'')+strategyRepair ));
+      const repairSuffix='\nCORRIGE LA RESPUESTA COMPLETA. Se detectaron estas incidencias: '+issues.join('; ')+(missingRefs.length?'\nTRAZABILIDAD OBLIGATORIA: agrega exactamente una entrada con habilidad, evidencia y criterio específicos para cada referencia real que falta: '+missingRefs.join(', ')+'. No inventes actividades ni referencias.':'')+strategyRepair;
+      const compactRepair=compactFallback&&compactFallback.length+repairSuffix.length<=15500?compactFallback+repairSuffix:null;
+      material = normalize(await draft(promptRedactor+repairSuffix,compactRepair));
       issues = check(material);
     }
     // A complete slide deck must not be discarded solely because the model
