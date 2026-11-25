@@ -95,7 +95,7 @@ function inspectAll(material,plan={}){
  if(area==='lenguaje'){
   if(/infiere|inferencia|comprensi[oó]n|idea principal|seg[uú]n el texto/i.test(allText)&&reading.trim().length<160&&!/texto:|noticia:|lectura:|fragmento:/i.test(full))
    recommend('LEN-LECTURA','No se identifica una lectura suficientemente desarrollada para sostener las preguntas.');
-  if(/escribe|redacta|produce un texto|argumenta/i.test(allText)&&!/criterio|pauta|rúbrica|coherencia|retroalimentaci[oó]n/i.test(allText))
+  if(/escribe|redacta|produce un texto|argumenta/i.test(allText)&&!/criterio|pauta|rúbrica|coherencia|retroalimentaci[oó]n/i.test(allText)&&!(material?.preguntasDesarrollo||[]).some(q=>String(q.criterioEvaluacion||'').trim().length>=25)&&!cases.some(q=>String(q.criterioEvaluacion||'').trim().length>=25))
    recommend('LEN-ESCRITURA','La producción escrita requiere criterios explícitos o una pauta de revisión.');
  }
  if(area==='ciencias'){
