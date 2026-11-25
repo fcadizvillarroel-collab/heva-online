@@ -17,6 +17,7 @@ module.exports=async function(req,res){
  const author=material.autoriaIA?.proveedor,keys=[process.env.ALLOW_PAID_AI==='true'?process.env.OPENAI_API_KEY:'',process.env.GEMINI_API_KEY,process.env.GROQ_API_KEY].map(k=>(k||'').trim());
  if(!['openai','gemini','groq'].includes(author))return res.status(409).json({error:'Autoría desconocida. Genera una nueva versión para asegurar un revisor de otro proveedor.'});
  const contributors=Provenance.contributors(material);
+ if(material.autoriaBloques?.completa===false)return res.status(409).json({codigo:'REVIEW_INCOMPLETE_PROVENANCE',error:'No se conoce la autoría de todos los bloques de esta versión. Se conserva el material; revisión docente pendiente.',reintentable:false});
  if(accion==='revisar'&&!Provenance.independent(material,keys).length)return res.status(409).json({codigo:'REVIEW_NO_INDEPENDENT_PROVIDER',error:'No hay un proveedor habilitado que no haya participado en la autoría o edición de esta versión. Se conserva el material; revisión docente pendiente.',proveedoresParticipantes:contributors,reintentable:false});
  let stage='fuentes';const deadline=Date.now()+55000;
  try{
@@ -69,6 +70,7 @@ module.exports=async function(req,res){
   const evidence=Sources.validateEvidence(corrected.respaldoDocumental,fuentesDocumentales);corrected.respaldoDocumental=evidence.valid;corrected.incidenciasDocumentales=evidence.invalid;corrected=Skills.prepare(corrected,plan,fuentesDocumentales,evidence);
   corrected.auditoriaExperimental=require('../experimental/quality-audit.cjs').inspect(corrected,plan);
   corrected.auditoriaDisciplinar=require('../experimental/subject-audit.cjs').inspectAll(corrected,plan);
+  if(material.autoriaBloques)corrected.autoriaBloques=material.autoriaBloques;
   corrected.edicionesIA=result.local?(material.edicionesIA||[]):[...(material.edicionesIA||[]),{seccion:'INTEGRAL',modo:'CORRECCION_REVISION',proveedor:result.provider,modelo:result.model,fecha:new Date().toISOString()}];
   if(!result.local&&material.autoriaIA?.proveedor!==result.provider)corrected.edicionesIA.unshift({seccion:'AUTORIA_PREVIA',proveedor:material.autoriaIA.proveedor,modelo:material.autoriaIA.modelo,fecha:material.autoriaIA.fecha});
   corrected.historialRevisionIA=[...(material.historialRevisionIA||[]),review];
