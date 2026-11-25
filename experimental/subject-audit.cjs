@@ -78,13 +78,14 @@ function inspectAll(material,plan={}){
  if(area==='sociales'&&has(/fuente hist[oó]rica|documento hist[oó]rico|testimonio/i)&&!has(/autor|fecha|procedencia|contexto/i))recommend('SOC-FUENTES','El análisis de fuentes necesita autoría, fecha o contexto identificable.');
  if(area==='lenguaje'&&has(/comprensi[oó]n lectora|lee el texto|seg[uú]n el texto/i)&&!has(/lectura:|texto:|noticia:|fragmento:|p[aá]rrafo 1/i))recommend('LEN-ESTIMULO','Comprobar que el texto íntegro esté incluido en el material.');
  if(area==='ingles'&&has(/translate|traduc|vocabulary|vocabulario/i)&&!has(/example|ejemplo|dialogue|di[aá]logo/i))recommend('ING-MODELO','La tarea lingüística no muestra un ejemplo o diálogo contextualizado.');
- if(area==='instrumental'&&has(/conflicto|contrato|derecho laboral|emprendimiento/i)&&!has(/caso|situaci[oó]n|decisi[oó]n|simulaci[oó]n/i))recommend('INS-APLICACION','El contenido práctico debería incluir una situación de aplicación o decisión.');
+
  if(area==='ciencias'&&has(/experimento|hip[oó]tesis|laboratorio/i)&&!has(/registro|observaci[oó]n|resultado|evidencia/i))recommend('CIE-EVIDENCIA','La actividad experimental no indica cómo registrar o interpretar resultados.');
  // Subject-specific checks inspect actual source fields, not only slide titles.
  const reading=String(material?.introduccionLectura||'');
  const cases=Array.isArray(material?.casosEstudio)?material.casosEstudio:[];
  const activities=Array.isArray(material?.actividadesGuiadas)?material.actividadesGuiadas:[];
  const allText=[full,reading,...cases.map(c=>[c.contextoReal,c.preguntaReflexion].join(' ')),...activities.map(a=>JSON.stringify(a))].join(' ');
+ if(area==='instrumental'&&/conflicto|contrato|derecho laboral|emprendimiento/i.test(allText)&&!cases.some(c=>String(c.contextoReal||'').trim().length>=40&&String(c.preguntaReflexion||'').trim().length>=15)&&!/caso|situaci[oó]n|decisi[oó]n|simulaci[oó]n/i.test(allText))recommend('INS-APLICACION','El contenido práctico debería incluir una situación de aplicación o decisión.');
  if(area==='ingles'){
   if(/traduc|translate|vocabulario|vocabulary|reading|lectura|dialogue|di[aá]logo/i.test(allText)&&!/\b(?:the|is|are|have|has|can|will|do|does|my|your|work|job|hello|good|what|where|when|why|how)\b/i.test(allText))
    recommend('ING-IDIOMA','No se identifican ejemplos evidentes en inglés; revisar que haya input lingüístico auténtico y adecuado al nivel.');
