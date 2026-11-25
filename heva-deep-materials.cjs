@@ -16,7 +16,7 @@ const profiles={
  matematica:{
   content:'Presenta conceptos, representación, significado de símbolos, procedimiento resuelto con datos diferentes de los ejercicios, comprobación, unidades, interpretación y errores típicos.',
   actions:'Ejemplo trabajado paso a paso; completar un paso faltante; detectar un error de procedimiento; resolver problema nuevo; contrastar dos procedimientos y comprobar resultado.',
-  guard:'Cada problema debe tener datos suficientes y solución matemáticamente válida. Nunca inventes cifras como si fueran datos estadísticos reales.'
+  guard:'Cada problema debe tener datos suficientes y solución matemáticamente válida. La incógnita no puede estar entregada literalmente como dato; comprueba la solución sustituyéndola en todas las condiciones, incluidas desigualdades estrictas, unidades, cantidades enteras y descuentos. Si defines ax+b=c como ecuación de primer grado en x, explicita a≠0. Evita distractores cuya única diferencia sea un dato repetido. Usa cantidades ficticias verosímiles y rotúlalas como ejemplos; nunca inventes cifras como datos estadísticos reales.'
  },
  ciencias:{
   content:'Explica conceptos, relaciones causa-efecto, modelo del fenómeno, condiciones y límites; diferencia observación, dato, hipótesis, inferencia y conclusión.',
