@@ -88,6 +88,7 @@ module.exports=async(req,res)=>{
    const slideFirstDraft=fase==='items'&&batch?.tipo==='diapositivas'?result.value:null;
    const slideCorrection=slideFirstDraft?'\nREPARA DIAPOSITIVAS YA GENERADAS (no inventes el resto): '+JSON.stringify(slideFirstDraft).slice(0,16500)+'\nErrores que debes corregir: '+issues.join('; ')+'. Devuelve EXACTAMENTE '+batch.cantidad+' diapositivas con nuevas situaciones y consignas para las repetidas; las demás deben conservarse.':'';
    result=await call(prompt+slideCorrection+S.evidencePrompt(fuentesDocumentales,{compact:true})+'\nCORRIGE este bloque completo: '+issues.join('; ')+(duplicateOriginal?'\nSustituye solo los duplicados y conserva los demás ítems de este borrador: '+JSON.stringify(duplicateOriginal):''),...keys,exclude,{deadline,fallbackPrompt:fallback+slideCorrection+'\nCORRIGE ESTE BLOQUE: '+issues.join('; ')+(duplicateOriginal?'\nConserva ítems válidos del borrador y sustituye solo repetidos: '+JSON.stringify(duplicateOriginal):''),fallbackMaxOutputTokens:fase==='base'?4096:3000,maxOutputTokens:fase==='base'?(plan.tipoMaterial==='PRESENTACION'?2600:10000):batch?.formato?8000:batch?.tipo==='diapositivas'?6500:5000});
+   note(result);
    if(fase==='items'){result.value=R.normalizePart(result.value,batch);if(slideFirstDraft)result.value=R.mergeSlideRepair(slideFirstDraft,result.value,plan,batch,parts);if(duplicateOriginal)result.value=R.mergeDuplicateRepair(duplicateOriginal,result.value,plan,batch,parts);}
    issues=R.partIssues(result.value,plan,fase==='items'?batch:null,parts);
   }
