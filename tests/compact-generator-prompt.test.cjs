@@ -26,3 +26,5 @@ test('no compactar un documento base, una referencia docente o treinta preguntas
  assert.equal(build({...plan,tipoMaterial:'PRESENTACION'},P),null);
  assert.equal(build({...plan,instruccionesDocente:'X'.repeat(1400)},P),null);
 });
+
+test('compact fallback keeps type-specific depth and independent assessment',()=>{assert.match(build(plan,P),/300–500 palabras/);assert.match(build({...plan,tipoMaterial:'ACCESIBLE'},P),/200–350 palabras/);const exam=build({...plan,tipoMaterial:'EVALUACION'},P);assert.match(exam,/No escribas una clase/);assert.doesNotMatch(exam,/Desarrolla una explicación disciplinar antes de la práctica/);assert.equal(build({...plan,disenoPedagogico:{contenidos:'Diseño editado'}},P),null);});
