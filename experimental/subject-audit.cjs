@@ -85,6 +85,10 @@ function inspectAll(material,plan={}){
  const cases=Array.isArray(material?.casosEstudio)?material.casosEstudio:[];
  const activities=Array.isArray(material?.actividadesGuiadas)?material.actividadesGuiadas:[];
  const allText=[full,reading,...cases.map(c=>[c.contextoReal,c.preguntaReflexion].join(' ')),...activities.map(a=>JSON.stringify(a))].join(' ');
+ // A year-bearing attribution in generated prose is not documentary evidence.
+ const attributed=[{ref:'LECTURA',text:reading},...slides.map((s,i)=>({ref:'DIAPO-'+(i+1),text:(s.contenido||[]).join?s.contenido.join(' '):String(s.contenido||'')}))];
+ const documents=material?.fuentesDocumentales?.documents||[];const verified=Array.isArray(material?.respaldoDocumental)?material.respaldoDocumental:[];
+ for(const entry of attributed){const re=/\(([A-ZÁÉÍÓÚÑ][^()\n]{2,90}?),\s*((?:19|20)\d{2})\)/g;for(const match of entry.text.matchAll(re)){const label=normalize(match[1]).trim(),year=match[2];const backed=verified.some(v=>v.estado==='cita_localizada_no_certifica_interpretacion'&&documents.some(doc=>String(v.fuenteId||'').startsWith(doc.id)&&normalize(doc.title).includes(label)&&String(doc.edition||doc.title||'').includes(year)));if(!backed)recommend(entry.ref,'Atribución bibliográfica no comprobada: '+match[0]+'. Verificar documento, fecha y fragmento antes de presentarla como fuente; no equivale a una cita localizada.');}}
  if(area==='instrumental'&&/conflicto|contrato|derecho laboral|emprendimiento/i.test(allText)&&!cases.some(c=>String(c.contextoReal||'').trim().length>=40&&String(c.preguntaReflexion||'').trim().length>=15)&&!/caso|situaci[oó]n|decisi[oó]n|simulaci[oó]n/i.test(allText))recommend('INS-APLICACION','El contenido práctico debería incluir una situación de aplicación o decisión.');
  if(area==='ingles'){
   if(/traduc|translate|vocabulario|vocabulary|reading|lectura|dialogue|di[aá]logo/i.test(allText)&&!/\b(?:the|is|are|have|has|can|will|do|does|my|your|work|job|hello|good|what|where|when|why|how)\b/i.test(allText))
