@@ -1,0 +1,21 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict');
+const S=require('../heva-studio.js'),D=require('../heva-didactics.js'),Deep=require('../heva-deep-materials.cjs'),T=require('../heva-templates.js'),A=require('../experimental/subject-audit.cjs');
+const subjects=[['Estudios Sociales','sociales'],['Lenguaje','lenguaje'],['Matemática','matematica'],['Ciencias Naturales','ciencias'],['Inglés','ingles'],['Construcciones Metálicas','tp_metal'],['Convivencia Social','convivencia'],['Inserción Laboral','laboral']];
+const formats=['GUIA','PRESENTACION','EVALUACION','PLANIFICACION'];
+for(const [asignatura,family] of subjects)for(const tipoMaterial of formats)test('Matriz sintética: '+asignatura+' / '+tipoMaterial,()=>{
+ const plan={asignatura,tipoMaterial,nivel:'I NM',objetivoAprendizaje:'Objetivo sintético de prueba, no OA oficial',temaEspecifico:'Tema de prueba',cantAlternativas:1,cantDesarrollo:0,cantCasos:0};
+ assert.equal(D.family(asignatura),family);
+ assert.ok(Deep.guidance(plan).includes('PERFIL DISCIPLINAR '+family.toUpperCase()));
+ const m={...plan,planGeneracion:plan,versionPedagogica:3,materialId:'test',version:1,revisionIA:{estado:'anterior'},introduccionLectura:'Texto original',preguntasAlternativas:[{numero:1,puntaje:1,enunciado:'Pregunta original',alternativas:['A','B','C','D'].map(letra=>({letra,texto:letra})),claveCorrecta:'A'}],diapositivas:[{titulo:'Título original',funcion:'explicación',contenido:['Original']}],planClase:[{momento:'Inicio',minutos:15,accionesDocente:'Original'}],trazabilidadEstrategia:[{referencia:'ALT-1',estrategiasIntegradas:['x'],habilidad:'Original'}]};
+ const before=JSON.stringify(m);
+ const n=S.improve(m,{contenido:{introduccionLectura:'Explicación revisada',diapositivas:[{titulo:'Cambio indebido',funcion:'cierre',contenido:['Texto revisado']}],planClase:[{momento:'Cierre',minutos:99,accionesDocente:'Revisado'}]}});
+ assert.equal(JSON.stringify(m),before);assert.equal(n.objetivoAprendizaje,m.objetivoAprendizaje);assert.deepEqual(n.planGeneracion,plan);
+ assert.equal(n.diapositivas[0].titulo,'Título original');assert.equal(n.diapositivas[0].funcion,'explicación');assert.equal(n.planClase[0].minutos,15);assert.equal(n.planClase[0].momento,'Inicio');assert.equal(n.revisionIA,undefined);
+ assert.equal(A.inspectAll(n,plan).aplica,true);
+ assert.throws(()=>S.improve(m,{contenido:{objetivoAprendizaje:'otro'}}),/Campo no permitido/);
+ assert.throws(()=>S.improve(m,{contenido:{preguntasAlternativas:[]}}),/cantidad/);
+ assert.throws(()=>S.improve(m,{contenido:{trazabilidadEstrategia:[{referencia:'ALT-2'}]}}),/trazabilidad/);
+});
+test('Todas las plantillas ofrecidas son válidas',()=>{for(const plantillaVisual of ['auto',...Object.keys(T.themes)])assert.ok(!S.validateExtras({plantillaVisual}).some(x=>/Plantilla/.test(x)));});
+test('No se acepta una propuesta vacía o sin cambios',()=>{assert.throws(()=>S.improve({introduccionLectura:'original'},{contenido:{}}),/no incorpora cambios/);});
