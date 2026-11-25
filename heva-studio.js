@@ -39,7 +39,7 @@ const improvementModes=Object.freeze({
 });
 const editableKeys=['introduccionLectura','instruccionesEstudiante','activacion','glosario','ejemploGuiado','actividadesGuiadas','actividadAutonoma','cierreReflexivo','preguntasAlternativas','preguntasDesarrollo','casosEstudio','diapositivas','planClase','planEstrategia','trazabilidadEstrategia','verdaderoFalso','pareados','comprensionLectora','identificacion','ejerciciosEvaluacion','desafioTaller','productoEsperado','procedimientoTaller','listaCotejoTP','recursos','ticketSalida','apoyosAcceso','noticiaDidactica','tablaEspecificaciones','pautaDocente','respaldoDocumental'];
 function improvementData(m){return Object.fromEntries(editableKeys.filter(k=>Object.hasOwn(m,k)).map(k=>[k,clone(m[k])]));}
-function improve(m,proposal){
+function improve(m,proposal,mode){
  if(!proposal||!proposal.contenido||typeof proposal.contenido!=='object'||Array.isArray(proposal.contenido))throw Error('La mejora no contiene un objeto de contenido.');
  const src=proposal.contenido,next=clone(m),allowed=improvementData(m);
  for(const k of Object.keys(src)){if(!Object.hasOwn(allowed,k))throw Error('Campo no permitido: '+k);const old=m[k],value=src[k];
@@ -60,6 +60,7 @@ function improve(m,proposal){
  }
  if(m.tipoMaterial==='EVALUACION'&&next.preguntasAlternativas?.some(q=>!Array.isArray(q.alternativas)||q.alternativas.length!==4||new Set(q.alternativas.map(a=>a.letra)).size!==4||!q.alternativas.some(a=>a.letra===q.claveCorrecta)))throw Error('Alternativas o clave inválidas.');
  if(!Object.keys(src).some(k=>k!=='respaldoDocumental'&&JSON.stringify(allowed[k])!==JSON.stringify(next[k])))throw Error('La propuesta no incorpora cambios pedagógicos.');
+ if(mode==='PROFUNDIDAD'&&['GUIA','ACCESIBLE'].includes(m.tipoMaterial)){const words=x=>String(x||'').trim().split(/\s+/).filter(Boolean).length;const old=words(m.introduccionLectura),now=words(next.introduccionLectura);if(now<Math.max(old+Math.min(40,Math.ceil(old*.15)),m.tipoMaterial==='GUIA'?300:200))throw Error('La profundización no amplía suficientemente la lectura. Se conserva el original.');}
  // An old quotation cannot be inherited as evidence for a rewritten statement.
  next.respaldoDocumental=Array.isArray(src.respaldoDocumental)?clone(src.respaldoDocumental):[];
  // Keep citations for unchanged sections only when the entire content field is unchanged.
