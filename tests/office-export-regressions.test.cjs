@@ -9,12 +9,12 @@ test('assessment missing scoring is flagged',()=>{const result=office().auditExp
 test('no invented warning for scored assessment',()=>{const result=office().auditExport({tipoMaterial:'EVALUACION',blocks:[{title:'Datos',text:'Puntaje total: 10 puntos'}]});assert.ok(!result.issues.some(x=>x.code==='SIN_PUNTAJE'))});
 test('balance visual prompt is identified',()=>{const result=office().auditExport({tipoMaterial:'GUIA',blocks:[{title:'Explicación',text:'Imaginar una balanza para resolver la igualdad'}]});assert.ok(result.issues.some(x=>x.code==='BALANZA_VISUAL'))});
 
-function renderDeck(material,large=false){
+function renderDeck(material,large=false,teacher=false){
  const slides=[];
  class Deck{constructor(){this.ShapeType={rect:'rect',line:'line',roundRect:'roundRect'}}addSlide(){const slide={texts:[],boxes:[],addText(t,options){this.texts.push(String(t));this.boxes.push({text:String(t),...options})},addShape(){},addNotes(n){this.notes=n}};slides.push(slide);return slide}async writeFile(){}}
  const context={HEVA:{material:m=>m,blocks:m=>m.blocks||[]},HEVATemplates:{layout:()=>({large,theme:{main:'8B2635',accent:'C77638',background:'FFF7ED',ink:'302723'}})},PptxGenJS:Deck,HEVASlideDesign:require('../heva-slide-design.js')};
  vm.runInNewContext(code,context);
- return context.HEVAOffice.powerpoint(material).then(()=>slides);
+ return context.HEVAOffice.powerpoint(material,teacher).then(()=>slides);
 }
 test('PowerPoint preserves fifth card and fifth process step',async()=>{
  for(const title of ['Características','Procedimiento paso a paso']){
@@ -29,9 +29,12 @@ test('Convivencia Social is not classified as history',()=>{
  assert.equal(audit.inspectAll({asignatura:'Convivencia Social'}).disciplina,'instrumental');
 });
 
-test('presentation exports teacher notes and real news provenance',async()=>{
- const slides=await renderDeck({titulo:'Clima',tipoMaterial:'PRESENTACION',diapositivas:[{titulo:'Evidencia',contenido:['Datos para analizar'],notasDocente:'Explicación y retroalimentación del docente'}],fuentesDocumentales:{noticias:{items:[{title:'Una noticia',publisher:'Noticias ONU',publishedAt:'2026-11-13T12:00:00Z',url:'https://news.un.org/es/story/123'}]}}});
- assert.ok(slides.some(s=>s.notes==='Explicación y retroalimentación del docente'));
+test('presentation exports teacher notes only with the teacher option and preserves news provenance',async()=>{
+ const material={titulo:'Clima',tipoMaterial:'PRESENTACION',diapositivas:[{titulo:'Evidencia',contenido:['Datos para analizar'],notasDocente:'Explicación y retroalimentación del docente'}],fuentesDocumentales:{noticias:{items:[{title:'Una noticia',publisher:'Noticias ONU',publishedAt:'2026-11-13T12:00:00Z',url:'https://news.un.org/es/story/123'}]}}};
+ const slides=await renderDeck(material);
+ const teacherSlides=await renderDeck(material,false,true);
+ assert.ok(teacherSlides.some(s=>s.notes==='Explicación y retroalimentación del docente'));
+ assert.ok(!slides.some(s=>s.notes==='Explicación y retroalimentación del docente'));
  assert.ok(slides.some(s=>s.texts.join(' ').includes('Noticias ONU · 2026-11-13')));
 });
 test('dense presentation paragraphs paginate without losing content in normal and large print',async()=>{const phrase='Esta explicación conecta el concepto con una situación concreta y explica su significado.';const paragraph=Array.from({length:30},()=>phrase).join(' ');for(const large of [false,true]){const slides=await renderDeck({titulo:'Contenido extenso',tipoMaterial:'PRESENTACION',diapositivas:[{titulo:'Ejercicio de aplicación',contenido:[paragraph],notasDocente:'Criterios docentes'}]},large);assert.ok(slides.length>4);const text=slides.flatMap(s=>s.texts).join(' ');assert.equal(text.split(phrase).length-1,30);for(const box of slides.flatMap(s=>s.boxes)){assert.ok(box.y+box.h<=7.5);if(box.y>=3.2&&box.fontSize>=23)assert.ok(box.text.length<650);}}});
@@ -75,4 +78,16 @@ test('evidencia completa de procedencia distingue una imagen documental de una i
  assert.equal(audit.documentaryEvidence.documentaryImagesChecked,1);
  assert.ok(!audit.issues.some(i=>i.code==='FUENTE_DOCUMENTAL_NO_VERIFICADA'));
  assert.ok(audit.issues.some(i=>i.code==='REVISION_PEDAGOGICA_PENDIENTE'));
+});
+
+
+test('PPTX generated from a guide shows one cover and retains the objective',async()=>{
+ const material={titulo:'Guía de muestra',tipoMaterial:'GUIA',asignatura:'Matemática',nivel:'EPJA',blocks:[
+  {title:'Guía de muestra',path:'titulo',text:'Guía de aprendizaje · EPJA · Matemática'},
+  {title:'Objetivo curricular',text:'Comparar dos presupuestos completos'}
+ ]};
+ const slides=await renderDeck(material);
+ assert.equal(slides.length,2);
+ assert.equal(slides.flatMap(s=>s.texts).filter(text=>text===material.titulo).length,1);
+ assert.ok(slides[1].texts.join(' ').includes('Comparar dos presupuestos completos'));
 });

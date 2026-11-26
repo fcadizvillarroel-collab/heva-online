@@ -1,3 +1,5 @@
+const SectionRepair=require('../lib/news-repair.cjs');
+const Provenance=require('../lib/review-provenance.cjs');
 const Didactics=require('../heva-didactics.js');
 const TPInternational=require('../lib/tp-metal-international.cjs');
 const {call} = require('./_providers.cjs');
@@ -224,7 +226,23 @@ Responde ÚNICAMENTE en JSON:
     const check = m => [...HEVA.validate(m,cantidadesEfectivas),...Pedagogy.validate(m,plan),...Skills.generationIssues(m,plan)];
     let material = normalize(await draft(promptRedactor,true));
     let issues = check(material);
-    if (issues.length) {
+    let repairProviders=[];
+    if(issues.some(SectionRepair.isReadingIssue)&&Date.now()<generationDeadline-6500){
+      let repairProvider;
+      try{
+        const fixed=await SectionRepair.repairReading(material,plan,issues,check,async prompt=>{
+          const response=await call(prompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY,[],{deadline:generationDeadline,maxOutputTokens:2200,fallbackMaxOutputTokens:2200});
+          repairProvider=response.provider;
+          return response.value;
+        });
+        if(fixed.changed){
+          material=fixed.base;
+          issues=fixed.issues;
+          repairProviders=[repairProvider];
+        }
+      }catch(error){console.warn('HEVA reading repair pending:',error.code||'ERROR');}
+    }
+    if (issues.length&&!issues.every(SectionRepair.isReadingIssue)) {
       const missingRefs=Pedagogy.missingTaskTraces(material);
       const selectedStrategy=Pedagogy.strategy(estrategiaDidactica);
       const strategyPlan=material.planEstrategia||{};
@@ -235,6 +253,7 @@ Responde ÚNICAMENTE en JSON:
       const compactRepair=compactFallback&&compactFallback.length+repairSuffix.length<=15500?compactFallback+repairSuffix:null;
       material = normalize(await draft(promptRedactor+repairSuffix,compactRepair));
       issues = check(material);
+      repairProviders=[];
     }
     // A complete slide deck must not be discarded solely because the model
     // omitted the strategy metadata. Request only that metadata, and validate
@@ -244,17 +263,18 @@ Responde ÚNICAMENTE en JSON:
         const selected=Pedagogy.strategy(estrategiaDidactica);
         const summary=(material.diapositivas||[]).map((d,i)=>({numero:i+1,titulo:d.titulo,contenido:String(Array.isArray(d.contenido)?d.contenido.join(' '):d.contenido||'').slice(0,420)}));
         const repairPrompt='Devuelve SOLO un objeto JSON con planEstrategia. Estrategia obligatoria: '+selected.id+' ('+selected.name+'). Objetivo: '+objetivoAprendizaje+'. Tema: '+temaEspecifico+'. Diapositivas existentes: '+JSON.stringify(summary)+'. Completa los cuatro campos habilidadCentral, aplicacionConcreta, evidenciaEsperada, retroalimentacionDocente con textos específicos y verificables respecto de las diapositivas; no inventes actividades. Forma: {"planEstrategia":{"id":"'+selected.id+'","habilidadCentral":"...","aplicacionConcreta":"...","evidenciaEsperada":"...","retroalimentacionDocente":"..."}}';
-        const response=await draft(repairPrompt);
-        if(response?.planEstrategia&&typeof response.planEstrategia==='object'){
-          const candidate=normalize({...material,planEstrategia:response.planEstrategia});
+        const response=await call(repairPrompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY,[],{deadline:generationDeadline,maxOutputTokens:900});
+        if(response.value?.planEstrategia&&typeof response.value.planEstrategia==='object'){
+          const candidate=normalize({...material,planEstrategia:response.value.planEstrategia});
           const candidateIssues=check(candidate);
-          if(candidateIssues.length<issues.length){material=candidate;issues=candidateIssues;}
+          if(candidateIssues.length<issues.length){material=candidate;issues=candidateIssues;repairProviders.push(response.provider);}
         }
       }catch(error){console.warn('Reparación puntual de estrategia no disponible:',error.code||'ERROR');}
     }
     if (issues.length) return res.status(422).json({error:'El material no cumple la estructura pedagógica solicitada. Se conserva el documento anterior.',detalle:issues.join('; '),borrador:material});
     material = Pedagogy.finalize(material,plan);
     material.autoriaIA=author;
+    if(repairProviders.length)material.autoriaBloques=Provenance.assembly(Provenance.record(material,author.proveedor,...repairProviders),[],author);
     material.planGeneracion=plan;
     material.fuentesDocumentales=fuentesDocumentales;
     material.textosEscolaresComplementarios=librosRegulares;material.matrizOATextos=matrizOA;material.planUsoFuentesOA=planUsoFuentes;

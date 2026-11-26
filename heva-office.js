@@ -7,10 +7,11 @@ async function word(m,teacher=false){
  const {Document,Packer,Paragraph,TextRun,HeadingLevel,AlignmentType,Footer,PageNumber}=root.docx;
  const originalBlocks=HEVA.blocks(material,teacher),blocks=root.HEVAGuideVisuals?.plan(material,originalBlocks,root.HEVAContextAssets,HEVA.blocks(material,false).length)||originalBlocks;
  const main=visual.theme.main,ink=visual.theme.ink,children=[];
+ const decorativeBoxes=root.HEVASlideDesign?.options(material)?.recuadros!==false;
  const line=(value,opts={})=>new Paragraph({children:[new TextRun({text:String(value),size:opts.size||visual.wordSize,font:material.accesibilidadVisual?.fuente||'Arial',characterSpacing:Math.round((material.accesibilidadVisual?.espaciado||0)*(opts.size||visual.wordSize)*10),bold:!!opts.bold,color:opts.color||ink})],spacing:{before:opts.before||0,after:opts.after??110},...(opts.box?{shading:{type:'clear',fill:opts.fill||visual.theme.background},border:{left:{color:opts.rule||main,size:16,space:8,style:'single'}},indent:{left:160,right:100}}:{}),keepNext:!!opts.keepNext,keepLines:!!opts.keepLines});
  children.push(line('ESCUELA HÉCTOR VALENZUELA CEA · EPJA',{bold:true,color:main,size:Math.max(20,visual.large?visual.wordSize:20),after:160,keepNext:true}));
  children.push(new Paragraph({text:material.titulo||'Material educativo',heading:HeadingLevel.TITLE,spacing:{after:220},keepNext:true}));
- children.push(line([material.asignatura,material.nivel,material.temaEspecifico].filter(Boolean).join(' · '),{color:main,bold:true,after:220,box:true,keepNext:true}));
+ children.push(line([material.asignatura,material.nivel,material.temaEspecifico].filter(Boolean).join(' · '),{color:main,bold:true,after:220,box:decorativeBoxes,keepNext:true}));
  for(const [blockIndex,block] of blocks.entries()){
   if(block.path==='titulo'||(block===blocks[0]&&block.title===material.titulo))continue;
   if(block.kind==='option'){
@@ -21,7 +22,7 @@ async function word(m,teacher=false){
    children.push(line(block.title+' '+block.text,{after:115,keepNext,keepLines:true}));
    continue;
   }
-  const purpose=wordPurpose(block),tinted=root.HEVASlideDesign?.options(material)?.recuadros!==false&&!visual.large;
+  const purpose=wordPurpose(block),tinted=decorativeBoxes&&!visual.large;
   children.push(new Paragraph({text:block.title,heading:HeadingLevel.HEADING_2,spacing:{before:purpose==='activity'?300:240,after:110},keepNext:true,...(tinted&&purpose!=='reading'?{shading:{type:'clear',fill:visual.theme.soft||visual.theme.background},border:{left:{color:purpose==='activity'?visual.theme.accent:main,size:18,space:8,style:'single'}}}:{} )}));
   if(block.kind==='planning-moment'){for(const field of block.fields){children.push(line(field.title,{bold:true,color:main,keepNext:true,after:70}));for(const paragraph of field.text.split(/\n+/).filter(Boolean))children.push(line(paragraph,{after:140}));}continue;}
   const extra=block.guideVisual;
@@ -286,9 +287,17 @@ function presentationPages(material,teacher=false){
  const isPresentation=String(material.tipoMaterial||'').toUpperCase()==='PRESENTACION'&&Array.isArray(material.diapositivas)&&material.diapositivas.length>0;
  let sections=[];
  if(isPresentation){
-  sections=material.diapositivas.map((d,i)=>({title:d.titulo||'Diapositiva '+(i+1),text:slideText(d.contenido),kind:'slide',role:d.funcion||'',image:d.imagenHEVA,hideImage:d.ocultarImagenHEVA===true,notes:d.notasDocente||''}));
+  sections=material.diapositivas.map((d,i)=>({title:d.titulo||'Diapositiva '+(i+1),text:slideText(d.contenido),kind:'slide',role:d.funcion||'',image:d.imagenHEVA,hideImage:d.ocultarImagenHEVA===true,notes:teacher?(d.notasDocente||''):''}));
  }else{
-  let blocks=[];const rawBlocks=HEVA.blocks(material,teacher),sourceBlocks=root.HEVAGuideVisuals?.attach(material,rawBlocks,HEVA.blocks(material,false).length)||rawBlocks;sourceBlocks.forEach(item=>{let prev=blocks.at(-1);if(item.kind==='option'&&prev?.group===item.group)prev.text+='\n'+item.title+' '+item.text;else blocks.push({...item})});
+  const blocks=[];
+  const rawBlocks=HEVA.blocks(material,teacher);
+  const sourceBlocks=root.HEVAGuideVisuals?.attach(material,rawBlocks,HEVA.blocks(material,false).length)||rawBlocks;
+  for(const item of sourceBlocks){
+   if(item.path==='titulo')continue;
+   const previous=blocks.at(-1);
+   if(item.kind==='option'&&previous?.group===item.group)previous.text+='\n'+item.title+' '+item.text;
+   else blocks.push({...item});
+  }
   sections=blocks.map(item=>({title:item.title,text:slideText(item.text),kind:item.kind||'section',image:item.image,hideImage:item.hideImage}));
  }
  const story=root.HEVAPedagogy?.newsText(material);if(isPresentation&&story)sections.unshift({title:'Noticia didáctica · SIMULADA',text:story,kind:'resource'});
