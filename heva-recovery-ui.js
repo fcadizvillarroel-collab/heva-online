@@ -61,10 +61,10 @@ async function recuperarMaterialHEVA(plan,allowRepair=true,repairRound=0){
  const request=async (body,retry=true)=>{
   let response;try{response=await fetch('/api/recover',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan,...body}),signal:AbortSignal.timeout(58000)});}catch(err){throw Error('La solicitud de '+body.fase+' no llegó a completarse ('+(err.name==='TimeoutError'?'tiempo agotado':'red interrumpida')+'). El avance guardado se conserva. Reintenta Crear material.');}
   let data;try{data=await response.json()}catch{const type=response.headers.get('content-type')||'';throw Error('El servidor respondió HTTP '+response.status+' sin JSON válido durante '+body.fase+'. '+(response.status===504||response.status===502?'Probable límite de tiempo o error de función. ':'')+'El avance guardado se conserva.');}
-  if(!response.ok&&body.fase==='base'&&data.codigo==='BASE_READING_INCOMPLETE'&&data.borradorBloque&&data.autor){
+  if(!response.ok&&body.fase==='base'&&['BASE_READING_INCOMPLETE','BASE_ACTIVITY_INCOMPLETE'].includes(data.codigo)&&data.borradorBloque&&data.autor){
    checkpoint.pendingBase={parte:data.borradorBloque,autor:data.autor};recoverySave(checkpoint);
    if(retry){
-    if(message)message.textContent='Ampliando solo la lectura explicativa; el resto del borrador se conserva…';
+    if(message)message.textContent=data.codigo==='BASE_ACTIVITY_INCOMPLETE'?'Completando los datos de la actividad; el resto del borrador se conserva…':'Ampliando solo la lectura explicativa; el resto del borrador se conserva…';
     return request({...body,borradorBloque:data.borradorBloque,autor:data.autor},false);
    }
   }
@@ -112,7 +112,7 @@ async function recuperarMaterialHEVA(plan,allowRepair=true,repairRound=0){
   checkpoint.correcciones=result.reparacion.diagnostico||[detail];recoverySave(checkpoint);
   if(result.reparacion.localizada===false)throw Error('Corrección final pendiente: '+detail+' El avance está guardado.');
   if(result.reparacion.base){
-   if(result.reparacion.lectura)checkpoint.pendingBase={parte:checkpoint.base,autor:checkpoint.autor};
+   if(result.reparacion.baseLocalizada||result.reparacion.lectura)checkpoint.pendingBase={parte:checkpoint.base,autor:checkpoint.autor};
    delete checkpoint.base;
   }
   if(Array.isArray(result.reparacion.indices)){for(const i of result.reparacion.indices){const b=checkpoint.bloques[i],prefix=b?.tipo==='alternativas'?'ALT':b?.tipo==='casos'?'CASO':'';if(b?.tipo==='diapositivas'&&checkpoint.parts[i]){checkpoint.pendingSlide={tipo:b.tipo,inicio:b.inicio,parte:checkpoint.parts[i]};}else if(prefix&&result.reparacion.duplicados?.some(ref=>{const n=Number(ref.split('-')[1]);return ref.startsWith(prefix+'-')&&n>b.inicio&&n<=b.inicio+b.cantidad;})){checkpoint.repairDrafts??={};if(checkpoint.parts[i])checkpoint.repairDrafts[i]=checkpoint.parts[i];}checkpoint.parts[i]=null;}}

@@ -227,10 +227,11 @@ Responde ÚNICAMENTE en JSON:
     let material = normalize(await draft(promptRedactor,true));
     let issues = check(material);
     let repairProviders=[];
-    if(issues.some(SectionRepair.isReadingIssue)&&Date.now()<generationDeadline-6500){
+    for(const repair of [SectionRepair.repairReading,SectionRepair.repairActivity]){
+      if(!issues.length||Date.now()>=generationDeadline-6500)break;
       let repairProvider;
       try{
-        const fixed=await SectionRepair.repairReading(material,plan,issues,check,async prompt=>{
+        const fixed=await repair(material,plan,issues,check,async prompt=>{
           const response=await call(prompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY,[],{deadline:generationDeadline,maxOutputTokens:2200,fallbackMaxOutputTokens:2200});
           repairProvider=response.provider;
           return response.value;
@@ -238,11 +239,11 @@ Responde ÚNICAMENTE en JSON:
         if(fixed.changed){
           material=fixed.base;
           issues=fixed.issues;
-          repairProviders=[repairProvider];
+          repairProviders.push(repairProvider);
         }
       }catch(error){console.warn('HEVA reading repair pending:',error.code||'ERROR');}
     }
-    if (issues.length&&!issues.every(SectionRepair.isReadingIssue)) {
+    if (issues.length&&!issues.every(SectionRepair.isResumableIssue)) {
       const missingRefs=Pedagogy.missingTaskTraces(material);
       const selectedStrategy=Pedagogy.strategy(estrategiaDidactica);
       const strategyPlan=material.planEstrategia||{};
