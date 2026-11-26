@@ -8,7 +8,10 @@ test('no news mode removes unexpected optional resource without AI',async()=>{co
 
 test('repairs a 276-word guide without replacing activities, news or traces',async()=>{
  const original={...base,introduccionLectura:'Concepto '.repeat(276).trim(),trazabilidadEstrategia:[{referencia:'GUIADA-1'}]};
- const validateGuide=value=>P.validate(value,plan);
+ const validateGuide=value=>{
+  const issues=P.validate(value,plan);
+  return [...issues,...issues.filter(N.isReadingIssue).map(issue=>'estructura: '+issue)];
+ };
  const problems=validateGuide(original);
  assert.ok(problems.some(issue=>N.isReadingIssue(issue)&&issue.includes('276')));
  const result=await N.repairReading(original,plan,problems,validateGuide,async prompt=>{
