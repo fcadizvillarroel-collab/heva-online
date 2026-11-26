@@ -5,7 +5,7 @@ function number(s){const t=String(s).replace(/[\s\u202f\u00a0]/g,'');if(/^\d{1,3
 function linearProof(q){
  const stem=norm(q?.enunciado).replace(/\u2212/g,'-');
  if(!/(?:valor (?:correcto )?de x|cuanto vale x|resuelve (?:la )?ecuacion|resolver (?:la )?ecuacion|determina (?:el )?valor de x)/.test(stem)||/incorrect|no es|error|excepto|aproxim|redonde|desigualdad/.test(stem))return null;
- const matches=[...stem.matchAll(/(?<![\w.,()+*/-])(-?\d+(?:[.,]\d+)*)\s*x\s*([+-])\s*(\d+(?:[.,]\d+)*)\s*=\s*(-?\d+(?:[.,]\d+)*)(?![\w.,*/^])/g)];
+ const matches=[...stem.matchAll(/(?<![\w.,()+*/-])(-?\d+(?:[.,]\d+)*)\s*x\s*([+-])\s*(\d+(?:[.,]\d+)*)\s*=\s*(-?\d+(?:[.,]\d+)*)(?![\w,*/^]|\.\d)/g)];
  if(matches.length!==1||(stem.match(/=/g)||[]).length!==1)return null;
  const [,rawA,op,rawB,rawC]=matches[0],a=number(rawA.replace(/^-/,''))
  * (rawA.startsWith('-')?-1:1),b=number(rawB)*(op==='-'?-1:1),c=number(rawC.replace(/^-/,''))
