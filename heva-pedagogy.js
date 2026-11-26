@@ -131,10 +131,15 @@ function activityIssues(material,plan){
    if(!paired&&!dimension('ancho|anchura'))missing.push('ancho');
    if(!criterion)missing.push('criterio numérico de superficie');
    if(missing.length)issues.push('Actividad no autosuficiente '+task.ref+': falta '+missing.join(', ')+'.');
+   else if(/\b\d+,\d{3}\s*(?:mm|cm|m)\b(?![²^\d])|\b\d+,\d{3}\s*(?:mm|cm|m)(?:²|\^?2)/.test(text))issues.push('Actividad no autosuficiente '+task.ref+': escribe las cantidades sin separador de miles para evitar una lectura ambigua.');
   }
  }
  if(/ciencias naturales/.test(subject)){
-  tasks.push({ref:'EJEMPLO',text:[material.ejemploGuiado?.situacion,...array(material.ejemploGuiado?.pasos).map(step=>step?.accion)].join(' ')});
+  const situation=material.ejemploGuiado?.situacion;
+  tasks.push({ref:'EJEMPLO',text:[situation,...array(material.ejemploGuiado?.pasos).map(step=>step?.accion)].join(' ')});
+  if(/^registro impreso de la observacion[^:\n]*[.!]?$/i.test(norm(situation).trim())){
+   issues.push('Actividad no autosuficiente EJEMPLO: transcribe los datos del registro en la situación; incluye al menos dos observaciones concretas.');
+  }
   for(const task of tasks){
    const text=norm(task.text);
    if(/(?:enciend[ae]|prend[ae]|observa(?:r|cion|d|e)?)[^.;]{0,42}(?:vela|llama)|vela encendida/.test(text)&&!/(?:simulad[oa]|registro de observacion|datos proporcionados|transcripcion)[^:]{0,24}:\s*\S.{16,}/.test(text))issues.push('Actividad no autosuficiente '+task.ref+': incluye un registro simulado con observaciones o datos imprimibles para trabajar sin llama.');

@@ -65,9 +65,20 @@ test('una simulación con datos sustituye la observación directa de la vela y c
  const rejected=await N.repairActivity(original,p,issues,validate,async()=>({actividad:original.ejemploGuiado}));
  assert.equal(rejected.changed,false);
  const result=await N.repairActivity(original,p,issues,validate,async()=>({actividad:{
-  situacion:'Registro simulado: al minuto uno la cera junto al centro está sólida; al minuto dos se observa un pequeño charco.',
+  situacion:'Registro simulado. Observación 1: al minuto uno la cera está sólida. Observación 2: al minuto dos se observa un pequeño charco.',
   pasos:[{accion:'Compara ambas observaciones',explicacion:'Usa solamente el registro impreso'}],conclusion:'La cera cambió de estado.'
  }}));
  assert.equal(result.changed,true);
  assert.equal(result.base.actividadesGuiadas,original.actividadesGuiadas);
+});
+
+
+test('rechaza una tabla ausente en Ciencias y un separador de miles ambiguo en el croquis',()=>{
+ const metal={...plan,asignatura:'Construcciones Metálicas'};
+ const task={actividadAutonoma:{consigna:'Placa rectangular de 600 × 300 mm. Decide si cumple la superficie mínima de 180,000 mm².'}};
+ assert.match(P.activityIssues(task,metal)[0],/ambigua/);
+ task.actividadAutonoma.consigna=task.actividadAutonoma.consigna.replace('180,000','180000');
+ assert.deepEqual(P.activityIssues(task,metal),[]);
+ const science={...plan,asignatura:'Ciencias Naturales'};
+ assert.match(P.activityIssues({ejemploGuiado:{situacion:'Registro impreso de la observación de hojas de plantas con lupa.'}},science)[0],/transcribe/);
 });
