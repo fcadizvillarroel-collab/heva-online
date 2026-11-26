@@ -44,7 +44,7 @@ module.exports=async(req,res)=>{
     const reparacion=R.repair(base,parts,plan,issues);
     if(reparacion.base){
      const baseIssues=R.partIssues(base,plan,null);
-     if(baseIssues.every(SectionRepair.isReadingIssue))reparacion.lectura=true;
+     if(baseIssues.every(SectionRepair.isResumableIssue))reparacion.baseLocalizada=true;
     }
     return res.status(422).json({error:'Los bloques requieren corrección. Se conserva el material anterior.',detalle:issues.join('; '),reparacion,reintentable:true});
    }
@@ -77,7 +77,7 @@ module.exports=async(req,res)=>{
   const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+(plan.tipoMaterial==='PRESENTACION'?'':Didactics.prompt(plan))+Inclusive.prompt(plan)+DidacticResources.prompt(plan)+International.prompt(plan)+strictFormat+caseRepair+developmentRepair+strategyRepair+correctionContext+duplicateRepair+slideRepair;
   const fallback=R.fallbackPrompt(plan,base,batch,parts,correcciones,fuentesDocumentales)+(plan.tipoMaterial==='PRESENTACION'?'':Didactics.prompt(plan))+Inclusive.prompt(plan)+DidacticResources.prompt(plan)+International.prompt(plan)+duplicateRepair+slideRepair;
   let result;
-  const resumeReading=fase==='base'&&borradorBloque;
+  const resumeBase=fase==='base'&&borradorBloque;
   const baseIssues=value=>R.partIssues(value,plan,null);
   const participants=new Set([borradorBloque,repararDuplicados,repararDiapositivas].flatMap(Provenance.blockProviders));
   const note=r=>{if(r?.provider)participants.add(r.provider);return r;};
@@ -85,8 +85,8 @@ module.exports=async(req,res)=>{
    const preserved=R.normalizePart(borradorBloque,batch),pending=R.partIssues(preserved,plan,batch,parts);
    if(pending.length&&!R.traceIssuesOnly(pending))return res.status(400).json({error:'El borrador no puede repararse solo con trazabilidad.',detalle:pending.join('; '),reintentable:false});
    result={value:preserved,provider:autor.proveedor,model:autor.modelo};
-  }else if(resumeReading){
-   if(!['gemini','groq','openai'].includes(autor?.proveedor)||!baseIssues(borradorBloque).some(SectionRepair.isReadingIssue))return res.status(400).json({error:'El borrador base no admite reparación de lectura.',reintentable:false});
+  }else if(resumeBase){
+   if(!['gemini','groq','openai'].includes(autor?.proveedor)||!baseIssues(borradorBloque).some(SectionRepair.isResumableIssue))return res.status(400).json({error:'El borrador base no admite reparación localizada.',reintentable:false});
    result={value:borradorBloque,provider:autor.proveedor,model:autor.modelo};
   }else result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true})+Textbooks.instruction(librosRegulares)+OATextbookMatrix.instruction(matrizOA)+OAPedagogy.instructions(planUsoFuentes)+TPInternational.prompt(referenciasMetalmecanica),...keys,exclude,{deadline,fallbackPrompt:fallback,fallbackMaxOutputTokens:fase==='base'?4096:3000,maxOutputTokens:fase==='base'?(plan.tipoMaterial==='PRESENTACION'?2600:10000):batch?.formato?8000:batch?.tipo==='diapositivas'?6500:5000});
   if(!borradorBloque)note(result);
@@ -95,7 +95,7 @@ module.exports=async(req,res)=>{
   if(fase==='items'&&!duplicateOriginal&&R.duplicateItems(result.value,plan,batch,parts).length&&issues.every(x=>/repite literalmente/.test(x)))duplicateOriginal=result.value;
   if(fase==='base'){
    const generateSection=async q=>note(await call(q,...keys,exclude,{deadline,maxOutputTokens:2200,fallbackMaxOutputTokens:2200})).value;
-   for(const repair of [SectionRepair.repairReading,SectionRepair.repair]){
+   for(const repair of [SectionRepair.repairReading,SectionRepair.repairActivity,SectionRepair.repair]){
     if(deadline-Date.now()<=6500)break;
     try{
      const fixed=await repair(result.value,plan,issues,baseIssues,generateSection);
@@ -103,9 +103,9 @@ module.exports=async(req,res)=>{
      issues=fixed.issues;
     }catch(error){console.warn('HEVA base section repair pending',error.code||'ERROR');}
    }
-   if(issues.some(SectionRepair.isReadingIssue))return res.status(422).json({
-    error:'El borrador base está guardable; falta ampliar la lectura explicativa.',
-    detalle:issues.join('; '),codigo:'BASE_READING_INCOMPLETE',reintentable:true,
+   if(issues.some(SectionRepair.isResumableIssue))return res.status(422).json({
+    error:'Se conserva el borrador base para completar la reparación localizada.',
+    detalle:issues.join('; '),codigo:issues.some(SectionRepair.isReadingIssue)?'BASE_READING_INCOMPLETE':'BASE_ACTIVITY_INCOMPLETE',reintentable:true,
     borradorBloque:Provenance.record(result.value,...participants),
     autor:{proveedor:result.provider,modelo:result.model}
    });

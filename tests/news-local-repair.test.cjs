@@ -37,3 +37,37 @@ test('accessible reading repair applies its own minimum and keeps rejected draft
  assert.equal(result.base,base);
  assert.equal(result.issues,problems);
 });
+
+test('repara solo el ejercicio de la placa que omite el ancho y el criterio de área',async()=>{
+ const p={...plan,asignatura:'Construcciones Metálicas',objetivoAprendizaje:'Interpretar croquis acotados'};
+ const original={...base,actividadAutonoma:{consigna:'Analice el croquis de una placa rectangular de largo 600 mm y espesor 10 mm. Indique si cumple el requisito de superficie.',productoEsperado:'Conclusión argumentada'},trazabilidadEstrategia:[{referencia:'AUTONOMA'}]};
+ const validate=m=>P.activityIssues(m,p);
+ const issues=validate(original);
+ assert.deepEqual(issues,['Actividad no autosuficiente AUTONOMA: falta ancho, criterio numérico de superficie.']);
+ const result=await N.repairActivity(original,p,issues,validate,async request=>{
+  assert.match(request,/Interpretar croquis acotados/);
+  return {actividad:{consigna:'En un croquis simulado se indica placa rectangular de 600 × 300 mm. Decide si cumple el mínimo de 1700 cm² de superficie.',productoEsperado:'Conclusión argumentada'},introduccionLectura:'Cambio indebido'};
+ });
+ assert.equal(result.changed,true);
+ assert.deepEqual(result.issues,[]);
+ assert.equal(result.base.introduccionLectura,original.introduccionLectura);
+ assert.equal(result.base.trazabilidadEstrategia,original.trazabilidadEstrategia);
+ assert.equal(result.base.actividadesGuiadas,original.actividadesGuiadas);
+ assert.equal(result.base.noticiaDidactica,original.noticiaDidactica);
+});
+
+test('una simulación con datos sustituye la observación directa de la vela y conserva el resto',async()=>{
+ const p={...plan,asignatura:'Ciencias Naturales'};
+ const original={...base,ejemploGuiado:{situacion:'Observación de una vela encendida',pasos:[{accion:'Observar la llama',explicacion:'Describir cambios'}],conclusion:'Explicar el cambio'}};
+ const validate=m=>P.activityIssues(m,p);
+ const issues=validate(original);
+ assert.match(issues[0],/EJEMPLO/);
+ const rejected=await N.repairActivity(original,p,issues,validate,async()=>({actividad:original.ejemploGuiado}));
+ assert.equal(rejected.changed,false);
+ const result=await N.repairActivity(original,p,issues,validate,async()=>({actividad:{
+  situacion:'Registro simulado: al minuto uno la cera junto al centro está sólida; al minuto dos se observa un pequeño charco.',
+  pasos:[{accion:'Compara ambas observaciones',explicacion:'Usa solamente el registro impreso'}],conclusion:'La cera cambió de estado.'
+ }}));
+ assert.equal(result.changed,true);
+ assert.equal(result.base.actividadesGuiadas,original.actividadesGuiadas);
+});

@@ -12,14 +12,19 @@ module.exports={fixture};
 if(require.main===module)(async()=>{
  fs.mkdirSync('/tmp/heva-qa',{recursive:true});const browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox']});const context=await browser.newContext({acceptDownloads:true,viewport:{width:1440,height:1000},serviceWorkers:'block'});const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.dismiss());
  await page.route('**/*',route=>{const u=new URL(route.request().url());if(u.hostname!=='127.0.0.1')return route.abort();if(u.pathname.startsWith('/api/'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({objetivos:[],documents:[],fragments:[],exito:true})});return route.continue()});
- await page.goto('http://127.0.0.1:8765/',{waitUntil:'networkidle'});await page.waitForTimeout(300);
+ await page.goto(process.env.HEVA_QA_URL||'http://127.0.0.1:8765/',{waitUntil:'networkidle'});await page.waitForTimeout(300);
  const openTeacherTools=async()=>{
   const tools=page.locator('#heva-result-edit');
   await tools.waitFor({state:'visible'});
   if(!await tools.evaluate(node=>node.open))await tools.locator(':scope > summary').click();
  };
 
- await page.evaluate(m=>{materialActual=m;renderizarDocumentoEnPantalla();cambiarHerramienta('crear')},fixture());await openTeacherTools();await page.getByRole('button',{name:'Editar y ordenar bloques',exact:true}).click();await page.getByRole('button',{name:'Cerrar',exact:true}).click();
+ const guide=fixture();
+ await page.evaluate(m=>{materialActual=m;renderizarDocumentoEnPantalla();cambiarHerramienta('crear')},guide);
+ const sheet=page.locator('#hoja-material');
+ await sheet.getByRole('heading',{name:guide.titulo,exact:true}).waitFor();
+ await sheet.getByRole('textbox',{name:'Explicación y lectura',exact:true}).waitFor();
+ await openTeacherTools();await page.getByRole('button',{name:'Editar y ordenar bloques',exact:true}).click();await page.getByRole('button',{name:'Cerrar',exact:true}).click();
  await page.getByRole('button',{name:'Accesibilidad',exact:true}).click();await page.getByLabel('Tamaño de letra',{exact:true}).fill('20');await page.getByLabel('Alto contraste',{exact:true}).check();await page.getByLabel('Letra grande en exportaciones',{exact:true}).check();await page.getByRole('button',{name:'Aplicar al material y exportaciones'}).click();assert.equal(await page.evaluate(()=>materialActual.accesibilidadVisual.tamano),20);
  await page.getByRole('button',{name:'Comparar versiones',exact:true}).click();assert.ok(await page.locator('dialog').isVisible());await page.getByRole('button',{name:'Cerrar',exact:true}).click();
  for(const [name,fn]of [['qa.docx','word'],['qa.pptx','powerpoint']]){const download=page.waitForEvent('download');await page.evaluate(async fn=>{await HEVAOffice[fn](materialActual,false)},fn);await (await download).saveAs('/tmp/heva-qa/'+name);}
