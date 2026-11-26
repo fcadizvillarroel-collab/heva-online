@@ -61,6 +61,13 @@ async function recuperarMaterialHEVA(plan,allowRepair=true,repairRound=0){
  const request=async (body,retry=true)=>{
   let response;try{response=await fetch('/api/recover',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan,...body}),signal:AbortSignal.timeout(58000)});}catch(err){throw Error('La solicitud de '+body.fase+' no llegó a completarse ('+(err.name==='TimeoutError'?'tiempo agotado':'red interrumpida')+'). El avance guardado se conserva. Reintenta Crear material.');}
   let data;try{data=await response.json()}catch{const type=response.headers.get('content-type')||'';throw Error('El servidor respondió HTTP '+response.status+' sin JSON válido durante '+body.fase+'. '+(response.status===504||response.status===502?'Probable límite de tiempo o error de función. ':'')+'El avance guardado se conserva.');}
+  if(!response.ok&&body.fase==='base'&&data.codigo==='BASE_READING_INCOMPLETE'&&data.borradorBloque&&data.autor){
+   checkpoint.pendingBase={parte:data.borradorBloque,autor:data.autor};recoverySave(checkpoint);
+   if(retry){
+    if(message)message.textContent='Ampliando solo la lectura explicativa; el resto del borrador se conserva…';
+    return request({...body,borradorBloque:data.borradorBloque,autor:data.autor},false);
+   }
+  }
   if(!response.ok&&body.fase==='items'&&data.codigo==='ITEM_DUPLICATES'&&data.borradorBloque){
    checkpoint.pendingDuplicate={tipo:body.batch.tipo,inicio:body.batch.inicio,parte:data.borradorBloque};recoverySave(checkpoint);
    if(retry){if(message)message.textContent='Reparando solo las preguntas repetidas; se conservan los demás ítems y pautas…';return request({...body,borradorBloque:undefined,repararDuplicados:data.borradorBloque},false);}
@@ -90,7 +97,7 @@ async function recuperarMaterialHEVA(plan,allowRepair=true,repairRound=0){
   if(!response.ok)throw Error((data.detalle||data.error||'Recuperación pendiente.')+(data.codigo?' ['+data.codigo+']':'')+(data.reintentable===false?' Revisa los parámetros del encargo antes de generar nuevamente.':data.codigo==='TYPE_ERROR'?' No se recomienda repetir la misma solicitud hasta corregir el error del servidor.':' Pulsa Crear material para continuar con el mismo encargo.'));
   return data;
  };
- if(!checkpoint.base){if(message)message.textContent='Recuperando la lectura y la estructura del material…';const data=await request({fase:'base',correcciones:checkpoint.correcciones||[]});checkpoint={...checkpoint,base:data.parte,autor:data.autor,bloques:data.bloques};recoverySave(checkpoint);}
+ if(!checkpoint.base){if(message)message.textContent='Recuperando la lectura y la estructura del material…';const pending=checkpoint.pendingBase;const data=await request({fase:'base',correcciones:checkpoint.correcciones||[],borradorBloque:pending?.parte,autor:pending?.autor});checkpoint={...checkpoint,base:data.parte,autor:data.autor,bloques:data.bloques};delete checkpoint.pendingBase;recoverySave(checkpoint);}
  for(let i=0;i<checkpoint.bloques.length;i++){
   if(checkpoint.parts[i])continue;
   if(message)message.textContent=`Completando actividades: bloque ${i+1} de ${checkpoint.bloques.length}…`;

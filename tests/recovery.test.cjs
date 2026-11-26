@@ -8,3 +8,39 @@ test('Chrome retoma el último bloque y conserva el material visible hasta valid
 test('espera una cuota breve una sola vez y no entra en bucle',async()=>{const vm=require('node:vm'),fs=require('node:fs');let n=0,waits=0;const ctx={localStorage:{getItem:()=>null},document:{getElementById:()=>({})},AbortSignal,setTimeout:resolve=>{waits++;resolve()},fetch:async()=>{n++;return{ok:false,json:async()=>({codigo:'AI_RATE_LIMIT',reintentarEn:1,error:'Cuota agotada'})}}};vm.createContext(ctx);vm.runInContext(fs.readFileSync(require.resolve('../heva-recovery-ui.js'),'utf8'),ctx);await assert.rejects(ctx.recuperarMaterialHEVA(plan),/Cuota agotada/);assert.equal(n,2);assert.equal(waits,1);});
 test('final correction reveals diagnostics and preserves all completed blocks when no target is known',async()=>{const vm=require('node:vm'),fs=require('node:fs');let saved={},calls=[];const ctx={localStorage:{getItem:k=>saved[k]||null,setItem:(k,v)=>saved[k]=v,removeItem:k=>delete saved[k]},document:{getElementById:()=>({})},AbortSignal,fetch:async(u,req)=>{const b=JSON.parse(req.body);calls.push(b.fase);return{ok:b.fase!=='finalizar',json:async()=>b.fase==='base'?{parte:{titulo:'Base'},autor:{proveedor:'gemini'},bloques:[{tipo:'casos',inicio:0}]}:b.fase==='items'?{parte:{casosEstudio:[{id:1}]}}:{detalle:'Texto neutral ausente en la lectura',reparacion:{base:false,indices:[],localizada:false,diagnostico:['Texto neutral ausente en la lectura']}}}}};vm.createContext(ctx);vm.runInContext(fs.readFileSync(require.resolve('../heva-recovery-ui.js'),'utf8'),ctx);await assert.rejects(ctx.recuperarMaterialHEVA(plan),/Texto neutral ausente/);assert.deepEqual(calls,['base','items','finalizar']);const checkpoint=JSON.parse(Object.values(saved)[0]);assert.equal(checkpoint.parts.length,1);assert.equal(checkpoint.base.titulo,'Base')});
 test('targeted regeneration accepts saved holes while retaining other blocks as context',()=>{const b=R.batches(plan)[0];assert.match(R.itemPrompt(plan,{titulo:'Base'},b,[null,{preguntasAlternativas:[{enunciado:'Pregunta que se conserva'}]}]),/Pregunta que se conserva/)});
+
+test('resumes a short reading from its draft after an interrupted repair',async()=>{
+ const vm=require('node:vm'),fs=require('node:fs');
+ const store=new Map(),calls=[];
+ const draft={titulo:'Guía guardada',introduccionLectura:'Lectura breve',actividadesGuiadas:[{consigna:'Tarea existente'}]};
+ const autor={proveedor:'gemini',modelo:'gemini-test'};
+ const response=(ok,data)=>({ok,status:ok?200:422,json:async()=>data});
+ let interrupted=true;
+ const load=()=>{
+  const context={
+   localStorage:{getItem:key=>store.get(key),setItem:(key,value)=>store.set(key,value)},
+   document:{getElementById:()=>({})},AbortSignal,
+   fetch:async(_url,request)=>{
+    const body=JSON.parse(request.body);
+    calls.push(body.fase);
+    if(body.fase==='finalizar'){
+     assert.deepEqual(body.base.actividadesGuiadas,draft.actividadesGuiadas);
+     return response(true,{material:{titulo:'Guía terminada'}});
+    }
+    if(!body.borradorBloque)return response(false,{codigo:'BASE_READING_INCOMPLETE',borradorBloque:draft,autor});
+    assert.deepEqual(body.borradorBloque,draft);
+    assert.deepEqual(body.autor,autor);
+    if(interrupted)throw Error('Red interrumpida');
+    return response(true,{parte:{...draft,introduccionLectura:'Lectura ampliada'},autor,bloques:[]});
+   }
+  };
+  vm.runInNewContext(fs.readFileSync(require.resolve('../heva-recovery-ui.js'),'utf8'),context);
+  return context;
+ };
+ await assert.rejects(load().recuperarMaterialHEVA(plan),/red interrumpida/);
+ assert.deepEqual(JSON.parse(store.get('heva-recuperacion-v2')).pendingBase,{parte:draft,autor});
+ interrupted=false;
+ assert.equal((await load().recuperarMaterialHEVA(plan)).material.titulo,'Guía terminada');
+ assert.equal(JSON.parse(store.get('heva-recuperacion-v2')).pendingBase,undefined);
+ assert.deepEqual(calls,['base','base','base','finalizar']);
+});

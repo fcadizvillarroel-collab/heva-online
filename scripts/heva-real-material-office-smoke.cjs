@@ -56,7 +56,7 @@ function check(name,data){report.checks.push({name,...data});console.log('REAL_O
   const preview=await page.evaluate(m=>window.HEVAOffice.preview(m,false),ppt);
   check('previa_ppt',{paginasPreview:preview.pages?.length||null,composicion:preview.visualSummary||null});
   const pending=page.waitForEvent('download',{timeout:90000});
-  await page.evaluate(async m=>window.HEVAOffice.powerpoint(m,false),ppt);
+  await page.evaluate(async m=>window.HEVAOffice.powerpoint(m,true),ppt);
   const download=await pending,pptPath=path.join(out,'globalizacion-gemini-real.pptx');
   await download.saveAs(pptPath);
   const pptEntries=zipList(pptPath),slideEntries=pptEntries.filter(x=>/^ppt\/slides\/slide\d+\.xml$/.test(x));

@@ -1,3 +1,4 @@
+const SectionRepair=require('../lib/news-repair.cjs');
 const Provenance=require('../lib/review-provenance.cjs');
 const Didactics=require('../heva-didactics.js');
 const TPInternational=require('../lib/tp-metal-international.cjs');
@@ -69,20 +70,38 @@ module.exports=async(req,res)=>{
   const prompt=(fase==='base'?R.basePrompt(plan):R.itemPrompt(plan,base,batch,parts))+(plan.tipoMaterial==='PRESENTACION'?'':Didactics.prompt(plan))+Inclusive.prompt(plan)+DidacticResources.prompt(plan)+International.prompt(plan)+strictFormat+caseRepair+developmentRepair+strategyRepair+correctionContext+duplicateRepair+slideRepair;
   const fallback=R.fallbackPrompt(plan,base,batch,parts,correcciones,fuentesDocumentales)+(plan.tipoMaterial==='PRESENTACION'?'':Didactics.prompt(plan))+Inclusive.prompt(plan)+DidacticResources.prompt(plan)+International.prompt(plan)+duplicateRepair+slideRepair;
   let result;
+  const resumeReading=fase==='base'&&borradorBloque;
+  const baseIssues=value=>R.partIssues(value,plan,null);
   const participants=new Set([borradorBloque,repararDuplicados,repararDiapositivas].flatMap(Provenance.blockProviders));
   const note=r=>{if(r?.provider)participants.add(r.provider);return r;};
   if(fase==='items'&&borradorBloque){
    const preserved=R.normalizePart(borradorBloque,batch),pending=R.partIssues(preserved,plan,batch,parts);
    if(pending.length&&!R.traceIssuesOnly(pending))return res.status(400).json({error:'El borrador no puede repararse solo con trazabilidad.',detalle:pending.join('; '),reintentable:false});
    result={value:preserved,provider:autor.proveedor,model:autor.modelo};
+  }else if(resumeReading){
+   if(!['gemini','groq','openai'].includes(autor?.proveedor)||!baseIssues(borradorBloque).some(SectionRepair.isReadingIssue))return res.status(400).json({error:'El borrador base no admite reparación de lectura.',reintentable:false});
+   result={value:borradorBloque,provider:autor.proveedor,model:autor.modelo};
   }else result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true})+Textbooks.instruction(librosRegulares)+OATextbookMatrix.instruction(matrizOA)+OAPedagogy.instructions(planUsoFuentes)+TPInternational.prompt(referenciasMetalmecanica),...keys,exclude,{deadline,fallbackPrompt:fallback,fallbackMaxOutputTokens:fase==='base'?4096:3000,maxOutputTokens:fase==='base'?(plan.tipoMaterial==='PRESENTACION'?2600:10000):batch?.formato?8000:batch?.tipo==='diapositivas'?6500:5000});
   if(!borradorBloque)note(result);
   if(fase==='items'){result.value=R.normalizePart(result.value,batch);if(slideOriginal)result.value=R.mergeSlideRepair(slideOriginal,result.value,plan,batch,parts);if(duplicateOriginal)result.value=R.mergeDuplicateRepair(duplicateOriginal,result.value,plan,batch,parts);}
   let issues=R.partIssues(result.value,plan,fase==='items'?batch:null,parts);
   if(fase==='items'&&!duplicateOriginal&&R.duplicateItems(result.value,plan,batch,parts).length&&issues.every(x=>/repite literalmente/.test(x)))duplicateOriginal=result.value;
-  // Repair the news before regenerating an otherwise usable base.
-  if(fase==='base'&&issues.some(require('../lib/news-repair.cjs').isNewsIssue)&&deadline-Date.now()>6500){
-   try{const fixed=await require('../lib/news-repair.cjs').repair(result.value,plan,issues,v=>R.partIssues(v,plan,null),async q=>note(await call(q,...keys,exclude,{deadline,maxOutputTokens:1800,fallbackMaxOutputTokens:1800})).value);if(fixed.changed){result.value=fixed.base;issues=fixed.issues;}}catch(error){console.warn('HEVA news-only repair pending',error.code||'ERROR');}
+  if(fase==='base'){
+   const generateSection=async q=>note(await call(q,...keys,exclude,{deadline,maxOutputTokens:2200,fallbackMaxOutputTokens:2200})).value;
+   for(const repair of [SectionRepair.repairReading,SectionRepair.repair]){
+    if(deadline-Date.now()<=6500)break;
+    try{
+     const fixed=await repair(result.value,plan,issues,baseIssues,generateSection);
+     result.value=fixed.base;
+     issues=fixed.issues;
+    }catch(error){console.warn('HEVA base section repair pending',error.code||'ERROR');}
+   }
+   if(issues.some(SectionRepair.isReadingIssue))return res.status(422).json({
+    error:'El borrador base está guardable; falta ampliar la lectura explicativa.',
+    detalle:issues.join('; '),codigo:'BASE_READING_INCOMPLETE',reintentable:true,
+    borradorBloque:Provenance.record(result.value,...participants),
+    autor:{proveedor:result.provider,modelo:result.model}
+   });
   }
   if(issues.length&&!R.traceIssuesOnly(issues)&&deadline-Date.now()>5000){
    const slideFirstDraft=fase==='items'&&batch?.tipo==='diapositivas'?result.value:null;

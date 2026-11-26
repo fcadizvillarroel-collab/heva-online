@@ -286,7 +286,7 @@ function presentationPages(material,teacher=false){
  const isPresentation=String(material.tipoMaterial||'').toUpperCase()==='PRESENTACION'&&Array.isArray(material.diapositivas)&&material.diapositivas.length>0;
  let sections=[];
  if(isPresentation){
-  sections=material.diapositivas.map((d,i)=>({title:d.titulo||'Diapositiva '+(i+1),text:slideText(d.contenido),kind:'slide',role:d.funcion||'',image:d.imagenHEVA,hideImage:d.ocultarImagenHEVA===true,notes:d.notasDocente||''}));
+  sections=material.diapositivas.map((d,i)=>({title:d.titulo||'Diapositiva '+(i+1),text:slideText(d.contenido),kind:'slide',role:d.funcion||'',image:d.imagenHEVA,hideImage:d.ocultarImagenHEVA===true,notes:teacher?(d.notasDocente||''):''}));
  }else{
   let blocks=[];const rawBlocks=HEVA.blocks(material,teacher),sourceBlocks=root.HEVAGuideVisuals?.attach(material,rawBlocks,HEVA.blocks(material,false).length)||rawBlocks;sourceBlocks.forEach(item=>{let prev=blocks.at(-1);if(item.kind==='option'&&prev?.group===item.group)prev.text+='\n'+item.title+' '+item.text;else blocks.push({...item})});
   sections=blocks.map(item=>({title:item.title,text:slideText(item.text),kind:item.kind||'section',image:item.image,hideImage:item.hideImage}));
