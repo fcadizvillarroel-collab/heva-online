@@ -43,6 +43,8 @@ function inspect(material,plan={}){
   if(/\berror\b/.test(promptText)&&/(obtiene|afirma|llega|concluye)/.test(promptText)&&/en que consiste|cual (?:es|fue) el error|error principal|error cometido/.test(promptText)&&!/\b(?:paso|procedimiento seguido|desarrollo siguiente|realizo|escribio|transformo|resto|sumo|dividio|multiplico)\b/.test(promptText)){
     incidencias.push({tipo:'ambiguedad',referencia:'ALT-'+(i+1),detalle:'Se solicita identificar el error de un estudiante sin mostrar el procedimiento que produjo su resultado. Añade sus pasos o pregunta solo si el resultado es correcto.'});
   }
+  const linear=require('../heva-calculation.js').proof(q);
+  if(linear?.tipo==='ecuacion_lineal_explicita'){checked++;if(linear.claveEsperada!==key)incidencias.push({tipo:'resultado',referencia:'ALT-'+(i+1),detalle:'La clave no coincide con la solución de la ecuación: '+linear.explicacion});else verificaciones.push({referencia:'ALT-'+(i+1),tipo:'ecuacion_lineal_explicita',resultado:'coincide'});return;}
   const text=String(q?.enunciado||'');const match=/^\s*(?:calcula|resuelve|evalua|cuanto es|¿cuanto es)\s*[:¿]?\s*([0-9+*/().,×÷·\s-]+)\s*[?¿.]?\s*$/i.exec(normalize(text));
   if(!match||!keyed)return;
   const expected=evaluateSimple(match[1]);if(expected===null)return;
@@ -53,7 +55,7 @@ function inspect(material,plan={}){
   else verificaciones.push({referencia:'ALT-'+(i+1),tipo:'aritmetica',resultado:'coincide'});
  });
  (material?.preguntasDesarrollo||[]).forEach((q,i)=>{for(const issue of wordProblemIssues(q?.enunciado))incidencias.push({...issue,referencia:'DES-'+(i+1)});});
- return {asignatura,aplica:true,estado:incidencias.length?'requiere_revision':'revision_parcial',incidencias,verificaciones,operacionesComprobadas:checked,advertencia:'Solo se comprueban operaciones aritméticas simples con cuatro opciones numéricas. Fórmulas, problemas verbales, procedimientos, OA y demás resultados requieren revisión especializada independiente y docente.'};
+ return {asignatura,aplica:true,estado:incidencias.length?'requiere_revision':'revision_parcial',incidencias,verificaciones,operacionesComprobadas:checked,advertencia:'Se comprueban operaciones aritméticas simples y ecuaciones lineales explícitas de formato reconocido con cuatro opciones numéricas. Fórmulas, problemas verbales, procedimientos, OA y demás resultados requieren revisión especializada independiente y docente.'};
 }
 
 const discipline=s=>{
