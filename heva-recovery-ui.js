@@ -55,9 +55,29 @@ function hevaRecoveryCommit(plan){
 }
 function recoveryRead(plan){try{const x=JSON.parse(localStorage.getItem(HEVA_RECOVERY_KEY));if(x?.version!==HEVA_RECOVERY_VERSION||x?.planKey!==JSON.stringify(plan))return null;if(x.base&&(!Array.isArray(x.parts)||!Array.isArray(x.bloques)))return null;if(Array.isArray(x.bloques)&&x.parts.length>x.bloques.length)return null;return x}catch{return null}}
 function recoverySave(x){try{localStorage.setItem(HEVA_RECOVERY_KEY,JSON.stringify({...x,version:HEVA_RECOVERY_VERSION}));mostrarRecuperacionPendienteHEVA()}catch{}}
-async function recuperarMaterialHEVA(plan,allowRepair=true,repairRound=0){
+async function recuperarMaterialHEVA(plan,allowRepair=true,repairRound=0,directDraft){
  let checkpoint=recoveryRead(plan)||{planKey:JSON.stringify(plan),parts:[]};
  const message=document.getElementById('dictamen-calidad');
+ if(directDraft){
+  checkpoint.pendingDirect=directDraft;
+  recoverySave(checkpoint);
+ }
+ if(checkpoint.pendingDirect){
+  if(message)message.textContent='Completando la reparación del borrador anterior…';
+  let response,data;
+  try{
+   response=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...plan,reanudarBorrador:checkpoint.pendingDirect}),signal:AbortSignal.timeout(58000)});
+   data=await response.json();
+  }catch{
+   throw Error('Se interrumpió la reparación del borrador. Pulsa Crear material para continuar.');
+  }
+  if(!response.ok&&data.codigo==='DIRECT_DRAFT_INCOMPLETE'&&data.reanudacion){
+   checkpoint.pendingDirect=data.reanudacion;
+   recoverySave(checkpoint);
+  }
+  if(!response.ok||data.exito!==true||!data.material||typeof data.material!=='object'||Array.isArray(data.material))throw Error(data.detalle||data.error||'La reparación sigue pendiente.');
+  return data;
+ }
  const request=async (body,retry=true)=>{
   let response;try{response=await fetch('/api/recover',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan,...body}),signal:AbortSignal.timeout(58000)});}catch(err){throw Error('La solicitud de '+body.fase+' no llegó a completarse ('+(err.name==='TimeoutError'?'tiempo agotado':'red interrumpida')+'). El avance guardado se conserva. Reintenta Crear material.');}
   let data;try{data=await response.json()}catch{const type=response.headers.get('content-type')||'';throw Error('El servidor respondió HTTP '+response.status+' sin JSON válido durante '+body.fase+'. '+(response.status===504||response.status===502?'Probable límite de tiempo o error de función. ':'')+'El avance guardado se conserva.');}
@@ -150,7 +170,9 @@ function mostrarRecuperacionPendienteHEVA(){
  const nombre=nombres[tipo]||'material';
  const title=document.createElement('h3');title.className='font-bold text-sm text-amber-950';title.textContent='Generación de '+nombre+' interrumpida';
  const text=document.createElement('p');text.className='text-xs text-amber-900 mt-1';
- text.textContent=tipo==='PRESENTACION'
+ text.textContent=saved.pendingDirect
+ ?'El borrador completo está guardado. Continúa para reparar la sección pendiente y validar el material.'
+ :tipo==='PRESENTACION'
  ?'Presentación guardada: '+String(saved.parts.filter(Boolean).length)+' de '+String(saved.bloques?.length||'?')+' bloques completos. No tiene relación con la planificación u otro material que estés creando.'
  :'Avance guardado: '+String(saved.parts.filter(Boolean).length)+' de '+String(saved.bloques?.length||'?')+' bloques completos. Puedes continuar o apartar el encargo anterior; no forma parte del material actual.';
  text.textContent+=' No es una actividad de la '+nombre+'.';

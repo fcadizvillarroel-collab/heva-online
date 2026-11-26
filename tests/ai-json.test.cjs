@@ -59,3 +59,54 @@ test('recovery API keeps the guide draft on HTTP 422 and resumes with only a rea
  assert.deepEqual(result.data.parte.actividadesGuiadas,draft.actividadesGuiadas);
  assert.deepEqual(result.data.parte.proveedoresBloque,['gemini']);
 });
+
+test('la generación directa repara un borrador completo y registra el proveedor de cada aporte',async t=>{
+ const P=require('../heva-pedagogy.js'),sources=require('../lib/document-sources.cjs');
+ const plan={tipoMaterial:'GUIA',asignatura:'Lenguaje',objetivoAprendizaje:'Contrastar dos textos',temaEspecifico:'Opinión y evidencia',estrategiaDidactica:'MODELADO',cantAlternativas:1,cantDesarrollo:0,cantCasos:0,noticiaDidacticaModo:'NO'};
+ const base=P.schema('GUIA',plan);
+ base.introduccionLectura='Evidencia '.repeat(276).trim();
+ base.actividadesGuiadas=[{consigna:'Contrasta dos textos',apoyo:'Usa una tabla',productoEsperado:'Tabla comparativa'}];
+ base.actividadAutonoma={consigna:'Justifica otra opinión',productoEsperado:'Un párrafo'};
+ base.planEstrategia={id:'MODELADO',habilidadCentral:'Contrastar dos textos',aplicacionConcreta:'Comparar versos con evidencias',evidenciaEsperada:'Una tabla comparativa',retroalimentacionDocente:'Revisar evidencias de cada texto'};
+ base.preguntasAlternativas=[{numero:1,enunciado:'¿Qué permite sostener una opinión?',alternativas:['Una afirmación sin apoyo','Un dato verificable','Un cambio de tema','Un saludo'].map((texto,i)=>({texto,letra:'ABCD'[i]})),claveCorrecta:'B',justificacion:'El dato aporta respaldo.',habilidad:'Distinguir evidencias'}];
+ base.trazabilidadEstrategia=['GUIADA-1','AUTONOMA','ALT-1'].map(referencia=>({referencia,habilidad:'Contrastar fuentes',evidencia:'Identifica evidencia de ambos textos',criterio:'Relaciona las fuentes y sus afirmaciones'}));
+ t.mock.method(sources,'retrieve',async()=>({documents:[],fragments:[]}));
+ const env={...process.env};t.after(()=>{process.env=env;});
+ Object.assign(process.env,{GEMINI_API_KEY:'TEST',GROQ_API_KEY:'TEST',ALLOW_PAID_AI:'false',HEVA_AI_REQUIRE_AUTH:'false',HEVA_PILOT_SHARED_QUOTA:'false'});
+ const prompts=[];
+ let secondAttempt=false;
+ t.mock.method(globalThis,'fetch',async(url,options)=>{
+  const request=JSON.parse(options.body);
+  const prompt=request.contents?.[0].parts[0].text||request.messages[1].content;
+  prompts.push(prompt);
+  if(prompts.length===1)return gemini(JSON.stringify(base));
+  if(!secondAttempt)return gemini(JSON.stringify({introduccionLectura:'Muy breve'}));
+  if(url.includes('generativelanguage'))return {ok:false,status:429,headers:{get:()=>null},json:async()=>({})};
+  return {ok:true,json:async()=>({choices:[{finish_reason:'stop',message:{content:JSON.stringify({introduccionLectura:'Lectura ampliada '.repeat(160),preguntasAlternativas:[]})}}]})};
+ });
+ const request=async body=>{
+  let status,data;
+  await require('../api/generate')({method:'POST',body:{...plan,...body}},{
+   setHeader(){},status(n){status=n;return this;},json(value){data=value;return this;}
+  });
+  return {status,data};
+ };
+ const pending=await request({});
+ assert.equal(pending.status,422,pending.data.detalle);
+ assert.equal(pending.data.codigo,'DIRECT_DRAFT_INCOMPLETE');
+ assert.equal(pending.data.reanudacion.autor.proveedor,'gemini');
+ assert.equal(pending.data.reanudacion.borrador.preguntasAlternativas.length,1);
+ const changed=structuredClone(pending.data.reanudacion);
+ changed.autor.proveedor='groq';
+ const rejected=await request({reanudarBorrador:changed});
+ assert.equal(rejected.data.codigo,'DIRECT_DRAFT_INVALID');
+ secondAttempt=true;
+ const complete=await request({reanudarBorrador:JSON.parse(JSON.stringify(pending.data.reanudacion))});
+ assert.equal(complete.status,200,complete.data.detalle);
+ assert.equal(complete.data.material.preguntasAlternativas[0].enunciado,base.preguntasAlternativas[0].enunciado);
+ assert.deepEqual(complete.data.material.actividadesGuiadas,base.actividadesGuiadas);
+ assert.equal(complete.data.material.autoriaIA.proveedor,'gemini');
+ assert.deepEqual(complete.data.material.autoriaBloques.proveedores,['gemini','groq']);
+ assert.equal(prompts.length,4);
+ assert.ok(prompts.slice(1).every(prompt=>prompt.startsWith('REPARACIÓN LOCALIZADA:')));
+});

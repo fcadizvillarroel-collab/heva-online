@@ -6,6 +6,12 @@ Antes de implementar cualquier mejora, consultar **[el mapa canónico de módulo
 
 **HEVA Review integrado:** PR **#70** ya incorporó el flujo único de generar → revisar → corregir errores comprobados → verificar en la aplicación principal, con `heva-review-studio.js`, `api/review.js` y los módulos pedagógicos/Office existentes. La propuesta autónoma **#58** queda reemplazada: **no fusionar `/review/index.html` ni crear un segundo catálogo, exportador o revisor**. Los informes automáticos no son aprobación docente. Para estado de seguridad actual, leer `SEGURIDAD_PENDIENTE.md` antes de proponer SQL.
 
+## Continuidad de la consolidación
+
+Consulta la [matriz de consolidación](docs/HEVA_CONSOLIDACION_20261126.md) antes de retomar una tarea. Registra allí el SHA base, la prueba reproducible, el alcance comprobado y el bloqueo concreto. Mantén postergado el banco de materiales. El paquete de unidad agrupa documentos del historial local existente.
+
+Usa las guías de trabajo de HEVA en `.agents/skills/`: [currículo y pedagogía](.agents/skills/heva-curriculo-pedagogia/SKILL.md), [materiales accesibles](.agents/skills/heva-materiales-accesibles/SKILL.md), [generación y recuperación](.agents/skills/heva-generacion-recuperacion/SKILL.md) y [verificación y despliegue](.agents/skills/heva-verificacion-despliegue/SKILL.md).
+
 ## Autoridad curricular: NO volver a crear los 407 OA
 
 **Supabase HEVA es la fuente de verdad de los objetivos de aprendizaje (OA) EPJA.**

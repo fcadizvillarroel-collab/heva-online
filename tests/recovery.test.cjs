@@ -44,3 +44,22 @@ test('resumes a short reading from its draft after an interrupted repair',async(
  assert.equal(JSON.parse(store.get('heva-recuperacion-v2')).pendingBase,undefined);
  assert.deepEqual(calls,['base','base','base','finalizar']);
 });
+
+test('un fallo de red al reparar una generación directa conserva la guía completa para retomarla',async()=>{
+ const vm=require('node:vm'),fs=require('node:fs'),store=new Map();
+ const pending={borrador:{titulo:'Guía',preguntasAlternativas:[{enunciado:'Pregunta existente'}]},autor:{proveedor:'gemini'},firma:'firma'};
+ let interrupted=true;
+ const context={localStorage:{getItem:key=>store.get(key),setItem:(key,value)=>store.set(key,value)},document:{getElementById:()=>({})},AbortSignal,fetch:async(url,request)=>{
+  assert.equal(url,'/api/generate');
+  const sent=JSON.parse(request.body);
+  assert.deepEqual(sent.reanudarBorrador,pending);
+  assert.equal(sent.objetivoAprendizaje,plan.objetivoAprendizaje);
+  if(interrupted)throw Error('Red temporalmente interrumpida');
+  return {ok:true,json:async()=>({exito:true,material:{titulo:'Guía reparada'}})};
+ }};
+ vm.runInNewContext(fs.readFileSync(require.resolve('../heva-recovery-ui.js'),'utf8'),context);
+ await assert.rejects(context.recuperarMaterialHEVA(plan,true,0,pending),/interrumpió la reparación/);
+ assert.deepEqual(JSON.parse(store.get('heva-recuperacion-v2')).pendingDirect,pending);
+ interrupted=false;
+ assert.equal((await context.recuperarMaterialHEVA(plan)).material.titulo,'Guía reparada');
+});

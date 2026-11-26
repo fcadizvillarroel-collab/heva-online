@@ -36,3 +36,8 @@ Se registraron tres migraciones: `heva_harden_admin_grants_and_staging_search_pa
 **No es pendiente:** recuperar, extraer de PDF, reimportar o "revisar la existencia" de los 407 OA. El estado del extractor PDF es independiente del catálogo ya registrado.
 
 Más contexto en [mapa canónico](docs/HEVA_MAPA_CANONICO_SIN_DUPLICADOS_20261123.md). Las verificaciones futuras deben tomar esta hoja como referencia y actualizarla cuando haya nueva evidencia, sin crear nuevos paneles ni registros paralelos.
+
+
+## Comprobación posterior de publicación
+
+El 26 de noviembre de 2026, el dominio principal respondió con el commit `5fb5443` en Vercel, en estado READY. La consulta verificada devolvió 407 objetivos vigentes con 407 claves distintas. Este cotejo acredita la lectura del catálogo en producción. La evidencia anterior sobre RPC y RLS sigue registrada arriba. El acceso con cuentas reales y la operación de cuotas del piloto continúan pendientes de comprobación.

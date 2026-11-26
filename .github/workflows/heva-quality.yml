@@ -46,6 +46,7 @@ jobs:
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
           sleep 2
           node scripts/result-layout-browser-smoke.cjs
+          node qa/ui-check.cjs
         env:
           HEVA_RESULT_QA_DIR: ${{ runner.temp }}/heva-result-qa
       - name: Inspección visual real HEVA LAB en Chromium
