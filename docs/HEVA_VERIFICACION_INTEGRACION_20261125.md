@@ -1,0 +1,43 @@
+# Cierre técnico parcial de HEVA · 25 de noviembre de 2026
+
+## Estado inicial y reutilización
+
+GitHub `main` y el alias productivo de Vercel apuntaban al SHA `a9f2f138302f275b7ec3aa222097db9bd7d529a3` en estado READY. La PR #100 estaba fusionada. La consulta de solo lectura a `/api/curriculum/admin?action=verified` devolvió 407 objetivos, 407 vigentes y 407 claves distintas. Se mantuvo el catálogo y se reutilizaron el flujo de recuperación por bloques, el reparador de noticias, los validadores estructurales, la trazabilidad de proveedores, el registro documental, la edición y el exportador Office de HEVA. La matriz previa de 32 combinaciones quedó como antecedente.
+
+## Incidencias y cambios
+
+- Producción devolvió HTTP 422 para guías de Estudios Sociales (281 palabras) y Lenguaje (299 palabras). La generación directa ahora intenta ampliar solo `introduccionLectura`. La recuperación por bloques aplica la misma sustitución, preserva actividades, noticia, pauta y trazas, y guarda el borrador y autoría si la ampliación queda pendiente. Se mantienen los umbrales de 300 palabras para GUIA y 200 para ACCESIBLE.
+- Si falla la recuperación documental, la API conserva el contrato de documentos y fragmentos vacíos. El reintento de lectura y el ensamblado pueden continuar con ese estado sin tratarlo como respaldo documental.
+- Los PPTX para estudiantes incluían las notas docentes en el paquete. Se preservan en el PPTX con pauta y se excluyen del ejemplar del estudiante. Se eliminó también la segunda portada de los PPTX derivados de guías.
+- El DOCX seguía dibujando un borde decorativo en el encabezado con los recuadros desactivados. La opción ahora se aplica al encabezado y a los bloques. Las líneas para responder en papel se conservan.
+- El encargo de generación pide el estímulo completo y el criterio de aceptación cuando una actividad requiere decidir si una pieza cumple una especificación. Se añadió tras observar una actividad de Construcciones Metálicas con datos insuficientes. La guía de generación también pide alternativas imprimibles o simuladas cuando una práctica requiere recursos restringidos, tras observar un ejemplo con una vela en Ciencias Naturales.
+
+## Pruebas y exportaciones
+
+Node 22 y `npm test` comprueban el diagnóstico de 276 palabras, la aceptación desde 300, el mínimo de la guía accesible, el 422 con borrador, la reanudación con preservación de actividades, la separación de notas y la portada única. Las pruebas existentes cubren 413 de proveedor y carga, espera acotada por 429, JSON inválido, recuperación de trazas y rechazo de planes inválidos. La regresión del fallo documental cubre el camino que podía terminar en HTTP 500. Se revisaron los cuatro pasos en Chromium a 320, 390, 768 y 1365 px, el visor de resultados y la recuperación visual. El chequeo Office con las bibliotecas de HEVA incluyó texto solo, gráficos editables y legibilidad accesible.
+
+Se generaron ocho muestras con Gemini en producción. Se exportaron con el código de la rama 16 DOCX, uno estudiantil y uno docente por muestra, y nueve PPTX, ocho estudiantiles y uno docente para Matemática. LibreOffice renderizó 101 páginas de Word y 263 diapositivas. El barrido de PDF no detectó páginas sin texto ni cajas de texto al borde de la página. Se revisaron visualmente portadas, páginas interiores y cierres de las ocho muestras mediante mosaicos. Este alcance no descarta solapamientos o cortes en todas las combinaciones de software y tipografía. Persisten espacios amplios en algunas diapositivas derivadas de guías breves y en las páginas finales de bibliografía. Las ilustraciones de los materiales son apoyos y requieren contraste con el objeto de cada actividad.
+
+| Muestra | Resultado observado y punto de revisión docente |
+|---|---|
+| Estudios Sociales | 327 palabras. El estímulo histórico está marcado como simulado. Conviene ampliar la evaluación de participación histórica con fuentes reales cuando la actividad lo requiera. |
+| Lenguaje y Comunicación | 346 palabras tras una nueva solicitud en producción, con datos curriculares corregidos en el encargo de ensayo. La adecuación de pausas, fluidez y entonación se observa mediante lectura oral. |
+| Matemática | Presentación con ejemplos concretos, pictóricos y simbólicos. El modelamiento de dos cuadernos a $500 es coherente con el producto $1.000. Revisar progresión de los ejemplos y claridad del contexto de los ejercicios. |
+| Ciencias Naturales | 301 palabras. La muestra propone observar el consumo desigual de una vela. Reemplazar la manipulación de llama en contextos restringidos por un registro simulado, datos o una demostración autorizada. |
+| Inglés | Guía accesible de 239 palabras con diálogo. Para acreditar comprensión oral, el docente debe leer el texto o facilitar una grabación accesible. Revisar con estudiantes usuarios de letra grande y apoyos de lectura. |
+| Convivencia Social | 310 palabras. Los escenarios permiten analizar el trato y las relaciones. Revisar que la transferencia permita responder mediante un caso ficticio y que el distractor no se descarte solo por su tono. |
+| Inserción Laboral | 346 palabras. Los requisitos municipales, tributarios y ambientales varían según actividad y comuna. El material precisa cotejo de vigencia antes de usarse como orientación para trámites. La revisión independiente devolvió 503 por cuota. |
+| Construcciones Metálicas | 365 palabras. Se reutilizó la transcripción de un aprendizaje esperado del selector TP de HEVA. La práctica autónoma da largo y espesor y solicita decidir si cumple una superficie, aunque omite el ancho y el criterio. Groq completó la revisión independiente sin observaciones ni contrastes para esta muestra, por lo que el hallazgo humano sigue abierto. |
+
+Las siete muestras con selección múltiple contienen un solo ítem y su clave resultó B. La muestra no permite acreditar equilibrio A–D dentro de instrumentos de varios ítems. Hay distractores demasiado fáciles de descartar en algunas guías. El programa de pruebas conserva la cobertura del balance de claves con instrumentos de más ítems.
+
+## Evidencia documental
+
+- **Fuente localizada.** La API localizó literalmente el OA para las siete muestras generales. Para la muestra TP se consultaron el programa de MINEDUC y otros cuatro documentos, pero la búsqueda del aprendizaje literal resultó `no_localizado`. El programa de MINEDUC citado corresponde a formación TP y es una referencia relacionada. Queda pendiente el cotejo con el documento de especialidad del cual procede la transcripción del selector. [Programa descargado](https://aprendoenlinea.mineduc.gob.cl/sites/default/files/newtenberg/614/articles-34329_programa.pdf)
+- **Cita comprobada y afirmación respaldada.** Las ocho muestras quedaron con cero citas aceptadas en `respaldoDocumental`. La localización del OA, la bibliografía consultada y los ejemplos aritméticos comprobados tienen alcances distintos. La equivalencia 500 mm ÷ 250 mm = 2 en el ejemplo simulado de Construcciones Metálicas se verifica con los datos del ejercicio.
+- **Interpretación pendiente.** Los enlaces de SEP México y Educ.ar respondieron HTTP 200 y corresponden al registro de apoyo didáctico para comunicación. No respaldan afirmaciones de la lección de lectura en voz alta ni reemplazan OA EPJA. El marco INET argentino contiene un apartado de representación gráfica. La ficha española de TodoFP respondió HTTP 200 y es una referencia temática de otro nivel. [SEP](https://aprendeencasa.sep.gob.mx/secundaria/como-me-hables-nos-comunicamos/) · [Educ.ar](https://www.educ.ar/recursos/14911/tipos-de-registros) · [INET](https://www.inet.edu.ar/wp-content/uploads/2013/04/15-07-anexo07.pdf) · [TodoFP](https://www.todofp.es/que-estudiar/familias-profesionales/fabricacion-mecanica/construcciones-metalicas.html)
+- **Referencia no verificable en la muestra.** Las afirmaciones específicas de formalización de la microempresa requieren contraste con fuentes vigentes y con la comuna y el rubro. La bibliografía de la muestra y la revisión IA disponible no aportaron ese respaldo.
+
+## Publicación y validación pendiente
+
+La [PR #101](https://github.com/fcadizvillarroel-collab/heva-online/pull/101) contiene la integración. El entorno de vista previa de Vercel exige autenticación. El conector pudo comprobar por GET que ambos proveedores respondían, pero carece de una operación POST autenticada para probar allí la ampliación real. La generación de muestras y la revisión de Groq se hicieron contra el commit inicial de producción. La validación curricular y disciplinar exhaustiva, la prueba con estudiantes y la validación de accesibilidad con tecnologías de apoyo siguen pendientes.

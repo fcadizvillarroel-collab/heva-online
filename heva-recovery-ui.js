@@ -111,7 +111,10 @@ async function recuperarMaterialHEVA(plan,allowRepair=true,repairRound=0){
   const detail=result.detalle||result.reparacion.diagnostico?.join('; ')||'El servidor no informó el detalle de la corrección.';
   checkpoint.correcciones=result.reparacion.diagnostico||[detail];recoverySave(checkpoint);
   if(result.reparacion.localizada===false)throw Error('Corrección final pendiente: '+detail+' El avance está guardado.');
-  if(result.reparacion.base)delete checkpoint.base;
+  if(result.reparacion.base){
+   if(result.reparacion.lectura)checkpoint.pendingBase={parte:checkpoint.base,autor:checkpoint.autor};
+   delete checkpoint.base;
+  }
   if(Array.isArray(result.reparacion.indices)){for(const i of result.reparacion.indices){const b=checkpoint.bloques[i],prefix=b?.tipo==='alternativas'?'ALT':b?.tipo==='casos'?'CASO':'';if(b?.tipo==='diapositivas'&&checkpoint.parts[i]){checkpoint.pendingSlide={tipo:b.tipo,inicio:b.inicio,parte:checkpoint.parts[i]};}else if(prefix&&result.reparacion.duplicados?.some(ref=>{const n=Number(ref.split('-')[1]);return ref.startsWith(prefix+'-')&&n>b.inicio&&n<=b.inicio+b.cantidad;})){checkpoint.repairDrafts??={};if(checkpoint.parts[i])checkpoint.repairDrafts[i]=checkpoint.parts[i];}checkpoint.parts[i]=null;}}
   else if(!result.reparacion.base)checkpoint.parts=checkpoint.parts.slice(0,result.reparacion.desde);
   recoverySave(checkpoint);const maxRounds=result.reparacion.duplicados?.length?3:1;if(!allowRepair||repairRound>=maxRounds)throw Error('Corrección final pendiente: '+detail+' El avance y los ítems válidos están guardados. Pulsa Crear material con el mismo encargo para retomar la reparación.');return recuperarMaterialHEVA(plan,allowRepair,repairRound+1);

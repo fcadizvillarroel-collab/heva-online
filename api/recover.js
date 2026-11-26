@@ -27,7 +27,7 @@ module.exports=async(req,res)=>{
   if(!['base','items','finalizar'].includes(fase))return res.status(400).json({error:'Fase no admitida.'});
   if(fase!=='finalizar'&&!(await require('./_ai-access.cjs').protect(req,res)))return;
   if(fase!=='base'&&(!base||!['gemini','groq','openai'].includes(autor?.proveedor)))return res.status(400).json({error:'Falta el documento base o su autoría.'});
-  let fuentesDocumentales;try{fuentesDocumentales=await S.retrieve(plan)}catch(e){console.error('HEVA document sources:',e.stack||e);fuentesDocumentales=[];}
+  let fuentesDocumentales;try{fuentesDocumentales=await S.retrieve(plan)}catch(e){console.error('HEVA document sources:',e.stack||e);fuentesDocumentales={documents:[],fragments:[],objetivo:'no_localizado'};}
   const librosRegulares=Textbooks.recommendations(plan);
     const matrizOA=OATextbookMatrix.build(plan,librosRegulares,fuentesDocumentales);
     const planUsoFuentes=OAPedagogy.build(plan,matrizOA);
@@ -40,7 +40,14 @@ module.exports=async(req,res)=>{
    // Apply the same count and trace boundary used by /api/generate.
    material=P.normalizeTaskTraces(P.enforceRequestedCounts(material,plan));
    let issues=R.validate(material,plan);
-   if(issues.length)return res.status(422).json({error:'Los bloques requieren corrección. Se conserva el material anterior.',detalle:issues.join('; '),reparacion:R.repair(base,parts,plan,issues),reintentable:true});
+   if(issues.length){
+    const reparacion=R.repair(base,parts,plan,issues);
+    if(reparacion.base){
+     const baseIssues=R.partIssues(base,plan,null);
+     if(baseIssues.every(SectionRepair.isReadingIssue))reparacion.lectura=true;
+    }
+    return res.status(422).json({error:'Los bloques requieren corrección. Se conserva el material anterior.',detalle:issues.join('; '),reparacion,reintentable:true});
+   }
    material=P.finalize(material,plan);material.autoriaIA=autor;material.autoriaBloques=Provenance.assembly(base,parts,autor);material.planGeneracion=plan;material.fuentesDocumentales=fuentesDocumentales;material.textosEscolaresComplementarios=librosRegulares;material.matrizOATextos=matrizOA;material.planUsoFuentesOA=planUsoFuentes;
     material.referenciasMetalmecanica=referenciasMetalmecanica;
     material.trazabilidadDocumentalTP=TPInternational.documentEvidence(referenciasMetalmecanica,fuentesDocumentales);

@@ -14,3 +14,48 @@ test('Gemini utiliza respaldo del mismo proveedor ante indisponibilidad temporal
 test('reserves a usable fallback window when both Gemini requests time out',async()=>{const oldFetch=global.fetch,oldNow=Date.now;let elapsed=0,calls=[];Date.now=()=>1794780000000+elapsed;global.fetch=async u=>{calls.push(u.includes('generativelanguage')?'gemini':'groq');if(u.includes('generativelanguage')){elapsed+=12000;const e=new Error('timeout');e.name='TimeoutError';throw e;}return{ok:true,json:async()=>({choices:[{finish_reason:'stop',message:{content:'{"titulo":"Respaldo"}'}}]})}};try{const r=await call('Presentación','','TEST','TEST');assert.equal(r.provider,'groq');assert.deepEqual(calls,['gemini','gemini','groq']);assert.ok(elapsed<=34000)}finally{global.fetch=oldFetch;Date.now=oldNow}});
 test('Groq receives the compact request and block output budget after Gemini returns invalid JSON',async()=>{const old=global.fetch,seen=[];global.fetch=async(u,r)=>{const body=JSON.parse(r.body);seen.push({u,body});return u.includes('generativelanguage')?gemini('{invalid'):{ok:true,json:async()=>({choices:[{finish_reason:'stop',message:{content:'{"titulo":"Bloque válido"}'}}]})}};try{const out=await call('ENCARGO_ORIGINAL_LARGO','','TEST','TEST',[],{fallbackPrompt:'OA LITERAL, esquema del bloque y contexto breve',fallbackMaxOutputTokens:3000,maxOutputTokens:10000});assert.equal(out.provider,'groq');assert.equal(seen[2].body.messages[1].content,'OA LITERAL, esquema del bloque y contexto breve');assert.equal(seen[2].body.max_completion_tokens,3000);assert.equal(seen[0].body.contents[0].parts[0].text,'ENCARGO_ORIGINAL_LARGO')}finally{global.fetch=old}});
 test('oversized fallback requests are diagnosed separately from invalid provider output',async()=>{const old=global.fetch;global.fetch=async u=>u.includes('generativelanguage')?gemini('{invalid'):{ok:false,status:413,json:async()=>({error:{message:'TEXTO_RESERVADO'}})};try{await assert.rejects(call('Bloque','','TEST','TEST'),e=>e.code==='AI_REQUEST_TOO_LARGE'&&e.proveedores.some(s=>s.estadoHTTP===413)&&!e.message.includes('TEXTO_RESERVADO'))}finally{global.fetch=old}});
+
+test('recovery API keeps the guide draft on HTTP 422 and resumes with only a reading request',async t=>{
+ const pedagogy=require('../heva-pedagogy.js'),sources=require('../lib/document-sources.cjs');
+ const plan={tipoMaterial:'GUIA',objetivoAprendizaje:'Comparar dos presupuestos',asignatura:'Matemática',
+  temaEspecifico:'Costos unitarios',estrategiaDidactica:'MODELADO',cantAlternativas:0,cantDesarrollo:0,cantCasos:0,
+  modoReferencia:'NINGUNA',noticiaDidacticaModo:'NO'};
+ const draft=pedagogy.schema('GUIA',plan);
+ draft.introduccionLectura='Presupuesto '.repeat(276).trim();
+ draft.actividadesGuiadas=[{consigna:'Compara dos presupuestos',apoyo:'Compara el costo por unidad',productoEsperado:'Tabla de comparación'}];
+ draft.actividadAutonoma={consigna:'Calcula otra compra',productoEsperado:'Un cálculo explicado'};
+ draft.planEstrategia={id:'MODELADO',habilidadCentral:'Comparar costos unitarios',aplicacionConcreta:'Modelar el cálculo antes de comparar compras',evidenciaEsperada:'Tabla de costos con cálculos',retroalimentacionDocente:'Revisar cómo se obtiene el precio unitario'};
+ draft.trazabilidadEstrategia=['GUIADA-1','AUTONOMA'].map(referencia=>({
+  referencia,habilidad:'Comparar costos',evidencia:'Tabla comparativa con unidades',criterio:'Usa costos por unidad'
+ }));
+ t.mock.method(sources,'retrieve',async()=>{throw Error('Fuente no disponible en esta prueba');});
+ const env={...process.env};
+ t.after(()=>{process.env=env;});
+ Object.assign(process.env,{GEMINI_API_KEY:'TEST',GROQ_API_KEY:'',ALLOW_PAID_AI:'false',HEVA_AI_REQUIRE_AUTH:'false'});
+ const prompts=[];
+ let accept=false;
+ t.mock.method(globalThis,'fetch',async(_url,options)=>{
+  const prompt=JSON.parse(options.body).contents[0].parts[0].text;
+  prompts.push(prompt);
+  if(prompts.length===1)return gemini(JSON.stringify(draft));
+  return gemini(JSON.stringify({introduccionLectura:accept?'Explicación '.repeat(305):'Muy breve',actividadesGuiadas:[]}));
+ });
+ const request=async body=>{
+  let status,data;
+  await require('../api/recover')({method:'POST',body:{fase:'base',plan,...body}},{
+   setHeader(){},status(n){status=n;return this;},json(value){data=value;return this;}
+  });
+  return {status,data};
+ };
+ const pending=await request({});
+ assert.equal(pending.status,422);
+ assert.equal(pending.data.codigo,'BASE_READING_INCOMPLETE');
+ assert.deepEqual(pending.data.borradorBloque.actividadesGuiadas,draft.actividadesGuiadas);
+ accept=true;
+ const result=await request({borradorBloque:pending.data.borradorBloque,autor:pending.data.autor});
+ assert.equal(result.status,200,result.data.detalle);
+ assert.equal(prompts.length,3);
+ assert.ok(prompts.slice(1).every(prompt=>prompt.startsWith('REPARACIÓN LOCALIZADA:')));
+ assert.deepEqual(result.data.parte.actividadesGuiadas,draft.actividadesGuiadas);
+ assert.deepEqual(result.data.parte.proveedoresBloque,['gemini']);
+});

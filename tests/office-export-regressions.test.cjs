@@ -79,3 +79,15 @@ test('evidencia completa de procedencia distingue una imagen documental de una i
  assert.ok(!audit.issues.some(i=>i.code==='FUENTE_DOCUMENTAL_NO_VERIFICADA'));
  assert.ok(audit.issues.some(i=>i.code==='REVISION_PEDAGOGICA_PENDIENTE'));
 });
+
+
+test('PPTX generated from a guide shows one cover and retains the objective',async()=>{
+ const material={titulo:'Guía de muestra',tipoMaterial:'GUIA',asignatura:'Matemática',nivel:'EPJA',blocks:[
+  {title:'Guía de muestra',path:'titulo',text:'Guía de aprendizaje · EPJA · Matemática'},
+  {title:'Objetivo curricular',text:'Comparar dos presupuestos completos'}
+ ]};
+ const slides=await renderDeck(material);
+ assert.equal(slides.length,2);
+ assert.equal(slides.flatMap(s=>s.texts).filter(text=>text===material.titulo).length,1);
+ assert.ok(slides[1].texts.join(' ').includes('Comparar dos presupuestos completos'));
+});
