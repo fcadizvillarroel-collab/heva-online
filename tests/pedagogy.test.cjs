@@ -18,3 +18,11 @@ test('API usa contrato elegido y conserva el objetivo literal',async()=>{let old
 module.exports={fixture};
 test('las alternativas se agrupan con su pregunta para presentar y exportar',()=>{let exam=H.material(P.finalize(fixture('EVALUACION'),{tipoMaterial:'EVALUACION',estrategiaDidactica:'MODELADO'})),blocks=H.blocks(exam),question=blocks.find(b=>b.kind==='question'),options=blocks.filter(b=>b.kind==='option');assert.equal(options.length,4);assert.ok(options.every(b=>b.group===question.group));assert.equal(options[0].title,'A)')});
 test('la pauta siempre muestra la clave aunque falte su explicación',()=>{let x=fixture('EVALUACION');delete x.preguntasAlternativas[0].justificacion;let m=H.material(P.finalize(x,{tipoMaterial:'EVALUACION',estrategiaDidactica:'MODELADO'}));assert.ok(H.blocks(m,true).some(b=>b.title==='Clave 1 · C'));assert.ok(!H.blocks(m).some(b=>b.title.startsWith('Clave ')))});
+
+test('The metal workshop prompt aligns dimension placement and the checklist',()=>{
+ const didactics=require('../heva-didactics.js');
+ const plan={asignatura:'Construcciones Metálicas',tipoMaterial:'TALLER'};
+ assert.match(didactics.prompt(plan),/cota de espesor junto al canto, entre las dos caras paralelas/);
+ assert.match(didactics.prompt(plan),/verifique|compruebe valor, unidad y ubicación/);
+ assert.doesNotMatch(didactics.prompt({...plan,tipoMaterial:'GUIA'}),/CROQUIS ACOTADO/);
+});
