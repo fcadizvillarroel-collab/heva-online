@@ -29,3 +29,17 @@ test('Word uses one native outline level for the document title and another for 
  assert.equal(JSON.stringify(outline),JSON.stringify([[heading.HEADING_1,'Análisis de fuentes'],[heading.HEADING_2,'Objetivo curricular']]));
  assert.ok(config.styles.default.heading1.run.size>config.styles.default.heading2.run.size);
 });
+
+test('PowerPoint groups a short workshop action with its own precaution and keeps unrelated steps separate',()=>{
+ const {g,m}=fixture();
+ m.tipoMaterial='TALLER';
+ g.HEVA.blocks=()=>[
+  {title:'Procedimiento 1',text:'Dibuje la vista de canto.',path:'procedimientoTaller.0.accion'},
+  {title:'Cuidado durante el trabajo',text:'Mantenga legibles las cotas.',path:'procedimientoTaller.0.cuidado'},
+  {title:'Procedimiento 2',text:'Compruebe la unidad.',path:'procedimientoTaller.1.accion'}
+ ];
+ const pages=g.HEVAOffice.presentationPages(m);
+ assert.equal(pages.length,2);
+ assert.match(pages[0].lines.join(' '),/Dibuje la vista de canto\. Cuidado durante el trabajo: Mantenga legibles las cotas\./);
+ assert.match(pages[1].lines.join(' '),/Compruebe la unidad/);
+});
