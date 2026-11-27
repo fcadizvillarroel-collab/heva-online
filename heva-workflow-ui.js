@@ -146,7 +146,7 @@ document.getElementById('hoja-material').addEventListener('input',()=>{clearTime
   }catch{return [];}
  };
  let packageBusy=false;
- let packageMessage='';
+ let packageMessage='',messageKey=null;
  let selectionKey=null,selection=new Set();
  const packageIdentity=material=>material.materialId||material;
  async function generatePackage(origin,selected){
@@ -166,6 +166,7 @@ document.getElementById('hoja-material').addEventListener('input',()=>{clearTime
   try{
    syncEdits();
    workflow.preservePackageMaterial(origin,localHistory,()=>guardarEnHistorial(false));
+   messageKey=packageIdentity(origin);
    const generated=await workflow.generateMissingPackage(origin,selected,{
     readHistory:localHistory,
     generate:plan=>{
@@ -184,18 +185,20 @@ document.getElementById('hoja-material').addEventListener('input',()=>{clearTime
     defaults:type=>HEVAPedagogy.contract(type).defaults,
     onPiece:type=>{
      packageMessage='Generando '+HEVAPedagogy.contract(type).name+'…';
-     if(resultStatus())resultStatus().textContent=packageMessage;
+     if(materialActual&&packageIdentity(materialActual)===messageKey&&resultStatus())resultStatus().textContent=packageMessage;
     }
    });
    packageMessage=generated.length?'Piezas guardadas en Mis materiales: '+generated.length+'.':'Las piezas seleccionadas ya están guardadas.';
   }catch(error){
+   messageKey=packageIdentity(origin);
    packageMessage=error.message||'La generación se interrumpió. Las piezas guardadas se conservan.';
   }finally{
    packageBusy=false;
    if(mainButton)mainButton.disabled=false;
    cargarHistorial();
    mostrarRecuperacionPendienteHEVA();
-   if(materialActual===origin){selectionKey=packageIdentity(origin);syncEdits();renderizarDocumentoEnPantalla();}
+   if(materialActual===origin)selectionKey=packageIdentity(origin);
+   if(materialActual){syncEdits();renderizarDocumentoEnPantalla();}
   }
  }
 
@@ -216,7 +219,7 @@ document.getElementById('hoja-material').addEventListener('input',()=>{clearTime
   const defaultSelection=planning?.modoMateriales==='crear'?(planning.materiales||[]):[];
   if(selectionKey!==packageIdentity(origin)){selectionKey=packageIdentity(origin);selection=new Set(defaultSelection);}
   const selected=()=>kit.filter(entry=>!entry.material&&selection.has(entry.type)).map(entry=>entry.type);
-  const packageStatus=el('p',packageMessage);
+  const packageStatus=el('p',messageKey===packageIdentity(origin)?packageMessage:'');
   packageStatus.id='heva-package-status';packageStatus.setAttribute('role','status');
   const generate=button('Generar piezas seleccionadas',()=>{
    const pieces=selected();
