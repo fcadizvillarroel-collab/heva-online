@@ -13,7 +13,11 @@ function visualFamily(subject){
  if(/lenguaje|lengua y literatura|lengua castellana|comunicacion|lectura|escritura/.test(n))return'lenguaje';
  if(/ingles|english|idioma extranjero/.test(n))return'ingles';
  if(/matemat|algebra|geometria/.test(n))return'matematica';
- if(/historia|estudios sociales|geografia|ciudadania|filosofia/.test(n))return'sociales';
+ if(/filosof/.test(n))return'filosofia';
+ if(/educacion fisica/.test(n))return'movimiento';
+ if(/educacion artistica|artes visuales/.test(n))return'artes';
+ if(/educacion ciudadana/.test(n))return'ciudadana';
+ if(/historia|estudios sociales|geografia|ciudadania/.test(n))return'sociales';
  if(/ciencias naturales|biologia|quimica|fisica|ecosistema/.test(n))return'ciencias';
  if(/construcciones metalicas|soldadura|especialidad metal|formacion en oficios|prevencion de riesgos/.test(n))return'tecnica';
  if(/convivencia|insercion laboral|empleabilidad|emprendimiento|consumo/.test(n))return'ciudadana';
@@ -34,6 +38,9 @@ function diagramPlan(section,subject,topic){
   matematica:{title:'Resolver con sentido',labels:['DATOS','PROCEDIMIENTO','COMPROBAR'],notes:['Identificar valores','Aplicar operaciones','Verificar el resultado']},
   sociales:{title:'Interpretar la sociedad',labels:['CONTEXTO','EVIDENCIAS','CONCLUSIÓN'],notes:['Ubicar tiempo y lugar','Examinar fuentes','Explicar relaciones']},
   ciencias:{title:'Explicar fenómenos',labels:['OBSERVAR','RELACIONAR','CONCLUIR'],notes:['Identificar evidencias','Analizar procesos','Explicar resultados']},
+  filosofia:{title:'Examinar un argumento',labels:['PREMISAS','CONCLUSIÓN','OBJECIÓN'],notes:['Identificar las razones','Precisar la tesis','Considerar un reparo']},
+  movimiento:{title:'Revisar una secuencia de movimiento',labels:['PROPÓSITO','SECUENCIA','AJUSTE'],notes:['Definir el objetivo','Observar sus pasos','Adaptar al contexto']},
+  artes:{title:'Interpretar y crear',labels:['OBSERVAR','DECIDIR','JUSTIFICAR'],notes:['Identificar elementos','Elegir recursos','Explicar su efecto']},
   tecnica:{title:'Procedimiento técnico seguro',labels:['PREPARAR','EJECUTAR','CONTROLAR'],notes:['Materiales y EPP','Secuencia de trabajo','Calidad y seguridad']},
   ciudadana:{title:'Decidir con fundamentos',labels:['SITUACIÓN','OPCIONES','DECISIÓN'],notes:['Comprender el caso','Comparar alternativas','Justificar elección']}
  };

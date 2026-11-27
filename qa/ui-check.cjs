@@ -23,7 +23,11 @@ if(require.main===module)(async()=>{
  await page.evaluate(m=>{materialActual=m;renderizarDocumentoEnPantalla();cambiarHerramienta('crear')},guide);
  const sheet=page.locator('#hoja-material');
  await sheet.getByRole('heading',{name:guide.titulo,exact:true}).waitFor();
- await sheet.getByRole('textbox',{name:'Explicación y lectura',exact:true}).waitFor();
+ const reading=sheet.locator('[data-heva-path="introduccionLectura"]');
+ await reading.waitFor({state:'visible'});
+ assert.equal(await reading.getAttribute('role'),'textbox');
+ assert.equal(await reading.getAttribute('aria-label'),'Explicación y lectura');
+ assert.equal(await reading.getAttribute('contenteditable'),'true');
  await openTeacherTools();await page.getByRole('button',{name:'Editar y ordenar bloques',exact:true}).click();await page.getByRole('button',{name:'Cerrar',exact:true}).click();
  await page.getByRole('button',{name:'Accesibilidad',exact:true}).click();await page.getByLabel('Tamaño de letra',{exact:true}).fill('20');await page.getByLabel('Alto contraste',{exact:true}).check();await page.getByLabel('Letra grande en exportaciones',{exact:true}).check();await page.getByRole('button',{name:'Aplicar al material y exportaciones'}).click();assert.equal(await page.evaluate(()=>materialActual.accesibilidadVisual.tamano),20);
  await page.evaluate(()=>{

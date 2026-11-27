@@ -59,7 +59,69 @@ function panel(){
   candidates.forEach((entry,index)=>source.append(new Option(entry.data.titulo+' · versión '+(entry.data.version||1),String(index))));
   if(candidates.length)source.value='0';
   else message.textContent='Genera y guarda otra evaluación del mismo OA con la misma estructura para emparejar preguntas distintas.';
-  for(const button of exportForms.querySelectorAll('button')){
+  const compareButton=document.createElement('button');
+  compareButton.type='button';compareButton.textContent='Comparar las preguntas de A y B';
+  exportForms.append(compareButton);
+  const updateComparison=()=>{compareButton.hidden=source.value==='';};
+  compareButton.onclick=()=>{
+   const other=candidates[Number(source.value)]?.data;
+   if(!other||source.value==='')return;
+   syncEdits();
+   const comparison=document.createElement('dialog');
+   comparison.setAttribute('aria-label',compareButton.textContent);
+   comparison.style.cssText='width:min(860px,94vw);max-height:85vh;overflow:auto;padding:20px;border:1px solid #c9bba9;border-radius:12px;background:#fff;';
+   const summary=document.createElement('h2');summary.textContent=compareButton.textContent;summary.style.cssText='font-weight:700;font-size:1.15rem';
+   const close=document.createElement('button');close.type='button';close.textContent='Cerrar comparación';close.onclick=()=>comparison.close();
+   const pairs=document.createElement('div');
+   comparison.append(summary,close,pairs);
+   comparison.addEventListener('close',()=>comparison.remove(),{once:true});
+   document.body.append(comparison);
+   comparison.showModal();
+   const original=materialActual;
+   if(!HEVAAssessment.compatibleForms(original,other)){
+    pairs.textContent='La evaluación cambió. Guarda los cambios y elige una forma compatible.';
+    return;
+   }
+   const note=document.createElement('p');
+   note.textContent='Compara las operaciones, el uso de evidencia y la dificultad de cada par antes de aplicar las formas.';
+   pairs.append(note);
+   for(const [letter,exam] of [['A',original],['B',other]]){
+    if(!exam.comprensionLectora?.texto)continue;
+    const reading=document.createElement('details');
+    const heading=document.createElement('summary');heading.textContent='Lectura de la forma '+letter;
+    const text=document.createElement('p');text.textContent=exam.comprensionLectora.texto;
+    reading.append(heading,text);pairs.append(reading);
+   }
+   const first=HEVAAssessment.items(original),second=HEVAAssessment.items(other);
+   first.forEach((entry,index)=>{
+    const group=document.createElement('fieldset');
+    const title=document.createElement('legend');title.textContent=entry.label+' · '+entry.points+(entry.points===1?' punto':' puntos');
+    group.style.cssText='padding:10px;margin:12px 0;border:1px solid #c9bba9;min-inline-size:0;overflow-wrap:anywhere;';
+    const columns=document.createElement('div');
+    columns.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:16px;';
+    group.append(title,columns);
+    for(const [letter,item] of [['A',entry],['B',second[index]]]){
+     const label=document.createElement('strong');label.textContent='Forma '+letter;
+     const content=document.createElement('p');
+     const q=item.q;
+     content.textContent=[q.estimulo||q.contextoReal,q.enunciado||q.preguntaReflexion||q.consigna||q.texto].filter(Boolean).join(' · ');
+     const column=document.createElement('div');column.append(label,content);
+     columns.append(column);
+     if(Array.isArray(q.alternativas)){
+      const options=document.createElement('ul');
+      for(const qOption of q.alternativas){
+       const option=document.createElement('li');option.textContent=qOption.letra+') '+qOption.texto;
+       options.append(option);
+      }
+      column.append(options);
+     }
+    }
+    pairs.append(group);
+   });
+  };
+  source.addEventListener('change',updateComparison);
+  updateComparison();
+  for(const button of exportForms.querySelectorAll('[data-form-copy]')){
    button.onclick=async()=>{
     try{
      button.disabled=true;

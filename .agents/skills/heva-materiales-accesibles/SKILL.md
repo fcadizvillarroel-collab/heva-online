@@ -10,3 +10,9 @@ description: Revisa interfaz, edición, versiones, accesibilidad, diseño Word y
 4. Si cambia un recurso utilizado offline, revisa la lista precargada y la versión de caché en `sw.js`. Comprueba recuperación después de recargar y conservación de preferencias con el navegador sin conexión.
 
 Para lectura oral, comprueba que el diálogo tiene nombre accesible y que se puede iniciar o detener la sección elegida desde teclado. Declara cuándo la voz es un doble de prueba y cuándo se probó con una voz instalada o un lector de pantalla real. Al comparar documentos de planificación, verifica el orden de los encabezados y conserva una captura del contenido renderizado.
+
+## Oficio visual y pruebas
+
+- **Word, PowerPoint y diseño visual.** Reusa las variantes editables y las opciones de portada, imágenes y diagramas. Usa gráficos, tablas o comparaciones cuando ayuden a interpretar datos o relaciones. Conserva tamaño legible y orden de lectura.
+- **Inspección visual, UX y accesibilidad.** Renderiza dos ejemplares afectados en LibreOffice y coteja estímulos, imágenes, recortes, pautas y encabezados. En navegador verifica foco, etiquetas, retorno de foco, uso móvil y comunicación de errores.
+- **Offline.** Prueba recarga sin red y acceso a un material guardado. La IA y la sincronización requieren conexión. Comprueba que el fallo de red preserve edición y trabajo pendiente.
