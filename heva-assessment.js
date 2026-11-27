@@ -21,5 +21,33 @@ function rubricText(q,base){const weight=points(q,base);return list(q.rubrica).m
 function score(m){return items(m).filter(x=>!/^Alternativa |^Desarrollo |^Caso /.test(x.label)).reduce((n,x)=>n+x.points,0)}
 function blocks(m,teacher=false){const out=[],push=(title,text,path)=>out.push({title,text:String(text),...(path?{path}:{})});const answer=()=>push('Respuesta','____________________________________________________\n____________________________________________________');for(const [i,q]of list(m.verdaderoFalso).entries()){push('Verdadero o falso '+(i+1)+' · '+points(q,2)+' puntos',q.enunciado||'','verdaderoFalso.'+i+'.enunciado');push('Respuesta V/F '+(i+1),'V ____ F ____ · Justifica o corrige: __________________________________');}const t=m.terminosPareados;if(list(t?.terminos).length){push('Términos pareados · '+t.terminos.reduce((n,q)=>n+points(q,1),0)+' puntos',t.consigna);push('Columna A · términos',t.terminos.map(q=>q.id+'. '+q.texto+' ('+points(q,1)+' puntos)  Respuesta: ____').join('\n'));push('Columna B · opciones',list(t.opciones).map(q=>q.id+') '+q.texto).join('\n'));}const r=m.comprensionLectora;if(list(r?.preguntas).length){push('Lectura · '+r.titulo,r.texto,'comprensionLectora.texto');push('Procedencia de la lectura',(r.naturaleza==='SIMULADA'?'TEXTO DIDÁCTICO SIMULADO · ':'')+(r.fuente||''));r.preguntas.forEach((q,i)=>{push('Comprensión lectora '+(i+1)+' · '+points(q,3)+' puntos',q.enunciado,'comprensionLectora.preguntas.'+i+'.enunciado');answer()});}for(const [field,name,points]of [['ejerciciosEvaluacion','Ejercicio de aplicación',3],['identificacion','Identificar y justificar',2]])list(m[field]).forEach((q,i)=>{push(name+' '+(i+1)+' · '+( [1,2,3].includes(q.puntajeDocente)?q.puntajeDocente:points)+' puntos',q.estimulo+'\n'+q.consigna);answer()});if(teacher){push('PAUTA DOCENTE · NUEVOS FORMATOS','No incluir esta sección en el ejemplar del estudiante.');list(m.verdaderoFalso).forEach((q,i)=>push('Clave V/F '+(i+1),(q.respuesta?'Verdadero':'Falso')+' · '+q.justificacion+(q.respuesta?'':'\nCorrección: '+q.correccion)));if(t)push('Clave de términos pareados',list(t.clave).map(k=>k.terminoId+' → '+k.opcionId+' · '+k.justificacion).join('\n'));for(const [field,name]of [['lectura','Lectura'],['ejerciciosEvaluacion','Ejercicio'],['identificacion','Identificar']])(field==='lectura'?list(r?.preguntas):list(m[field])).forEach((q,i)=>push('Pauta '+name+' '+(i+1),q.respuestaEsperada+'\n'+q.criterioEvaluacion+'\n'+rubricText(q,field==='identificacion'?2:3)));}return out;}
 function shuffleMatching(m,random=Math.random){const t=m.terminosPareados;if(!t||!Array.isArray(t.opciones)||!Array.isArray(t.clave))return m;const options=t.opciones.map(q=>({...q}));for(let i=options.length-1;i>0;i--){const j=Math.max(0,Math.min(i,Math.floor(random()*(i+1))));[options[i],options[j]]=[options[j],options[i]];}const ids=new Map(options.map((q,i)=>[q.id,String.fromCharCode(65+i)]));m.terminosPareados={...t,opciones:options.map(q=>({...q,id:ids.get(q.id)})),clave:t.clave.map(k=>({...k,opcionId:ids.get(k.opcionId)||k.opcionId}))};return m;}
-return {types,config,count,validatePlan,schema,prompt,refs,validate,score,points,items,totalScore,rubricText,blocks,shuffleMatching};
+// Forma B conserva los ítems y mueve solo las opciones independientes de su posición.
+function forms(m, remapJustification){
+ if(m?.tipoMaterial!=='EVALUACION'||typeof remapJustification!=='function')return null;
+ const letters=['A','B','C','D'];
+ const shifted=Object.fromEntries(letters.map((letter,index)=>[letter,letters[(index+1)%letters.length]]));
+ const alternativeItems=list(m.preguntasAlternativas);
+ const a=JSON.parse(JSON.stringify({...m,titulo:'Forma A · '+m.titulo}));
+ const b=JSON.parse(JSON.stringify({...m,titulo:'Forma B · '+m.titulo}));
+ let changed=0;
+ for(const q of list(b.preguntasAlternativas)){
+  const options=list(q?.alternativas);
+  if(options.length!==4||options.map(x=>x?.letra).sort().join('')!=='ABCD'||!options.every(x=>text(x.texto))||new Set(options.map(x=>norm(x.texto))).size!==4||!letters.includes(q.claveCorrecta))continue;
+  const visible=[q.enunciado,...options.map(x=>x.texto)].join(' ');
+  if(/\b(?:(?:todas?|ninguna?|ambas?)\s+(?:las\s+)?(?:anteriores|siguientes|opciones|alternativas)|(?:alternativa|opci[oó]n|letra|respuesta|inciso)\s+[ABCD]|(?:primera|segunda|tercera|cuarta|[úu]ltima|anterior|siguiente)\s+(?:opci[oó]n|alternativa)|(?:opci[oó]n|alternativa)\s+(?:primera|segunda|tercera|cuarta|[úu]ltima|anterior|siguiente)|[ABCD]\s*(?:y|o|\/)\s*[ABCD])\b/i.test(visible)||/\b[ABCD][).:]/.test(visible))continue;
+  const justification=remapJustification(q.justificacion,shifted);
+  if(justification===null)continue;
+  q.alternativas=options.map(x=>({...x,letra:shifted[x.letra]})).sort((x,y)=>letters.indexOf(x.letra)-letters.indexOf(y.letra));
+  q.claveCorrecta=shifted[q.claveCorrecta];
+  q.justificacion=justification;
+  changed++;
+ }
+ if(!changed)return null;
+ // Las formas son ejemplares de exportación. La revisión registrada sigue vinculada al original.
+ delete b.revisionIA;
+ delete b.aprobacionDocente;
+ delete b.aprobacionPedagogica;
+ return {a,b,changed,retained:alternativeItems.length-changed};
+}
+return {types,config,count,validatePlan,schema,prompt,refs,validate,score,points,items,totalScore,rubricText,blocks,shuffleMatching,forms};
 });

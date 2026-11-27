@@ -1,5 +1,6 @@
 const SectionRepair=require('../lib/news-repair.cjs');
 const Provenance=require('../lib/review-provenance.cjs');
+const {createHmac,timingSafeEqual}=require('node:crypto');
 const Didactics=require('../heva-didactics.js');
 const TPInternational=require('../lib/tp-metal-international.cjs');
 const {call} = require('./_providers.cjs');
@@ -51,7 +52,8 @@ module.exports = async function handler(req, res) {
     cantDesarrollo = 2,
     cantCasos = 2,
     incluirTicketSalida = true,
-    preguntaARegenerar = null
+    preguntaARegenerar = null,
+    reanudarBorrador = null
   } = req.body || {};
 
   // En presentaciones, el contenido evaluable se integra en las diapositivas.
@@ -77,6 +79,9 @@ module.exports = async function handler(req, res) {
   const inclusiveErrors=Inclusive.validate(apoyosInclusivos);
   if(inclusiveErrors.length)return res.status(400).json({error:inclusiveErrors.join('; '),codigo:'APOYOS_INVALIDOS'});
   if (typeof objetivoAprendizaje !== 'string' || typeof textoReferencia !== 'string' || textoReferencia.length > 60000) return res.status(400).json({error:'Objetivo o texto de referencia inválido o demasiado extenso.'});
+  if(reanudarBorrador!==null&&(modoHerramienta!=='GENERADOR_ESTANDAR'||typeof reanudarBorrador!=='object'||typeof reanudarBorrador.firma!=='string'||!/^[a-f0-9]{64}$/.test(reanudarBorrador.firma)||JSON.stringify(reanudarBorrador).length>250000)){
+    return res.status(400).json({error:'El borrador recibido no admite reanudación.',codigo:'DIRECT_DRAFT_INVALID'});
+  }
   const OPENAI_API_KEY = process.env.ALLOW_PAID_AI === 'true' ? (process.env.OPENAI_API_KEY || '').trim() : '';
   const GEMINI_API_KEY = (process.env.GEMINI_API_KEY || '').trim();
   const GROQ_API_KEY = (process.env.GROQ_API_KEY || '').trim();
@@ -197,6 +202,11 @@ Responde ÚNICAMENTE en JSON:
     let estrategiasLab = [];
     try { estrategiasLab = LabBridge.resolveMany({asignatura,nivel,objetivoAprendizaje,temaEspecifico,tipoMaterial,estrategiaLaboratorio,estrategiasLaboratorio,opcionesLaboratorio,oaClaveLaboratorio,marcoCurricular}); }
     catch (error) { return res.status(400).json({error:'Estrategia Laboratorio: '+error.message}); }
+    const signResume=({borrador,autor,proveedores})=>createHmac('sha256',JSON.stringify([OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY]))
+      .update(JSON.stringify(['heva-borrador-directo-v1',plan,estrategiasLab,borrador,autor,proveedores])).digest();
+    if(reanudarBorrador&&!timingSafeEqual(Buffer.from(reanudarBorrador.firma,'hex'),signResume(reanudarBorrador))){
+      return res.status(422).json({error:'El borrador no coincide con este encargo o con la configuración actual.',codigo:'DIRECT_DRAFT_INVALID',reintentable:false});
+    }
     const fuentesDocumentales=await Sources.retrieve(plan);
     const librosRegulares=Textbooks.recommendations(plan);
     const matrizOA=OATextbookMatrix.build(plan,librosRegulares,fuentesDocumentales);
@@ -210,7 +220,7 @@ Responde ÚNICAMENTE en JSON:
     // textbook citations, integrated strategies or the teacher's instructions.
     const compactFallback=CompactPrompt.build(plan,Pedagogy,{estrategiasLaboratorioActivas:estrategiasLab.length>0});
     const metadata = {objetivoAprendizaje,asignatura,nivel,marcoCurricular,temaEspecifico,tipoMaterial,estrategiaDidactica:Pedagogy.strategy(estrategiaDidactica).name};
-    let author;
+    let author=reanudarBorrador?.autor;
     const draft = async (prompt,allowCompact=false) => { const r = await call(prompt,OPENAI_API_KEY,GEMINI_API_KEY,GROQ_API_KEY,[],{deadline:generationDeadline,oversizePrompt:typeof allowCompact==='string'?allowCompact:allowCompact?compactFallback:undefined,oversizeMaxOutputTokens:6000}); author={proveedor:r.provider,modelo:r.model,fecha:new Date().toISOString()}; return r.value; };
     const normalize = raw => {
       const normalized=Pedagogy.normalizeStrategyPlan(raw,plan);
@@ -224,9 +234,9 @@ Responde ÚNICAMENTE en JSON:
       return m;
     };
     const check = m => [...HEVA.validate(m,cantidadesEfectivas),...Pedagogy.validate(m,plan),...Skills.generationIssues(m,plan)];
-    let material = normalize(await draft(promptRedactor,true));
+    let material = normalize(reanudarBorrador?.borrador??await draft(promptRedactor,true));
     let issues = check(material);
-    let repairProviders=[];
+    let repairProviders=reanudarBorrador?.proveedores||[];
     for(const repair of [SectionRepair.repairReading,SectionRepair.repairActivity]){
       if(!issues.length||Date.now()>=generationDeadline-6500)break;
       let repairProvider;
@@ -241,9 +251,9 @@ Responde ÚNICAMENTE en JSON:
           issues=fixed.issues;
           repairProviders.push(repairProvider);
         }
-      }catch(error){console.warn('HEVA reading repair pending:',error.code||'ERROR');}
+      }catch(error){console.warn('HEVA section repair pending:',error.code||'ERROR');}
     }
-    if (issues.length&&!issues.every(SectionRepair.isResumableIssue)) {
+    if (!reanudarBorrador&&issues.length&&!issues.every(SectionRepair.isResumableIssue)) {
       const missingRefs=Pedagogy.missingTaskTraces(material);
       const selectedStrategy=Pedagogy.strategy(estrategiaDidactica);
       const strategyPlan=material.planEstrategia||{};
@@ -259,7 +269,7 @@ Responde ÚNICAMENTE en JSON:
     // A complete slide deck must not be discarded solely because the model
     // omitted the strategy metadata. Request only that metadata, and validate
     // it before merging; never synthesize evidence or silently pass validation.
-    if(issues.some(x=>x.includes('La estrategia seleccionada no está desarrollada'))&&Date.now()<generationDeadline-6500){
+    if(!reanudarBorrador&&issues.some(x=>x.includes('La estrategia seleccionada no está desarrollada'))&&Date.now()<generationDeadline-6500){
       try{
         const selected=Pedagogy.strategy(estrategiaDidactica);
         const summary=(material.diapositivas||[]).map((d,i)=>({numero:i+1,titulo:d.titulo,contenido:String(Array.isArray(d.contenido)?d.contenido.join(' '):d.contenido||'').slice(0,420)}));
@@ -272,7 +282,17 @@ Responde ÚNICAMENTE en JSON:
         }
       }catch(error){console.warn('Reparación puntual de estrategia no disponible:',error.code||'ERROR');}
     }
-    if (issues.length) return res.status(422).json({error:'El material no cumple la estructura pedagógica solicitada. Se conserva el documento anterior.',detalle:issues.join('; '),borrador:material});
+    if (issues.length){
+      if(issues.every(SectionRepair.isResumableIssue)){
+        const reanudacion={borrador:material,autor:author,proveedores:repairProviders};
+        reanudacion.firma=signResume(reanudacion).toString('hex');
+        if(JSON.stringify(reanudacion).length<=250000)return res.status(422).json({
+          error:'Se conserva el borrador completo para continuar la reparación localizada.',
+          detalle:issues.join('; '),codigo:'DIRECT_DRAFT_INCOMPLETE',reanudacion,reintentable:true
+        });
+      }
+      return res.status(422).json({error:'El material no cumple la estructura pedagógica solicitada. Se conserva el documento anterior.',detalle:issues.join('; '),borrador:material});
+    }
     material = Pedagogy.finalize(material,plan);
     material.autoriaIA=author;
     if(repairProviders.length)material.autoriaBloques=Provenance.assembly(Provenance.record(material,author.proveedor,...repairProviders),[],author);

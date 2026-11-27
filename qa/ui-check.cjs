@@ -10,7 +10,7 @@ function fixture(type='GUIA'){
 }
 module.exports={fixture};
 if(require.main===module)(async()=>{
- fs.mkdirSync('/tmp/heva-qa',{recursive:true});const browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox']});const context=await browser.newContext({acceptDownloads:true,viewport:{width:1440,height:1000},serviceWorkers:'block'});const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.dismiss());
+ fs.mkdirSync('/tmp/heva-qa',{recursive:true});const browser=await chromium.launch({executablePath:process.env.HEVA_CHROMIUM_EXECUTABLE||(fs.existsSync('/usr/bin/chromium')?'/usr/bin/chromium':undefined),headless:true,args:['--no-sandbox']});const context=await browser.newContext({acceptDownloads:true,viewport:{width:1440,height:1000},serviceWorkers:'block'});const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.dismiss());
  await page.route('**/*',route=>{const u=new URL(route.request().url());if(u.hostname!=='127.0.0.1')return route.abort();if(u.pathname.startsWith('/api/'))return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({objetivos:[],documents:[],fragments:[],exito:true})});return route.continue()});
  await page.goto(process.env.HEVA_QA_URL||'http://127.0.0.1:8765/',{waitUntil:'networkidle'});await page.waitForTimeout(300);
  const openTeacherTools=async()=>{
@@ -32,5 +32,27 @@ if(require.main===module)(async()=>{
  await page.getByRole('button',{name:'Editar y ordenar bloques',exact:true}).click();await page.getByRole('button',{name:'Bajar',exact:true}).first().click();assert.equal(await page.evaluate(()=>materialActual.diapositivas[0].titulo),'Conexiones entre lugares');await page.getByRole('button',{name:'Cerrar',exact:true}).click();await page.getByRole('button',{name:'Deshacer último cambio',exact:true}).click();assert.equal(await page.evaluate(()=>materialActual.diapositivas[0].titulo),'Lo que aprenderemos');
  const before=await page.evaluate(()=>materialActual.materialId);await context.setOffline(true);await page.evaluate(()=>generarMaterialReal());assert.equal(await page.evaluate(()=>materialActual.materialId),before);assert.ok(await page.evaluate(()=>!!localStorage.getItem('heva-solicitud-pendiente-v1')));await context.setOffline(false);
  await page.reload({waitUntil:'networkidle'});await page.evaluate(m=>{materialActual=m;renderizarDocumentoEnPantalla()},fixture());assert.equal(await page.locator('#hoja-material').evaluate(el=>getComputedStyle(el).fontSize),'20px');
- assert.deepEqual(errors,[]);console.log(JSON.stringify({browser:'Chromium',checks:['abrir interfaz','editor de bloques','ajustes accesibles','comparación','Word real','PPTX real','vista previa','reordenar y referencias','deshacer','encargo offline','persistencia de acceso'],pageErrors:errors,artifacts:'/tmp/heva-qa'}));await browser.close();
+
+ await page.getByText('Perfiles de curso guardados',{exact:true}).click();
+ await page.getByLabel('Nombre del perfil',{exact:true}).fill('Taller EPJA QA');
+ await page.getByRole('button',{name:'Guardar perfil',exact:true}).click();
+ const originalType=await page.locator('#tipo-material').inputValue();
+ await page.reload({waitUntil:'networkidle'});
+ await page.getByText('Perfiles de curso guardados',{exact:true}).click();
+ await page.getByLabel('Perfil guardado',{exact:true}).selectOption({label:'Taller EPJA QA'});
+ await page.locator('#tipo-material').selectOption(originalType==='GUIA'?'ACCESIBLE':'GUIA');
+ await context.setOffline(true);
+ await page.getByRole('button',{name:'Aplicar perfil',exact:true}).click();
+ await page.getByText('Perfil aplicado. Selecciona el objetivo para este material.').waitFor();
+ assert.equal(await page.locator('#tipo-material').inputValue(),originalType);
+ const complete=type=>{const sample=fixture(type);sample.planGeneracion.marcoCurricular='Decreto 257';return sample;};
+ await page.evaluate(({guide,presentation})=>{
+  localStorage.setItem('heva_historial',JSON.stringify([{id:'PPT-QA',fecha:'26-11-2026',data:presentation}]));
+  materialActual=guide;renderizarDocumentoEnPantalla();
+ },{guide:complete('GUIA'),presentation:complete('PRESENTACION')});
+ await page.getByText('Paquete pedagógico de esta unidad',{exact:true}).click();
+ await page.getByRole('button',{name:'Abrir '+P.contract('PRESENTACION').name,exact:true}).click();
+ assert.equal(await page.evaluate(()=>materialActual.tipoMaterial),'PRESENTACION');
+ await context.setOffline(false);
+ assert.deepEqual(errors,[]);console.log(JSON.stringify({browser:'Chromium',checks:['abrir interfaz','editor de bloques','ajustes accesibles','comparación','Word real','PPTX real','vista previa','reordenar y referencias','deshacer','encargo offline','persistencia de acceso','perfil de curso offline tras recarga','paquete de unidad'],pageErrors:errors,artifacts:'/tmp/heva-qa'}));await browser.close();
 })().catch(e=>{console.error(e);process.exit(1)});

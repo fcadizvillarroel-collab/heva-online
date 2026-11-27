@@ -13,3 +13,28 @@ test('repeated case questions are detected even if the case narratives differ',(
 test('matching options shuffle without changing the correct term-definition relationships',()=>{const m=sample(),before=m.terminosPareados.clave.map(k=>m.terminosPareados.opciones.find(o=>o.id===k.opcionId).texto);A.shuffleMatching(m,()=>0);const after=m.terminosPareados.clave.map(k=>m.terminosPareados.opciones.find(o=>o.id===k.opcionId).texto);assert.deepEqual(after,before);assert.deepEqual(A.validate(m,plan),[])});
 
 test('generation prompt carries concrete integrated requirements, not just strategy IDs',()=>{const p={...plan,planIntegrado:I.plan({strategies:[{id:'multicausalidad',quantity:1}],counts:{alternativas:0,desarrollo:0,lecturas:0}})};assert.match(P.prompt(p),/causas de distinta naturaleza/);assert.match(P.prompt(p),/estrategiasIntegradas/)});
+
+test('forma B remapea explicación y clave de alternativas seguras conservando contenido y puntuación',()=>{
+ const m=P.finalize(sample(),plan),remap=require('../heva-skills.js').remapJustification;
+ const options=[{letra:'A',texto:'Analizar fuentes'},{letra:'B',texto:'Examinar testimonios'},{letra:'C',texto:'Comparar puntos de vista'},{letra:'D',texto:'Revisar una cronología'}];
+ m.preguntasAlternativas=[
+  {enunciado:'¿Cómo identificar perspectivas opuestas?',alternativas:options,claveCorrecta:'C',justificacion:'La alternativa C distingue perspectivas.',puntajeDocente:3},
+  {enunciado:'Elige entre A y B.',alternativas:options,claveCorrecta:'A',justificacion:'La alternativa A identifica la fuente.'}
+ ];
+ const original=structuredClone(m),forms=A.forms(m,remap);
+ assert.deepEqual(m,original);
+ assert.match(forms.a.titulo,/^Forma A/);
+ assert.match(forms.b.titulo,/^Forma B/);
+ assert.equal(forms.changed,1);
+ assert.equal(forms.retained,1);
+ const changed=forms.b.preguntasAlternativas[0];
+ assert.equal(changed.claveCorrecta,'D');
+ assert.match(changed.justificacion,/alternativa D/);
+ assert.equal(changed.alternativas.find(x=>x.letra===changed.claveCorrecta).texto,options[2].texto);
+ assert.deepEqual(forms.b.preguntasAlternativas[1],m.preguntasAlternativas[1]);
+ assert.equal(A.totalScore(forms.b),A.totalScore(forms.a));
+ assert.deepEqual(P.refs(forms.b),P.refs(forms.a));
+ assert.ok(!JSON.stringify(P.blocks(forms.b)).includes('La alternativa D distingue perspectivas.'));
+ assert.ok(JSON.stringify(P.blocks(forms.b,true)).includes('La alternativa D distingue perspectivas.'));
+ assert.equal(A.forms({...m,preguntasAlternativas:[m.preguntasAlternativas[1]]},remap),null);
+});

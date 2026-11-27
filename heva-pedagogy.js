@@ -124,7 +124,8 @@ function activityIssues(material,plan){
    const text=norm(task.text);
    if(!/placa rectangular/.test(text)||!/cumple|cumplimiento/.test(text)||!/superficie|area/.test(text))continue;
    const paired=/\d+(?:[.,]\d+)?\s*(?:mm|cm|m)?\s*[×x]\s*\d+(?:[.,]\d+)?\s*(?:mm|cm|m)\b/.test(text);
-   const dimension=label=>new RegExp('\\b(?:'+label+')\\s*(?:(?:de|es|mide|igual a)\\s+|[:=]\\s*)?\\d+(?:[.,]\\d+)?\\s*(?:mm|cm|m)\\b(?![²^])').test(text);
+   const measurement=String.raw`\d+(?:[.,]\d+)?\s*(?:mm|cm|m)\b(?![²^])`;
+   const dimension=label=>new RegExp(String.raw`\b(?:${label})\s*(?:(?:es\s+de|mide|igual\s+a|de|es)\s+|[:=]\s*)?${measurement}|${measurement}\s+(?:de\s+)?(?:${label})\b`).test(text);
    const criterion=/(?:al menos|como minimo|minim[oa]|maxim[oa]|mayor o igual|menor o igual|requiere|exige|umbral|criterio de aceptacion)[^.;]{0,70}\d+(?:[.,]\d+)?\s*(?:mm|cm|m)(?:\^?2|²| cuadrados?)\b(?!\d)/.test(text.replaceAll('²','2'));
    const missing=[];
    if(!paired&&!dimension('largo|longitud'))missing.push('largo');

@@ -91,3 +91,28 @@ test('PPTX generated from a guide shows one cover and retains the objective',asy
  assert.equal(slides.flatMap(s=>s.texts).filter(text=>text===material.titulo).length,1);
  assert.ok(slides[1].texts.join(' ').includes('Comparar dos presupuestos completos'));
 });
+
+test('PowerPoint paginates a long selection item intact and keeps short options together',async()=>{
+ const letters=['A','B','C','D'];
+ const context=Array.from({length:260},(_,index)=>'observación '+index).join(' ');
+ const question='¿Qué observación corresponde al caso?';
+ const prompt=context+'. '+question;
+ const material={titulo:'Lectura de observaciones',tipoMaterial:'EVALUACION',blocks:[
+  {title:'Selección múltiple 1',text:prompt,kind:'question',group:'ALT-1'},
+  ...letters.map(letra=>({title:letra+')',text:'Respuesta '+letra,kind:'option',group:'ALT-1'}))
+ ]};
+ for(const large of [false,true]){
+  const slides=await renderDeck(material,large);
+  const bodies=slides.slice(1).flatMap(slide=>slide.boxes.filter(box=>box.y>=2.35&&box.y<2.8));
+  assert.ok(bodies.length>2);
+  assert.ok(bodies.every(box=>box.fontSize>=26));
+  const expected=[prompt,...letters.map(letra=>letra+') Respuesta '+letra)].join(' ');
+  assert.equal(bodies.map(box=>box.text).join(' ').replace(/\s+/g,' '),expected);
+  assert.ok(bodies.at(-1).text.includes(question));
+  assert.ok(letters.every(letra=>bodies.at(-1).text.includes(letra+') Respuesta '+letra)));
+ }
+ material.blocks[0].text='¿Qué observación corresponde al caso?';
+ const short=await renderDeck(material);
+ assert.equal(short.length,2,'Una pregunta breve debe permanecer en una diapositiva.');
+ assert.ok(letters.every(letra=>short[1].texts.some(text=>text.includes(letra+') Respuesta '+letra))));
+});

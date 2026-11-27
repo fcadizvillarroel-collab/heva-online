@@ -8,3 +8,34 @@ test('Plantillas y tamaños accesibles válidos sin recursos externos',()=>{for(
 
 test('abreviar no puede borrar la pregunta y dejar solo datos',()=>{const m=sample();m.preguntasAlternativas[0].enunciado='Un producto cuesta 100. ¿Cuál es el descuento?';assert.throws(()=>S.patch(m,'ALT-1',{contenido:{enunciado:'Un producto cuesta 100.',claveCorrecta:'A'}}),/eliminó la pregunta/)});
 test('exportadores propagan plantilla y tamaño accesible a sus bibliotecas',async()=>{const vm=require('node:vm'),fs=require('node:fs');let wordOptions,slides=[];class Paragraph{constructor(x){this.x=x}}class TextRun{constructor(x){this.x=x}}class Doc{constructor(x){wordOptions=x}}class Deck{constructor(){this.ShapeType={rect:'rect',line:'line',roundRect:'roundRect'}}addSlide(){const s={texts:[],addShape(){},addText(text,options){this.texts.push({text,options})}};slides.push(s);return s}async writeFile(){}}const ctx={HEVATemplates:T,HEVA:{material:x=>x,blocks:()=>[{title:'Prueba',text:'Contenido de comprobación'}]},docx:{Document:Doc,Paragraph,TextRun,HeadingLevel:{TITLE:1,HEADING_1:2},Packer:{toBlob:async()=>new Blob(['doc'])}},PptxGenJS:Deck,Blob,setTimeout:()=>{},URL:{createObjectURL:()=>'',revokeObjectURL:()=>{}},document:{createElement:()=>({click(){},remove(){}}),body:{appendChild(){}}}};vm.createContext(ctx);vm.runInContext(fs.readFileSync(require.resolve('../heva-office.js'),'utf8'),ctx);const m={titulo:'Prueba',tipoMaterial:'ACCESIBLE',plantillaVisual:'contraste'};await ctx.HEVAOffice.word(m);await ctx.HEVAOffice.powerpoint(m);assert.equal(wordOptions.sections[0].children[2].x.children[0].x.size,32);assert.equal(slides[0].background.color,'FFFFFF');assert.ok(slides.slice(1).some(s=>s.texts.some(t=>t.text==='Contenido de comprobación'&&t.options.fontSize>=26)))});
+
+test('la edición individual de pareados y comprensión conserva identificadores, claves y puntaje docente',()=>{
+ const m=sample();
+ m.terminosPareados={terminos:[{id:'1',texto:'Oferta',puntajeDocente:2}],opciones:[{id:'A',texto:'Opciones disponibles'}],clave:[{terminoId:'1',opcionId:'A'}]};
+ m.comprensionLectora={texto:'Texto completo.',preguntas:[{numero:1,enunciado:'Describe la situación.',puntajeDocente:1}]};
+ const paired=S.patch(m,'PAR-1',{contenido:{id:'9',texto:'Oferta de trabajo'}});
+ const reading=S.patch(m,'LECT-1',{contenido:{numero:4,enunciado:'Compara las condiciones.',puntajeDocente:3}});
+ assert.deepEqual(paired.terminosPareados.terminos,[{id:'1',texto:'Oferta de trabajo',puntajeDocente:2}]);
+ assert.deepEqual(paired.terminosPareados.clave,m.terminosPareados.clave);
+ assert.deepEqual(reading.comprensionLectora.preguntas,[{numero:1,enunciado:'Compara las condiciones.',puntajeDocente:1}]);
+ assert.deepEqual(S.changes(m,paired),['PAR-1']);
+ assert.deepEqual(S.changes(m,reading),['LECT-1']);
+});
+
+test('la mejora integral mantiene ponderaciones personalizadas y rechaza cambios en los recuentos anidados',()=>{
+ const m=sample();
+ for(const q of m.preguntasAlternativas)q.alternativas=['A','B','C','D'].map(letra=>({letra,texto:letra}));
+ m.terminosPareados={terminos:[{id:'1',texto:'Oferta',puntajeDocente:2}],opciones:[{id:'A',texto:'Propuesta'}],clave:[{terminoId:'1',opcionId:'A',justificacion:'Es una propuesta.'}]};
+ m.comprensionLectora={texto:'Texto completo.',preguntas:[{numero:1,enunciado:'Describe la situación.'}]};
+ const proposal=S.improvementData(m);
+ proposal.terminosPareados.terminos[0]={id:'99',texto:'Oferta de trabajo'};
+ proposal.terminosPareados.opciones[0].id='B';
+ proposal.terminosPareados.clave[0].terminoId='99';
+ proposal.comprensionLectora.preguntas[0]={numero:2,enunciado:'Compara las condiciones.',puntajeDocente:1};
+ const next=S.improve(m,{contenido:proposal},'EVALUACION');
+ assert.deepEqual(next.terminosPareados.terminos,[{id:'1',texto:'Oferta de trabajo',puntajeDocente:2}]);
+ assert.deepEqual(next.terminosPareados.opciones,m.terminosPareados.opciones);
+ assert.deepEqual(next.terminosPareados.clave,m.terminosPareados.clave);
+ assert.deepEqual(next.comprensionLectora.preguntas,[{numero:1,enunciado:'Compara las condiciones.'}]);
+ assert.throws(()=>S.improve(m,{contenido:{comprensionLectora:{...m.comprensionLectora,preguntas:[]}}},'EVALUACION'),/cantidad/);
+});

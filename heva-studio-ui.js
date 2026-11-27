@@ -42,6 +42,36 @@ function panel(){
  '<p id="studio-status" role="status" style="font-size:11px;margin:12px 0 5px">Las propuestas requieren conexión con IA. Puedes revisar el resultado antes de incorporarlo al material.</p>'+
  '<div id="studio-preview" style="overflow-wrap:anywhere"></div></details>';
  el.querySelectorAll('button').forEach(button=>{button.style.padding='9px 10px';button.style.margin='5px 0';button.style.borderRadius='7px';button.style.border=button.id==='studio-edit'?'none':'1px solid #b98d67';button.style.fontSize='12px';button.style.fontWeight='600'});
+ if(m.tipoMaterial==='EVALUACION'&&m.preguntasAlternativas?.length){
+  const exportForms=document.createElement('details');
+  exportForms.innerHTML='<summary>Exportar formas A y B en Word</summary>'+
+   '<p>Las dos formas conservan las preguntas y el puntaje. En la forma B cambia el orden de las opciones que admiten reordenamiento.</p>'+
+   '<label>Forma <select id="studio-assessment-form"><option value="a">A</option><option value="b">B</option></select></label> '+
+   '<button type="button" data-form-copy="student">Descargar evaluación</button> '+
+   '<button type="button" data-form-copy="teacher">Descargar pauta docente</button>'+
+   '<p role="status" aria-live="polite"></p>';
+  const message=exportForms.querySelector('[role="status"]');
+  for(const button of exportForms.querySelectorAll('button')){
+   button.onclick=async()=>{
+    try{
+     button.disabled=true;
+     syncEdits();
+     const original=materialActual,snapshot=fingerprint(),chosen=exportForms.querySelector('select').value;
+     const originalReport=await informeExportacionHEVA();
+     if(materialActual!==original||fingerprint()!==snapshot)throw Error('La evaluación cambió. Intenta descargar la nueva versión.');
+     if(!originalReport.exportable)throw Error('Corrige los errores comprobados en el control de exportación antes de descargar las formas.');
+     const forms=HEVAAssessment.forms(original,globalThis.HEVASkills?.remapJustification);
+     if(!forms)throw Error('Esta evaluación no tiene alternativas que se puedan reordenar con seguridad.');
+     const report=HEVAAudit.inspect(forms[chosen]);
+     if(report.errores.length)throw Error('La forma requiere corrección antes de exportar: '+report.errores[0].problema);
+     await HEVAOffice.word(forms[chosen],button.dataset.formCopy==='teacher');
+     message.textContent='Forma '+chosen.toUpperCase()+' descargada. La forma B reordena '+forms.changed+' preguntas y conserva '+forms.retained+' sin cambios. Revisión docente pendiente.';
+    }catch(error){message.textContent=error.message;}
+    finally{button.disabled=false;}
+   };
+  }
+  el.prepend(exportForms);
+ }
  anchor.append(el);
  document.getElementById('studio-edit').onclick=edit;
  document.getElementById('studio-improve').onclick=improve;

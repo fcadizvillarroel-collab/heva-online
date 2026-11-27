@@ -64,3 +64,99 @@ async function prepararExportacionHEVA(format){
 exportarWord=()=>prepararExportacionHEVA('Word');exportarPowerPoint=()=>prepararExportacionHEVA('PowerPoint');
 const workflowRender=renderizarDocumentoEnPantalla;renderizarDocumentoEnPantalla=function(){workflowRender();mostrarControlHEVA()};
 document.getElementById('hoja-material').addEventListener('input',()=>{clearTimeout(workflowAuditTimer);workflowAuditTimer=setTimeout(()=>{syncEdits();mostrarControlHEVA()},400)});
+
+// El perfil contiene preferencias del curso. El catálogo conserva la selección de OA.
+(function mountCourseWorkflow(){
+ const workflow=globalThis.HEVACourseWorkflow;
+ const host=document.getElementById('marco-curricular');
+ if(!workflow||!host)return;
+ const el=(tag,text)=>{const element=document.createElement(tag);if(text)element.textContent=text;return element;};
+ const byId=id=>document.getElementById(id);
+ const fields={marco:'marco-curricular',nivel:'nivel-epja',asignatura:'asignatura',tipo:'tipo-material'};
+ const details=el('details');details.className='no-print border rounded p-2 my-2';
+ details.append(el('summary','Perfiles de curso guardados'));
+ const info=el('p','Guarda el marco, nivel, asignatura y tipo de material en este navegador.');
+ const name=el('input');name.id='heva-course-profile-name';name.maxLength=60;name.className='border rounded px-2';
+ const nameLabel=el('label','Nombre del perfil');nameLabel.htmlFor=name.id;
+ const saved=el('select');saved.id='heva-course-profile-select';saved.className='border rounded px-2';
+ const savedLabel=el('label','Perfil guardado');savedLabel.htmlFor=saved.id;
+ const status=el('p');status.setAttribute('role','status');
+ const button=(label,action)=>{const b=el('button',label);b.type='button';b.className='border rounded px-2 py-1';b.onclick=action;return b;};
+ const row=el('div');row.className='flex flex-wrap items-center gap-2 my-2';
+ const storage=()=>window.localStorage;
+ const value=()=>workflow.readProfiles(storage()).find(entry=>entry.id===saved.value);
+ const refresh=id=>{
+  const options=workflow.readProfiles(storage()).map(entry=>{const option=el('option',entry.name);option.value=entry.id;return option;});
+  const placeholder=el('option','Selecciona un perfil');placeholder.value='';
+  saved.replaceChildren(placeholder,...options);saved.value=id||'';
+ };
+ const run=async action=>{
+  for(const control of [save,apply,remove])control.disabled=true;
+  try{await action();}catch(error){status.textContent=error.message||'No se pudo leer o guardar el perfil.';}
+  finally{for(const control of [save,apply,remove])control.disabled=false;}
+ };
+ const save=button('Guardar perfil',()=>run(()=>{
+  const course=workflow.saveProfile(storage(),{name:name.value,...Object.fromEntries(Object.entries(fields).map(([k,id])=>[k,byId(id).value]))});
+  refresh(course.id);status.textContent='Perfil guardado en este navegador.';
+ }));
+ const apply=button('Aplicar perfil',()=>run(async()=>{
+  const course=value();
+  if(!course)throw Error('Selecciona un perfil guardado.');
+  const supports=(control,v)=>Array.from(control.options).some(option=>option.value===v);
+  const marco=byId(fields.marco),nivel=byId(fields.nivel),tipo=byId(fields.tipo);
+  if(!supports(marco,course.marco)||!supports(nivel,course.nivel)||!supports(tipo,course.tipo)||
+    !ESTRUCTURA_CURRICULAR[course.marco]?.[course.nivel]?.includes(course.asignatura)){
+   throw Error('La configuración de este perfil ya no está disponible.');
+  }
+  marco.value=course.marco;nivel.value=course.nivel;
+  await actualizarTodoElCurriculo(course.asignatura);
+  tipo.value=course.tipo;tipo.dispatchEvent(new Event('change',{bubbles:true}));
+  status.textContent='Perfil aplicado. Selecciona el objetivo para este material.';
+ }));
+ const remove=button('Eliminar perfil',()=>run(()=>{
+  const course=value();
+  if(!course)throw Error('Selecciona un perfil guardado.');
+  if(!confirm('¿Eliminar el perfil «'+course.name+'»?'))return;
+  workflow.removeProfile(storage(),course.id);
+  refresh();name.value='';status.textContent='Perfil eliminado.';
+ }));
+ saved.addEventListener('change',()=>{name.value=value()?.name||'';});
+ row.append(nameLabel,name,save,savedLabel,saved,apply,remove);
+ details.append(info,row,status);host.parentElement.after(details);
+ try{refresh();}catch{status.textContent='El almacenamiento local no está disponible.';}
+
+ const prior=renderizarDocumentoEnPantalla;
+ renderizarDocumentoEnPantalla=function(...args){
+  prior(...args);
+  let section=byId('heva-unit-package');
+  if(!materialActual){if(section)section.hidden=true;return;}
+  let history=[];
+  try{history=JSON.parse(storage().getItem('heva_historial')||'[]');}catch{}
+  const kit=workflow.packageFor(materialActual,history);
+  if(!kit){if(section)section.hidden=true;return;}
+  if(!section){
+   section=el('details');section.id='heva-unit-package';section.className='no-print border rounded p-3 my-3';
+   byId('hoja-material').after(section);
+  }
+  const list=el('ol');list.className='list-decimal pl-5';
+  for(const entry of kit){
+   const row=el('li');
+   const label=HEVAPedagogy.contract(entry.type).name;
+   if(!entry.material)row.textContent=label+' · pendiente';
+   else{
+    row.append(el('span',label+' · '+entry.material.titulo+' '));
+    if(entry.material===materialActual)row.append(el('span','(abierto)'));
+    else row.append(button('Abrir '+label,()=>{
+     syncEdits();guardarEnHistorial(false);
+     materialActual=JSON.parse(JSON.stringify(entry.material));
+     renderizarDocumentoEnPantalla();
+     byId('hoja-material')?.scrollIntoView({block:'start'});
+    }));
+   }
+   list.append(row);
+  }
+  section.hidden=false;
+  section.replaceChildren(el('summary','Paquete pedagógico de esta unidad'),
+   el('p','Secuencia de materiales guardados con el mismo marco, nivel, asignatura, objetivo y tema.'),list);
+ };
+})();

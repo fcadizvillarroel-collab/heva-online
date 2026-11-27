@@ -1,16 +1,37 @@
 (function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory(require('./heva-pedagogy.js'));else root.HEVAStudio=factory(root.HEVAPedagogy)})(typeof globalThis!=='undefined'?globalThis:this,function(P){
 const clone=x=>JSON.parse(JSON.stringify(x)),text=x=>typeof x==='string'&&x.trim();
 const scalar={lectura:['introduccionLectura','Lectura y explicación'],instrucciones:['instruccionesEstudiante','Instrucciones'],cierre:['cierreReflexivo','Cierre reflexivo']};
-const lists={VF:['verdaderoFalso','Verdadero o falso'],EJE:['ejerciciosEvaluacion','Ejercicio'],IDEN:['identificacion','Identificación'],ALT:['preguntasAlternativas','Selección múltiple'],DES:['preguntasDesarrollo','Desarrollo'],CASO:['casosEstudio','Caso'],GUIADA:['actividadesGuiadas','Actividad guiada'],DIAPO:['diapositivas','Diapositiva']};
-function sections(m){const out=Object.entries(scalar).filter(([,v])=>typeof m[v[0]]==='string').map(([id,[key,label]])=>({id,key,label,kind:'texto'}));for(const [prefix,[key,label]]of Object.entries(lists))for(let i=0;i<(m[key]||[]).length;i++)out.push({id:prefix+'-'+(i+1),key,index:i,label:label+' '+(i+1),kind:'objeto'});if(m.actividadAutonoma)out.push({id:'AUTONOMA',key:'actividadAutonoma',label:'Actividad autónoma',kind:'objeto'});return out;}
-function section(m,id){const s=sections(m).find(x=>x.id===id);if(!s)throw Error('Selecciona una sección existente.');return{...s,value:clone(s.index==null?m[s.key]:m[s.key][s.index]),trace:clone((m.trazabilidadEstrategia||[]).find(t=>t.referencia===id)||null)};}
+const lists={VF:['verdaderoFalso','Verdadero o falso'],EJE:['ejerciciosEvaluacion','Ejercicio'],IDEN:['identificacion','Identificación'],ALT:['preguntasAlternativas','Selección múltiple'],DES:['preguntasDesarrollo','Desarrollo'],CASO:['casosEstudio','Caso'],GUIADA:['actividadesGuiadas','Actividad guiada'],DIAPO:['diapositivas','Diapositiva'],PAR:['terminosPareados','Término pareado','terminos'],LECT:['comprensionLectora','Comprensión lectora','preguntas']};
+function sectionList(m,key,child){return child?m[key]?.[child]:m[key];}
+function sections(m){
+ const out=Object.entries(scalar).filter(([,v])=>typeof m[v[0]]==='string').map(([id,[key,label]])=>({id,key,label,kind:'texto'}));
+ for(const [prefix,[key,label,child]] of Object.entries(lists)){
+  const array=sectionList(m,key,child);
+  if(!Array.isArray(array))continue;
+  array.forEach((_,index)=>out.push({id:prefix+'-'+(index+1),key,child,index,label:label+' '+(index+1),kind:'objeto'}));
+ }
+ if(m.actividadAutonoma)out.push({id:'AUTONOMA',key:'actividadAutonoma',label:'Actividad autónoma',kind:'objeto'});
+ return out;
+}
+function section(m,id){
+ const s=sections(m).find(x=>x.id===id);
+ if(!s)throw Error('Selecciona una sección existente.');
+ const value=s.index==null?m[s.key]:sectionList(m,s.key,s.child)[s.index];
+ return {...s,value:clone(value),trace:clone((m.trazabilidadEstrategia||[]).find(t=>t.referencia===id)||null)};
+}
+function preserveItemFields(old,now,fields){
+ for(const key of fields){
+  if(Object.hasOwn(old,key))now[key]=clone(old[key]);
+  else if(key==='puntajeDocente'||key==='puntaje')delete now[key];
+ }
+}
 function patch(m,id,proposal){const s=section(m,id);if(!proposal||!Object.hasOwn(proposal,'contenido'))throw Error('La propuesta no contiene la sección editada.');const content=proposal.contenido;
  if(s.kind==='texto'&&typeof content!=='string')throw Error('Se esperaba un texto para esta sección.');
  if(s.kind==='objeto'&&(!content||Array.isArray(content)||typeof content!=='object'))throw Error('Se esperaba una actividad completa.');
  if(s.kind==='objeto'&&/\?/.test(s.value.enunciado||'')&&!/\?/.test(content.enunciado||'')&&!/\b(calcula|determine|determina|selecciona|identifica|explica|responde|justifica|resuelve)\b/i.test(content.enunciado||''))throw Error('La edición eliminó la pregunta o consigna. Se conserva el original.');
  const next=clone(m);let value=clone(content);
- if(s.kind==='objeto'){if(Object.hasOwn(s.value,'numero'))value.numero=s.value.numero;if(Object.hasOwn(s.value,'id'))value.id=s.value.id;}
- if(s.index==null)next[s.key]=value;else next[s.key][s.index]=value;
+ if(s.kind==='objeto')preserveItemFields(s.value,value,['numero','id','puntaje','puntajeDocente']);
+ if(s.index==null)next[s.key]=value;else sectionList(next,s.key,s.child)[s.index]=value;
  if(s.trace){if(!proposal.trazabilidad||!['habilidad','evidencia','criterio'].every(k=>text(proposal.trazabilidad[k])))throw Error('Falta trazabilidad de la actividad editada.');next.trazabilidadEstrategia=next.trazabilidadEstrategia.map(t=>t.referencia===id?{...t,referencia:id,habilidad:proposal.trazabilidad.habilidad,evidencia:proposal.trazabilidad.evidencia,criterio:proposal.trazabilidad.criterio}:t);}
  next.respaldoDocumental=(next.respaldoDocumental||[]).filter(c=>c.seccion!==id&&!(id==='lectura'&&/lectura/i.test(c.seccion)));
  invalidate(next,m);return next;
@@ -37,22 +58,49 @@ const improvementModes=Object.freeze({
  ENRIQUECER:'Enriquecer ejemplos y estímulos completos, variados y pertinentes; usar solo evidencia documental disponible.',
  INTEGRAL:'Mejorar profundidad, didáctica, diversidad, claridad, precisión y evaluación de forma coherente.'
 });
-const editableKeys=['introduccionLectura','instruccionesEstudiante','activacion','glosario','ejemploGuiado','actividadesGuiadas','actividadAutonoma','cierreReflexivo','preguntasAlternativas','preguntasDesarrollo','casosEstudio','diapositivas','planClase','planEstrategia','trazabilidadEstrategia','verdaderoFalso','pareados','comprensionLectora','identificacion','ejerciciosEvaluacion','desafioTaller','productoEsperado','procedimientoTaller','listaCotejoTP','recursos','ticketSalida','apoyosAcceso','noticiaDidactica','tablaEspecificaciones','pautaDocente','respaldoDocumental'];
+const editableKeys=['introduccionLectura','instruccionesEstudiante','activacion','glosario','ejemploGuiado','actividadesGuiadas','actividadAutonoma','cierreReflexivo','preguntasAlternativas','preguntasDesarrollo','casosEstudio','diapositivas','planClase','planEstrategia','trazabilidadEstrategia','verdaderoFalso','pareados','terminosPareados','comprensionLectora','identificacion','ejerciciosEvaluacion','desafioTaller','productoEsperado','procedimientoTaller','listaCotejoTP','recursos','ticketSalida','apoyosAcceso','noticiaDidactica','tablaEspecificaciones','pautaDocente','respaldoDocumental'];
 function improvementData(m){return Object.fromEntries(editableKeys.filter(k=>Object.hasOwn(m,k)).map(k=>[k,clone(m[k])]));}
 function improve(m,proposal,mode){
  if(!proposal||!proposal.contenido||typeof proposal.contenido!=='object'||Array.isArray(proposal.contenido))throw Error('La mejora no contiene un objeto de contenido.');
  const src=proposal.contenido,next=clone(m),allowed=improvementData(m);
+ const fixedFields=['id','numero','puntaje','puntajeDocente','minutos','momento','funcion'];
  for(const k of Object.keys(src)){if(!Object.hasOwn(allowed,k))throw Error('Campo no permitido: '+k);const old=m[k],value=src[k];
   if(Array.isArray(old)){if(!Array.isArray(value)||old.length!==value.length&&k!=='respaldoDocumental')throw Error('La mejora cambia la cantidad de '+k);}
   else if(old!==null&&(typeof old!==typeof value||Array.isArray(value)))throw Error('Estructura incompatible: '+k);
   next[k]=clone(value);
  }
- for(const k of ['preguntasAlternativas','preguntasDesarrollo','casosEstudio','verdaderoFalso','pareados','identificacion','ejerciciosEvaluacion','diapositivas','planClase','actividadesGuiadas','procedimientoTaller','listaCotejoTP']){
-  if(!Array.isArray(m[k]))continue;
-  m[k].forEach((old,i)=>{const now=next[k][i];if(old&&typeof old==='object'&&!Array.isArray(old)){if(!now||typeof now!=='object'||Array.isArray(now))throw Error('Elemento inválido en '+k);
-   for(const field of ['id','numero','puntaje','minutos','momento','funcion','titulo'])if(Object.hasOwn(old,field)&&(field!=='titulo'||k==='diapositivas'))now[field]=clone(old[field]);
-   if(k==='preguntasAlternativas'&&old.alternativas?.length!==now.alternativas?.length)throw Error('Cantidad de opciones modificada.');
-  }});
+ for(const [prefix,[field,,child]] of Object.entries(lists)){
+  const previous=sectionList(m,field,child),updated=sectionList(next,field,child);
+  if(!Array.isArray(previous))continue;
+  if(!Array.isArray(updated)||previous.length!==updated.length)throw Error('La mejora cambia la cantidad de '+(child||field)+'.');
+  previous.forEach((old,i)=>{
+   const now=updated[i];
+   if(!old||typeof old!=='object'||Array.isArray(old))return;
+   if(!now||typeof now!=='object'||Array.isArray(now))throw Error('Elemento inválido en '+(child||field)+'.');
+   preserveItemFields(old,now,prefix==='DIAPO'?[...fixedFields,'titulo']:fixedFields);
+   if(prefix==='ALT'&&old.alternativas?.length!==now.alternativas?.length)throw Error('Cantidad de opciones modificada.');
+  });
+ }
+ for(const field of ['planClase','procedimientoTaller','listaCotejoTP','pareados']){
+  if(!Array.isArray(m[field]))continue;
+  m[field].forEach((old,i)=>{
+   if(!old||typeof old!=='object'||Array.isArray(old))return;
+   const now=next[field][i];
+   if(!now||typeof now!=='object'||Array.isArray(now))throw Error('Elemento inválido en '+field+'.');
+   preserveItemFields(old,now,fixedFields);
+  });
+ }
+ for(const [child,id] of [['opciones','id'],['clave','terminoId']]){
+  const previous=m.terminosPareados?.[child];
+  if(!Array.isArray(previous))continue;
+  const updated=next.terminosPareados?.[child];
+  if(!Array.isArray(updated)||updated.length!==previous.length)throw Error('La mejora cambia la cantidad de '+child+' en términos pareados.');
+  previous.forEach((old,i)=>{
+   if(!old||typeof old!=='object'||Array.isArray(old))return;
+   const now=updated[i];
+   if(!now||typeof now!=='object'||Array.isArray(now))throw Error('Elemento inválido en '+child+'.');
+   preserveItemFields(old,now,[id]);
+  });
  }
  if(Array.isArray(m.trazabilidadEstrategia)){
   const ref=x=>[x.referencia,x.estrategiasIntegradas||[]];
