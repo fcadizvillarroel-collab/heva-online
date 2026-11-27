@@ -38,8 +38,13 @@ const report={fecha:new Date().toISOString(),endpoint:url,tipo:'GUIA',oaClave:oa
      const options=q.alternativas||[];return options.length===4 &&
        new Set(options.map(a=>String(a.texto||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim())).size===4;
    });
-   if(m.versionPedagogica===3&&report.alternativas===1&&report.desarrollo===1&&report.casos===1&&uniqueAlternatives)
-    {report.resultado='GENERACION_REAL_VALIDADA_ESTRUCTURALMENTE';report.detalle='Generación real aceptada, trazas y conteos básicos comprobados. Revisión humana pendiente.';}
+   if(m.versionPedagogica===3&&report.alternativas===1&&report.desarrollo===1&&report.casos===1&&uniqueAlternatives){
+    report.resultado='GENERACION_REAL_VALIDADA_ESTRUCTURALMENTE';
+    report.detalle='Generación real aceptada, trazas y conteos básicos comprobados. Revisión humana pendiente.';
+    if(process.env.HEVA_LIVE_KEEP_SAMPLE==='true'){
+     fs.writeFileSync(path.join(path.dirname(out),'live-ai-production-material.json'),JSON.stringify(m,null,2)+'\n',{mode:0o600});
+    }
+   }
    else {report.resultado='RESPUESTA_INCOMPLETA';report.detalle='HTTP 200 pero estructura, conteos o distractores no cumplen los requisitos del encargo.';}
   }else{
    report.resultado=({401:'ACCESO_DOCENTE_REQUERIDO',403:'ACCESO_DENEGADO',413:'SOLICITUD_DEMASIADO_GRANDE',422:'MATERIAL_INVALIDO',429:'CUOTA_IA_AGOTADA',502:'IA_RESPUESTA_INVALIDA',503:'PROVEEDORES_NO_DISPONIBLES'})[response.status]||'ERROR_GENERACION';

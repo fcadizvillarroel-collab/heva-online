@@ -1,3 +1,4 @@
+const {isDeepStrictEqual}=require('node:util');
 const SectionRepair=require('../lib/news-repair.cjs');
 const Provenance=require('../lib/review-provenance.cjs');
 const Didactics=require('../heva-didactics.js');
@@ -49,6 +50,8 @@ module.exports=async(req,res)=>{
     return res.status(422).json({error:'Los bloques requieren corrección. Se conserva el material anterior.',detalle:issues.join('; '),reparacion,reintentable:true});
    }
    material=P.finalize(material,plan);material.autoriaIA=autor;material.autoriaBloques=Provenance.assembly(base,parts,autor);material.planGeneracion=plan;material.fuentesDocumentales=fuentesDocumentales;material.textosEscolaresComplementarios=librosRegulares;material.matrizOATextos=matrizOA;material.planUsoFuentesOA=planUsoFuentes;
+   if([base,...parts].some(block=>block?.procedenciaBloqueIncompleta))material.autoriaBloques.completa=false;
+   delete material.procedenciaBloqueIncompleta;
     material.referenciasMetalmecanica=referenciasMetalmecanica;
     material.trazabilidadDocumentalTP=TPInternational.documentEvidence(referenciasMetalmecanica,fuentesDocumentales);
     material.planVisualTP=TPInternational.visualPlan(referenciasMetalmecanica,material.trazabilidadDocumentalTP);
@@ -79,8 +82,25 @@ module.exports=async(req,res)=>{
   let result;
   const resumeBase=fase==='base'&&borradorBloque;
   const baseIssues=value=>R.partIssues(value,plan,null);
-  const participants=new Set([borradorBloque,repararDuplicados,repararDiapositivas].flatMap(Provenance.blockProviders));
-  const note=r=>{if(r?.provider)participants.add(r.provider);return r;};
+  const previousDrafts=[borradorBloque,repararDuplicados,repararDiapositivas].filter(Boolean);
+  const participants=new Set(previousDrafts.flatMap(Provenance.blockProviders));
+  let incompleteProvenance=previousDrafts.some(block=>block.procedenciaBloqueIncompleta||!Provenance.blockProviders(block).length);
+  const note=r=>{if(r?.provider)participants.add(r.provider);};
+  const preserveBlock=()=>{
+   const block=Provenance.record(result.value,...participants);
+   if(incompleteProvenance)block.procedenciaBloqueIncompleta=true;
+   else delete block.procedenciaBloqueIncompleta;
+   return block;
+  };
+  const blockContent=({proveedoresBloque,procedenciaBloqueIncompleta,...content})=>content;
+  const mergeItemProposal=(proposal,slideDraft,duplicateDraft)=>{
+   let value=R.normalizePart(proposal.value,batch);
+   if(slideDraft)value=R.mergeSlideRepair(slideDraft,value,plan,batch,parts);
+   if(duplicateDraft)value=R.mergeDuplicateRepair(duplicateDraft,value,plan,batch,parts);
+   const previous=duplicateDraft||slideDraft;
+   if(!previous||!isDeepStrictEqual(blockContent(R.normalizePart(previous,batch)),blockContent(value)))note(proposal);
+   return value;
+  };
   if(fase==='items'&&borradorBloque){
    const preserved=R.normalizePart(borradorBloque,batch),pending=R.partIssues(preserved,plan,batch,parts);
    if(pending.length&&!R.traceIssuesOnly(pending))return res.status(400).json({error:'El borrador no puede repararse solo con trazabilidad.',detalle:pending.join('; '),reintentable:false});
@@ -89,16 +109,24 @@ module.exports=async(req,res)=>{
    if(!['gemini','groq','openai'].includes(autor?.proveedor)||!baseIssues(borradorBloque).some(SectionRepair.isResumableIssue))return res.status(400).json({error:'El borrador base no admite reparación localizada.',reintentable:false});
    result={value:borradorBloque,provider:autor.proveedor,model:autor.modelo};
   }else result=await call(prompt+S.evidencePrompt(fuentesDocumentales,{compact:true})+Textbooks.instruction(librosRegulares)+OATextbookMatrix.instruction(matrizOA)+OAPedagogy.instructions(planUsoFuentes)+TPInternational.prompt(referenciasMetalmecanica),...keys,exclude,{deadline,fallbackPrompt:fallback,fallbackMaxOutputTokens:fase==='base'?4096:3000,maxOutputTokens:fase==='base'?(plan.tipoMaterial==='PRESENTACION'?2600:10000):batch?.formato?8000:batch?.tipo==='diapositivas'?6500:5000});
-  if(!borradorBloque)note(result);
-  if(fase==='items'){result.value=R.normalizePart(result.value,batch);if(slideOriginal)result.value=R.mergeSlideRepair(slideOriginal,result.value,plan,batch,parts);if(duplicateOriginal)result.value=R.mergeDuplicateRepair(duplicateOriginal,result.value,plan,batch,parts);}
+  if(!borradorBloque){
+   if(fase==='items')result.value=mergeItemProposal(result,slideOriginal,duplicateOriginal);
+   else note(result);
+  }
   let issues=R.partIssues(result.value,plan,fase==='items'?batch:null,parts);
   if(fase==='items'&&!duplicateOriginal&&R.duplicateItems(result.value,plan,batch,parts).length&&issues.every(x=>/repite literalmente/.test(x)))duplicateOriginal=result.value;
   if(fase==='base'){
-   const generateSection=async q=>note(await call(q,...keys,exclude,{deadline,maxOutputTokens:2200,fallbackMaxOutputTokens:2200})).value;
    for(const repair of [SectionRepair.repairReading,SectionRepair.repairActivity,SectionRepair.repair]){
     if(deadline-Date.now()<=6500)break;
     try{
+     const candidates=new Set();
+     const generateSection=async q=>{
+      const candidate=await call(q,...keys,exclude,{deadline,maxOutputTokens:2200,fallbackMaxOutputTokens:2200});
+      candidates.add(candidate.provider);
+      return candidate.value;
+     };
      const fixed=await repair(result.value,plan,issues,baseIssues,generateSection);
+     if(fixed.changed)for(const provider of candidates)note({provider});
      result.value=fixed.base;
      issues=fixed.issues;
     }catch(error){console.warn('HEVA base section repair pending',error.code||'ERROR');}
@@ -106,7 +134,7 @@ module.exports=async(req,res)=>{
    if(issues.some(SectionRepair.isResumableIssue))return res.status(422).json({
     error:'Se conserva el borrador base para completar la reparación localizada.',
     detalle:issues.join('; '),codigo:issues.some(SectionRepair.isReadingIssue)?'BASE_READING_INCOMPLETE':'BASE_ACTIVITY_INCOMPLETE',reintentable:true,
-    borradorBloque:Provenance.record(result.value,...participants),
+    borradorBloque:preserveBlock(),
     autor:{proveedor:result.provider,modelo:result.model}
    });
   }
@@ -114,8 +142,9 @@ module.exports=async(req,res)=>{
    const slideFirstDraft=fase==='items'&&batch?.tipo==='diapositivas'?result.value:null;
    const slideCorrection=slideFirstDraft?'\nREPARA DIAPOSITIVAS YA GENERADAS (no inventes el resto): '+JSON.stringify(slideFirstDraft).slice(0,16500)+'\nErrores que debes corregir: '+issues.join('; ')+'. Devuelve EXACTAMENTE '+batch.cantidad+' diapositivas con nuevas situaciones y consignas para las repetidas; las demás deben conservarse.':'';
    result=await call(prompt+slideCorrection+S.evidencePrompt(fuentesDocumentales,{compact:true})+'\nCORRIGE este bloque completo: '+issues.join('; ')+(duplicateOriginal?'\nSustituye solo los duplicados y conserva los demás ítems de este borrador: '+JSON.stringify(duplicateOriginal):''),...keys,exclude,{deadline,fallbackPrompt:fallback+slideCorrection+'\nCORRIGE ESTE BLOQUE: '+issues.join('; ')+(duplicateOriginal?'\nConserva ítems válidos del borrador y sustituye solo repetidos: '+JSON.stringify(duplicateOriginal):''),fallbackMaxOutputTokens:fase==='base'?4096:3000,maxOutputTokens:fase==='base'?(plan.tipoMaterial==='PRESENTACION'?2600:10000):batch?.formato?8000:batch?.tipo==='diapositivas'?6500:5000});
-   note(result);
-   if(fase==='items'){result.value=R.normalizePart(result.value,batch);if(slideFirstDraft)result.value=R.mergeSlideRepair(slideFirstDraft,result.value,plan,batch,parts);if(duplicateOriginal)result.value=R.mergeDuplicateRepair(duplicateOriginal,result.value,plan,batch,parts);}
+   if(!slideFirstDraft&&!duplicateOriginal){participants.clear();incompleteProvenance=false;}
+   if(fase==='items')result.value=mergeItemProposal(result,slideFirstDraft,duplicateOriginal);
+   else note(result);
    issues=R.partIssues(result.value,plan,fase==='items'?batch:null,parts);
   }
   if(fase==='items'&&R.traceIssuesOnly(issues)&&deadline-Date.now()>5500){
@@ -127,14 +156,13 @@ module.exports=async(req,res)=>{
      const promptTrace=R.traceRepairPrompt(plan,result.value,batch)
       +(attempt?'\\nSEGUNDO INTENTO: devuelve todos los IDs exigidos por referencia exacta. Aún falta: '+remaining.join('; '):'');
      const fixed=await call(promptTrace,...keys,exclude,{deadline,maxOutputTokens:2600});
-     note(fixed);
      const candidate=R.mergeTraceRepair(result.value,fixed.value,plan,batch);
      const candidateIssues=R.partIssues(candidate,plan,batch,parts);
-     if(candidateIssues.length<issues.length){result.value=candidate;issues=candidateIssues;}
+     if(candidateIssues.length<issues.length){note(fixed);result.value=candidate;issues=candidateIssues;}
     }catch(error){console.warn('HEVA trace repair pending:',error.code||'TRACE_REPAIR_ERROR');break;}
    }
   }
-  if(fase==='items'&&R.traceIssuesOnly(issues))return res.status(422).json({error:'Las preguntas están conservadas; falta completar su trazabilidad pedagógica.',detalle:issues.join('; '),codigo:'ITEM_TRACES_INCOMPLETE',borradorBloque:Provenance.record(result.value,...participants),reintentable:true});
+  if(fase==='items'&&R.traceIssuesOnly(issues))return res.status(422).json({error:'Las preguntas están conservadas; falta completar su trazabilidad pedagógica.',detalle:issues.join('; '),codigo:'ITEM_TRACES_INCOMPLETE',borradorBloque:preserveBlock(),reintentable:true});
   // Repair strategy metadata separately instead of regenerating and losing a
   // complete base. This is the endpoint used by "Crear material" recovery.
   if(fase==='base'&&issues.some(x=>x.includes('La estrategia seleccionada no está desarrollada'))&&deadline-Date.now()>6500){
@@ -144,17 +172,16 @@ module.exports=async(req,res)=>{
     const tasks=[...(baseDraft.diapositivas||[]).map((d,i)=>({ref:'DIAPO-'+(i+1),titulo:d.titulo,contenido:d.contenido})),...(baseDraft.actividadesGuiadas||[]).map((d,i)=>({ref:'GUIADA-'+(i+1),consigna:d.consigna}))].slice(0,14);
     const repair='Devuelve SOLO JSON con planEstrategia, sin otras claves. Estrategia id '+selected.id+'; nombre '+selected.name+'. Objetivo '+plan.objetivoAprendizaje+'. Tema '+plan.temaEspecifico+'. Tareas reales '+JSON.stringify(tasks).slice(0,6500)+'. Completa id, habilidadCentral, aplicacionConcreta, evidenciaEsperada y retroalimentacionDocente con textos específicos, sin inventar tareas ni resultados. Forma {"planEstrategia":{"id":"'+selected.id+'","habilidadCentral":"...","aplicacionConcreta":"...","evidenciaEsperada":"...","retroalimentacionDocente":"..."}}';
     const fixed=await call(repair,...keys,exclude,{deadline,maxOutputTokens:900});
-    note(fixed);
     if(fixed.value?.planEstrategia&&typeof fixed.value.planEstrategia==='object'){
       const candidate=P.normalizeStrategyPlan({...baseDraft,planEstrategia:fixed.value.planEstrategia},plan);
       const next=R.partIssues(candidate,plan,null);
-      if(next.length<issues.length){result.value=candidate;issues=next;}
+      if(next.length<issues.length){note(fixed);result.value=candidate;issues=next;}
     }
    }catch(error){console.warn('HEVA strategy-only repair failed',error.code||'ERROR');}
   }
-  if(fase==='items'&&R.duplicateItems(result.value,plan,batch,parts).length&&issues.every(x=>/repite literalmente/.test(x)))return res.status(422).json({error:'El bloque contiene preguntas repetidas. Se conservan los ítems válidos.',detalle:issues.join('; '),codigo:'ITEM_DUPLICATES',borradorBloque:Provenance.record(result.value,...participants),reintentable:true});
-  if(fase==='items'&&batch?.tipo==='diapositivas'&&issues.length)return res.status(422).json({error:'Un grupo de diapositivas necesita corrección. Se conserva el borrador para reparar solo lo necesario.',detalle:issues.join('; '),codigo:'SLIDE_BLOCK_INCOMPLETE',borradorBloque:Provenance.record(result.value,...participants),reintentable:true});
+  if(fase==='items'&&R.duplicateItems(result.value,plan,batch,parts).length&&issues.every(x=>/repite literalmente/.test(x)))return res.status(422).json({error:'El bloque contiene preguntas repetidas. Se conservan los ítems válidos.',detalle:issues.join('; '),codigo:'ITEM_DUPLICATES',borradorBloque:preserveBlock(),reintentable:true});
+  if(fase==='items'&&batch?.tipo==='diapositivas'&&issues.length)return res.status(422).json({error:'Un grupo de diapositivas necesita corrección. Se conserva el borrador para reparar solo lo necesario.',detalle:issues.join('; '),codigo:'SLIDE_BLOCK_INCOMPLETE',borradorBloque:preserveBlock(),reintentable:true});
   if(issues.length)return res.status(422).json({error:'El bloque requiere ajustes. Se conservan los anteriores.',detalle:issues.join('; '),codigo:fase==='base'&&issues.some(x=>x.includes('La trazabilidad de estrategia no cubre'))?'BASE_TRACES_INCOMPLETE':fase==='base'&&issues.some(x=>x.includes('La estrategia seleccionada no está desarrollada'))?'STRATEGY_PLAN_INCOMPLETE':'BLOCK_INVALID',reintentable:true});
-  return res.status(200).json({exito:true,parte:Provenance.record(result.value,...participants),autor:{proveedor:result.provider,modelo:result.model,fecha:new Date().toISOString()},bloques:R.batches(plan)});
+  return res.status(200).json({exito:true,parte:preserveBlock(),autor:{proveedor:result.provider,modelo:result.model,fecha:new Date().toISOString()},bloques:R.batches(plan)});
  }catch(e){console.error('HEVA recovery:',e.code||'ERROR',JSON.stringify({fase:String(req.body?.fase||'').slice(0,20),bloque:String(req.body?.batch?.tipo||'').slice(0,30),inicio:Number(req.body?.batch?.inicio)||0,proveedores:e.proveedores||[]}));const tooLarge=e.code==='AI_REQUEST_TOO_LARGE',limited=e.code==='AI_RATE_LIMIT',invalid=String(e?.code||'').startsWith('AI_RESPONSE_'),unavailable=['AI_UNAVAILABLE','AI_TIMEOUT'].includes(e.code);return res.status(limited?429:tooLarge?413:invalid||unavailable?503:500).json({error:limited?'Cuota temporal de IA agotada.':invalid?'La IA devolvió un bloque incompleto o inválido.':unavailable?'No hubo respuesta de los proveedores disponibles.':'No se pudo completar este bloque.',detalle:tooLarge?'El proveedor rechazó el tamaño de este bloque. Los bloques ya completados siguen guardados.':invalid?'La IA no devolvió este bloque en formato JSON válido; los bloques completados siguen guardados.':unavailable?'Los proveedores de IA no respondieron. Revisa su disponibilidad y vuelve a intentar.':limited?'El proveedor alcanzó su cuota temporal.':e instanceof TypeError?'Error interno al procesar el material. Código TYPE_ERROR; se requiere revisar el registro del servidor.':(e.message||'El avance anterior se conserva.'),codigo:e.code||(e instanceof TypeError?'TYPE_ERROR':'RECOVERY_ERROR'),reintentable:true,reintentarEn:e.retryAfter||0});}
 };
