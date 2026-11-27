@@ -45,6 +45,6 @@ test('planificación completa de 90 minutos puede aprobar estructura propia sin 
 test('la versión en caché cambia junto con los módulos de auditoría',()=>{
  const sw=source('sw.js');
  assert.match(sw,/heva-online-v\d+-[a-z-]+/); assert.doesNotMatch(sw,/const CACHE='heva-online-v77-/); assert.match(sw,/heva-review-studio\.js/);
- const html=source('index.html');assert.ok(html.includes('/heva-quality-gate.js?v=20261124-citas-exactas'));assert.ok(html.includes('/heva-recovery-ui.js?v=20261126-consolidacion'));assert.ok(html.includes('/heva-slide-design.js?v=20261127-perfiles'));assert.ok(html.includes('/heva-guide-visuals.js?v=20261126-actividades-fuentes-acceso'));assert.ok(html.includes('/heva-office.js?v=20261127-brechas'));assert.ok(html.includes('/heva-teacher-ui.js?v=20261127-brechas'));
+ const html=source('index.html');assert.ok(html.includes('/heva-quality-gate.js?v=20261124-citas-exactas'));assert.ok(html.includes('/heva-recovery-ui.js?v=20261126-consolidacion'));assert.ok(html.includes('/heva-slide-design.js?v=20261127-perfiles'));assert.ok(html.includes('/heva-guide-visuals.js?v=20261126-actividades-fuentes-acceso'));assert.ok(html.includes('/heva-office.js?v=20261127-consigna'));assert.ok(html.includes('/heva-teacher-ui.js?v=20261127-brechas'));
  assert.match(sw,/experimental\/material-view\.js/);
 });

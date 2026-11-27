@@ -90,8 +90,9 @@ function paginatePresentation(section,large=false){
  if(keepOptions&&!fitsPage(dataRows)){
   const last=source.at(-1),prompt=last.match(/¿[^¿?]+\?$/)?.[0];
   const context=prompt?last.slice(0,-prompt.length).trimEnd():'';
-  if(context&&!context.endsWith(':')&&fitsText([[prompt,...finalOptions].join('\n')],11.0,4.05,size)){
-   source[source.length-1]=context;
+  if(prompt&&!context.endsWith(':')&&fitsSlideParagraphs([prompt,...finalOptions],11.0,4.05,size)){
+   if(context)source[source.length-1]=context;
+   else source.pop();
    finalOptions.unshift(prompt);
   }
  }
