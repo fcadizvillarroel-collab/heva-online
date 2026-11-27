@@ -5,17 +5,23 @@ module.exports = async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
+  const { action = 'list' } = req.query;
+  const verifiedRead = req.method === 'GET' && action === 'verified';
   const SUPABASE_URL = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
   const SERVICE_KEY = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
 
-  if (!SUPABASE_URL || !SERVICE_KEY) {
+  const previewUrl = (process.env.HEVA_PREVIEW_SUPABASE_URL || '').replace(/\/$/, '');
+  const previewKey = (process.env.HEVA_PREVIEW_SUPABASE_PUBLISHABLE_KEY || '').trim();
+  const previewRead = verifiedRead && process.env.VERCEL_ENV === 'preview' &&
+    (!SUPABASE_URL || !SERVICE_KEY) && /^https:\/\/[a-z0-9]+\.supabase\.co$/.test(previewUrl) &&
+    /^sb_publishable_[A-Za-z0-9_-]+$/.test(previewKey);
+
+  if ((!SUPABASE_URL || !SERVICE_KEY) && !previewRead) {
     return res.status(500).json({
       error: 'Credenciales de Supabase no configuradas en Vercel',
       detalle: 'Asegúrate de agregar SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY en Vercel Environment Variables.'
     });
   }
-
-  const { action = 'list' } = req.query;
 
   const headersSupabase = {
     'apikey': SERVICE_KEY,
@@ -35,8 +41,13 @@ module.exports = async function handler(req, res) {
   };
   try {
     // La ruta docente debe resolverse ANTES de la ruta general GET.
-    if (req.method === 'GET' && action === 'verified') {
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/curriculo_publicado?select=*,curriculo_staging(etapa,formacion,referencia_comprobada)&vigente=eq.true&limit=1000&order=aprobado_at.desc`, { headers: headersSupabase });
+    if (verifiedRead) {
+      const url = previewRead ? previewUrl : SUPABASE_URL;
+      const fields = previewRead
+        ? 'id,clave_interna,codigo_oficial,marco,nivel,asignatura,tipo,eje,texto_literal,fuente_documento,pagina_oficial,vigente'
+        : '*,curriculo_staging(etapa,formacion,referencia_comprobada)';
+      const headers = previewRead ? {apikey: previewKey} : headersSupabase;
+      const response = await fetch(`${url}/rest/v1/curriculo_publicado?select=${fields}&vigente=eq.true&limit=1000&order=aprobado_at.desc`, {headers});
       const rows = await response.json();
       if (!response.ok) throw new Error(rows.message || 'No fue posible consultar el catálogo');
       const HEVA = require('../../heva-core.js');
