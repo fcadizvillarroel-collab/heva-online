@@ -38,7 +38,7 @@
  function exportProfiles(storage){
   return JSON.stringify({schema:profileBackupSchema,perfiles:readProfiles(storage)},null,2);
  }
- function importProfiles(storage,serialized){
+ function parseProfileBackup(serialized){
   let document;
   try{
    if(typeof serialized!=='string'||serialized.length>25000)throw Error();
@@ -51,6 +51,10 @@
   if(incoming.some(entry=>!entry)||new Set(incoming.map(entry=>entry.id)).size!==incoming.length){
    throw Error('El respaldo contiene perfiles inválidos o repetidos.');
   }
+  return incoming;
+ }
+ function importProfiles(storage,serialized){
+  const incoming=parseProfileBackup(serialized);
   const prior=readProfiles(storage),ids=new Set(prior.map(entry=>entry.id));
   const added=incoming.filter(entry=>!ids.has(entry.id));
   if(prior.length+added.length>20)throw Error('La importación excede los 20 perfiles permitidos. Elimina perfiles antes de importar.');
@@ -145,5 +149,5 @@
   }
   return generated;
  }
- return {readProfiles,saveProfile,removeProfile,exportProfiles,importProfiles,packageFor,preservePackageMaterial,openPackageMaterial,generateMissingPackage};
+ return {readProfiles,saveProfile,removeProfile,exportProfiles,importProfiles,parseProfileBackup,packageFor,preservePackageMaterial,openPackageMaterial,generateMissingPackage};
 });

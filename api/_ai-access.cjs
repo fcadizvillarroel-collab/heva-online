@@ -36,13 +36,38 @@ async function protect(req,res){
   }
   return false;
  }
- const match=/^Bearer (\S+)$/i.exec(req.headers?.authorization||'');
- if(!match){
+ try{
+  const userId=await authorizeTeacher(req,res,url,key);
+  if(!userId)return false;
+  const limit=limitFor(process.env.HEVA_AI_DAILY_LIMIT,20,100);
+  if(await checkQuota(url+'/rest/v1/rpc/heva_consumir_cuota_ia',serviceHeaders,{p_usuario:userId,p_limite:limit}))return true;
+  res.status(429).json({codigo:'AI_DAILY_QUOTA_EXHAUSTED',error:'Se alcanzó la cuota diaria de solicitudes de IA.'});
+ }catch{
+  res.status(503).json({codigo:'AI_ACCESS_UNAVAILABLE',error:'No se pudieron comprobar la sesión, los permisos o la cuota.'});
+ }
+ return false;
+}
+const cookieName='__Host-heva-teacher';
+function sameOrigin(req){
+ try{
+  const origin=new URL(req.headers.origin);
+  return origin.host===req.headers.host&&
+   (origin.protocol==='https:'||(origin.protocol==='http:'&&['localhost','127.0.0.1'].includes(origin.hostname)));
+ }catch{return false;}
+}
+function sessionCookie(req){
+ return req.headers?.cookie?.split(';').map(value=>value.trim()).find(value=>value.startsWith(cookieName+'='))?.slice(cookieName.length+1);
+}
+async function authorizeTeacher(req,res,url,key){
+ const serviceHeaders={apikey:key,Authorization:'Bearer '+key};
+ const bearer=/^Bearer (\S+)$/i.exec(req.headers?.authorization||'')?.[1]||
+  (sameOrigin(req)?sessionCookie(req):null);
+ if(!bearer){
   res.status(401).json({codigo:'AI_AUTH_REQUIRED',error:'Inicia sesión para generar materiales.'});
   return false;
  }
  try{
-  const response=await fetch(url+'/auth/v1/user',{headers:{apikey:key,Authorization:'Bearer '+match[1]},signal:AbortSignal.timeout(5000)});
+  const response=await fetch(url+'/auth/v1/user',{headers:{apikey:key,Authorization:'Bearer '+bearer},signal:AbortSignal.timeout(5000)});
   if(response.status===401||response.status===403){
    res.status(401).json({codigo:'AI_AUTH_INVALID',error:'Sesión docente inválida o vencida.'});
    return false;
@@ -62,12 +87,10 @@ async function protect(req,res){
    res.status(403).json({codigo:'AI_ROLE_REQUIRED',error:'La cuenta necesita un perfil docente o administrador habilitado.'});
    return false;
   }
-  const limit=limitFor(process.env.HEVA_AI_DAILY_LIMIT,20,100);
-  if(await checkQuota(url+'/rest/v1/rpc/heva_consumir_cuota_ia',serviceHeaders,{p_usuario:user.id,p_limite:limit}))return true;
-  res.status(429).json({codigo:'AI_DAILY_QUOTA_EXHAUSTED',error:'Se alcanzó la cuota diaria de solicitudes de IA.'});
+  return user.id;
  }catch{
-  res.status(503).json({codigo:'AI_ACCESS_UNAVAILABLE',error:'No se pudieron comprobar la sesión, los permisos o la cuota.'});
+  res.status(503).json({codigo:'AI_ACCESS_UNAVAILABLE',error:'No se pudieron comprobar la sesión o los permisos.'});
+  return false;
  }
- return false;
 }
-module.exports={protect};
+module.exports={protect,authorizeTeacher,sameOrigin,cookieName};
