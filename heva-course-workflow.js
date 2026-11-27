@@ -48,5 +48,28 @@
   }
   return materialTypes.map(type=>({type,material:chosen.get(type)||null}));
  }
- return {readProfiles,saveProfile,removeProfile,packageFor};
+ function openPackageMaterial(current,target,readHistory,save){
+  const currentUnit=unitKey(current);
+  if(!currentUnit||currentUnit!==unitKey(target)||!materialTypes.includes(target.tipoMaterial)){
+   throw Error('El material seleccionado ya no corresponde a la unidad abierta.');
+  }
+  const next=JSON.parse(JSON.stringify(target));
+  const persisted=()=>{
+   const snapshot=JSON.stringify(current);
+   return readHistory().some(record=>JSON.stringify(record?.data)===snapshot);
+  };
+  if(persisted())return next;
+  // El guardado compartido puede asignar identidad y versión antes de escribir.
+  const metadata=Object.fromEntries(['materialId','version'].filter(field=>Object.hasOwn(current,field)).map(field=>[field,current[field]]));
+  try{
+   save();
+   if(persisted())return next;
+  }catch{}
+  for(const field of ['materialId','version']){
+   if(Object.hasOwn(metadata,field))current[field]=metadata[field];
+   else delete current[field];
+  }
+  throw Error('No se pudo confirmar el guardado. El material editado sigue abierto; descarga un respaldo JSON antes de cambiar.');
+ }
+ return {readProfiles,saveProfile,removeProfile,packageFor,openPackageMaterial};
 });

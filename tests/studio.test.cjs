@@ -39,3 +39,23 @@ test('la mejora integral mantiene ponderaciones personalizadas y rechaza cambios
  assert.deepEqual(next.comprensionLectora.preguntas,[{numero:1,enunciado:'Compara las condiciones.'}]);
  assert.throws(()=>S.improve(m,{contenido:{comprensionLectora:{...m.comprensionLectora,preguntas:[]}}},'EVALUACION'),/cantidad/);
 });
+
+test('Recuperación pide una actividad autónoma que evidencie el desempeño del OA',()=>{
+ const m=sample();
+ const p=S.adaptationPlan(m,'RECUPERACION');
+ assert.equal(p.objetivoAprendizaje,m.objetivoAprendizaje);
+ assert.equal(p.derivacion.origenId,m.materialId);
+ assert.match(p.instruccionesDocente,/textos o datos completos/);
+ assert.match(p.instruccionesDocente,/criterio de autoevaluación observable/);
+ assert.match(p.instruccionesDocente,/producto esperado deben practicar y mostrar ese desempeño/);
+});
+
+test('Recuperación de lectura en voz alta modela el desempeño sin copiar ejercicios del original',()=>{
+ const m={...sample(),tipoMaterial:'GUIA',objetivoAprendizaje:'Leer en voz alta textos variados.',estrategiaDidactica:'Análisis de fuentes y evidencias'};
+ const p=S.adaptationPlan(m,'RECUPERACION');
+ assert.equal(p.estrategiaDidactica,'Ejemplo guiado y aplicación progresiva');
+ assert.equal(p.modoReferencia,'NINGUNA');
+ assert.equal(p.textoReferencia,'');
+ assert.equal(p.derivacion.origenId,m.materialId);
+ assert.match(p.instruccionesDocente,/practicar y releer en voz alta/);
+});

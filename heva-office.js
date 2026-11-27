@@ -6,11 +6,11 @@ async function word(m,teacher=false){
  const material=HEVA.material(m),visual=root.HEVATemplates.layout(material);
  const {Document,Packer,Paragraph,TextRun,HeadingLevel,AlignmentType,Footer,PageNumber}=root.docx;
  const originalBlocks=HEVA.blocks(material,teacher),blocks=root.HEVAGuideVisuals?.plan(material,originalBlocks,root.HEVAContextAssets,HEVA.blocks(material,false).length)||originalBlocks;
- const main=visual.theme.main,ink=visual.theme.ink,children=[];
+ const main=visual.theme.main,ink=visual.theme.ink,font=material.accesibilidadVisual?.fuente||'Arial',children=[];
  const decorativeBoxes=root.HEVASlideDesign?.options(material)?.recuadros!==false;
- const line=(value,opts={})=>new Paragraph({children:[new TextRun({text:String(value),size:opts.size||visual.wordSize,font:material.accesibilidadVisual?.fuente||'Arial',characterSpacing:Math.round((material.accesibilidadVisual?.espaciado||0)*(opts.size||visual.wordSize)*10),bold:!!opts.bold,color:opts.color||ink})],spacing:{before:opts.before||0,after:opts.after??110},...(opts.box?{shading:{type:'clear',fill:opts.fill||visual.theme.background},border:{left:{color:opts.rule||main,size:16,space:8,style:'single'}},indent:{left:160,right:100}}:{}),keepNext:!!opts.keepNext,keepLines:!!opts.keepLines});
+ const line=(value,opts={})=>new Paragraph({children:[new TextRun({text:String(value),size:opts.size||visual.wordSize,font,characterSpacing:Math.round((material.accesibilidadVisual?.espaciado||0)*(opts.size||visual.wordSize)*10),bold:!!opts.bold,color:opts.color||ink})],spacing:{before:opts.before||0,after:opts.after??110},...(opts.box?{shading:{type:'clear',fill:opts.fill||visual.theme.background},border:{left:{color:opts.rule||main,size:16,space:8,style:'single'}},indent:{left:160,right:100}}:{}),keepNext:!!opts.keepNext,keepLines:!!opts.keepLines});
  children.push(line('ESCUELA HÉCTOR VALENZUELA CEA · EPJA',{bold:true,color:main,size:Math.max(20,visual.large?visual.wordSize:20),after:160,keepNext:true}));
- children.push(new Paragraph({text:material.titulo||'Material educativo',heading:HeadingLevel.TITLE,spacing:{after:220},keepNext:true}));
+ children.push(new Paragraph({text:material.titulo||'Material educativo',heading:HeadingLevel.HEADING_1,spacing:{after:220},keepNext:true}));
  children.push(line([material.asignatura,material.nivel,material.temaEspecifico].filter(Boolean).join(' · '),{color:main,bold:true,after:220,box:decorativeBoxes,keepNext:true}));
  for(const [blockIndex,block] of blocks.entries()){
   if(block.path==='titulo'||(block===blocks[0]&&block.title===material.titulo))continue;
@@ -34,7 +34,15 @@ async function word(m,teacher=false){
    for(let j=0;j<3;j++)children.push(new Paragraph({children:[new TextRun({text:' ',size:visual.wordSize})],border:{bottom:{color:'8A8A8A',size:4,style:'single'}},spacing:{after:155}}));
   }
  }
- const doc=new Document({styles:{paragraphStyles:[{id:'Heading2',name:'Heading 2',basedOn:'Normal',next:'Normal',run:{font:material.accesibilidadVisual?.fuente||'Arial',size:Math.max(visual.wordSize,28),bold:true,color:main},paragraph:{keepNext:true}},{id:'Title',name:'Title',basedOn:'Normal',next:'Normal',run:{font:material.accesibilidadVisual?.fuente||'Arial',size:Math.max(visual.wordSize+8,36),bold:true,color:main},paragraph:{keepNext:true}}],default:{document:{run:{font:material.accesibilidadVisual?.fuente||'Arial',size:visual.wordSize,language:{value:'es-CL'}},paragraph:{spacing:{line:Math.round(240*(material.accesibilidadVisual?.interlineado||1.3)),lineRule:'auto'}}}}},sections:[{properties:{page:{margin:{top:1080,bottom:1080,left:1080,right:1080}}},...(Footer&&PageNumber?{footers:{default:new Footer({children:[new Paragraph({alignment:AlignmentType.RIGHT,children:[new TextRun({text:'HEVA · '+(teacher?'Docente':'Estudiante')+'   |   ',size:20,color:main}),new TextRun({children:[PageNumber.CURRENT],size:20,color:main})]})]})}}:{}),children}]});
+ const styles={default:{
+  heading1:{run:{font,size:Math.max(visual.wordSize+8,36),bold:true,color:main},paragraph:{keepNext:true,outlineLevel:0}},
+  heading2:{run:{font,size:Math.max(visual.wordSize,28),bold:true,color:main},paragraph:{keepNext:true,outlineLevel:1}},
+  document:{
+   run:{font,size:visual.wordSize,language:{value:'es-CL'}},
+   paragraph:{spacing:{line:Math.round(240*(material.accesibilidadVisual?.interlineado||1.3)),lineRule:'auto'}}
+  }
+ }};
+ const doc=new Document({styles,sections:[{properties:{page:{margin:{top:1080,bottom:1080,left:1080,right:1080}}},...(Footer&&PageNumber?{footers:{default:new Footer({children:[new Paragraph({alignment:AlignmentType.RIGHT,children:[new TextRun({text:'HEVA · '+(teacher?'Docente':'Estudiante')+'   |   ',size:20,color:main}),new TextRun({children:[PageNumber.CURRENT],size:20,color:main})]})]})}}:{}),children}]});
  const blob=await Packer.toBlob(doc);
  download(blob,safeName(material.titulo)+(teacher?'_docente':'_estudiante')+'.docx');
  return blob;

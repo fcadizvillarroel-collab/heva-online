@@ -130,15 +130,20 @@ document.getElementById('hoja-material').addEventListener('input',()=>{clearTime
   prior(...args);
   let section=byId('heva-unit-package');
   if(!materialActual){if(section)section.hidden=true;return;}
-  let history=[];
-  try{history=JSON.parse(storage().getItem('heva_historial')||'[]');}catch{}
-  const kit=workflow.packageFor(materialActual,history);
+  const localHistory=()=>{
+   try{
+    const history=JSON.parse(storage().getItem('heva_historial')||'[]');
+    return Array.isArray(history)?history:[];
+   }catch{return [];}
+  };
+  const kit=workflow.packageFor(materialActual,localHistory());
   if(!kit){if(section)section.hidden=true;return;}
   if(!section){
    section=el('details');section.id='heva-unit-package';section.className='no-print border rounded p-3 my-3';
    byId('hoja-material').after(section);
   }
   const list=el('ol');list.className='list-decimal pl-5';
+  const packageStatus=el('p');packageStatus.setAttribute('role','status');
   for(const entry of kit){
    const row=el('li');
    const label=HEVAPedagogy.contract(entry.type).name;
@@ -147,16 +152,18 @@ document.getElementById('hoja-material').addEventListener('input',()=>{clearTime
     row.append(el('span',label+' · '+entry.material.titulo+' '));
     if(entry.material===materialActual)row.append(el('span','(abierto)'));
     else row.append(button('Abrir '+label,()=>{
-     syncEdits();guardarEnHistorial(false);
-     materialActual=JSON.parse(JSON.stringify(entry.material));
-     renderizarDocumentoEnPantalla();
-     byId('hoja-material')?.scrollIntoView({block:'start'});
+     try{
+      syncEdits();
+      materialActual=workflow.openPackageMaterial(materialActual,entry.material,localHistory,()=>guardarEnHistorial(false));
+      renderizarDocumentoEnPantalla();
+      byId('hoja-material')?.scrollIntoView({block:'start'});
+     }catch(error){packageStatus.textContent=error.message;}
     }));
    }
    list.append(row);
   }
   section.hidden=false;
   section.replaceChildren(el('summary','Paquete pedagógico de esta unidad'),
-   el('p','Secuencia de materiales guardados con el mismo marco, nivel, asignatura, objetivo y tema.'),list);
+   el('p','Secuencia de materiales guardados con el mismo marco, nivel, asignatura, objetivo y tema.'),list,packageStatus);
  };
 })();

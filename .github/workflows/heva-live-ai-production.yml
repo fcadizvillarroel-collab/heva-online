@@ -1,11 +1,11 @@
 name: HEVA production live AI single-request check
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'scripts/production_live_ai_smoke.cjs'
-      - '.github/workflows/heva-live-ai-production.yml'
   workflow_dispatch:
+    inputs:
+      keep_sample:
+        description: 'Conservar la muestra ficticia para renderizarla en Word y PowerPoint'
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
@@ -23,10 +23,14 @@ jobs:
         run: node --check scripts/production_live_ai_smoke.cjs
       - name: Real HEVA generation (ONE controlled request; may use shared free quota)
         run: node scripts/production_live_ai_smoke.cjs
+        env:
+          HEVA_LIVE_KEEP_SAMPLE: ${{ inputs.keep_sample }}
       - name: Preserve real response status and counts without student data
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: heva-production-live-ai-smoke
-          path: out/live-ai-production-smoke.json
+          path: |
+            out/live-ai-production-smoke.json
+            out/live-ai-production-material.json
           retention-days: 14

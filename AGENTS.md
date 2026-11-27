@@ -9,6 +9,7 @@ Antes de implementar cualquier mejora, consultar **[el mapa canónico de módulo
 ## Continuidad de la consolidación
 
 Consulta la [matriz de consolidación](docs/HEVA_CONSOLIDACION_20261126.md) antes de retomar una tarea. Registra allí el SHA base, la prueba reproducible, el alcance comprobado y el bloqueo concreto. Mantén postergado el banco de materiales. El paquete de unidad agrupa documentos del historial local existente.
+Para la continuación, consulta la [evidencia de segunda fase](docs/HEVA_CIERRE_FASE2_20261127.md).
 
 Usa las guías de trabajo de HEVA en `.agents/skills/`: [currículo y pedagogía](.agents/skills/heva-curriculo-pedagogia/SKILL.md), [materiales accesibles](.agents/skills/heva-materiales-accesibles/SKILL.md), [generación y recuperación](.agents/skills/heva-generacion-recuperacion/SKILL.md) y [verificación y despliegue](.agents/skills/heva-verificacion-despliegue/SKILL.md).
 
