@@ -22,6 +22,8 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22'
+      - name: Install HEVA dependencies
+        run: npm ci
       - name: Run HEVA regression tests
         run: npm test
       - name: Run experimental quality tests
