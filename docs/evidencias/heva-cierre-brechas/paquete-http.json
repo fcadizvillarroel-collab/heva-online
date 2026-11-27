@@ -1,0 +1,93 @@
+[
+  {
+    "stage": "base",
+    "type": "GUIA",
+    "status": 422,
+    "code": "BASE_READING_INCOMPLETE",
+    "provider": "gemini"
+  },
+  {
+    "stage": "base",
+    "type": "GUIA",
+    "status": 200,
+    "provider": "gemini"
+  },
+  {
+    "stage": "items",
+    "type": "GUIA",
+    "status": 200,
+    "provider": "gemini"
+  },
+  {
+    "stage": "items",
+    "type": "GUIA",
+    "status": 200,
+    "provider": "gemini"
+  },
+  {
+    "stage": "items",
+    "type": "GUIA",
+    "status": 200,
+    "provider": "groq"
+  },
+  {
+    "stage": "items",
+    "type": "GUIA",
+    "status": 200,
+    "provider": "gemini"
+  },
+  {
+    "stage": "finalizar",
+    "type": "GUIA",
+    "status": 200,
+    "provider": "gemini"
+  },
+  {
+    "stage": "base",
+    "type": "EVALUACION",
+    "status": 200,
+    "provider": "gemini"
+  },
+  {
+    "stage": "items",
+    "type": "EVALUACION",
+    "status": 200,
+    "provider": "gemini"
+  },
+  {
+    "stage": "items",
+    "type": "EVALUACION",
+    "status": 422,
+    "code": "ITEM_DUPLICATES"
+  },
+  {
+    "stage": "items",
+    "type": "EVALUACION",
+    "status": 200,
+    "provider": "gemini"
+  },
+  {
+    "stage": "items",
+    "type": "EVALUACION",
+    "status": 200,
+    "provider": "gemini"
+  },
+  {
+    "stage": "items",
+    "type": "EVALUACION",
+    "status": 200,
+    "provider": "gemini"
+  },
+  {
+    "stage": "items",
+    "type": "EVALUACION",
+    "status": 200,
+    "provider": "gemini"
+  },
+  {
+    "stage": "finalizar",
+    "type": "EVALUACION",
+    "status": 200,
+    "provider": "gemini"
+  }
+]
