@@ -116,3 +116,23 @@ test('PowerPoint paginates a long selection item intact and keeps short options 
  assert.equal(short.length,2,'Una pregunta breve debe permanecer en una diapositiva.');
  assert.ok(letters.every(letra=>short[1].texts.some(text=>text.includes(letra+') Respuesta '+letra))));
 });
+
+test('editorial and clean PowerPoint covers honor the image opt-in',async()=>{
+ for(const layout of ['editorial','clean']){
+  const slides=[];
+  class Deck{
+   constructor(){this.ShapeType={rect:'rect',line:'line',roundRect:'roundRect'};}
+   addSlide(){const slide={images:[],addImage(value){this.images.push(value);},addText(){},addShape(){}};slides.push(slide);return slide;}
+   async writeFile(){}
+  }
+  const sandbox={HEVA:{material:m=>m,blocks:()=>[]},HEVATemplates:{layout:()=>({theme:{layout,main:'8B2635',accent:'C77638',background:'FFF7ED',ink:'302723'}})},
+   HEVASlideDesign:require('../heva-slide-design.js'),HEVAVisualAssets:{cover:'data:image/png;base64,AAAA'},PptxGenJS:Deck};
+  vm.runInNewContext(code,sandbox);
+  await sandbox.HEVAOffice.powerpoint({titulo:'Portada de prueba',imagenPortadaHEVA:true});
+  assert.equal(slides[0].images.length,1);
+  assert.ok(slides[0].images[0].x>7);
+  const before=slides.length;
+  await sandbox.HEVAOffice.powerpoint({titulo:'Portada sin imagen',imagenPortadaHEVA:true,recursosVisualesHEVA:{imagenes:false}});
+  assert.equal(slides[before].images.length,0);
+ }
+});

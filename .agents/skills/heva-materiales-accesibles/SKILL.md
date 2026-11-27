@@ -16,3 +16,9 @@ Para lectura oral, comprueba que el diálogo tiene nombre accesible y que se pue
 - **Word, PowerPoint y diseño visual.** Reusa las variantes editables y las opciones de portada, imágenes y diagramas. Usa gráficos, tablas o comparaciones cuando ayuden a interpretar datos o relaciones. Conserva tamaño legible y orden de lectura.
 - **Inspección visual, UX y accesibilidad.** Renderiza dos ejemplares afectados en LibreOffice y coteja estímulos, imágenes, recortes, pautas y encabezados. En navegador verifica foco, etiquetas, retorno de foco, uso móvil y comunicación de errores.
 - **Offline.** Prueba recarga sin red y acceso a un material guardado. La IA y la sincronización requieren conexión. Comprueba que el fallo de red preserve edición y trabajo pendiente.
+
+## Studio, transformación y flujo docente
+
+Reutiliza la selección de bloques y la aceptación de Studio para asistencia sucesiva, comparaciones y nuevas versiones. Comprueba que la persona pueda ver y revertir cambios y que el original se mantenga. Usa la importación del mismo panel y distingue trabajo con texto de inspección visual completa. En exportaciones, comprueba el control de portada con una composición renderizada.
+
+Para personalización y memoria, usa preferencias editables ingresadas por el docente. Aplica su contenido solo cuando se active para el encargo y confirma qué datos pueden sincronizarse. Comprueba el estado local en dos ámbitos de curso y la conservación del acceso sin conexión.

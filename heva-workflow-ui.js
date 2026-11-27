@@ -14,7 +14,7 @@ function actualizarDisenoHEVA(force=false){
  box.querySelectorAll('textarea:not([readonly])').forEach(x=>x.addEventListener('input',()=>{document.getElementById('design-state').textContent='Cambios docentes incluidos en el próximo material.'}));
 }
 function leerDisenoHEVA(){if(!globalThis.HEVADesign)return null;actualizarDisenoHEVA();const p=planFormularioHEVA(),d={objetivoAprendizaje:p.objetivoAprendizaje,estrategiaDidactica:p.estrategiaDidactica};globalThis.HEVADesign.fields.forEach(k=>d[k]=k==='contenidos'?p.temaEspecifico:document.getElementById('design-'+k).value.trim());d.profundidad=document.getElementById('design-depth').value;d.contextualizacion=document.getElementById('design-context').value;d.apoyosProfundidad={modelado:document.getElementById('design-modelado').checked,ausencias:document.getElementById('design-ausencias').checked,desafio:document.getElementById('design-desafio').checked};const issues=globalThis.HEVADesign.validate(d,p);if(issues.length)throw Error(issues.join('; '));return d;}
-const designPanel=document.createElement('section');designPanel.id='heva-design-panel';designPanel.className='space-y-3 mt-3';const designDetails=document.createElement('details');designDetails.id='heva-design-details';designDetails.className='no-print';designDetails.style.cssText='padding:14px;margin:12px 0;border:1px solid #c9bba9;border-radius:12px;background:#fff7ed';designDetails.open=false;designDetails.innerHTML='<summary style="cursor:pointer"><strong>Diseño pedagógico antes de generar · clic para ocultar o desplegar ▼</strong></summary><p>Ajusta las tareas, las evidencias y la evaluación sin volver a escribir el objetivo o los contenidos. Si no cambias nada, HEVA utiliza la propuesta inicial.</p>';document.getElementById('btn-generar').before(designDetails);designDetails.insertAdjacentHTML('afterend',"<details id=\"heva-depth-details\" class=\"mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3\"><summary class=\"font-bold text-sm cursor-pointer\">Profundidad y contextualización · opcional</summary><p class=\"text-xs mt-2\">Despliega para ajustar profundidad, contexto y apoyos. Si no cambias nada, se aplican las opciones predeterminadas.</p><label class=\"block text-xs font-bold my-2\">Profundidad conceptual<select id=\"design-depth\" class=\"w-full border rounded p-2 font-normal\"><option value=\"profunda\">Profunda · explicaciones, relaciones y aplicación</option><option value=\"esencial\">Esencial · conceptos clave y práctica breve</option><option value=\"avanzada\">Avanzada · análisis crítico y fuentes</option></select></label><label class=\"block text-xs font-bold my-2\">Contexto de las actividades<select id=\"design-context\" class=\"w-full border rounded p-2 font-normal\"><option value=\"epja_local\">EPJA y entorno local, cuando sea pertinente</option><option value=\"adulto\">Vida adulta general</option><option value=\"laboral_ciudadano\">Situaciones laborales y ciudadanas pertinentes</option></select></label><label class=\"flex gap-2 text-xs my-2\"><input type=\"checkbox\" id=\"design-modelado\" checked> Ejemplos resueltos y práctica progresiva (solo materiales formativos)</label><label class=\"flex gap-2 text-xs my-2\"><input type=\"checkbox\" id=\"design-ausencias\" checked> Apoyos para retomar después de ausencias</label><label class=\"flex gap-2 text-xs my-2\"><input type=\"checkbox\" id=\"design-desafio\" checked> Desafíos de transferencia con situaciones nuevas</label></details>");designDetails.appendChild(designPanel);try{actualizarDisenoHEVA()}catch(err){console.error('HEVA: diseño pendiente',err);designPanel.innerHTML='<p class="text-xs text-amber-800">Los campos de diseño se cargarán al seleccionar un objetivo. Las opciones de profundidad y contexto están disponibles arriba.</p>';}
+const designPanel=document.createElement('section');designPanel.id='heva-design-panel';designPanel.className='space-y-3 mt-3';const designDetails=document.createElement('details');designDetails.id='heva-design-details';designDetails.className='no-print';designDetails.style.cssText='padding:14px;margin:12px 0;border:1px solid #c9bba9;border-radius:12px;background:#fff7ed';designDetails.open=false;designDetails.innerHTML='<summary style="cursor:pointer"><strong>Diseño pedagógico antes de generar · clic para ocultar o desplegar ▼</strong></summary><p>Ajusta las tareas, las evidencias y la evaluación sin volver a escribir el objetivo o los contenidos. Si no cambias nada, HEVA utiliza la propuesta inicial.</p>';document.getElementById('btn-generar').before(designDetails);designDetails.insertAdjacentHTML('afterend',"<details id=\"heva-depth-details\" class=\"mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3\"><summary class=\"font-bold text-sm cursor-pointer\">Profundidad y contextualización · opcional</summary><p class=\"text-xs mt-2\">Despliega para ajustar profundidad, contexto y apoyos. Si no cambias nada, se aplican las opciones predeterminadas.</p><label class=\"block text-xs font-bold my-2\">Profundidad conceptual<select id=\"design-depth\" class=\"w-full border rounded p-2 font-normal\"><option value=\"profunda\">Profunda · explicaciones, relaciones y aplicación</option><option value=\"esencial\">Esencial · conceptos clave y práctica breve</option><option value=\"intermedia\">Intermedia · práctica progresiva</option><option value=\"avanzada\">Avanzada · análisis crítico y fuentes</option></select></label><label class=\"block text-xs font-bold my-2\">Contexto de las actividades<select id=\"design-context\" class=\"w-full border rounded p-2 font-normal\"><option value=\"epja_local\">EPJA y entorno local, cuando sea pertinente</option><option value=\"adulto\">Vida adulta general</option><option value=\"laboral_ciudadano\">Situaciones laborales y ciudadanas pertinentes</option></select></label><label class=\"flex gap-2 text-xs my-2\"><input type=\"checkbox\" id=\"design-modelado\" checked> Ejemplos resueltos y práctica progresiva (solo materiales formativos)</label><label class=\"flex gap-2 text-xs my-2\"><input type=\"checkbox\" id=\"design-ausencias\" checked> Apoyos para retomar después de ausencias</label><label class=\"flex gap-2 text-xs my-2\"><input type=\"checkbox\" id=\"design-desafio\" checked> Desafíos de transferencia con situaciones nuevas</label></details>");designDetails.appendChild(designPanel);try{actualizarDisenoHEVA()}catch(err){console.error('HEVA: diseño pendiente',err);designPanel.innerHTML='<p class="text-xs text-amber-800">Los campos de diseño se cargarán al seleccionar un objetivo. Las opciones de profundidad y contexto están disponibles arriba.</p>';}
 for(const id of ['asignatura','nivel-epja','marco-curricular','tipo-material','texto-oa','tema-especifico','estrategia-didactica','select-oa'])document.getElementById(id)?.addEventListener('change',()=>actualizarDisenoHEVA());
 for(const id of ['texto-oa','tema-especifico'])document.getElementById(id)?.addEventListener('input',()=>actualizarDisenoHEVA());
 const designCurriculum=actualizarObjetivosYEstrategias;actualizarObjetivosYEstrategias=async function(...args){await designCurriculum(...args);actualizarDisenoHEVA()};
@@ -233,6 +233,55 @@ document.getElementById('hoja-material').addEventListener('input',()=>{clearTime
    api('read').then(connectCloud).catch(error=>{syncStatus.textContent=error.message;});
   }
  }catch{status.textContent='El almacenamiento local no está disponible.';}
+
+ const memory=el('details');memory.id='heva-teacher-memory';memory.className='no-print border rounded p-2 my-2';
+ memory.append(el('summary','Memoria docente'),
+  el('p','Guarda preferencias pedagógicas en este navegador y elige si aplicarlas al encargo. Puedes cambiar las opciones antes de generar.'));
+ const scopeSelect=el('select');
+ for(const [key,label]of [['curso','Este nivel, marco y asignatura'],['asignatura','Toda la asignatura']]){
+  const option=el('option',label);option.value=key;scopeSelect.append(option);
+ }
+ const scopeLabel=el('label','Guardar preferencias para ');scopeLabel.append(scopeSelect);memory.append(scopeLabel);
+ const options=el('fieldset');options.append(el('legend','Preferencias'));
+ const choices=Object.entries(workflow.teacherPreferences).map(([key,text])=>{
+  const input=el('input');input.type='checkbox';input.value=key;
+  const label=el('label');label.className='block';label.append(input,document.createTextNode(' '+text));
+  options.append(label);return input;
+ });
+ const useMemory=el('input');useMemory.type='checkbox';
+ const useLabel=el('label');useLabel.className='block';useLabel.append(useMemory,document.createTextNode(' Aplicar preferencias al encargo actual'));
+ const memoryStatus=el('p');memoryStatus.setAttribute('role','status');
+ const memoryScope=()=>({ambito:scopeSelect.value,...Object.fromEntries(['marco','nivel','asignatura'].map(key=>[key,byId(fields[key]).value]))});
+ const readChoices=()=>choices.filter(input=>input.checked).map(input=>input.value);
+ const displayMemory=preferences=>choices.forEach(input=>{input.checked=preferences.includes(input.value);});
+ let loadedScope='';
+ const refreshMemory=(force=false)=>{
+  const scope=memoryScope(),scopeId=JSON.stringify(scope);
+  if(!force&&scopeId===loadedScope)return;
+  loadedScope=scopeId;useMemory.checked=false;memoryStatus.textContent='';
+  try{displayMemory(workflow.readTeacherMemory(window.localStorage,scope));}
+  catch{displayMemory([]);memoryStatus.textContent='No se pudieron leer las preferencias de este navegador.';}
+ };
+ const saveMemory=button('Guardar preferencias',()=>{
+  try{
+   const preferences=workflow.saveTeacherMemory(window.localStorage,memoryScope(),readChoices());
+   memoryStatus.textContent=preferences.length?'Preferencias guardadas en este navegador.':'Preferencias eliminadas para este ámbito.';
+  }catch(error){memoryStatus.textContent=error.message||'No se pudieron guardar las preferencias.';}
+ });
+ memory.append(options,saveMemory,useLabel,memoryStatus);
+ details.after(memory);
+ scopeSelect.addEventListener('change',()=>refreshMemory(true));
+ for(const key of ['marco','nivel','asignatura'])byId(fields[key]).addEventListener('change',()=>refreshMemory());
+ const updateCurriculum=actualizarTodoElCurriculo;
+ actualizarTodoElCurriculo=async function(...args){
+  const result=await updateCurriculum.apply(this,args);refreshMemory();return result;
+ };
+ window.hevaTeacherMemoryExtras=()=>{
+  refreshMemory();
+  const extras=workflow.teacherMemoryExtras(readChoices(),useMemory.checked,byId(fields.tipo).value);
+  useMemory.checked=false;return extras;
+ };
+ refreshMemory(true);
 
  const localHistory=()=>{
   try{

@@ -42,6 +42,57 @@ return false;
 }
 function hasTicket(m){return m.ticketSalida&&typeof m.ticketSalida==='object'&&Object.values(m.ticketSalida).some(x=>typeof x==='string'&&x.trim().length>15);}
 function audit(m,p){if(p.tipoMaterial!=='PLANIFICACION'||!p.planificacionClase)return [];const c=p.planificacionClase,rows=m.planClase||[],errors=[];const map={metodos:'metodosAplicados',agrupamientos:'agrupamientos',recursos:'recursosUsados',comprobaciones:'comprobaciones',apoyos:'apoyosAplicados'};for(const [key,field]of Object.entries(map))for(const id of c[key]||[])if(!rows.some(row=>recorded(row,field,key,id)||evidence(m,row,key,id))&&!(key==='comprobaciones'&&id==='ticket'&&hasTicket(m)))errors.push('Planificación: falta desarrollar la selección '+groups[key][id]+'.');const expected=times(c);for(const [i,key]of ['inicio','desarrollo','cierre'].entries())if(rows[i]?.minutos!==expected[key]||String(rows[i]?.momento||'').toLowerCase()!==key)errors.push('Planificación: revisa el momento y tiempo de '+key+'.');return errors;}
-return {groups,suggestions,duration,times,validate,summary,prompt,audit};
+const calendarHorizons={anual:'Anual',semestral:'Semestral',mensual:'Mensual',semanal:'Semanal',unidad:'Por unidad',secuencia:'Por secuencia'};
+const calendarKey='heva-calendarios-v1';
+const dayMs=86400000;
+function dayStamp(value){
+ if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value))return NaN;
+ const stamp=Date.parse(value+'T00:00:00Z');
+ return Number.isFinite(stamp)&&new Date(stamp).toISOString().slice(0,10)===value?stamp:NaN;
+}
+function sessionDuration(value){
+ if(!Number.isInteger(value)||value<15||value>240)throw Error('La duración de la sesión debe estar entre 15 y 240 minutos.');
+ return value;
+}
+function scheduleCalendar({id,nombre,horizonte,inicio,fin,dias,exclusiones=[],duracion,curso}){
+ const name=String(nombre||'').trim(),from=dayStamp(inicio),to=dayStamp(fin);
+ if(typeof id!=='string'||!id||!name||!Object.hasOwn(calendarHorizons,horizonte))throw Error('Indica un nombre y un tipo de planificación.');
+ if(!curso||['asignatura','nivel','marcoCurricular'].some(key=>typeof curso[key]!=='string'||!curso[key].trim()))throw Error('Selecciona el marco curricular, nivel y asignatura.');
+ if(!Number.isFinite(from)||!Number.isFinite(to)||to<from||to-from>=366*dayMs)throw Error('Indica un intervalo válido de hasta 366 días.');
+ if(!Array.isArray(dias)||!dias.length||dias.some(day=>!Number.isInteger(day)||day<0||day>6))throw Error('Selecciona al menos un día de clases.');
+ if(!Array.isArray(exclusiones)||exclusiones.some(date=>!Number.isFinite(dayStamp(date))))throw Error('Revisa las fechas excluidas. Usa AAAA-MM-DD.');
+ sessionDuration(duracion);
+ const selected=new Set(dias),blocked=new Set(exclusiones),sesiones=[];
+ for(let stamp=from;stamp<=to;stamp+=dayMs){
+  const day=new Date(stamp),fecha=day.toISOString().slice(0,10);
+  if(selected.has(day.getUTCDay())&&!blocked.has(fecha))sesiones.push({id:fecha,fecha,duracion,nota:'',materialId:'',encargo:null,suspendida:false});
+ }
+ if(!sesiones.length)throw Error('El intervalo y los días elegidos no dejan sesiones disponibles.');
+ return {id,nombre:name,horizonte,inicio,fin,dias:[...selected],exclusiones:[...blocked],curso,sesiones};
+}
+function updateSession(calendar,id,{fecha,duracion,nota,materialId,encargo,suspendida=false}){
+ const session=calendar.sesiones.find(entry=>entry.id===id);
+ if(!session)throw Error('Selecciona una sesión del calendario.');
+ if(!Number.isFinite(dayStamp(fecha))||fecha<calendar.inicio||fecha>calendar.fin||calendar.exclusiones.includes(fecha))throw Error('Elige una fecha habilitada dentro del intervalo.');
+ if(calendar.sesiones.some(entry=>entry.id!==id&&entry.fecha===fecha))throw Error('Ya hay una sesión en esa fecha.');
+ sessionDuration(duracion);
+ if(encargo&&(!encargo.objetivoAprendizaje?.trim()||!encargo.temaEspecifico?.trim()))throw Error('Selecciona el objetivo curricular y completa el tema del encargo.');
+ if(encargo&&(encargo.asignatura!==calendar.curso.asignatura||encargo.nivel!==calendar.curso.nivel||encargo.marcoCurricular!==calendar.curso.marcoCurricular))throw Error('El encargo pertenece a otro curso o marco curricular.');
+ const previousPlan=encargo?.planificacionClase;
+ const savedPlan=encargo?{...encargo,planificacionClase:{...previousPlan,duracion,tiempos:previousPlan?.duracion===duracion?times(previousPlan):times({duracion})}}:null;
+ const next={...session,fecha,duracion,nota:String(nota||'').trim(),materialId:String(materialId||''),encargo:savedPlan,suspendida:suspendida===true};
+ return {...calendar,sesiones:calendar.sesiones.map(entry=>entry===session?next:entry).sort((a,b)=>a.fecha.localeCompare(b.fecha))};
+}
+function readCalendars(storage){
+ const value=JSON.parse(storage.getItem(calendarKey)||'[]');
+ if(!Array.isArray(value)||value.some(x=>typeof x?.id!=='string'||!Array.isArray(x.sesiones)))throw Error('El calendario local no se pudo leer.');
+ return value;
+}
+function saveCalendar(storage,calendar){
+ const records=readCalendars(storage);
+ storage.setItem(calendarKey,JSON.stringify([calendar,...records.filter(x=>x.id!==calendar.id)]));
+ return calendar;
+}
+return {groups,suggestions,duration,times,validate,summary,prompt,audit,calendarHorizons,scheduleCalendar,updateSession,readCalendars,saveCalendar};
 });
 
