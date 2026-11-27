@@ -82,3 +82,13 @@ test('rechaza una tabla ausente en Ciencias y un separador de miles ambiguo en e
  const science={...plan,asignatura:'Ciencias Naturales'};
  assert.match(P.activityIssues({ejemploGuiado:{situacion:'Registro impreso de la observación de hojas de plantas con lupa.'}},science)[0],/transcribe/);
 });
+
+test('acepta una dimensión expresada como ancho es de 200 mm o 200 mm de ancho',()=>{
+ const p={...plan,asignatura:'Construcciones Metálicas'};
+ const check=width=>P.activityIssues({actividadAutonoma:{
+  consigna:'Analice si una placa rectangular de largo 600 mm y espesor 10 mm cumple una superficie mínima de 120000 mm² sabiendo que '+width+'.'
+ }},p);
+ assert.deepEqual(check('su ancho es de 200 mm'),[]);
+ assert.deepEqual(check('tiene 200 mm de ancho'),[]);
+ assert.match(check('el ancho se desconoce')[0],/falta ancho/);
+});
