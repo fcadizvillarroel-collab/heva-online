@@ -140,3 +140,10 @@ test('una cronología sin fechas explícitas no inventa años',()=>{
  const all=pages.flatMap(page=>page.elements.map(e=>String(e.text||''))).join(' ');
  for(const line of lines)assert.ok(all.includes(line));
 });
+
+test('New disciplines do not inherit unrelated social or scientific illustrations',()=>{
+ assert.equal(D.diagramPlan({title:'Reconstruir un argumento'},'Filosofía','Premisas y conclusión').title,'Examinar un argumento');
+ assert.equal(D.visualFamily('Educación Física y Salud'),'movimiento');
+ assert.equal(D.visualFamily('Artes Visuales'),'artes');
+ assert.equal(D.visualFamily('Educación Ciudadana'),'ciudadana');
+});

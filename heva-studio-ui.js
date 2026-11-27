@@ -59,6 +59,57 @@ function panel(){
   candidates.forEach((entry,index)=>source.append(new Option(entry.data.titulo+' · versión '+(entry.data.version||1),String(index))));
   if(candidates.length)source.value='0';
   else message.textContent='Genera y guarda otra evaluación del mismo OA con la misma estructura para emparejar preguntas distintas.';
+  const comparison=document.createElement('details');
+  const summary=document.createElement('summary');summary.textContent='Comparar las preguntas de A y B';
+  const pairs=document.createElement('div');
+  comparison.append(summary,pairs);
+  exportForms.append(comparison);
+  const showComparison=()=>{
+   const other=source.value===''?null:candidates[Number(source.value)]?.data;
+   comparison.hidden=!other;
+   pairs.replaceChildren();
+   if(!other)return;
+   const original=materialActual;
+   if(!HEVAAssessment.compatibleForms(original,other)){
+    pairs.textContent='La evaluación cambió. Guarda los cambios y elige una forma compatible.';
+    return;
+   }
+   const note=document.createElement('p');
+   note.textContent='Compara las operaciones, el uso de evidencia y la dificultad de cada par antes de aplicar las formas.';
+   pairs.append(note);
+   for(const [letter,exam] of [['A',original],['B',other]]){
+    if(!exam.comprensionLectora?.texto)continue;
+    const reading=document.createElement('details');
+    const heading=document.createElement('summary');heading.textContent='Lectura de la forma '+letter;
+    const text=document.createElement('p');text.textContent=exam.comprensionLectora.texto;
+    reading.append(heading,text);pairs.append(reading);
+   }
+   const first=HEVAAssessment.items(original),second=HEVAAssessment.items(other);
+   first.forEach((entry,index)=>{
+    const group=document.createElement('fieldset');
+    const title=document.createElement('legend');title.textContent=entry.label+' · '+entry.points+' puntos';
+    group.append(title);
+    for(const [letter,item] of [['A',entry],['B',second[index]]]){
+     const label=document.createElement('strong');label.textContent='Forma '+letter;
+     const content=document.createElement('p');
+     const q=item.q;
+     content.textContent=[q.estimulo||q.contextoReal,q.enunciado||q.preguntaReflexion||q.consigna||q.texto].filter(Boolean).join(' · ');
+     group.append(label,content);
+     if(Array.isArray(q.alternativas)){
+      const options=document.createElement('ul');
+      for(const qOption of q.alternativas){
+       const option=document.createElement('li');option.textContent=qOption.letra+') '+qOption.texto;
+       options.append(option);
+      }
+      group.append(options);
+     }
+    }
+    pairs.append(group);
+   });
+  };
+  source.addEventListener('change',showComparison);
+  comparison.addEventListener('toggle',()=>{if(comparison.open){syncEdits();showComparison();}});
+  showComparison();
   for(const button of exportForms.querySelectorAll('button')){
    button.onclick=async()=>{
     try{

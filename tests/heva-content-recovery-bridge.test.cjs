@@ -76,3 +76,11 @@ test('Oral-reading OA receives contextual intonation and a portable self-check w
  const refs=International.references({...base,temaEspecifico:'registro formal'});
  assert.equal(refs.filter(r=>r.extracto&&r.localizador).length,2);
 });
+
+test('Catalog subjects use specific didactics and new areas have distinct evidence',()=>{
+ const subjects=[...new Set(require('../catalogo-publicado.json').map(row=>row.asignatura))];
+ for(const subject of subjects)assert.notEqual(Didactics.profile(subject).id,'otra',subject);
+ const newNames=['Filosofía','Educación Ciudadana','Educación Física y Salud','Artes Visuales'];
+ assert.equal(new Set(newNames.map(name=>Didactics.profile(name).id)).size,newNames.length);
+ assert.match(Didactics.prompt({asignatura:'Educación Física'}),/alternativas de observación o planificación en papel/);
+});
