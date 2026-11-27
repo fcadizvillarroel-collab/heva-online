@@ -83,7 +83,94 @@ document.getElementById('hoja-material').addEventListener('input',()=>{clearTime
  const status=el('p');status.setAttribute('role','status');
  const button=(label,action)=>{const b=el('button',label);b.type='button';b.className='border rounded px-2 py-1';b.onclick=action;return b;};
  const row=el('div');row.className='flex flex-wrap items-center gap-2 my-2';
- const storage=()=>window.localStorage;
+ let cloud=null;
+ const storage=()=>cloud?.storage||window.localStorage;
+ const syncStatus=el('p');syncStatus.setAttribute('role','status');
+ const syncForm=el('form');
+ const email=el('input');email.type='email';email.required=true;email.autocomplete='username';email.setAttribute('aria-label','Correo de la cuenta');
+ const password=el('input');password.type='password';password.required=true;password.autocomplete='current-password';password.setAttribute('aria-label','Contraseña de la cuenta');
+ const login=el('button','Iniciar sesión para sincronizar');login.type='submit';
+ syncForm.append(email,password,login);
+ const api=async (action,values={})=>{
+  const response=await fetch('/api/course-profiles',{method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({action,...values}),signal:AbortSignal.timeout(12000)});
+  const data=await response.json();
+  if(!response.ok)throw Error(data.error||'La sincronización no está disponible.');
+  return data;
+ };
+ let syncing=false;
+ function loadCloud(remote){
+  const profiles=workflow.parseProfileBackup(remote.perfiles);
+  const snapshot=JSON.stringify(profiles);
+  cloud.snapshot=snapshot;
+  cloud.storage={getItem:()=>cloud.snapshot,setItem:(_key,next)=>{cloud.snapshot=next;cloud.dirty=true;}};
+  cloud.revision=remote.revision;
+  cloud.accountId=remote.accountId;
+  cloud.dirty=false;
+ }
+ async function synchronize(){
+  if(!cloud||syncing||navigator.onLine===false)return;
+  syncing=true;
+  try{
+   if(cloud.dirty){
+    const snapshot=cloud.snapshot;
+    const remote=await api('write',{accountId:cloud.accountId,revision:cloud.revision,backup:workflow.exportProfiles(storage())});
+    cloud.revision=remote.revision;
+    cloud.dirty=cloud.snapshot!==snapshot;
+    syncStatus.textContent='Perfiles sincronizados.';
+   }else{
+    const remote=await api('read',{accountId:cloud.accountId});
+    if(remote.revision!==cloud.revision&&!cloud.dirty){loadCloud(remote);refresh(saved.value);}
+   }
+  }catch(error){syncStatus.textContent=error.message+' Puedes descargar los perfiles de esta sesión como respaldo.';}
+  finally{syncing=false;}
+ }
+ syncForm.addEventListener('submit',async event=>{
+  event.preventDefault();login.disabled=true;
+  try{
+   await api('login',{email:email.value,password:password.value});
+   const remote=await api('read');
+   connectCloud(remote);
+   syncStatus.textContent='Sesión sincronizada. Los perfiles guardados en este navegador se muestran al cerrar sesión.';
+  }catch(error){await api('logout').catch(()=>{});syncStatus.textContent=error.message;}
+  finally{password.value='';login.disabled=false;}
+ });
+ function connectCloud(remote){
+  cloud={};loadCloud(remote);
+  refresh();syncForm.hidden=true;logout.hidden=false;reloadCloud.hidden=false;
+  try{sessionStorage.setItem('heva-course-sync-active','1');}catch{}
+ }
+ const logout=button('Cerrar sesión de perfiles',async()=>{
+  if(syncing||!cloud)return;
+  if(cloud.dirty&&!confirm('Hay cambios sin sincronizar. ¿Cerrar la sesión y descartar esos cambios?'))return;
+  syncing=true;
+  try{
+   await api('logout');cloud=null;refresh();
+   try{sessionStorage.removeItem('heva-course-sync-active');}catch{}
+   syncForm.hidden=false;logout.hidden=true;reloadCloud.hidden=true;
+   syncStatus.textContent='Sesión cerrada. Se muestran los perfiles locales.';
+  }catch(error){syncStatus.textContent=error.message;}
+  finally{syncing=false;}
+ });
+ logout.hidden=true;
+ const reloadCloud=button('Recargar perfiles de la cuenta',async()=>{
+  if(syncing||!cloud)return;
+  if(cloud.dirty&&!confirm('¿Descartar los cambios pendientes y cargar la versión de la cuenta?'))return;
+  syncing=true;
+  const snapshot=cloud.snapshot;
+  try{
+   const remote=await api('read',{accountId:cloud.accountId});
+   if(cloud.snapshot!==snapshot)throw Error('Hay cambios nuevos. Vuelve a solicitar la recarga.');
+   loadCloud(remote);refresh();syncStatus.textContent='Perfiles de la cuenta actualizados.';
+  }
+  catch(error){syncStatus.textContent=error.message;}
+  finally{syncing=false;}
+ });
+ reloadCloud.hidden=true;
+ window.addEventListener('online',synchronize);
+ window.addEventListener('focus',synchronize);
+ window.addEventListener('beforeunload',event=>{if(cloud?.dirty)event.preventDefault();});
+ setInterval(synchronize,30000);
  const value=()=>workflow.readProfiles(storage()).find(entry=>entry.id===saved.value);
  const refresh=id=>{
   const options=workflow.readProfiles(storage()).map(entry=>{const option=el('option',entry.name);option.value=entry.id;return option;});
@@ -92,7 +179,7 @@ document.getElementById('hoja-material').addEventListener('input',()=>{clearTime
  };
  const run=async action=>{
   for(const control of [save,apply,remove,exportProfiles,importProfiles,file])control.disabled=true;
-  try{await action();}catch(error){status.textContent=error.message||'No se pudo leer o guardar el perfil.';}
+  try{await action();await synchronize();}catch(error){status.textContent=error.message||'No se pudo leer o guardar el perfil.';}
   finally{for(const control of [save,apply,remove,exportProfiles,importProfiles,file])control.disabled=false;}
  };
  const save=button('Guardar perfil',()=>run(()=>{
@@ -136,12 +223,20 @@ document.getElementById('hoja-material').addEventListener('input',()=>{clearTime
  }));
  saved.addEventListener('change',()=>{name.value=value()?.name||'';});
  row.append(nameLabel,name,save,savedLabel,saved,apply,remove,exportProfiles,importProfiles,file);
- details.append(info,row,status);host.parentElement.after(details);
- try{refresh();}catch{status.textContent='El almacenamiento local no está disponible.';}
+ const account=el('details');account.hidden=true;
+ fetch('/api/course-profiles',{signal:AbortSignal.timeout(5000)}).then(response=>response.json()).then(data=>{account.hidden=data.enabled!==true;}).catch(()=>{});
+ account.append(el('summary','Sincronización opcional de perfiles'),syncForm,logout,reloadCloud,syncStatus);
+ details.append(info,row,status,account);host.parentElement.after(details);
+ try{
+  refresh();
+  if(sessionStorage.getItem('heva-course-sync-active')==='1'){
+   api('read').then(connectCloud).catch(error=>{syncStatus.textContent=error.message;});
+  }
+ }catch{status.textContent='El almacenamiento local no está disponible.';}
 
  const localHistory=()=>{
   try{
-   const history=JSON.parse(storage().getItem('heva_historial')||'[]');
+   const history=JSON.parse(window.localStorage.getItem('heva_historial')||'[]');
    return Array.isArray(history)?history:[];
   }catch{return [];}
  };
@@ -170,7 +265,7 @@ document.getElementById('hoja-material').addEventListener('input',()=>{clearTime
    const generated=await workflow.generateMissingPackage(origin,selected,{
     readHistory:localHistory,
     generate:plan=>{
-     if(storage().getItem(HEVA_RECOVERY_KEY)&&!recoveryRead(plan)){
+     if(window.localStorage.getItem(HEVA_RECOVERY_KEY)&&!recoveryRead(plan)){
       throw Error('Hay un avance activo de otro material. Retómalo o apártalo antes de continuar. Las piezas guardadas se conservan.');
      }
      return recuperarMaterialHEVA(plan);
