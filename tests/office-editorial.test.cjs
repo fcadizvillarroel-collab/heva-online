@@ -12,7 +12,7 @@ test('No decorative concept boxes when disabled, accessible font sizing preserve
 test('Word uses one native outline level for the document title and another for each section',async()=>{
  const {g}=fixture();
  let config;
- const heading={HEADING_1:'Heading1',HEADING_2:'Heading2'};
+ const heading={HEADING_1:'Heading1',HEADING_2:'Heading2',HEADING_3:'Heading3'};
  class Document{constructor(value){config=value;}}
  class Paragraph{constructor(value){this.value=value;}}
  class TextRun{constructor(value){this.value=value;}}
@@ -20,13 +20,17 @@ test('Word uses one native outline level for the document title and another for 
  g.document={createElement:()=>({click(){},remove(){}}),body:{appendChild(){}}};
  g.URL={createObjectURL:()=>'',revokeObjectURL(){}};
  g.setTimeout=()=>{};
- g.HEVA.blocks=()=>[{title:'Objetivo curricular',text:'Interpretar evidencias.'}];
+ g.HEVA.blocks=()=>[
+  {title:'Objetivo curricular',text:'Interpretar evidencias.'},
+  {title:'Inicio · 15 minutos',kind:'planning-moment',fields:[{title:'Cómo comprobar el aprendizaje',text:'Recoger una explicación breve.'}]}
+ ];
  await g.HEVAOffice.word({titulo:'Análisis de fuentes',tipoMaterial:'ACCESIBLE',accesibilidadVisual:{letraGrande:true}});
  assert.equal(config.styles.paragraphStyles,undefined,'Los estilos nativos se configuran una sola vez.');
  assert.equal(config.styles.default.heading1.paragraph.outlineLevel,0);
  assert.equal(config.styles.default.heading2.paragraph.outlineLevel,1);
+ assert.equal(config.styles.default.heading3.paragraph.outlineLevel,2);
  const outline=config.sections[0].children.filter(p=>p.value.heading).map(p=>[p.value.heading,p.value.text]);
- assert.equal(JSON.stringify(outline),JSON.stringify([[heading.HEADING_1,'Análisis de fuentes'],[heading.HEADING_2,'Objetivo curricular']]));
+ assert.equal(JSON.stringify(outline),JSON.stringify([[heading.HEADING_1,'Análisis de fuentes'],[heading.HEADING_2,'Objetivo curricular'],[heading.HEADING_2,'Inicio · 15 minutos'],[heading.HEADING_3,'Cómo comprobar el aprendizaje']]));
  assert.ok(config.styles.default.heading1.run.size>config.styles.default.heading2.run.size);
 });
 
@@ -42,4 +46,33 @@ test('PowerPoint groups a short workshop action with its own precaution and keep
  assert.equal(pages.length,2);
  assert.match(pages[0].lines.join(' '),/Dibuje la vista de canto\. Cuidado durante el trabajo: Mantenga legibles las cotas\./);
  assert.match(pages[1].lines.join(' '),/Compruebe la unidad/);
+});
+
+test('PowerPoint distinguishes complete planning fields and respects the plain layout',()=>{
+ const {g}=fixture();
+ const fields=[
+  {title:'Cómo comprobar el aprendizaje',text:'Guía de análisis de fuentes completada.'},
+  {title:'Apoyo para participar',text:'Lectura acompañada y segmentación de textos para facilitar la comprensión.'}
+ ];
+ g.HEVA.blocks=()=>[{title:'Desarrollo · 60 minutos',kind:'planning-moment',fields,text:fields.map(x=>x.title+': '+x.text).join('\n')}];
+ for(const large of [false,true]){
+  const material={titulo:'Planificación de Estudios Sociales',tipoMaterial:'PLANIFICACION',accesibilidadVisual:{letraGrande:large},recursosVisualesHEVA:{imagenes:false,recuadros:true}};
+  const styled=g.HEVAOffice.preview(material).pages;
+  assert.equal(styled.length,2);
+  assert.equal(styled[1].visualKind,'planning');
+  for(const field of fields){
+   const label=styled[1].elements.find(e=>e.text===field.title);
+   const body=styled[1].elements.find(e=>e.text===field.text);
+   assert.ok(label?.bold);
+   assert.ok(body.fontSize>=26);
+   assert.ok(label.x+label.w < body.x);
+   assert.ok(body.y+body.h<6.61);
+  }
+  material.recursosVisualesHEVA.recuadros=false;
+  const plain=g.HEVAOffice.preview(material).pages;
+  assert.equal(plain.length,2);
+  assert.notEqual(plain[1].visualKind,'planning');
+  const text=plain[1].elements.filter(e=>e.kind==='text').map(e=>e.text).join('\n');
+  for(const field of fields)assert.ok(text.includes(field.title+': '+field.text));
+ }
 });

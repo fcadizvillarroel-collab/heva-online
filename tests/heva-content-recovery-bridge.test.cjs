@@ -68,3 +68,11 @@ test('Las dos rutas de IA y la interfaz usan el mismo contrato opcional',()=>{
  assert.match(repoFile('heva-recovery-ui.js'),/heva-resume-toggle/);
  assert.match(r,/R\.mergeSlideRepair/);
 });
+
+test('Oral-reading OA receives contextual intonation and a portable self-check without affecting other language objectives',()=>{
+ const base={tipoMaterial:'GUIA',asignatura:'Lenguaje y Comunicación'};
+ assert.match(Didactics.prompt({...base,objetivoAprendizaje:'Leer en voz alta textos variados'}),/sin presentar un único patrón tonal como regla universal/);
+ assert.doesNotMatch(Didactics.prompt({...base,objetivoAprendizaje:'Comparar textos informativos'}),/LECTURA EN VOZ ALTA:/);
+ const refs=International.references({...base,temaEspecifico:'registro formal'});
+ assert.equal(refs.filter(r=>r.extracto&&r.localizador).length,2);
+});

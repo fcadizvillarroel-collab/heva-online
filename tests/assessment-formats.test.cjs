@@ -38,3 +38,15 @@ test('forma B remapea explicación y clave de alternativas seguras conservando c
  assert.ok(JSON.stringify(P.blocks(forms.b,true)).includes('La alternativa D distingue perspectivas.'));
  assert.equal(A.forms({...m,preguntasAlternativas:[m.preguntasAlternativas[1]]},remap),null);
 });
+
+test('Differentiated forms keep independent keys and reject repeated items or a different blueprint',()=>{
+ const a={tipoMaterial:'EVALUACION',titulo:'Matemática',asignatura:'Matemática',marcoCurricular:'Bases 2024',nivel:'I',objetivoAprendizaje:'Representar fracciones',duracionMinutos:30,
+  preguntasAlternativas:[{enunciado:'¿Cuál es el equivalente de 1/2?',claveCorrecta:'A'}]};
+ const b={...a,preguntasAlternativas:[{enunciado:'¿Cuál es el equivalente de 3/4?',claveCorrecta:'C'}]};
+ const pair=A.pairForms(a,b);
+ assert.equal(pair.a.preguntasAlternativas[0].claveCorrecta,'A');
+ assert.equal(pair.b.preguntasAlternativas[0].claveCorrecta,'C');
+ assert.equal(A.pairForms(a,a),null);
+ assert.equal(A.pairForms(a,{...b,duracionMinutos:45}),null);
+ assert.equal(A.pairForms(a,{...b,preguntasAlternativas:[{...b.preguntasAlternativas[0],puntajeDocente:2}]}),null);
+});

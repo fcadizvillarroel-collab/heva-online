@@ -50,3 +50,71 @@ test('abrir otra pieza exige confirmar en el historial los cambios antes de nave
  assert.equal(history[0].data.version,3);
  assert.equal(history[0].data.titulo,'Guía recién editada');
 });
+
+test('un respaldo de perfiles es portátil, excluye OA y conserva las preferencias locales homónimas',()=>{
+ const storage=()=>({value:null,getItem(){return this.value;},setItem(_,value){this.value=value;}});
+ const first=storage(),second=storage();
+ W.saveProfile(first,{...course,objetivoAprendizaje:'OA que no se exporta'});
+ W.saveProfile(first,{...course,name:'Otro curso'});
+ W.saveProfile(second,{...course,tipo:'EVALUACION'});
+ const backup=W.exportProfiles(first);
+ assert.equal(backup.includes('OA que no se exporta'),false);
+ assert.deepEqual(W.importProfiles(second,backup),{added:1,kept:1});
+ assert.equal(W.readProfiles(second).find(profile=>profile.id==='mi curso').tipo,'EVALUACION');
+ const saved=second.value;
+ assert.throws(()=>W.importProfiles(second,backup.replace('"Otro curso"','"Mi curso"')),/inválidos o repetidos/);
+ assert.equal(second.value,saved);
+});
+
+const packagePlan={
+ marcoCurricular:'DECRETO_257_2009',nivel:'III_BASICO',asignatura:'Estudios Sociales',
+ objetivoAprendizaje:'Reconocer fuentes de información histórica.',temaEspecifico:'Fuentes del barrio',
+ tipoMaterial:'PLANIFICACION',planificacionClase:{modoMateriales:'crear',materiales:['GUIA','PRESENTACION']},
+ documentosBase:[{titulo:'No copiar dos veces'}],instrumentosEvaluacion:{pareados:5}
+};
+const packageOrigin={...packagePlan,planGeneracion:packagePlan,titulo:'Plan de la unidad',materialId:'plan'};
+const responseFor=plan=>({exito:true,material:{...plan,planGeneracion:plan,versionPedagogica:3,titulo:'Pieza '+plan.tipoMaterial}});
+
+test('la generación de piezas conserva la unidad y continúa tras una interrupción desde el historial',async()=>{
+ const history=[],requests=[],commits=[];
+ const operations={
+  readHistory:()=>history,reference:'Contenido vigente de la planificación.',
+  defaults:type=>require('../heva-pedagogy.js').contract(type).defaults,
+  save:material=>history.unshift({data:structuredClone(material)}),
+  commit:plan=>commits.push(plan.tipoMaterial),
+  generate:async plan=>{
+   requests.push(plan);
+   if(plan.tipoMaterial==='PRESENTACION'&&requests.length===2)throw Error('Proveedor agotado');
+   return responseFor(plan);
+  }
+ };
+ await assert.rejects(W.generateMissingPackage(packageOrigin,['GUIA','PRESENTACION','GUIA'],operations),/Proveedor agotado/);
+ assert.deepEqual(commits,['GUIA']);
+ assert.equal(history[0].data.planificacionOrigen,'plan');
+ assert.deepEqual((await W.generateMissingPackage(structuredClone(packageOrigin),['GUIA','PRESENTACION'],operations)).map(m=>m.tipoMaterial),['PRESENTACION']);
+ assert.deepEqual(requests.map(plan=>plan.tipoMaterial),['GUIA','PRESENTACION','PRESENTACION']);
+ assert.deepEqual(requests[1],requests[2]);
+ assert.deepEqual(commits,['GUIA','PRESENTACION']);
+ for(const plan of requests){
+  assert.equal(plan.objetivoAprendizaje,packagePlan.objetivoAprendizaje);
+  assert.equal(plan.temaEspecifico,packagePlan.temaEspecifico);
+  assert.equal(plan.planificacionClase,null);
+  assert.equal(plan.textoReferencia,operations.reference);
+  assert.equal(plan.documentosBase,undefined);
+  assert.deepEqual(plan.instrumentosEvaluacion,{});
+  assert.doesNotThrow(()=>require('../lib/recovery.cjs').planOf(plan));
+ }
+ assert.deepEqual([requests[1].cantAlternativas,requests[1].cantDesarrollo,requests[1].cantCasos],[0,0,0]);
+});
+
+test('una respuesta incompatible o una copia no guardada no consumen el avance de la pieza',async()=>{
+ const operations={
+  readHistory:()=>[],reference:'Texto de la unidad',defaults:()=>[4,2,2],
+  commit:()=>assert.fail('El avance debe seguir disponible.'),
+  save:()=>{},generate:async plan=>responseFor(plan)
+ };
+ await assert.rejects(W.generateMissingPackage(packageOrigin,['GUIA'],operations),/No se confirmó el guardado/);
+ operations.generate=async plan=>responseFor({...plan,objetivoAprendizaje:'OA distinto'});
+ operations.save=()=>assert.fail('No debe guardar otro OA.');
+ await assert.rejects(W.generateMissingPackage(packageOrigin,['GUIA'],operations),/no corresponde/);
+});

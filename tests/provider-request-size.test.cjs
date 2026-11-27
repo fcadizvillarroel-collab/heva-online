@@ -62,3 +62,43 @@ test('HTTP 429 never retries the compact Groq prompt after shared quota exhausti
   assert.equal(count,1);
  }finally{global.fetch=old;}
 });
+
+test('activa Gemini y Groq antes de un proveedor de pago expresamente habilitado',async t=>{
+ const old=process.env.ALLOW_PAID_AI;
+ process.env.ALLOW_PAID_AI='true';
+ t.after(()=>{if(old===undefined)delete process.env.ALLOW_PAID_AI;else process.env.ALLOW_PAID_AI=old;});
+ const urls=[];
+ t.mock.method(globalThis,'fetch',async url=>{
+  urls.push(url);
+  if(url.includes('generativelanguage'))return {ok:false,status:429,headers:{get:()=>null},json:async()=>{throw Error('Respuesta de cuota sin JSON');}};
+  return {ok:true,status:200,json:async()=>({choices:[{message:{content:'{"titulo":"Guía gratuita"}'},finish_reason:'stop'}]})};
+ });
+ const result=await call('Guía EPJA','test-openai','test-gemini','test-groq');
+ assert.equal(result.provider,'groq');
+ assert.equal(urls.length,2);
+ assert.match(urls[0],/generativelanguage\.googleapis\.com/);
+ assert.match(urls[1],/api\.groq\.com/);
+});
+
+test('una ventana reducida conserva un intento Gemini y tiempo para Groq',async t=>{
+ const urls=[];
+ t.mock.method(globalThis,'fetch',async url=>{
+  urls.push(url);
+  return {ok:true,status:200,json:async()=>({candidates:[{finishReason:'STOP',content:{parts:[{text:'{"titulo":"Guía gratuita"}'}]}}]})};
+ });
+ const result=await call('Guía EPJA',null,'test-gemini','test-groq',[],{deadline:Date.now()+12000});
+ assert.equal(result.provider,'gemini');
+ assert.equal(urls.length,1);
+});
+
+test('interpreta Retry-After como fecha HTTP sin repetir modelos durante la misma cuota',async t=>{
+ const now=Date.parse('2026-11-27T12:00:00Z');
+ t.mock.method(Date,'now',()=>now);
+ let requests=0;
+ t.mock.method(globalThis,'fetch',async()=>{
+  requests++;
+  return {ok:false,status:429,headers:{get:()=>new Date(now+45000).toUTCString()}};
+ });
+ await assert.rejects(call('Guía EPJA',null,'test-gemini',null),error=>error.code==='AI_RATE_LIMIT'&&error.retryAfter===45);
+ assert.equal(requests,1);
+});

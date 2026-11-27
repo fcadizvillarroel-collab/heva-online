@@ -91,9 +91,9 @@ document.getElementById('hoja-material').addEventListener('input',()=>{clearTime
   saved.replaceChildren(placeholder,...options);saved.value=id||'';
  };
  const run=async action=>{
-  for(const control of [save,apply,remove])control.disabled=true;
+  for(const control of [save,apply,remove,exportProfiles,importProfiles,file])control.disabled=true;
   try{await action();}catch(error){status.textContent=error.message||'No se pudo leer o guardar el perfil.';}
-  finally{for(const control of [save,apply,remove])control.disabled=false;}
+  finally{for(const control of [save,apply,remove,exportProfiles,importProfiles,file])control.disabled=false;}
  };
  const save=button('Guardar perfil',()=>run(()=>{
   const course=workflow.saveProfile(storage(),{name:name.value,...Object.fromEntries(Object.entries(fields).map(([k,id])=>[k,byId(id).value]))});
@@ -120,22 +120,93 @@ document.getElementById('hoja-material').addEventListener('input',()=>{clearTime
   workflow.removeProfile(storage(),course.id);
   refresh();name.value='';status.textContent='Perfil eliminado.';
  }));
+ const file=el('input');file.type='file';file.accept='.json,application/json';file.hidden=true;
+ const exportProfiles=button('Descargar perfiles',()=>run(()=>{
+  if(!workflow.readProfiles(storage()).length)throw Error('Guarda un perfil antes de descargarlo.');
+  HEVAOffice.download(new Blob([workflow.exportProfiles(storage())],{type:'application/json'}),'HEVA_perfiles_curso.json');
+ }));
+ const importProfiles=button('Importar perfiles',()=>file.click());
+ file.addEventListener('change',()=>run(async()=>{
+  const backup=file.files?.[0];file.value='';
+  if(!backup)return;
+  if(backup.size>75000)throw Error('El respaldo de perfiles es demasiado grande.');
+  const {added,kept}=workflow.importProfiles(storage(),await backup.text());
+  refresh(saved.value);
+  status.textContent='Perfiles importados: '+added+'. Perfiles locales conservados con el mismo nombre: '+kept+'.';
+ }));
  saved.addEventListener('change',()=>{name.value=value()?.name||'';});
- row.append(nameLabel,name,save,savedLabel,saved,apply,remove);
+ row.append(nameLabel,name,save,savedLabel,saved,apply,remove,exportProfiles,importProfiles,file);
  details.append(info,row,status);host.parentElement.after(details);
  try{refresh();}catch{status.textContent='El almacenamiento local no está disponible.';}
+
+ const localHistory=()=>{
+  try{
+   const history=JSON.parse(storage().getItem('heva_historial')||'[]');
+   return Array.isArray(history)?history:[];
+  }catch{return [];}
+ };
+ let packageBusy=false;
+ let packageMessage='',messageKey=null;
+ let selectionKey=null,selection=new Set();
+ const packageIdentity=material=>material.materialId||material;
+ async function generatePackage(origin,selected){
+  if(packageBusy)return;
+  const resultStatus=()=>byId('heva-package-status');
+  if(hevaRecoveryRunning()){
+   resultStatus().textContent='Hay otra generación en curso. Espera a que termine.';
+   return;
+  }
+  if(navigator.onLine===false){
+   resultStatus().textContent='Conéctate a internet para generar las piezas. Los materiales guardados siguen disponibles.';
+   return;
+  }
+  const mainButton=byId('btn-generar');
+  packageBusy=true;
+  if(mainButton)mainButton.disabled=true;
+  try{
+   syncEdits();
+   workflow.preservePackageMaterial(origin,localHistory,()=>guardarEnHistorial(false));
+   messageKey=packageIdentity(origin);
+   const generated=await workflow.generateMissingPackage(origin,selected,{
+    readHistory:localHistory,
+    generate:plan=>{
+     if(storage().getItem(HEVA_RECOVERY_KEY)&&!recoveryRead(plan)){
+      throw Error('Hay un avance activo de otro material. Retómalo o apártalo antes de continuar. Las piezas guardadas se conservan.');
+     }
+     return recuperarMaterialHEVA(plan);
+    },
+    save:material=>{
+     material.materialId=material.materialId||crypto.randomUUID();
+     material.version=material.version||1;
+     hevaAutoSaveMaterial(material);
+    },
+    commit:hevaRecoveryCommit,
+    reference:HEVAStudio.reference(origin),
+    defaults:type=>HEVAPedagogy.contract(type).defaults,
+    onPiece:type=>{
+     packageMessage='Generando '+HEVAPedagogy.contract(type).name+'…';
+     if(materialActual&&packageIdentity(materialActual)===messageKey&&resultStatus())resultStatus().textContent=packageMessage;
+    }
+   });
+   packageMessage=generated.length?'Piezas guardadas en Mis materiales: '+generated.length+'.':'Las piezas seleccionadas ya están guardadas.';
+  }catch(error){
+   messageKey=packageIdentity(origin);
+   packageMessage=error.message||'La generación se interrumpió. Las piezas guardadas se conservan.';
+  }finally{
+   packageBusy=false;
+   if(mainButton)mainButton.disabled=false;
+   cargarHistorial();
+   mostrarRecuperacionPendienteHEVA();
+   if(materialActual===origin)selectionKey=packageIdentity(origin);
+   if(materialActual){syncEdits();renderizarDocumentoEnPantalla();}
+  }
+ }
 
  const prior=renderizarDocumentoEnPantalla;
  renderizarDocumentoEnPantalla=function(...args){
   prior(...args);
   let section=byId('heva-unit-package');
   if(!materialActual){if(section)section.hidden=true;return;}
-  const localHistory=()=>{
-   try{
-    const history=JSON.parse(storage().getItem('heva_historial')||'[]');
-    return Array.isArray(history)?history:[];
-   }catch{return [];}
-  };
   const kit=workflow.packageFor(materialActual,localHistory());
   if(!kit){if(section)section.hidden=true;return;}
   if(!section){
@@ -143,27 +214,49 @@ document.getElementById('hoja-material').addEventListener('input',()=>{clearTime
    byId('hoja-material').after(section);
   }
   const list=el('ol');list.className='list-decimal pl-5';
-  const packageStatus=el('p');packageStatus.setAttribute('role','status');
+  const origin=materialActual;
+  const planning=origin.planGeneracion?.planificacionClase;
+  const defaultSelection=planning?.modoMateriales==='crear'?(planning.materiales||[]):[];
+  if(selectionKey!==packageIdentity(origin)){selectionKey=packageIdentity(origin);selection=new Set(defaultSelection);}
+  const selected=()=>kit.filter(entry=>!entry.material&&selection.has(entry.type)).map(entry=>entry.type);
+  const packageStatus=el('p',messageKey===packageIdentity(origin)?packageMessage:'');
+  packageStatus.id='heva-package-status';packageStatus.setAttribute('role','status');
+  const generate=button('Generar piezas seleccionadas',()=>{
+   const pieces=selected();
+   if(!pieces.length)return;
+   void generatePackage(origin,pieces);
+   refreshSelection();
+   if(packageBusy)list.querySelectorAll('input,button').forEach(control=>{control.disabled=true;});
+  });
+  const refreshSelection=()=>{generate.disabled=packageBusy||!selected().length;};
+
   for(const entry of kit){
    const row=el('li');
    const label=HEVAPedagogy.contract(entry.type).name;
-   if(!entry.material)row.textContent=label+' · pendiente';
+   if(!entry.material&&origin.planGeneracion){
+    const choice=el('input');choice.type='checkbox';choice.checked=selection.has(entry.type);choice.disabled=packageBusy;
+    choice.onchange=()=>{if(choice.checked)selection.add(entry.type);else selection.delete(entry.type);refreshSelection();};
+    const choiceLabel=el('label');choiceLabel.append(choice,el('span',' '+label+' · pendiente'));row.append(choiceLabel);
+   }else if(!entry.material)row.textContent=label+' · pendiente';
    else{
     row.append(el('span',label+' · '+entry.material.titulo+' '));
     if(entry.material===materialActual)row.append(el('span','(abierto)'));
-    else row.append(button('Abrir '+label,()=>{
+    else{const open=button('Abrir '+label,()=>{
      try{
       syncEdits();
+      packageMessage='';
       materialActual=workflow.openPackageMaterial(materialActual,entry.material,localHistory,()=>guardarEnHistorial(false));
       renderizarDocumentoEnPantalla();
       byId('hoja-material')?.scrollIntoView({block:'start'});
      }catch(error){packageStatus.textContent=error.message;}
-    }));
+    });open.disabled=packageBusy;row.append(open);}
    }
    list.append(row);
   }
   section.hidden=false;
   section.replaceChildren(el('summary','Paquete pedagógico de esta unidad'),
-   el('p','Secuencia de materiales guardados con el mismo marco, nivel, asignatura, objetivo y tema.'),list,packageStatus);
+   el('p','Secuencia de materiales guardados con el mismo marco, nivel, asignatura, objetivo y tema.'),list);
+  if(origin.planGeneracion&&kit.some(entry=>!entry.material)){refreshSelection();section.append(generate);}
+  section.append(packageStatus);
  };
 })();

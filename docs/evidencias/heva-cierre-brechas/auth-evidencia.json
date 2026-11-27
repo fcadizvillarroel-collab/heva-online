@@ -1,0 +1,32 @@
+{
+  "created": 10,
+  "assertions": [
+    {
+      "http": 401,
+      "code": "AI_AUTH_REQUIRED"
+    },
+    {
+      "http": 403,
+      "code": "AI_ROLE_REQUIRED"
+    },
+    {
+      "http": 200,
+      "code": "accepted"
+    },
+    {
+      "http": 200,
+      "code": "accepted"
+    },
+    {
+      "http": 429,
+      "code": "AI_DAILY_QUOTA_EXHAUSTED"
+    },
+    {
+      "http": 200,
+      "code": "accepted"
+    }
+  ],
+  "pending": 10,
+  "beforeAssignment": "10",
+  "profileCount": "0"
+}
