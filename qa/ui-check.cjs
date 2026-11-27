@@ -26,6 +26,20 @@ if(require.main===module)(async()=>{
  await sheet.getByRole('textbox',{name:'Explicación y lectura',exact:true}).waitFor();
  await openTeacherTools();await page.getByRole('button',{name:'Editar y ordenar bloques',exact:true}).click();await page.getByRole('button',{name:'Cerrar',exact:true}).click();
  await page.getByRole('button',{name:'Accesibilidad',exact:true}).click();await page.getByLabel('Tamaño de letra',{exact:true}).fill('20');await page.getByLabel('Alto contraste',{exact:true}).check();await page.getByLabel('Letra grande en exportaciones',{exact:true}).check();await page.getByRole('button',{name:'Aplicar al material y exportaciones'}).click();assert.equal(await page.evaluate(()=>materialActual.accesibilidadVisual.tamano),20);
+ await page.evaluate(()=>{
+  window.qaSpeech=[];
+  Object.defineProperty(speechSynthesis,'getVoices',{configurable:true,value:()=>[]});
+  Object.defineProperty(speechSynthesis,'cancel',{configurable:true,value:()=>{}});
+  Object.defineProperty(speechSynthesis,'speak',{configurable:true,value:u=>{qaSpeech.push(u.text);queueMicrotask(()=>u.onend());}});
+ });
+ await page.getByRole('button',{name:'Escuchar',exact:true}).click();
+ const reader=page.getByRole('dialog',{name:'Escuchar el material'});
+ await reader.getByLabel('Sección para escuchar').selectOption(await reader.getByLabel('Sección para escuchar').locator('option').filter({hasText:'Explicación y lectura'}).getAttribute('value'));
+ await reader.getByRole('button',{name:'Iniciar lectura'}).click();
+ await reader.getByText('Lectura terminada.',{exact:true}).waitFor();
+ assert.match(await page.evaluate(()=>qaSpeech.join(' ')),/La globalización relaciona sociedades/);
+ assert.doesNotMatch(await page.evaluate(()=>qaSpeech.join(' ')),/Lee cada sección/);
+ await reader.getByRole('button',{name:'Cerrar',exact:true}).click();
  await page.getByRole('button',{name:'Comparar versiones',exact:true}).click();assert.ok(await page.locator('dialog').isVisible());await page.getByRole('button',{name:'Cerrar',exact:true}).click();
  for(const [name,fn]of [['qa.docx','word'],['qa.pptx','powerpoint']]){const download=page.waitForEvent('download');await page.evaluate(async fn=>{await HEVAOffice[fn](materialActual,false)},fn);await (await download).saveAs('/tmp/heva-qa/'+name);}
  await page.evaluate(m=>{materialActual=m;renderizarDocumentoEnPantalla()},fixture('PRESENTACION'));await openTeacherTools();await page.getByRole('button',{name:'Vista previa PPT',exact:true}).click();assert.ok(await page.locator('.heva-slide-canvas').count()>10);await page.screenshot({path:'/tmp/heva-qa/preview.png'});await page.getByRole('button',{name:'Cerrar',exact:true}).click();
@@ -54,5 +68,5 @@ if(require.main===module)(async()=>{
  await page.getByRole('button',{name:'Abrir '+P.contract('PRESENTACION').name,exact:true}).click();
  assert.equal(await page.evaluate(()=>materialActual.tipoMaterial),'PRESENTACION');
  await context.setOffline(false);
- assert.deepEqual(errors,[]);console.log(JSON.stringify({browser:'Chromium',checks:['abrir interfaz','editor de bloques','ajustes accesibles','comparación','Word real','PPTX real','vista previa','reordenar y referencias','deshacer','encargo offline','persistencia de acceso','perfil de curso offline tras recarga','paquete de unidad'],pageErrors:errors,artifacts:'/tmp/heva-qa'}));await browser.close();
+ assert.deepEqual(errors,[]);console.log(JSON.stringify({browser:'Chromium',checks:['abrir interfaz','editor de bloques','ajustes accesibles','lectura por sección','comparación','Word real','PPTX real','vista previa','reordenar y referencias','deshacer','encargo offline','persistencia de acceso','perfil de curso offline tras recarga','paquete de unidad'],pageErrors:errors,artifacts:'/tmp/heva-qa'}));await browser.close();
 })().catch(e=>{console.error(e);process.exit(1)});

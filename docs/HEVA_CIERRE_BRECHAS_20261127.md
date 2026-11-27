@@ -1,0 +1,31 @@
+# HEVA · Evidencia de las brechas posteriores a la PR #106
+
+Base de la rama `831a22d3f395a69a199087c144857569c9b071ba`, verificada en producción al comenzar. Se reutilizaron la [consolidación](HEVA_CONSOLIDACION_20261126.md), el [cierre de segunda fase](HEVA_CIERRE_FASE2_20261127.md) y el [cotejo de PowerPoint, taller y fuentes](HEVA_PPT_TALLER_FUENTES_20261127.md). No se cambió el catálogo ni Supabase. El banco de materiales sigue postergado.
+
+| Brecha | Resultado y límite |
+|---|---|
+| Pedagogía diferenciada | Se reutilizan los perfiles por asignatura. Se acotó un fallo observado en Lenguaje: el modelamiento de lectura oral propone una entonación contextual y pide una lista de cotejo observable para la práctica autónoma. El cambio de pauta pasó una regresión. El efecto sobre generaciones futuras requiere otra muestra. |
+| PowerPoint | En una planificación real de Estudios Sociales se renderizaron 16 diapositivas antes y después, con texto conservado. Cinco diapositivas separan acciones, evidencias y apoyos en bandas editables. Los recuadros pueden desactivarse. |
+| Word | En la misma planificación real se conservaron las 3 páginas y el texto. Las etiquetas internas de cada momento pasan a encabezados de nivel 3 y los marcadores del PDF aumentan de 12 a 24. |
+| Fuentes | Siguen vigentes los cotejos nacionales de la PR #106. Para registros de habla, el panel docente presenta dos extractos y localizadores de las referencias metodológicas existentes de SEP (México) y Educ.ar (Argentina). Se distingue una secuencia HTML de una ficha descriptiva. La contribución es metodológica y el OA sigue siendo el chileno. |
+| Paquetes | La misma acción del paquete coordina las piezas seleccionadas mediante el recuperador existente. Cada pieza se verifica en el historial antes de retirar su avance. En Chromium se simuló cuota agotada en el PowerPoint: se conservó la guía, se reintentó solo el PowerPoint con el mismo plan y se retiró el avance después del guardado. Falta un paquete completo con proveedor real. |
+| Perfiles | Exportación e importación opcionales mediante archivo JSON, sin servidores ni credenciales. Los perfiles del dispositivo tienen prioridad frente a nombres ya guardados. La importación y descarga se probaron en Chromium. La sincronización automática queda pendiente de una identidad habilitada. |
+| Evaluaciones A/B | El panel empareja dos evaluaciones guardadas si comparten OA, asignatura, nivel, marco, duración, formatos y puntos por ítem. Rechaza enunciados iguales y mantiene las claves respectivas. El flujo anterior de reordenar alternativas sigue disponible. La equivalencia de demanda y dificultad requiere inspección docente. |
+| Accesibilidad | El lector existente permite elegir una sección. El diálogo tiene nombre accesible. La prueba de Chromium verifica que solo se envía esa sección a la voz simulada. Se conserva la adaptación de materiales y se inspecciona la navegación Word mediante marcadores. Falta prueba con personas usuarias de lector de pantalla y voz instalada. |
+| Autenticación y cuotas | Pruebas defensivas cubren sesión inválida, ausencia de rol, cuota agotada y errores de servicio. Consulta de solo lectura: 0 usuarios Auth y 0 perfiles habilitados. El ensayo con cuentas requiere alta autorizada y que el frontend envíe la sesión. Las opciones de producción no se activaron. |
+| Proveedores gratuitos | Se priorizan Gemini y Groq. Se conserva una ventana para Groq cuando el tiempo restante es corto y se interpreta `Retry-After` aun con cuerpo HTTP no JSON. Se probaron casos simulados de indisponibilidad. La nueva forma B real se generó con la versión pública base y verifica interoperabilidad con exportación, no el cambio de enrutamiento. |
+| Skills | Se añadieron criterios de A/B diferenciadas y comprobación accesible a las dos guías existentes. |
+| Evidencia | Chromium, regresiones dirigidas, reexportación y renderizado LibreOffice. La evidencia real incluye una planificación previa y dos evaluaciones independientes de Matemática generadas con Gemini. |
+
+## Extractos de las referencias metodológicas
+
+- SEP, sección «Énfasis»: «lenguaje formal e informal en función de la situación comunicativa». Sustenta contrastar destinatarios y propósitos en ejemplos propios. [Página original](https://aprendeencasa.sep.gob.mx/secundaria/como-me-hables-nos-comunicamos/)
+- Educ.ar, descripción de la ficha: «puede ser condicionado por el interlocutor y el contexto». Sustenta situar las consignas de adecuación del registro. [Ficha original](https://www.educ.ar/recursos/14911/tipos-de-registros)
+
+## Exportación real de formas A/B
+
+El panel exportó dos formas generadas independientemente con Gemini. LibreOffice renderizó 3 páginas para cada ejemplar estudiante y 5 para cada ejemplar docente. Se comprobó que la pauta aparece solo en la versión docente. En la primera alternativa, A pide seleccionar una operación y B pide entregar el valor calculado. Existe una diferencia de demanda pese a la coincidencia de estructura. Un segundo intento acotado para acercar las consignas recibió HTTP 422. La pareja queda como evidencia técnica, con revisión docente pendiente.
+
+[Comparación renderizada de la planificación](evidencias/heva-cierre-brechas/planificacion.webp) · [Muestra renderizada A/B](evidencias/heva-cierre-brechas/formas-a-b.webp).
+
+La revisión de dificultad A/B, la validación de lectores de pantalla y la publicación de esta rama requieren sus comprobaciones o autorización respectivas.

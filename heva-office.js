@@ -24,7 +24,13 @@ async function word(m,teacher=false){
   }
   const purpose=wordPurpose(block),tinted=decorativeBoxes&&!visual.large;
   children.push(new Paragraph({text:block.title,heading:HeadingLevel.HEADING_2,spacing:{before:purpose==='activity'?300:240,after:110},keepNext:true,...(tinted&&purpose!=='reading'?{shading:{type:'clear',fill:visual.theme.soft||visual.theme.background},border:{left:{color:purpose==='activity'?visual.theme.accent:main,size:18,space:8,style:'single'}}}:{} )}));
-  if(block.kind==='planning-moment'){for(const field of block.fields){children.push(line(field.title,{bold:true,color:main,keepNext:true,after:70}));for(const paragraph of field.text.split(/\n+/).filter(Boolean))children.push(line(paragraph,{after:140}));}continue;}
+  if(block.kind==='planning-moment'){
+   for(const field of block.fields){
+    children.push(new Paragraph({text:field.title,heading:HeadingLevel.HEADING_3,spacing:{before:105,after:70},keepNext:true}));
+    for(const paragraph of field.text.split(/\n+/).filter(Boolean))children.push(line(paragraph,{after:140}));
+   }
+   continue;
+  }
   const extra=block.guideVisual;
   if(!extra?.chart&&!extra?.diagram&&!extra?.comparison&&!extra?.timeline)for(const paragraph of String(block.text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean)){
    children.push(line(paragraph,{after:140,box:!visual.large&&tinted&&(!!extra?.box||purpose==='objective'||purpose==='example'),rule:purpose==='example'?visual.theme.accent:main,keepNext:block.kind==='question'||/^ejemploGuiado\.pasos\.\d+\.accion$/.test(block.path||'')}));
@@ -37,6 +43,7 @@ async function word(m,teacher=false){
  const styles={default:{
   heading1:{run:{font,size:Math.max(visual.wordSize+8,36),bold:true,color:main},paragraph:{keepNext:true,outlineLevel:0}},
   heading2:{run:{font,size:Math.max(visual.wordSize,28),bold:true,color:main},paragraph:{keepNext:true,outlineLevel:1}},
+  heading3:{run:{font,size:visual.wordSize,bold:true,color:main},paragraph:{keepNext:true,outlineLevel:2}},
   document:{
    run:{font,size:visual.wordSize,language:{value:'es-CL'}},
    paragraph:{spacing:{line:Math.round(240*(material.accesibilidadVisual?.interlineado||1.3)),lineRule:'auto'}}
@@ -178,10 +185,26 @@ function drawBalance(ppt,theme,slide){
  line(4.3,4.35,1.7,0);line(7.2,4.35,1.7,0);line(5.75,5.35,1.7,0,3);
  slide.addText('MISMA OPERACIÓN EN AMBOS LADOS',{x:3.1,y:5.63,w:7,h:.45,fontSize:18,bold:true,color:theme.main,align:'center',margin:0});
 }
+// Retain the same pagination as ordinary text. Only complete planning fields
+// that fit at readable sizes use the two-column editorial composition.
+function planningRows(scene,lines){
+ if(scene.kind!=='planning-moment'||!scene.fields?.length||!lines.length)return null;
+ const byLine=new Map(scene.fields.map(field=>[field.title+': '+slideText(field.text),field]));
+ const fields=lines.map(line=>byLine.get(line));
+ if(fields.some(field=>!field))return null;
+ const labelSize=scene.large?26:20,bodySize=26,gap=.13;
+ const heightOf=(value,width,size)=>lineCount(value,width,size)*size*1.28/72+.12;
+ const rows=fields.map(field=>{
+  const labelHeight=heightOf(field.title,2.38,labelSize),bodyHeight=heightOf(field.text,8.32,bodySize);
+  return {...field,labelHeight,bodyHeight,height:Math.max(labelHeight,bodyHeight)+.34};
+ });
+ const height=rows.reduce((n,row)=>n+row.height,0)+(rows.length-1)*gap;
+ return height<=4.4?{rows,height,labelSize,bodySize,gap}:null;
+}
 function addContent(ppt,theme,slide,title,lines,section,index=0,scene={}){
  const resources=scene.visualOptions||{imagenes:true,diagramas:true,graficos:true,recuadros:true},illustration=resources.imagenes?scene.image:null;
  const question=isSelectionSlide(title,section);
- if(!question&&resources.diagramas&&!illustration&&scene.design!=='activity'&&classifySlide(title,lines,index)!=='activity'){if(drawSemanticVisual(ppt,theme,slide,title,lines))return;}
+ if(!question&&section!=='planning-moment'&&resources.diagramas&&!illustration&&scene.design!=='activity'&&classifySlide(title,lines,index)!=='activity'){if(drawSemanticVisual(ppt,theme,slide,title,lines))return;}
  const kind=classifySlide(title,lines,index),clean=lines.map(x=>x.replace(/^[-•]\s*/,'').trim()).filter(Boolean);
  const activity=!question&&(scene.design==='activity'||kind==='activity'),activityStyle=activity&&resources.recuadros,ink=activityStyle?'FFFFFF':theme.ink,main=activityStyle?'FFFFFF':theme.main;
  // A single canvas: no nested cards, decorative counters or repeated panel grids.
@@ -191,6 +214,18 @@ function addContent(ppt,theme,slide,title,lines,section,index=0,scene={}){
  const chart=resources.graficos&&scene.allowDataChart!==false&&!activity&&!question&&fitsText([clean.join('\n')],5.15,3.9,26)?root.HEVASlideDesign?.dataChart(clean):null;
  const titleSize=title.length>85?28:title.length>60?32:36;
  text(title,.85,.92,illustration&&!chart?7.05:11.6,1.18,illustration&&!chart?Math.min(titleSize,32):titleSize,main,true);
+ const planning=resources.recuadros&&!illustration?planningRows(scene,clean):null;
+ if(planning){
+  let y=2.2+(4.4-planning.height)/2;
+  for(const row of planning.rows){
+   slide.addShape(ppt.ShapeType.roundRect,{x:.85,y,w:11.63,h:row.height,rectRadius:.12,line:{color:theme.accent,width:1},fill:{color:theme.panel||'FFFFFF'}});
+   slide.addShape(ppt.ShapeType.rect,{x:.89,y:y+.07,w:2.95,h:row.height-.14,line:{color:theme.accent,transparency:100},fill:{color:theme.soft||theme.background}});
+   text(row.title,1.14,y+.17,2.38,row.labelHeight,planning.labelSize,theme.main,true);
+   text(row.text,4.0,y+.17,8.32,row.bodyHeight,planning.bodySize,ink);
+   y+=row.height+planning.gap;
+  }
+  slide.hevaVisualType='planning';return;
+ }
  if(chart){
   text(clean.join('\n'),.86,2.4,5.15,3.9,26,ink);
   text('Unidad: '+chart.unit,6.6,2.08,5.65,.35,16,main,true);
@@ -326,7 +361,7 @@ function presentationPages(material,teacher=false){
    else if(companion&&fitsSlideParagraphs([previous.text,labeled],11.0,4.05,26))previous.text+='\n'+labeled;
    else blocks.push({...item});
   }
-  sections=blocks.map(item=>({title:item.title,text:slideText(item.text),kind:item.kind||'section',image:item.image,hideImage:item.hideImage}));
+  sections=blocks.map(item=>({title:item.title,text:slideText(item.text),kind:item.kind||'section',fields:item.fields,image:item.image,hideImage:item.hideImage}));
  }
  const story=root.HEVAPedagogy?.newsText(material);if(isPresentation&&story)sections.unshift({title:'Noticia didáctica · SIMULADA',text:story,kind:'resource'});
  sections=root.HEVASlideDesign?.decorate(material,sections,root.HEVAGuideVisuals?.enabled(material)&&root.HEVASlideDesign.image(material.imagenGuiaHEVA)?{}:root.HEVAContextAssets)||sections;

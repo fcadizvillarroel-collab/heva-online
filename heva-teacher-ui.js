@@ -5,7 +5,7 @@ const T=globalThis.HEVATeaching,byId=id=>document.getElementById(id);
 let undo=[],reading=[],speechIndex=0,speechToken=0;
 function element(tag,text,attrs={}){const x=document.createElement(tag);if(text!=null)x.textContent=text;for(const [key,value]of Object.entries(attrs))x.setAttribute(key,value);return x;}
 function button(text,action){const b=element('button',text,{type:'button'});b.onclick=()=>{try{Promise.resolve(action()).catch(e=>alert(e.message))}catch(e){alert(e.message)}};return b;}
-function dialog(title){const d=element('dialog',null,{class:'heva-teacher-dialog'});const close=button('Cerrar',()=>d.close());d.append(element('h2',title),close);d.addEventListener('close',()=>d.remove());document.body.append(d);return d;}
+function dialog(title){const d=element('dialog',null,{class:'heva-teacher-dialog','aria-label':title});const close=button('Cerrar',()=>d.close());d.append(element('h2',title),close);d.addEventListener('close',()=>d.remove());document.body.append(d);return d;}
 function current(){syncEdits();if(!materialActual)throw Error('Primero crea o abre un material.');return materialActual;}
 function setMaterial(next){materialActual=next;if(next.revisionIA)next.revisionIA.estado='desactualizada_por_edicion';renderizarDocumentoEnPantalla();guardarEnHistorial(false);}
 function checkpoint(){const m=current();guardarEnHistorial(false);undo.push(structuredClone(m));if(undo.length>20)undo.shift();}
@@ -160,7 +160,41 @@ function accessibility(){const d=dialog('Accesibilidad de lectura y exportación
 function stopSpeech(){speechToken++;globalThis.speechSynthesis?.cancel();reading=[];}
 function speak(){if(!globalThis.speechSynthesis||!globalThis.SpeechSynthesisUtterance){alert('Este navegador no dispone de lectura en voz alta.');return;}const m=current(),d=dialog('Escuchar el material');d.append(element('p','Lee solo el ejemplar del estudiante. La disponibilidad de voces y su funcionamiento sin conexión dependen del equipo.'));
  const voice=element('select',null,{'aria-label':'Voz'}),rate=element('input',null,{type:'number',min:'.5',max:'1.5',step:'.1',value:'.9','aria-label':'Velocidad'});function voices(){voice.replaceChildren();const list=speechSynthesis.getVoices().filter(x=>/^es/i.test(x.lang));for(const v of list)voice.append(new Option(v.name+' · '+v.lang,v.voiceURI));const cl=list.find(x=>/^es[-_]CL$/i.test(x.lang));if(cl)voice.value=cl.voiceURI;}voices();speechSynthesis.addEventListener('voiceschanged',voices);d.addEventListener('close',()=>{stopSpeech();speechSynthesis.removeEventListener('voiceschanged',voices)},{once:true});
- const status=element('p','Listo para leer.',{role:'status'});d.append(voice,rate,button('Leer desde el inicio',()=>{stopSpeech();const token=speechToken;reading=HEVAPedagogy.blocks(m,false).flatMap(x=>[x.title,x.text]).join('. ').match(/[^.!?]+[.!?]?/g)?.flatMap(x=>x.match(/.{1,220}(?:\s|$)|.{1,220}/g)||[])||[];speechIndex=0;const next=()=>{if(token!==speechToken)return;if(speechIndex>=reading.length){status.textContent='Lectura terminada.';return;}const u=new SpeechSynthesisUtterance(reading[speechIndex++]);u.lang='es-CL';u.rate=Math.min(1.5,Math.max(.5,Number(rate.value)||.9));u.voice=speechSynthesis.getVoices().find(v=>v.voiceURI===voice.value)||null;u.onend=next;u.onerror=()=>{status.textContent='La voz no pudo continuar. Prueba otra voz del equipo.';};status.textContent='Leyendo fragmento '+speechIndex+' de '+reading.length;speechSynthesis.speak(u);};next();}),button('Pausar',()=>speechSynthesis.pause()),button('Continuar',()=>speechSynthesis.resume()),button('Detener',()=>{stopSpeech();status.textContent='Lectura detenida.';}),status);d.showModal();}
+ const blocks=HEVAPedagogy.blocks(m,false);
+ const section=element('select',null,{'aria-label':'Sección para escuchar'});
+ section.append(new Option('Material completo',''));
+ blocks.forEach((block,index)=>section.append(new Option((index+1)+'. '+block.title,String(index))));
+ const status=element('p','Listo para leer.',{role:'status'});
+ function start(){
+  stopSpeech();
+  const token=speechToken;
+  const selected=section.value===''?blocks:[blocks[Number(section.value)]];
+  const segmenter=typeof Intl.Segmenter==='function'?new Intl.Segmenter('es-CL',{granularity:'sentence'}):null;
+  reading=selected.flatMap(block=>[block.title,block.text]).flatMap(value=>{
+   const text=String(value||'').trim();
+   const sentences=segmenter?Array.from(segmenter.segment(text),x=>x.segment):[text];
+   return sentences.flatMap(sentence=>sentence.match(/.{1,220}(?:\s|$)|.{1,220}/g)||[]);
+  });
+  speechIndex=0;
+  function next(){
+   if(token!==speechToken)return;
+   if(speechIndex>=reading.length){status.textContent='Lectura terminada.';return;}
+   const u=new SpeechSynthesisUtterance(reading[speechIndex++]);
+   u.lang='es-CL';
+   u.rate=Math.min(1.5,Math.max(.5,Number(rate.value)||.9));
+   u.voice=speechSynthesis.getVoices().find(v=>v.voiceURI===voice.value)||null;
+   u.onend=next;
+   u.onerror=()=>{if(token===speechToken)status.textContent='La voz no pudo continuar. Prueba otra voz del equipo.';};
+   status.textContent='Leyendo fragmento '+speechIndex+' de '+reading.length;
+   speechSynthesis.speak(u);
+  }
+  next();
+ }
+ d.append(section,voice,rate,button('Iniciar lectura',start),
+  button('Pausar',()=>speechSynthesis.pause()),button('Continuar',()=>speechSynthesis.resume()),
+  button('Detener',()=>{stopSpeech();status.textContent='Lectura detenida.';}),status);
+ d.showModal();
+}
 function showDepthAdvisories(bar){
  let box=byId('heva-depth-advisories');
  const issues=materialActual?.controlProfundidadHEVA;
@@ -216,9 +250,10 @@ function showTextbookCandidates(bar){
  let refs=byId('heva-textbook-references');
  const record=materialActual?.textosEscolaresComplementarios;
  const matrix=materialActual?.matrizOATextos;
- if(!record?.enabled){if(refs)refs.remove();return;}
+ const international=Array.isArray(materialActual?.referenciasDidacticasComplementarias)?materialActual.referenciasDidacticasComplementarias:[];
+ if(!record?.enabled&&!international.length){if(refs)refs.remove();return;}
  if(!refs){refs=element('details',null,{id:'heva-textbook-references'});bar.append(refs);}
- refs.replaceChildren(element('summary','Matriz OA EPJA · libros y fuentes de Chile/México'));
+ refs.replaceChildren(element('summary','Matriz OA EPJA · libros y referencias documentales'));
  const header=element('p','Objetivo curricular prioritario: '+String(matrix?.oaLiteral||materialActual?.objetivoAprendizaje||'Sin información')+'.');
  header.style.cssText='font-size:.87rem;font-weight:600;line-height:1.5;margin:8px 0';
  refs.append(header);
@@ -301,6 +336,19 @@ function showTextbookCandidates(bar){
    section.append(line);
   }
   section.append(element('p','Precaución: las páginas TE son del texto escolar regular de 2023, no páginas PDF verificadas ni equivalencias con OA EPJA. Los ejemplos mexicanos solo podrán utilizarse tras consultar y verificar sus páginas.'));
+  refs.append(section);
+ }
+ if(international.length){
+  const section=element('section');
+  section.append(element('h4','Referencias metodológicas internacionales'));
+  for(const entry of international.slice(0,10)){
+   const line=element('div');
+   line.append(element('strong',entry.pais+' · '+entry.titulo),element('p',entry.aporte));
+   if(entry.extracto&&entry.localizador)line.append(element('p',entry.localizador+' · «'+entry.extracto+'»'));
+   if(entry.tipo)line.append(element('p',entry.tipo));
+   if(/^https:\/\//.test(entry.url))line.append(element('a','Abrir '+entry.titulo,{href:entry.url,target:'_blank',rel:'noopener noreferrer'}));
+   section.append(line);
+  }
   refs.append(section);
  }
  const activities=Array.isArray(matrix?.vinculosActividades)?matrix.vinculosActividades:[];

@@ -49,5 +49,31 @@ function forms(m, remapJustification){
  delete b.aprobacionPedagogica;
  return {a,b,changed,retained:alternativeItems.length-changed};
 }
-return {types,config,count,validatePlan,schema,prompt,refs,validate,score,points,items,totalScore,rubricText,blocks,shuffleMatching,forms};
+// Reuse independently generated assessments and keep each form's own answers.
+function compatibleForms(a,b){
+ if(a?.tipoMaterial!=='EVALUACION'||b?.tipoMaterial!=='EVALUACION')return false;
+ const identity=['asignatura','nivel','marcoCurricular','objetivoAprendizaje'];
+ if(identity.some(key=>!norm(a[key])||norm(a[key])!==norm(b[key])))return false;
+ if(a.duracionMinutos!==b.duracionMinutos)return false;
+ const first=items(a),second=items(b);
+ if(!first.length||first.length!==second.length)return false;
+ const question=({q})=>norm(q?.enunciado||q?.preguntaReflexion||q?.consigna||q?.texto);
+ const originals=new Set(first.map(question));
+ if(first.some((x,i)=>x.label!==second[i].label||x.points!==second[i].points||!question(x))||
+    second.some(x=>!question(x)||originals.has(question(x))))return false;
+ return true;
+}
+function pairForms(a,b){
+ if(!compatibleForms(a,b))return null;
+ const label=(m,form)=>{
+  const copy=JSON.parse(JSON.stringify(m));
+  copy.titulo='Forma '+form+' · '+m.titulo;
+  delete copy.revisionIA;
+  delete copy.aprobacionDocente;
+  delete copy.aprobacionPedagogica;
+  return copy;
+ };
+ return {a:label(a,'A'),b:label(b,'B'),changed:items(b).length,retained:0};
+}
+return {types,config,count,validatePlan,schema,prompt,refs,validate,score,points,items,totalScore,rubricText,blocks,shuffleMatching,forms,compatibleForms,pairForms};
 });
