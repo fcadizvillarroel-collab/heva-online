@@ -6,6 +6,7 @@
  const profileStorageKey='heva-perfiles-curso-v1';
  const profileBackupSchema='heva-perfiles-curso-v1';
  const courseFields=['marco','nivel','asignatura','tipo'];
+ const institutionalFields={establecimiento:80,modalidad:60,curso:60,recursos:160,contexto:160};
  const materialTypes=['PLANIFICACION','GUIA','PRESENTACION','TALLER','EVALUACION','ACCESIBLE'];
  const unitFields=['marcoCurricular','nivel','asignatura','objetivoAprendizaje','temaEspecifico'];
  const string=value=>typeof value==='string'?value.trim():'';
@@ -15,7 +16,8 @@
   if(!name||name.length>60)return null;
   const fields=Object.fromEntries(courseFields.map(field=>[field,string(value[field])]));
   if(Object.values(fields).some(field=>!field||field.length>160)||!materialTypes.includes(fields.tipo))return null;
-  return {id:key(name),name,...fields};
+  const institutional=Object.fromEntries(Object.entries(institutionalFields).map(([field,limit])=>[field,string(value.institucional?.[field]).slice(0,limit)]).filter(([,text])=>text));
+  return {id:key(name),name,...fields,...(Object.keys(institutional).length?{institucional:institutional}:{})};
  }
  function readProfiles(storage){
   try{

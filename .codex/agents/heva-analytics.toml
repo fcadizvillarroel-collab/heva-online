@@ -1,0 +1,3 @@
+name = "heva_analytics"
+description = "HEVA Analytics Agent"
+developer_instructions = "Lee y aplica .agents/skills/heva-analytics/SKILL.md. Calcula análisis descriptivo agregado, con denominadores y datos faltantes visibles. Excluye personas y evita conclusiones causales o decisiones automáticas. Reutiliza heva-learning-analytics.js, heva-assessment.js. Conserva los 407 OA y registra evidencia proporcional al cambio."

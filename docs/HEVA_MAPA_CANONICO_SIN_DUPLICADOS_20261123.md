@@ -63,3 +63,7 @@ Supabase mantiene **407 OA registrados, 407 vigentes y 407 con aprobación de ca
 - La publicación curricular deja de ser una secuencia HTTP no atómica: `api/curriculum/admin.js` usa la RPC `heva_aprobar_objetivo`, ya presente en Supabase, con denegación si falla. No reponer la lógica antigua.
 - Los archivos SQL históricos con sufijo `_PENDIENTE.sql` son registros de las **migraciones aplicadas**; la activación de cuotas mediante variables de entorno no es parte de su instalación.
 - El alcance de las pruebas de IA, Word y PowerPoint sigue separado del cotejo disciplinar y la aprobación docente: que un test produzca un ZIP válido no implica que la guía o las diapositivas sean correctas.
+
+## Gestión educativa en la Fase 3
+
+El [registro de Fase 3](HEVA_FASE3_GESTION.md) identifica las rutas del banco sobre historial, seguimiento sobre calendario, resultados agregados sobre evaluación y portabilidad de copias. Reutilizar también las rutas de perfiles, edición, revisión y exportación descritas en este mapa.

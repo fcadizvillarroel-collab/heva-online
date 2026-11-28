@@ -80,6 +80,15 @@ document.getElementById('hoja-material').addEventListener('input',()=>{clearTime
  const nameLabel=el('label','Nombre del perfil');nameLabel.htmlFor=name.id;
  const saved=el('select');saved.id='heva-course-profile-select';saved.className='border rounded px-2';
  const savedLabel=el('label','Perfil guardado');savedLabel.htmlFor=saved.id;
+ const institution=el('details');institution.className='my-2';
+ institution.append(el('summary','Contexto del establecimiento'),el('p','Usa nombres institucionales o códigos de curso. Evita ingresar nombres de estudiantes, identificadores o información sensible.'));
+ const contextFields={};
+ for(const [key,title,limit] of [['establecimiento','Establecimiento',80],['modalidad','Modalidad educativa',60],['curso','Código de curso',60],['recursos','Recursos disponibles',160],['contexto','Contexto pedagógico general',160]]){
+  const label=el('label',title);label.className='block';
+  const input=el('input');input.type='text';input.maxLength=limit;input.className='block border rounded px-2 mb-2 w-full';
+  label.append(input);institution.append(label);contextFields[key]=input;
+ }
+ const fillContext=entry=>{for(const [key,input] of Object.entries(contextFields))input.value=entry?.institucional?.[key]||'';};
  const status=el('p');status.setAttribute('role','status');
  const button=(label,action)=>{const b=el('button',label);b.type='button';b.className='border rounded px-2 py-1';b.onclick=action;return b;};
  const row=el('div');row.className='flex flex-wrap items-center gap-2 my-2';
@@ -176,6 +185,7 @@ document.getElementById('hoja-material').addEventListener('input',()=>{clearTime
   const options=workflow.readProfiles(storage()).map(entry=>{const option=el('option',entry.name);option.value=entry.id;return option;});
   const placeholder=el('option','Selecciona un perfil');placeholder.value='';
   saved.replaceChildren(placeholder,...options);saved.value=id||'';
+  fillContext(value());
  };
  const run=async action=>{
   for(const control of [save,apply,remove,exportProfiles,importProfiles,file])control.disabled=true;
@@ -183,7 +193,7 @@ document.getElementById('hoja-material').addEventListener('input',()=>{clearTime
   finally{for(const control of [save,apply,remove,exportProfiles,importProfiles,file])control.disabled=false;}
  };
  const save=button('Guardar perfil',()=>run(()=>{
-  const course=workflow.saveProfile(storage(),{name:name.value,...Object.fromEntries(Object.entries(fields).map(([k,id])=>[k,byId(id).value]))});
+  const course=workflow.saveProfile(storage(),{name:name.value,...Object.fromEntries(Object.entries(fields).map(([k,id])=>[k,byId(id).value])),institucional:Object.fromEntries(Object.entries(contextFields).map(([key,input])=>[key,input.value]))});
   refresh(course.id);status.textContent='Perfil guardado en este navegador.';
  }));
  const apply=button('Aplicar perfil',()=>run(async()=>{
@@ -221,12 +231,12 @@ document.getElementById('hoja-material').addEventListener('input',()=>{clearTime
   refresh(saved.value);
   status.textContent='Perfiles importados: '+added+'. Perfiles locales conservados con el mismo nombre: '+kept+'.';
  }));
- saved.addEventListener('change',()=>{name.value=value()?.name||'';});
+ saved.addEventListener('change',()=>{const entry=value();name.value=entry?.name||'';fillContext(entry);});
  row.append(nameLabel,name,save,savedLabel,saved,apply,remove,exportProfiles,importProfiles,file);
  const account=el('details');account.hidden=true;
  fetch('/api/course-profiles',{signal:AbortSignal.timeout(5000)}).then(response=>response.json()).then(data=>{account.hidden=data.enabled!==true;}).catch(()=>{});
  account.append(el('summary','Sincronización opcional de perfiles'),syncForm,logout,reloadCloud,syncStatus);
- details.append(info,row,status,account);host.parentElement.after(details);
+ details.append(info,row,institution,status,account);host.parentElement.after(details);
  try{
   refresh();
   if(sessionStorage.getItem('heva-course-sync-active')==='1'){

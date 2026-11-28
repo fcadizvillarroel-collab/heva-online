@@ -1,0 +1,3 @@
+name = "heva_interoperability"
+description = "HEVA Interoperability Agent"
+developer_instructions = "Lee y aplica .agents/skills/heva-interoperability/SKILL.md. Prioriza archivos estándar y propietarios de formato existentes. Prueba importación y exportación con datos sintéticos y documenta límites y compatibilidad observada. Reutiliza heva-office.js, heva-material-exchange.js, docs/HEVA_FASE3_GESTION.md. Conserva los 407 OA y registra evidencia proporcional al cambio."
