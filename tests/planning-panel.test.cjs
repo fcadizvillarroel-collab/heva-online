@@ -97,3 +97,29 @@ test('editing an itinerary reapplies its new activity and evidence to the canoni
  assert.doesNotMatch(C.prompt(next),/Recuperar experiencias del curso/);
  assert.throws(()=>C.editItinerary(first,{...fields,evidencia:''}),/evidencia/);
 });
+
+test('an interdisciplinary sequence preserves two catalog objectives and their separate evidence through planning and recovery',()=>{
+ const encargo={...calendarCourse,...plan()};
+ encargo.oaPrincipal={clave:'oa-lenguaje',texto:encargo.objetivoAprendizaje};
+ const second={clave_interna:'oa-matematica',asignatura:'Educación Matemática',texto_literal:'Resolver problemas con razones y proporciones.',vigente:true};
+ const fields={actividad:'Comparar dos presupuestos y redactar una solicitud.',criterioPrincipal:'Formula una petición clara.',criterioSecundario:'Justifica la comparación con una razón.'};
+ const calendar=C.scheduleCalendar(leapPeriod);
+ const joint=C.interdisciplinaryBrief(encargo,second,fields);
+ const sequence=C.proposeItinerary(calendar,calendar.sesiones[0].id,2,joint);
+ for(const {encargo:brief} of sequence.sesiones.filter(s=>s.encargo)){
+  assert.equal(brief.objetivoAprendizaje,encargo.objetivoAprendizaje);
+  assert.deepEqual(brief.interdisciplinariedad.objetivos.map(o=>o.criterio),[fields.criterioPrincipal,fields.criterioSecundario]);
+  const edited=C.editItinerary(brief,{titulo:'Revisar presupuestos',actividad:'Leer los dos presupuestos.',evidencia:'Comparar y justificar.'});
+  for(const prompt of [P.prompt(edited),R.fallbackPrompt(edited,{},undefined)]){
+   assert.ok(prompt.includes(second.texto_literal));
+   assert.ok(prompt.includes(fields.criterioPrincipal));
+   assert.ok(prompt.includes(fields.criterioSecundario));
+  }
+  assert.equal(edited.planificacionClase.detalleMetodos.split(second.texto_literal).length,2);
+ }
+ assert.throws(()=>C.interdisciplinaryBrief(encargo,{...second,asignatura:encargo.asignatura},fields),/asignatura diferente/);
+ assert.throws(()=>C.interdisciplinaryBrief(encargo,{...second,vigente:false},fields),/segundo OA vigente/);
+ assert.throws(()=>C.interdisciplinaryBrief(encargo,undefined,fields),/segundo OA vigente/);
+ assert.throws(()=>C.interdisciplinaryBrief(encargo,second,{...fields,criterioSecundario:''}),/criterio observable/);
+ assert.throws(()=>C.interdisciplinaryBrief({...encargo,oaPrincipal:null},second,fields),/OA principal/);
+});

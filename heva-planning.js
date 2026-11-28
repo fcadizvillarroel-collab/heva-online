@@ -91,6 +91,28 @@ const itineraryStages=[
  {titulo:'Consolidar',actividad:'Resolver una situación con menos apoyo e incorporar una breve comprobación entre pares.',evidencia:'Presentar la respuesta y comprobarla con un criterio.'},
  {titulo:'Transferir y comprobar',actividad:'Resolver una situación nueva de forma autónoma y cerrar con una síntesis que permita retomar el trabajo tras una ausencia.',evidencia:'Entregar una respuesta propia y explicar cómo aplicar lo aprendido en otra situación.'}
 ];
+function interdisciplinaryBrief(encargo,secondary,fields){
+ const primary=encargo.oaPrincipal;
+ if(!primary?.clave||primary.texto!==encargo.objetivoAprendizaje)throw Error('Selecciona un OA principal del catálogo EPJA.');
+ if(!secondary?.clave_interna||!secondary.texto_literal||secondary.vigente===false||secondary.clave_interna===primary.clave)throw Error('Selecciona un segundo OA vigente del catálogo EPJA.');
+ if(normalized(secondary.asignatura)===normalized(encargo.asignatura))throw Error('Selecciona una asignatura diferente para el segundo OA.');
+ const details=Object.fromEntries(['actividad','criterioPrincipal','criterioSecundario'].map(key=>[key,String(fields[key]||'').trim()]));
+ if(Object.values(details).some(value=>!value||value.length>500))throw Error('Completa la actividad común y un criterio observable por OA (hasta 500 caracteres cada uno).');
+ const objetivos=[
+  {...primary,asignatura:encargo.asignatura,criterio:details.criterioPrincipal},
+  {clave:secondary.clave_interna,asignatura:secondary.asignatura,texto:secondary.texto_literal,criterio:details.criterioSecundario}
+ ];
+ const plan=encargo.planificacionClase;
+ const labels=['OA principal','OA complementario'];
+ const describe=(goal,index)=>labels[index]+' ('+goal.asignatura+', '+goal.clave+')';
+ const planificacionClase={...plan,
+  detalleMetodos:[plan.detalleMetodos,'Actividad interdisciplinaria común: '+details.actividad,...objetivos.map((goal,index)=>describe(goal,index)+': '+goal.texto),'Conserva ambos OA por separado. Desarrolla la actividad común según el foco de la sesión.'].filter(Boolean).join('\n'),
+  producto:[plan.producto,...objetivos.map((goal,index)=>'Evidencia para '+describe(goal,index)+': '+goal.criterio)].filter(Boolean).join('\n')
+ };
+ const errors=validate({tipoMaterial:'PLANIFICACION',planificacionClase});
+ if(errors.length)throw Error(errors.join(' '));
+ return {...encargo,interdisciplinariedad:{objetivos,actividad:details.actividad},planificacionClase};
+}
 function editItinerary(encargo,fields){
  const itinerario=Object.fromEntries(['titulo','actividad','evidencia'].map(key=>[key,String(fields[key]||'').trim()]));
  if(!itinerario.titulo||itinerario.titulo.length>120||['actividad','evidencia'].some(key=>!itinerario[key]||itinerario[key].length>1000))throw Error('Completa el foco, la actividad y la evidencia respetando los límites de extensión.');
@@ -120,6 +142,6 @@ function saveCalendar(storage,calendar){
  storage.setItem(calendarKey,JSON.stringify([calendar,...records.filter(x=>x.id!==calendar.id)]));
  return calendar;
 }
-return {groups,suggestions,duration,times,validate,summary,prompt,audit,calendarHorizons,scheduleCalendar,updateSession,editItinerary,proposeItinerary,readCalendars,saveCalendar};
+return {groups,suggestions,duration,times,validate,summary,prompt,audit,calendarHorizons,scheduleCalendar,updateSession,interdisciplinaryBrief,editItinerary,proposeItinerary,readCalendars,saveCalendar};
 });
 

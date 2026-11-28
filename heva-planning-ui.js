@@ -14,6 +14,7 @@ function mountCalendar(panel,node,C,form,read,loadBrief){
   const wrapper=node('label',label,'block font-semibold text-sm');
   const element=node(tag,null,'block border rounded px-2 py-1 mt-1 w-full font-normal');
   element.id=id;
+  element.setAttribute('aria-label',label);
   if(type)element.type=type;
   wrapper.append(element);parent.append(wrapper);return element;
  }
@@ -52,6 +53,50 @@ function mountCalendar(panel,node,C,form,read,loadBrief){
  sequence.append(node('legend','Proponer una secuencia de clases','font-semibold text-sm'),node('p','Usa el OA y el encargo del formulario. Desde la fecha seleccionada se ocupan solo sesiones activas sin encargo ni material vinculado.','text-sm'));
  const count=field(sequence,'Cantidad de clases','planning-calendar-itinerary-count','input','number');
  count.min='2';count.max='6';count.step='1';count.value='3';
+ const joint=node('details');
+ joint.append(node('summary','Añadir un OA de otra asignatura','font-semibold text-sm cursor-pointer'));
+ const subject=field(joint,'Segunda asignatura','planning-calendar-joint-subject','select');
+ const secondary=field(joint,'OA complementario','planning-calendar-joint-oa','select');
+ const source=node('p',null,'text-sm');
+ source.setAttribute('role','status');
+ const literal=node('p',null,'text-sm');
+ joint.append(source,literal);
+ const jointFields={
+  actividad:field(joint,'Actividad común para ambos OA','planning-calendar-joint-task','textarea'),
+  criterioPrincipal:field(joint,'Evidencia observable para el OA principal','planning-calendar-joint-primary','textarea'),
+  criterioSecundario:field(joint,'Evidencia observable para el OA complementario','planning-calendar-joint-secondary','textarea')
+ };
+ for(const field of Object.values(jointFields))field.maxLength=500;
+ sequence.append(joint);
+ let secondaryRows=[],request=0,selectionContext='';
+ function resetSubjects(){
+  request++;
+  const current=course();
+  const choices=[...byId('asignatura').options].filter(o=>o.value&&o.value!==current.asignatura&&!/Construcciones Metálicas/i.test(o.value));
+  subject.replaceChildren(option('','Sin OA complementario'),...choices.map(o=>option(o.value,o.textContent)));
+  secondary.replaceChildren();
+  secondaryRows=[];literal.textContent='';source.textContent='';
+  selectionContext=JSON.stringify(current);
+ }
+ joint.addEventListener('toggle',()=>{
+  if(joint.open&&selectionContext!==JSON.stringify(course()))resetSubjects();
+ });
+ for(const id of ['asignatura','marco-curricular','nivel-epja'])byId(id).addEventListener('change',resetSubjects);
+ subject.addEventListener('change',async()=>{
+  const token=++request;
+  const {marcoCurricular,nivel}=course();
+  secondaryRows=[];literal.textContent='';secondary.replaceChildren();
+  source.textContent=subject.value?'Cargando objetivos…':'';
+  if(!subject.value)return;
+  try{
+   const {list,source:origin}=await consultarCatalogoHEVA({marco:marcoCurricular,nivel,asignatura:subject.value});
+   if(token!==request)return;
+   secondaryRows=list.filter(o=>o.clave_interna&&o.texto_literal&&o.vigente!==false);
+   secondary.replaceChildren(option('','Selecciona un OA complementario'),...secondaryRows.map(o=>option(o.clave_interna,(o.codigo_oficial||o.clave_interna)+' · '+o.texto_literal)));
+   source.textContent=secondaryRows.length?(origin==='Supabase'?'Objetivos de Supabase.':'Respaldo local. Puede requerir actualización.'):'No hay objetivos disponibles para esta selección.';
+  }catch(error){if(token===request)source.textContent='No se pudo consultar el catálogo para esta asignatura.';}
+ });
+ secondary.addEventListener('change',()=>{literal.textContent=secondaryRows.find(o=>o.clave_interna===secondary.value)?.texto_literal||'';});
  output.append(sequence);
  const date=field(output,'Fecha de la sesión','planning-calendar-date','input','date');
  const duration=field(output,'Duración de la sesión en minutos','planning-calendar-minutes','input','number');
@@ -120,7 +165,15 @@ function mountCalendar(panel,node,C,form,read,loadBrief){
  action(sequence,'Proponer y guardar secuencia',()=>{
   const sessionId=session.value;
   const amount=Number(count.value);
-  const next=C.proposeItinerary(active,sessionId,amount,currentBrief());
+  let brief=currentBrief();
+  if(subject.value){
+   if(selectionContext!==JSON.stringify(course()))throw Error('Vuelve a seleccionar la segunda asignatura para este curso.');
+   const selected=byId('select-oa').selectedOptions[0];
+   brief.oaPrincipal={clave:selected?.dataset.key,texto:selected?.value};
+   const fields=Object.fromEntries(Object.entries(jointFields).map(([key,field])=>[key,field.value]));
+   brief=C.interdisciplinaryBrief(brief,secondaryRows.find(o=>o.clave_interna===secondary.value),fields);
+  }
+  const next=C.proposeItinerary(active,sessionId,amount,brief);
   C.saveCalendar(localStorage,next);showCalendar(next,sessionId);
   status.textContent='Secuencia guardada en '+amount+' sesiones. Selecciona una sesión para revisar o editar su propuesta.';
  });
