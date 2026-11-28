@@ -63,3 +63,14 @@ test('the searchable content and inventory preserve material data without puttin
  assert.match(L.report(results),/Guía de recursos/);
  assert.doesNotMatch(L.report(results),/Describe el presupuesto/);
 });
+
+test('optional concept lookup prioritizes literal results and preserves curriculum filters',()=>{
+ const records=Library.catalog([
+  entry('related',{titulo:'Cotización de útiles',asignatura:'Matemática'}),
+  entry('exact',{titulo:'Presupuesto de útiles',asignatura:'Matemática'}),
+  entry('other',{titulo:'Cotización de oficios',asignatura:'Lenguaje'})
+ ]);
+ assert.deepEqual(Library.search(records,{query:'presupuesto',concepts:true,asignatura:'Matemática'}).map(x=>[x.current.id,x.conceptMatch]),[['exact',false],['related',true]]);
+ assert.deepEqual(Library.search(records,{query:'presupuesto útiles'}).map(x=>x.current.id),['exact']);
+ assert.deepEqual(Library.search(records,{query:'presupuesto transporte',concepts:true}),[]);
+});

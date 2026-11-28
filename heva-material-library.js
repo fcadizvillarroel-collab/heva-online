@@ -62,16 +62,38 @@ function facets(records){
  }));
 }
 
-function search(records,{query='',...filters}={}){
- const words=normalized(query).split(' ').filter(Boolean);
+const conceptGroups=[
+ ['inasistencia','inasistencias','ausencia','ausencias','ausentismo'],['presupuesto','presupuestos','cotización','cotizaciones'],['sinónimo','equivalencia léxica'],
+ ['seguridad laboral','prevención de riesgos'],['interpretación de textos','comprensión lectora'],
+ ['proporcionalidad','variación proporcional'],['convivencia','resolución de conflictos']
+].map(group=>group.map(normalized));
+const hasPhrase=(value,fragment)=>(' '+value+' ').includes(' '+fragment+' ');
+function queryParts(query,concepts){
+ let literal=normalized(query);
+ const alternatives=[];
+ if(concepts){
+  for(const group of conceptGroups){
+   const term=group.find(value=>hasPhrase(literal,value));
+   if(!term)continue;
+   alternatives.push(group);
+   literal=(' '+literal+' ').replaceAll(' '+term+' ',' ').trim();
+  }
+ }
+ return {words:literal.split(' ').filter(Boolean),alternatives};
+}
+function search(records,{query='',concepts=false,...filters}={}){
+ const {words,alternatives}=queryParts(query,concepts);
+ const directQuery=normalized(query).split(' ').filter(Boolean);
  return records.flatMap(record=>{
-  const matched=record.versions.find(version=>{
-   if(fields.some(field=>filters[field]&&normalized(version[field])!==normalized(filters[field])))return false;
+  let relatedVersion;
+  for(const version of record.versions){
+   if(fields.some(field=>filters[field]&&normalized(version[field])!==normalized(filters[field])))continue;
    const haystack=normalized([version.titulo,version.tema,version.oa,...fields.map(field=>version[field])].join(' '))+' '+version.content;
-   return words.every(word=>haystack.includes(word));
-  });
-  return matched?[{...record,matched}]:[];
- });
+   if(directQuery.every(word=>haystack.includes(word)))return [{...record,matched:version,conceptMatch:false}];
+   if(!relatedVersion&&alternatives.length&&words.every(word=>haystack.includes(word))&&alternatives.every(group=>group.some(term=>hasPhrase(haystack.trim(),term))))relatedVersion=version;
+  }
+  return relatedVersion?[{...record,matched:relatedVersion,conceptMatch:true}]:[];
+ }).sort((a,b)=>Number(a.conceptMatch)-Number(b.conceptMatch));
 }
 
 function report(records){
