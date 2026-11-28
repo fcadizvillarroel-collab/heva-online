@@ -49,14 +49,31 @@ function adaptationPlan(m,type){if(!['ACCESIBLE','RECUPERACION'].includes(type)|
  if(oralReadingRecovery)p.instruccionesDocente+=' Modela pausas, fluidez y entonación en un fragmento completo. Incluye un segundo fragmento para practicar y releer en voz alta, con criterios observables que se puedan comprobar sin docente ni dispositivo.';
  p.textoReferencia=oralReadingRecovery?'':reference(m);
  p.modoReferencia=oralReadingRecovery?'NINGUNA':'CONTENIDO';p.adecuacionesPIE=[...new Set([...(p.adecuacionesPIE||[]),...(type==='ACCESIBLE'?['Lectura acompañada y segmentación']:[])])];p.disenoPedagogico=null;p.plantillaVisual=m.plantillaVisual||p.plantillaVisual||'calida';p.derivacion={tipo:type,origenId:m.materialId,origenVersion:m.version||1,origenTitulo:String(m.titulo).slice(0,300),familiaId:m.familiaMaterialId||m.materialId};return p;}
+function comparisonSources(docs){
+ if(!Array.isArray(docs)||docs.length!==2||validateExtras({documentosBase:docs}).length||docs[0].id===docs[1].id||
+    docs.some(doc=>typeof doc?.texto!=='string'||!doc.texto.trim()||!text(doc.titulo)))throw Error('Selecciona dos documentos base distintos con texto.');
+ return docs.map((doc,index)=>({documento:index+1,titulo:doc.titulo,texto:doc.texto.trim().slice(0,4500)}));
+}
+function checkedComparison(sources,result){
+ if(!Array.isArray(result?.contrastes)||!result.contrastes.length||result.contrastes.length>6)throw Error('La síntesis no contiene contrastes verificables.');
+ const visible=value=>String(value||'').replace(/\s+/g,' ').trim();
+ const contrasts=result.contrastes.filter(item=>['coincidencia','diferencia'].includes(item?.tipo)&&
+  typeof item?.interpretacion==='string'&&visible(item.interpretacion).length>0&&item.interpretacion.length<=400&&
+  [item.cita1,item.cita2].every((quote,index)=>typeof quote==='string'&&visible(quote).length>=12&&quote.length<=400&&
+   visible(sources[index].texto).includes(visible(quote))));
+ if(!contrasts.length)throw Error('La síntesis no aportó citas localizadas en ambos fragmentos.');
+ return {contrastes:contrasts.map(({tipo,interpretacion,cita1,cita2})=>({tipo,interpretacion,cita1,cita2})),omitidos:result.contrastes.length-contrasts.length};
+}
 function conversationAction(material,instruction){
  const value=String(instruction||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
  if(!value)return null;
  if(/^compara/.test(value))return {kind:'compare'};
  if(/ausent|inasist|baja asistencia/.test(value))return {kind:'adapt',target:'RECUPERACION'};
  if(/lectura oral|lectura acompanada|version accesible/.test(value))return {kind:'adapt',target:'ACCESIBLE'};
- const target=/^(genera|crea|convierte|transforma)/.test(value)&&
-  (/evaluacion|prueba/.test(value)?'EVALUACION':/presentacion|diapositivas/.test(value)?'PRESENTACION':/guia/.test(value)?'GUIA':null);
+ const destination=/^(convierte|transforma)\b/.test(value)
+  ?value.match(/\b(?:en|a)\s+(?:(?:una?|la)\s+)?(evaluacion|prueba|presentacion|diapositivas|guia)\b/)?.[1]
+  :value.match(/^(?:genera|crea)\s+(?:(?:una?|la)\s+)?(evaluacion|prueba|presentacion|diapositivas|guia)\b/)?.[1];
+ const target={evaluacion:'EVALUACION',prueba:'EVALUACION',presentacion:'PRESENTACION',diapositivas:'PRESENTACION',guia:'GUIA'}[destination];
  if(target&&target!==material.tipoMaterial)return {kind:'convert',target};
  const labels=sections(material);
  const match=(prefix,index)=>labels.find(entry=>entry.id===prefix+'-'+index)?.id;
@@ -80,6 +97,7 @@ function conversionPlan(m,target){
  const [cantAlternativas,cantDesarrollo,cantCasos]=target==='PRESENTACION'?[0,0,0]:P.contract(target).defaults;
  Object.assign(p,{cantAlternativas,cantDesarrollo,cantCasos,planIntegrado:null,planificacionClase:null,instrumentosEvaluacion:{},
   adecuacionesPIE:m.planGeneracion?.adecuacionesPIE||[],instruccionesDocente:'Transforma la referencia en un material de la misma unidad. Conserva el OA y usa consignas nuevas; en evaluaciones separa pauta y estímulos.'});
+ if(target==='GUIA')p.instruccionesDocente+=' Desarrolla una lectura explicativa de 340 a 400 palabras, con explicación de conceptos y un ejemplo resuelto. Las consignas y el glosario se cuentan aparte.';
  p.derivacion.tipo='CONVERSION';
  return p;
 }
@@ -155,4 +173,4 @@ function improve(m,proposal,mode){
  delete next.auditoriaDisciplinar;delete next.auditoriaExperimental;delete next.incidenciasDocumentales;
  invalidate(next,m);return next;
 }
-return{sections,section,patch,invalidate,validateExtras,documentsPrompt,adaptationPlan,conversationAction,conversionPlan,link,changes,reference,improvementModes,improvementData,improve};});
+return{sections,section,patch,invalidate,validateExtras,documentsPrompt,comparisonSources,checkedComparison,adaptationPlan,conversationAction,conversionPlan,link,changes,reference,improvementModes,improvementData,improve};});

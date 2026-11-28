@@ -40,18 +40,50 @@ function compareDocuments(){
  const dialog=document.createElement('dialog');
  dialog.setAttribute('aria-label','Comparar documentos base');
  dialog.style.cssText='width:min(1000px,94vw);max-height:85vh;overflow:auto;padding:20px;border:1px solid #c9bba9;border-radius:12px;background:white';
- const title=document.createElement('h2');title.textContent='Comparar documentos base';
+ const title=document.createElement('h2');title.textContent='Comparar documentos base';title.style.cssText='font-weight:700;font-size:1.15rem;margin-bottom:8px';
  const close=document.createElement('button');close.type='button';close.textContent='Cerrar comparación';close.onclick=()=>dialog.close();
  const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px';
  for(const source of list){
   const article=document.createElement('section'),heading=document.createElement('h3'),body=document.createElement('pre');
-  heading.textContent=source.titulo;
+  heading.textContent=source.titulo;heading.style.fontWeight='700';
   body.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;font:inherit';
   body.textContent=source.texto;
+  article.style.cssText='padding:12px;border:1px solid #d6c5b7;border-radius:8px;min-width:0';
   article.append(heading,body);grid.append(article);
  }
- dialog.append(title,close,grid);
- dialog.addEventListener('close',()=>dialog.remove(),{once:true});
+ const analyze=document.createElement('button');analyze.type='button';analyze.textContent='Contrastar fragmentos con IA';
+ const explanation=document.createElement('p');
+ explanation.textContent='Envía hasta 4.500 caracteres de cada documento a HEVA para contrastarlos. Revisa las interpretaciones antes de usarlas.';
+ const progress=document.createElement('p');progress.setAttribute('role','status');
+ const findings=document.createElement('section');findings.style.cssText='display:grid;gap:10px;margin:10px 0';
+ let request;
+ analyze.onclick=async()=>{
+  analyze.disabled=true;findings.replaceChildren();progress.textContent='Contrastando los fragmentos…';
+  request=new AbortController();
+  try{
+   const response=await fetch('/api/studio',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({accion:'comparar_documentos',documentosBase:list.map(({id,titulo,texto})=>({id,titulo,texto:texto.trim().slice(0,4500)}))}),signal:AbortSignal.any([request.signal,AbortSignal.timeout(45000)])});
+   const data=await response.json();
+   if(!response.ok||!Array.isArray(data.contrastes))throw Error(data.error||'No se pudo completar la síntesis.');
+   for(const item of data.contrastes){
+    const article=document.createElement('article'),heading=document.createElement('h3');
+    heading.textContent=item.tipo==='coincidencia'?'Coincidencia':'Diferencia';
+    heading.style.fontWeight='700';article.style.cssText='padding:12px;border-left:4px solid #8b2635;background:#fff7ed';
+    const summary=document.createElement('p');summary.textContent=item.interpretacion;
+    article.append(heading,summary);
+    for(const [index,quote] of [item.cita1,item.cita2].entries()){
+     const caption=document.createElement('p');caption.textContent=list[index].titulo;
+     const excerpt=document.createElement('blockquote');excerpt.textContent='«'+quote+'»';
+     article.append(caption,excerpt);
+    }
+    findings.append(article);
+   }
+   progress.textContent='Citas localizadas en ambos textos. Revisión de las interpretaciones pendiente.'+(data.omitidos?' Contrastes omitidos por falta de respaldo literal: '+data.omitidos+'.':'');
+  }catch(error){if(!request.signal.aborted)progress.textContent=error.message;}
+  finally{analyze.disabled=false;}
+ };
+ dialog.append(title,close,explanation,analyze,progress,findings,grid);
+ dialog.addEventListener('close',()=>{request?.abort();dialog.remove();},{once:true});
  document.body.append(dialog);dialog.showModal();
 }
 function drawDocs(){const list=document.getElementById('studio-doc-list');if(!list)return;const marked=selected().map(d=>d.id);list.innerHTML=docs().map(d=>'<p><label><input type="checkbox" id="studio-doc-'+d.id+'" '+(marked.includes(d.id)?'checked':'')+'> '+E(d.titulo)+' · '+d.texto.length+' caracteres</label> <button type="button" data-edit-doc="'+d.id+'">Editar texto</button> <button type="button" data-remove="'+d.id+'">Eliminar</button></p>').join('');list.querySelectorAll('[data-edit-doc]').forEach(b=>b.onclick=()=>editDocument(b.dataset.editDoc));list.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{localStorage.setItem('heva_documentos_v1',JSON.stringify(docs().filter(d=>d.id!==b.dataset.remove)));drawDocs()});list.querySelectorAll('input').forEach(c=>c.onchange=()=>{const issues=S.validateExtras({documentosBase:selected()});if(issues.length){c.checked=false;document.getElementById('studio-doc-status').textContent=issues.join(' ')}})}
