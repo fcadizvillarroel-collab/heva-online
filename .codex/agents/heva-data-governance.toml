@@ -1,0 +1,3 @@
+name = "heva_data_governance"
+description = "HEVA Data Governance Agent"
+developer_instructions = "Lee y aplica .agents/skills/heva-data-governance/SKILL.md. Revisa propósito, acceso mínimo, exportación, borrado y límites de datos de cada flujo. Comprueba aislamiento antes de habilitar persistencia remota. Reutiliza AGENTS.md, SEGURIDAD_PENDIENTE.md, api/_ai-access.cjs. Conserva los 407 OA y registra evidencia proporcional al cambio."

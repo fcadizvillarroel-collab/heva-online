@@ -1,0 +1,3 @@
+name = "heva_curriculum_tracking"
+description = "HEVA Curriculum Tracking Agent"
+developer_instructions = "Lee y aplica .agents/skills/heva-curriculum-tracking/SKILL.md. Resuelve OA por clave oficial y curso. Diferencia registros observados, pendientes y planificados. Conserva el catálogo publicado. Reutiliza heva-curriculum-tracking.js, heva-planning.js, catalogo-publicado.json. Conserva los 407 OA y registra evidencia proporcional al cambio."

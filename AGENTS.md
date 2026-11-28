@@ -8,7 +8,7 @@ Antes de implementar cualquier mejora, consultar **[el mapa canónico de módulo
 
 ## Continuidad de la consolidación
 
-Consulta la [matriz de consolidación](docs/HEVA_CONSOLIDACION_20261126.md) antes de retomar una tarea. Registra allí el SHA base, la prueba reproducible, el alcance comprobado y el bloqueo concreto. Mantén postergado el banco de materiales. El paquete de unidad agrupa documentos del historial local existente.
+Consulta la [matriz de consolidación](docs/HEVA_CONSOLIDACION_20261126.md) antes de retomar una tarea. Registra allí el SHA base, la prueba reproducible, el alcance comprobado y el bloqueo concreto. Desde la Fase 3, el banco local reutiliza el historial existente. El paquete de unidad agrupa documentos del historial local existente.
 Para la continuación, consulta la [evidencia de segunda fase](docs/HEVA_CIERRE_FASE2_20261127.md). Reutiliza también el [registro de cierre de brechas](docs/HEVA_CIERRE_BRECHAS_20261127.md) y la [guía de activación de perfiles](docs/HEVA_ACTIVACION_PERFILES_CURSO.md).
 
 Usa las guías de trabajo de HEVA en `.agents/skills/`: [currículo y pedagogía](.agents/skills/heva-curriculo-pedagogia/SKILL.md), [materiales accesibles](.agents/skills/heva-materiales-accesibles/SKILL.md), [generación y recuperación](.agents/skills/heva-generacion-recuperacion/SKILL.md) y [verificación y despliegue](.agents/skills/heva-verificacion-despliegue/SKILL.md).
@@ -52,3 +52,7 @@ Para el asistente, transformación documental, calendario y memoria, consulta el
 - En CI, asegurar que la ruta verificada consulte Supabase con `vigente=eq.true`, mientras que el JSON local no sea tratado como escritura de base de datos.
 - Para un cotejo en vivo, ejecutar únicamente SQL de solo lectura. No incorporar credenciales de servicio en código del navegador ni pruebas.
 - Si una tarea solicita mejorar HEVA sin nombrar cambios curriculares, la interpretación predeterminada es **reutilizar los 407 OA, no cargarlos otra vez**.
+
+## Gestión educativa, Fase 3
+
+Consulta [el registro de gestión educativa](docs/HEVA_FASE3_GESTION.md) para los módulos, perfiles de agentes, pruebas y límites de datos. El banco local usa el historial existente y los seguimientos usan perfiles, calendario y catálogo publicados. Para datos de estudiantes aplica las condiciones institucionales del registro antes de habilitar persistencia identificable. El catálogo curricular permanece bajo las reglas de autoridad descritas arriba.

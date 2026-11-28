@@ -164,3 +164,14 @@ test('la memoria docente consentida llega a la base y a los bloques de diapositi
   assert.doesNotMatch(prompt,/INDICACIONES COMPLEMENTARIAS DEL DOCENTE:/);
  }
 });
+
+test('el contexto institucional es opcional, se conserva en el respaldo y filtra campos ajenos',()=>{
+ let snapshot;
+ const storage={getItem:()=>snapshot,setItem:(_key,value)=>{snapshot=value;}};
+ const context={establecimiento:'CEA de ejemplo',modalidad:'EPJA',curso:'A-3',recursos:'Material impreso',contexto:'Presencial'};
+ W.saveProfile(storage,{...course,institucional:{...context,estudiantes:['Ejemplo'],token:'secreto'}});
+ assert.deepEqual(W.readProfiles(storage)[0].institucional,context);
+ const backup=W.exportProfiles(storage);
+ assert.deepEqual(W.parseProfileBackup(backup)[0].institucional,context);
+ assert.doesNotMatch(backup,/estudiantes|token|secreto/);
+});

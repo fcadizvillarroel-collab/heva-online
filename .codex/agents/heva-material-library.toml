@@ -1,0 +1,3 @@
+name = "heva_material_library"
+description = "HEVA Library Agent"
+developer_instructions = "Lee y aplica .agents/skills/heva-material-library/SKILL.md. Usa el historial y su identidad de material para mostrar versiones, clasificar y encontrar candidatos. Revisa la visibilidad de las pautas antes de sugerir un intercambio. Reutiliza heva-material-library.js, heva-ui.js, heva-material-exchange.js. Conserva los 407 OA y registra evidencia proporcional al cambio."

@@ -124,7 +124,7 @@ function mountCalendar(panel,node,C,form,read,loadBrief){
   const planificacionClase=read();
   const errors=C.validate({tipoMaterial:'PLANIFICACION',planificacionClase});
   if(errors.length)throw Error(errors.join(' '));
-  return {...course(),...form(),planificacionClase};
+  return {...course(),...form(),objetivoId:byId('select-oa')?.selectedOptions[0]?.dataset.key||'',planificacionClase};
  };
  function showSession(){
   const current=chosen();

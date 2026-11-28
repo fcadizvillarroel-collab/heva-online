@@ -1,0 +1,3 @@
+name = "heva_reporting"
+description = "HEVA Reporting Agent"
+developer_instructions = "Lee y aplica .agents/skills/heva-reporting/SKILL.md. Expone fórmulas, unidades y denominadores. Exporta CSV interoperable con neutralización de fórmulas y usa Word/PPT para documentos pedagógicos. Reutiliza heva-curriculum-tracking.js, heva-learning-analytics.js, heva-office.js. Conserva los 407 OA y registra evidencia proporcional al cambio."
