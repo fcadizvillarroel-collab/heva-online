@@ -33,7 +33,7 @@ test('la interfaz HEVA que realmente utiliza el docente respeta respuestas Supab
  assert.match(ui,/catch\(e\)\{source='catálogo local EPJA';list=await local\(\);\}/);
  assert.ok(!ui.includes("if(!list.length&&source==='Supabase')"),'No cambiar la fuente después de recibir un cero válido');
  const html=src('index.html');
- assert.match(html,/heva-ui\.js\?v=20261123-qa-guard/);
+ assert.match(html,/heva-ui\.js\?v=20261128-interdisciplinar/);
 });
 test('Word y PPT muestran auditoría existente de forma automática y sin bloquear exportaciones válidas',()=>{
  const ui=src('heva-ui.js');

@@ -1,6 +1,26 @@
 const hevaEscape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let catalogRequest=0;
 let previousSubject='', topicBySubject={};
+async function consultarCatalogoHEVA(filter){
+ const usable=rows=>(Array.isArray(rows)?rows:[]).filter(o=>o&&typeof o.texto_literal==='string'&&o.texto_literal.trim()&&o.estado!=='RECHAZADO'&&o.vigente!==false);
+ const key='heva_catalog_'+JSON.stringify(filter);
+ const local=async()=>{try{
+   const r=await fetch('/catalogo-publicado.json',{cache:'no-cache'});
+   if(!r.ok)throw Error('Catálogo local HTTP '+r.status);
+   return usable(HEVA.catalog(await r.json(),filter));
+  }catch(e){console.warn('Catálogo local no disponible',e);try{return usable(JSON.parse(localStorage.getItem(key)||'[]'))}catch{return []}}};
+ let list=[],source='Supabase';
+  try{
+   const r=await fetch('/api/curriculum/admin?action=verified&'+new URLSearchParams(filter),{cache:'no-store'});
+   if(!r.ok)throw Error('Respuesta HTTP '+r.status);
+   const data=await r.json();
+   if(!Array.isArray(data.objetivos))throw Error('Respuesta sin objetivos');
+   list=usable(data.objetivos);
+   // Respuesta válida, incluso [], manda sobre respaldos y cachés antiguos.
+   try{localStorage.setItem(key,JSON.stringify(list))}catch{}
+  }catch(e){source='catálogo local EPJA';list=await local();}
+ return {list,source};
+}
 actualizarObjetivosYEstrategias=async function(){
  const serial=++catalogRequest;
  const sel=document.getElementById('select-oa'),counter=document.getElementById('contador-oas'),oa=document.getElementById('texto-oa');
@@ -11,24 +31,8 @@ actualizarObjetivosYEstrategias=async function(){
  }
  previousSubject=filter.asignatura;
  sel.replaceChildren(new Option('Cargando catálogo…',''));sel.disabled=true;oa.value='';
- const usable=rows=>(Array.isArray(rows)?rows:[]).filter(o=>o&&typeof o.texto_literal==='string'&&o.texto_literal.trim()&&o.estado!=='RECHAZADO'&&o.vigente!==false);
- const key='heva_catalog_'+JSON.stringify(filter);
- const local=async()=>{try{
-   const r=await fetch('/catalogo-publicado.json',{cache:'no-cache'});
-   if(!r.ok)throw Error('Catálogo local HTTP '+r.status);
-   return usable(HEVA.catalog(await r.json(),filter));
-  }catch(e){console.warn('Catálogo local no disponible',e);try{return usable(JSON.parse(localStorage.getItem(key)||'[]'))}catch{return []}}};
  try{
-  let list=[],source='Supabase';
-  try{
-   const r=await fetch('/api/curriculum/admin?action=verified&'+new URLSearchParams(filter),{cache:'no-store'});
-   if(!r.ok)throw Error('Respuesta HTTP '+r.status);
-   const data=await r.json();
-   if(!Array.isArray(data.objetivos))throw Error('Respuesta sin objetivos');
-   list=usable(data.objetivos);
-   // Respuesta válida, incluso [], manda sobre respaldos y cachés antiguos.
-   try{localStorage.setItem(key,JSON.stringify(list))}catch{}
-  }catch(e){source='catálogo local EPJA';list=await local();}
+  const {list,source}=await consultarCatalogoHEVA(filter);
   if(serial!==catalogRequest)return;
   sel.replaceChildren();
   for(const item of list){

@@ -75,5 +75,51 @@ if(require.main===module)(async()=>{
  await page.getByRole('button',{name:'Abrir '+P.contract('PRESENTACION').name,exact:true}).click();
  assert.equal(await page.evaluate(()=>materialActual.tipoMaterial),'PRESENTACION');
  await context.setOffline(false);
- assert.deepEqual(errors,[]);console.log(JSON.stringify({browser:'Chromium',checks:['abrir interfaz','editor de bloques','ajustes accesibles','lectura por sección','comparación','Word real','PPTX real','vista previa','reordenar y referencias','deshacer','encargo offline','persistencia de acceso','perfil de curso offline tras recarga','paquete de unidad'],pageErrors:errors,artifacts:'/tmp/heva-qa'}));await browser.close();
+ const rows=require('../catalogo-publicado.json');
+ await page.route(url=>url.pathname==='/api/curriculum/admin',route=>{
+  const filters=Object.fromEntries(new URL(route.request().url()).searchParams);
+  if(filters.asignatura==='Educación Matemática')return route.fulfill({status:503,body:'Catálogo no disponible'});
+  return route.fulfill({json:{objetivos:H.catalog(rows,filters)}});
+ });
+ await page.locator('#marco-curricular').selectOption('DECRETO_257_2009',{force:true});
+ await page.locator('#nivel-epja').selectOption('III_BASICO',{force:true});
+ await page.locator('#asignatura').selectOption('Lenguaje y Comunicación',{force:true});
+ await page.evaluate(()=>actualizarObjetivosYEstrategias());
+ await page.waitForFunction(()=>document.querySelector('#select-oa option[data-key]')?.value);
+ await page.locator('#select-oa').selectOption({index:1},{force:true});
+ await page.locator('#tipo-material').selectOption('PLANIFICACION',{force:true});
+ const calendar=page.locator('#heva-planning-calendar');
+ for(const detail of await calendar.evaluate(el=>{const ids=[];for(let parent=el.parentElement;parent;parent=parent.parentElement)if(parent.tagName==='DETAILS'&&parent.id)ids.unshift(parent.id);return ids;})){
+  const section=page.locator('#'+detail);
+  if(!await section.evaluate(el=>el.open))await section.locator(':scope > summary').click();
+ }
+ await calendar.locator(':scope > summary').click();
+ await page.locator('#tema-especifico').fill('Organizar una compra comunitaria');
+ await calendar.getByLabel('Nombre del nuevo calendario').fill('Compras comunitarias');
+ await calendar.getByLabel('Período de planificación').selectOption('unidad');
+ await calendar.getByLabel('Desde',{exact:true}).fill('2028-02-28');
+ await calendar.getByLabel('Hasta',{exact:true}).fill('2028-03-13');
+ await calendar.getByLabel('lunes',{exact:true}).check();
+ await calendar.getByRole('button',{name:'Crear calendario local'}).click();
+ await calendar.getByText('Añadir un OA de otra asignatura',{exact:true}).click();
+ await calendar.getByLabel('Segunda asignatura').selectOption('Educación Matemática');
+ await calendar.getByText('Respaldo local. Puede requerir actualización.',{exact:true}).waitFor();
+ await calendar.getByLabel('OA complementario',{exact:true}).selectOption({index:2});
+ await calendar.getByLabel('Actividad común para ambos OA').fill('Comparar dos presupuestos y justificar una compra.');
+ await calendar.getByLabel('Evidencia observable para el OA principal').fill('Explica la decisión en un párrafo claro.');
+ await calendar.getByLabel('Evidencia observable para el OA complementario').fill('Comprueba la diferencia entre los presupuestos.');
+ await calendar.getByRole('button',{name:'Proponer y guardar secuencia'}).click();
+ await calendar.getByText(/Secuencia guardada en 3 sesiones/).waitFor();
+ const briefs=await page.evaluate(()=>HEVAPlanning.readCalendars(localStorage)[0].sesiones.map(s=>s.encargo));
+ assert.equal(briefs.length,3);
+ for(const brief of briefs){
+  const [primary,secondary]=brief.interdisciplinariedad.objetivos;
+  assert.equal(primary.texto,brief.objetivoAprendizaje);
+  assert.equal(secondary.texto,rows.find(o=>o.clave_interna===secondary.clave).texto_literal);
+ }
+ await calendar.getByRole('button',{name:'Cargar encargo guardado en el formulario'}).click();
+ const prompt=await page.evaluate(()=>HEVAPlanning.prompt({tipoMaterial:'PLANIFICACION',...hevaPlanningExtras()}));
+ assert.match(prompt,/Explica la decisión en un párrafo claro/);
+ assert.match(prompt,/Comprueba la diferencia entre los presupuestos/);
+ assert.deepEqual(errors,[]);console.log(JSON.stringify({browser:'Chromium',checks:['abrir interfaz','editor de bloques','ajustes accesibles','lectura por sección','comparación','Word real','PPTX real','vista previa','reordenar y referencias','deshacer','encargo offline','persistencia de acceso','perfil de curso offline tras recarga','paquete de unidad','unidad interdisciplinaria y respaldo curricular'],pageErrors:errors,artifacts:'/tmp/heva-qa'}));await browser.close();
 })().catch(e=>{console.error(e);process.exit(1)});
