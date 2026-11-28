@@ -118,3 +118,49 @@ test('una respuesta incompatible o una copia no guardada no consumen el avance d
  operations.save=()=>assert.fail('No debe guardar otro OA.');
  await assert.rejects(W.generateMissingPackage(packageOrigin,['GUIA'],operations),/no corresponde/);
 });
+
+test('la memoria docente es local, editable y aislada por asignatura o curso',()=>{
+ const storage={data:new Map(),getItem(key){return this.data.get(key);},setItem(key,value){this.data.set(key,value);}};
+ const scope={ambito:'curso',marco:course.marco,nivel:course.nivel,asignatura:course.asignatura};
+ const subject={...scope,ambito:'asignatura'};
+ W.saveProfile(storage,course);
+ assert.deepEqual(W.saveTeacherMemory(storage,scope,['pasos','impresion','impresion','dato no permitido']),['pasos','impresion']);
+ assert.deepEqual(W.readTeacherMemory(storage,{...scope,asignatura:' ESTUDIOS SOCIALES '}),['pasos','impresion']);
+ assert.deepEqual(W.readTeacherMemory(storage,{...scope,nivel:'IV_BASICO'}),[]);
+ assert.deepEqual(W.readTeacherMemory(storage,subject),[]);
+ W.saveTeacherMemory(storage,subject,['lectura']);
+ assert.deepEqual(W.readTeacherMemory(storage,{...subject,nivel:'IV_BASICO'}),['lectura']);
+ assert.deepEqual(W.saveTeacherMemory(storage,scope,['impresion']),['impresion']);
+ assert.equal(W.exportProfiles(storage).includes('impresion'),false);
+ assert.throws(()=>W.saveTeacherMemory(storage,{...scope,asignatura:''},['lectura']),/Selecciona una asignatura/);
+ W.saveTeacherMemory(storage,scope,[]);
+ assert.deepEqual(W.readTeacherMemory(storage,scope),[]);
+ assert.deepEqual(W.readTeacherMemory(storage,subject),['lectura']);
+});
+
+test('solo las preferencias elegidas explícitamente se incorporan a un encargo compatible',()=>{
+ const selected=['pasos','lectura','información privada'];
+ assert.deepEqual(W.teacherMemoryExtras(selected,false,'GUIA'),{});
+ const guide=W.teacherMemoryExtras(selected,true,'GUIA');
+ assert.equal(guide.preferenciasDocentesHEVA.length,2);
+ assert.match(guide.instruccionesDocente,/OA EPJA/);
+ assert.doesNotMatch(guide.instruccionesDocente,/información privada/);
+ const evaluation=W.teacherMemoryExtras(selected,true,'EVALUACION');
+ assert.deepEqual(evaluation.preferenciasDocentesHEVA,[W.teacherPreferences.lectura]);
+ assert.deepEqual(W.teacherMemoryExtras(['pasos'],true,'EVALUACION'),{});
+});
+
+test('la memoria docente consentida llega a la base y a los bloques de diapositivas',()=>{
+ const R=require('../lib/recovery.cjs');
+ const plan={...packagePlan,tipoMaterial:'PRESENTACION',planificacionClase:null,documentosBase:[],instrumentosEvaluacion:{},cantAlternativas:0,cantDesarrollo:0,cantCasos:0};
+ function prompts(input){
+  const p=R.planOf(input);
+  return [R.basePrompt(p),R.itemPrompt(p,{titulo:'Base'},R.batches(p)[0],[])];
+ }
+ for(const prompt of prompts({...plan,...W.teacherMemoryExtras(['impresion'],true,'PRESENTACION')})){
+  assert.match(prompt,/INDICACIONES COMPLEMENTARIAS DEL DOCENTE:[^\n]*material impreso/);
+ }
+ for(const prompt of prompts({...plan,...W.teacherMemoryExtras(['impresion'],false,'PRESENTACION')})){
+  assert.doesNotMatch(prompt,/INDICACIONES COMPLEMENTARIAS DEL DOCENTE:/);
+ }
+});

@@ -59,3 +59,19 @@ test('Recuperación de lectura en voz alta modela el desempeño sin copiar ejerc
  assert.equal(p.derivacion.origenId,m.materialId);
  assert.match(p.instruccionesDocente,/practicar y releer en voz alta/);
 });
+
+test('Assistant directs a numbered request to an existing block and recognizes a derived evaluation',()=>{
+ const m={...sample(),tipoMaterial:'GUIA',actividadesGuiadas:[{},{}]};
+ assert.deepEqual(S.conversationAction(m,'Mejora la segunda actividad'),{kind:'edit',section:'GUIADA-2'});
+ assert.deepEqual(S.conversationAction(m,'Mejora la actividad 9'),{kind:'missing'});
+ assert.deepEqual(S.conversationAction(m,'Amplía la explicación'),{kind:'edit',section:'lectura'});
+ assert.deepEqual(S.conversationAction(m,'Genera una evaluación basada en esta guía'),{kind:'convert',target:'EVALUACION'});
+ assert.deepEqual(S.conversationAction(m,'Crea una versión para estudiantes ausentes'),{kind:'adapt',target:'RECUPERACION'});
+ const p=S.conversionPlan(m,'PRESENTACION');
+ assert.equal(p.cantAlternativas,0);
+ assert.equal(p.objetivoAprendizaje,m.objetivoAprendizaje);
+ assert.deepEqual(S.validateExtras(p),[]);
+ assert.equal(p.derivacion.origenVersion,2);
+ assert.match(S.link({titulo:'Nueva'},p).titulo,/conversión/);
+ assert.equal(m.tipoMaterial,'GUIA');
+});

@@ -13,6 +13,8 @@ Para la continuación, consulta la [evidencia de segunda fase](docs/HEVA_CIERRE_
 
 Usa las guías de trabajo de HEVA en `.agents/skills/`: [currículo y pedagogía](.agents/skills/heva-curriculo-pedagogia/SKILL.md), [materiales accesibles](.agents/skills/heva-materiales-accesibles/SKILL.md), [generación y recuperación](.agents/skills/heva-generacion-recuperacion/SKILL.md) y [verificación y despliegue](.agents/skills/heva-verificacion-despliegue/SKILL.md).
 
+Para el asistente, transformación documental, calendario y memoria, consulta el [registro de Fase 2](docs/HEVA_ASISTENTE_FASE2_20261127.md). Las responsabilidades de Assistant, Document y Comparison usan Studio; Memory y Personalization usan el flujo de curso; Planning y Workflow usan planificación y paquetes; Adaptation, Interdisciplinary y Learning Designer usan pedagogía. Visual y Research conservan sus módulos canónicos.
+
 ## Autoridad curricular: NO volver a crear los 407 OA
 
 **Supabase HEVA es la fuente de verdad de los objetivos de aprendizaje (OA) EPJA.**

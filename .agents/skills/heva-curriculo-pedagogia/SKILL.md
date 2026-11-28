@@ -16,3 +16,7 @@ Para formas A/B con ítems nuevos, usa dos evaluaciones guardadas que compartan 
 - **Currículum, pedagogía y contexto EPJA.** Revisa el perfil disciplinar en `heva-didactics.js`. En educación de adultos y contextos de acceso restringido comprueba que los estímulos sean completos, que exista una alternativa utilizable en papel y que las actividades puedan retomarse tras una ausencia.
 - **Investigación y verificación de fuentes.** Distingue ficha de catálogo, índice, página leída, cita literal y apoyo directo a la afirmación. Para usar una imagen o un texto de terceros registra procedencia y licencia verificable. Si falta respaldo, registra el límite a nivel de afirmación.
 - **Evaluación.** Usa la comparación A/B del panel docente para revisar qué operación exige cada consigna y qué evidencia produce. Comprueba distractores, puntaje, rúbrica y ausencia de claves en el ejemplar del estudiante. Registra por separado la coincidencia de estructura y la dificultad observada.
+
+## Planificación extendida, adaptación y diseño de secuencias
+
+Reutiliza el calendario y el plan de clase existentes. Registra OA, secuencia, recursos, forma de comprobar el logro, bloqueos de fechas y ajustes por inasistencia. En adaptación multinivel varía apoyos y exigencia con OA estable. Para propuestas interdisciplinarias, conserva los OA y criterios por separado y comprueba la evidencia específica de cada uno. Los resúmenes de fuentes y las rúbricas siguen el registro documental y los controles de evaluación existentes.

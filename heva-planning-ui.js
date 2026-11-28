@@ -1,5 +1,133 @@
 (function(){
 'use strict';
+function mountCalendar(panel,node,C,form,read){
+ const byId=id=>document.getElementById(id);
+ const course=()=>({asignatura:byId('asignatura')?.value||'',nivel:byId('nivel-epja')?.value||'',marcoCurricular:byId('marco-curricular')?.value||''});
+ const details=node('details',null,'bg-white border rounded p-3');
+ details.id='heva-planning-calendar';
+ details.append(node('summary','Calendario de clases y unidades','font-bold cursor-pointer'));
+ const fields=node('div',null,'grid gap-3 my-3');
+ details.append(fields);
+ const status=node('p',null,'text-sm my-2');
+ status.setAttribute('role','status');
+ function field(parent,label,id,tag,type){
+  const wrapper=node('label',label,'block font-semibold text-sm');
+  const element=node(tag,null,'block border rounded px-2 py-1 mt-1 w-full font-normal');
+  element.id=id;
+  if(type)element.type=type;
+  wrapper.append(element);parent.append(wrapper);return element;
+ }
+ function option(value,label){const e=node('option',label);e.value=value;return e;}
+ function action(parent,label,fn){
+  const button=node('button',label,'border rounded px-3 py-1 text-sm font-bold');
+  button.type='button';button.addEventListener('click',()=>{
+   try{fn();}catch(error){status.textContent=error.message;}
+  });
+  parent.append(button);return button;
+ }
+ let active=null;
+ const saved=field(fields,'Calendarios guardados','planning-calendar-saved','select');
+ const name=field(fields,'Nombre del nuevo calendario','planning-calendar-name','input','text');
+ const horizon=field(fields,'Período de planificación','planning-calendar-horizon','select');
+ horizon.replaceChildren(...Object.entries(C.calendarHorizons).map(([id,title])=>option(id,title)));
+ const from=field(fields,'Desde','planning-calendar-start','input','date');
+ const to=field(fields,'Hasta','planning-calendar-end','input','date');
+ const days=node('fieldset');days.append(node('legend','Días de clases','font-semibold text-sm'));
+ const dayInputs=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'].map((label,value)=>{
+  const line=node('label',null,'inline-flex gap-1 items-center mr-3');
+  const checkbox=node('input');checkbox.type='checkbox';checkbox.value=value;
+  line.append(checkbox,node('span',label,'text-sm'));days.append(line);return checkbox;
+ });
+ fields.append(days);
+ const excluded=field(fields,'Fechas excluidas por feriados o interrupciones, una por línea','planning-calendar-exclusions','textarea');
+ excluded.placeholder='AAAA-MM-DD';
+ excluded.rows=3;
+ const output=node('section',null,'border-t pt-3 mt-3 grid gap-3');
+ output.hidden=true;
+ const title=node('h4',null,'font-bold');
+ const context=node('p',null,'text-sm');
+ output.append(title,context);
+ const session=field(output,'Sesión','planning-calendar-session','select');
+ const date=field(output,'Fecha de la sesión','planning-calendar-date','input','date');
+ const duration=field(output,'Duración de la sesión en minutos','planning-calendar-minutes','input','number');
+ duration.min='15';duration.max='240';duration.step='1';
+ const note=field(output,'Nota, ajuste por baja asistencia o actividad de recuperación','planning-calendar-session-note','textarea');
+ note.rows=2;
+ const suspendedLabel=node('label',null,'flex gap-2 items-center text-sm');
+ const suspended=node('input');suspended.type='checkbox';
+ suspendedLabel.append(suspended,node('span','Marcar sesión suspendida'));output.append(suspendedLabel);
+ const planMode=field(output,'Encargo de la sesión','planning-calendar-session-plan','select');
+ planMode.append(option('keep','Conservar el encargo guardado'),option('assign','Vincular el encargo actual del formulario'),option('clear','Quitar el encargo vinculado'));
+ const planSummary=node('pre',null,'whitespace-pre-wrap font-sans text-sm');
+ output.append(planSummary);
+ const material=field(output,'Versión de material del historial','planning-calendar-material','select');
+ function history(){return typeof readHistory==='function'?(readHistory()||[]):[];}
+ const chosen=()=>active?.sesiones.find(entry=>entry.id===session.value);
+ function showSession(){
+  const current=chosen();
+  if(!current)return;
+  date.value=current.fecha;duration.value=current.duracion;note.value=current.nota;suspended.checked=current.suspendida===true;
+  planMode.value='keep';
+  const plan=current.encargo;
+  planSummary.textContent=plan?[plan.objetivoAprendizaje,plan.temaEspecifico,C.summary(plan.planificacionClase)].join('\n'):'Sesión sin encargo vinculado.';
+  const entries=history().filter(entry=>typeof entry?.id==='string'&&entry.data?.titulo);
+  material.replaceChildren(option('','Sin material'),...entries.map(({id,data})=>option(id,data.titulo+(data.version?' · v'+data.version:''))));
+  if(current.materialId&&!entries.some(entry=>entry.id===current.materialId))material.append(option(current.materialId,'Versión no disponible en el historial'));
+  material.value=current.materialId;
+ }
+ function showCalendar(calendar,sessionId){
+  active=calendar;output.hidden=!calendar;
+  if(!calendar)return;
+  title.textContent=calendar.nombre;
+  context.textContent=[C.calendarHorizons[calendar.horizonte],calendar.curso.asignatura,calendar.curso.nivel,calendar.sesiones.filter(entry=>!entry.suspendida).length+' sesiones activas'].join(' · ');
+  session.replaceChildren(...calendar.sesiones.map(entry=>option(entry.id,entry.fecha+' · '+(entry.suspendida?'suspendida':entry.duracion+' min'))));
+  if(sessionId)session.value=sessionId;
+  showSession();
+ }
+ function showSaved(selected){
+  const calendars=C.readCalendars(localStorage);
+  saved.replaceChildren(option('','Selecciona un calendario'),...calendars.map(item=>option(item.id,item.nombre+' · '+C.calendarHorizons[item.horizonte])));
+  saved.value=selected||'';
+  return calendars;
+ }
+ action(fields,'Crear calendario local',()=>{
+  const calendar=C.scheduleCalendar({id:crypto.randomUUID(),nombre:name.value,horizonte:horizon.value,inicio:from.value,fin:to.value,dias:dayInputs.filter(input=>input.checked).map(input=>Number(input.value)),exclusiones:excluded.value.split('\n').map(text=>text.trim()).filter(Boolean),duracion:read().duracion,curso:course()});
+  C.saveCalendar(localStorage,calendar);showSaved(calendar.id);showCalendar(calendar);
+  status.textContent='Calendario guardado en este navegador.';
+ });
+ action(output,'Guardar cambios de la sesión',()=>{
+  const current=chosen();
+  let encargo=current?.encargo;
+  if(planMode.value==='clear')encargo=null;
+  if(planMode.value==='assign'){
+   const planificacionClase=read();
+   const errors=C.validate({tipoMaterial:'PLANIFICACION',planificacionClase});
+   if(errors.length)throw Error(errors.join(' '));
+   encargo={...course(),...form(),planificacionClase};
+  }
+  const next=C.updateSession(active,session.value,{fecha:date.value,duracion:Number(duration.value),nota:note.value,materialId:material.value,encargo,suspendida:suspended.checked});
+  const sessionId=session.value;
+  C.saveCalendar(localStorage,next);showCalendar(next,sessionId);
+  status.textContent='Sesión actualizada.';
+ });
+ action(output,'Abrir material vinculado',()=>{
+  const index=history().findIndex(entry=>entry.id===chosen()?.materialId);
+  if(index<0)throw Error('La versión vinculada no está disponible en el historial de este navegador.');
+  recuperarHistorial(index);
+ });
+ saved.addEventListener('change',()=>{
+  try{const entry=C.readCalendars(localStorage).find(item=>item.id===saved.value);showCalendar(entry);}
+  catch(error){status.textContent=error.message;}
+ });
+ session.addEventListener('change',showSession);
+ details.addEventListener('toggle',()=>{
+  if(!details.open)return;
+  try{showSaved(active?.id);if(active)showSession();}
+  catch(error){status.textContent=error.message;}
+ });
+ details.append(output,status);
+ panel.prepend(details);
+}
 function mount(){
 const C=HEVAPlanning,$=id=>document.getElementById(id),type=$('tipo-material'),anchor=$('tema-especifico')?.parentElement;if(!type||!anchor)return;
 const panel=document.createElement('section');panel.id='heva-planning-panel';panel.className='border-2 border-amber-300 rounded-xl p-4 bg-amber-50 space-y-3 my-3';anchor.after(panel);
@@ -35,6 +163,7 @@ function updateTimes(){const t=C.times({duracion:Number(minutes.value)});for(con
 minutes.addEventListener('input',updateTimes);minutes.addEventListener('change',updateTimes);
 function refresh(){const planning=type.value==='PLANIFICACION';panel.hidden=!planning;for(const id of ['heva-unified-pedagogy','heva-access-details','heva-design-details','heva-depth-details']){const e=$(id);if(e)e.hidden=planning;}const e=$('heva-design');if(e)e.closest('details')?e.closest('details').hidden=planning:e.hidden=planning;const contract=$('contrato-material');if(planning&&contract){contract.replaceChildren(node('strong','Planificación de una clase'),node('p','Selecciona contenidos, metodología, recursos y evaluación. La planificación tendrá inicio, desarrollo y cierre según el tiempo elegido.'));}if(planning){if($('integrated-lab'))$('integrated-lab').open=false;suggest();refreshSummary();}}
 window.hevaPlanningExtras=()=>{if(type.value!=='PLANIFICACION')return{};suggest();const c=read(),errors=C.validate({tipoMaterial:'PLANIFICACION',planificacionClase:c});if(errors.length)throw Error(errors.join('; '));const map={modelado:'MODELADO',fuentes:'FUENTES',casos:'CASOS',problemas:'PROBLEMAS',lectura:'LECTURA',escritura:'MODELADO',simulacion:'CASOS',debate:'FUENTES',indagacion:'PROBLEMAS'};const primary=c.metodos.find(id=>map[id]);return{planificacionClase:c,disenoPedagogico:null,planIntegrado:null,estrategiaDidactica:HEVAPedagogy.strategy(map[primary]||'MODELADO').name,adecuacionesPIE:c.apoyos.map(id=>C.groups.apoyos[id])};};
+mountCalendar(panel,node,C,form,read);
 type.addEventListener('change',refresh);$('select-oa').addEventListener('change',()=>{suggest();});$('texto-oa').addEventListener('input',suggest);$('asignatura').addEventListener('change',suggest);
 const oldUpdate=window.actualizarObjetivosYEstrategias;window.actualizarObjetivosYEstrategias=async function(...args){const r=await oldUpdate.apply(this,args);refresh();return r;};
 refresh();

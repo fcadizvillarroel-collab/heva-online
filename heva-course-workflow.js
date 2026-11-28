@@ -61,6 +61,52 @@
   if(added.length)storage.setItem(profileStorageKey,JSON.stringify([...prior,...added]));
   return {added:added.length,kept:incoming.length-added.length};
  }
+ const teacherMemoryKey='heva-memoria-docente-v1';
+ const teacherPreferences=Object.freeze({
+  recuperacion:'Incluye una vía breve de recuperación para asistencia irregular.',
+  pasos:'Modela las tareas nuevas con un ejemplo completo y practica por etapas.',
+  impresion:'Diseña actividades realizables con material impreso y sin internet.',
+  lectura:'Segmenta las consignas y explica el vocabulario clave con ejemplos para personas adultas.',
+  puestaEnComun:'Incluye una puesta en común breve que también pueda resolverse individualmente.'
+ });
+ function teacherScope(scope){
+  const subject=key(scope?.asignatura);
+  const framework=key(scope?.marco),level=key(scope?.nivel);
+  if(!subject||subject.length>160)return null;
+  if(scope.ambito==='asignatura')return JSON.stringify([subject]);
+  if(scope.ambito==='curso'&&framework&&level&&framework.length<=160&&level.length<=160)return JSON.stringify([subject,framework,level]);
+  return null;
+ }
+ function teacherMemory(storage){
+  const data=JSON.parse(storage.getItem(teacherMemoryKey)||'{}');
+  if(!data||typeof data!=='object'||Array.isArray(data))throw Error('La memoria docente guardada no se puede leer.');
+  return data;
+ }
+ function teacherSelection(input){
+  return Array.isArray(input)?Object.keys(teacherPreferences).filter(id=>input.includes(id)):[];
+ }
+ function readTeacherMemory(storage,scope){
+  const id=teacherScope(scope);
+  return id?teacherSelection(teacherMemory(storage)[id]):[];
+ }
+ function saveTeacherMemory(storage,scope,preferences){
+  const id=teacherScope(scope);
+  if(!id)throw Error('Selecciona una asignatura y, para las preferencias por curso, el marco y el nivel.');
+  const data=teacherMemory(storage),selection=teacherSelection(preferences);
+  if(selection.length)data[id]=selection;
+  else delete data[id];
+  storage.setItem(teacherMemoryKey,JSON.stringify(data));
+  return selection;
+ }
+ function teacherMemoryExtras(preferences,enabled,type){
+  const selection=enabled===true?teacherSelection(preferences):[];
+  if(!selection.length)return {};
+  const applicable=type==='EVALUACION'?selection.filter(id=>!['recuperacion','pasos','puestaEnComun'].includes(id)):selection;
+  if(!applicable.length)return {};
+  const instructions=applicable.map(id=>teacherPreferences[id]);
+  return {preferenciasDocentesHEVA:instructions,instruccionesDocente:
+   'Preferencias del docente para este encargo, cuando sean compatibles con el tipo de material y el OA EPJA. '+instructions.join(' ')};
+ }
  function unitKey(material){
   const values=unitFields.map(field=>key(material?.planGeneracion?.[field]||material?.[field]));
   return values.every(Boolean)?JSON.stringify(values):null;
@@ -117,6 +163,7 @@
   };
   // El plan ya cita el material local completo en vez de duplicar sus documentos adjuntos.
   delete request.documentosBase;
+  delete request.preferenciasDocentesHEVA;
   if(type==='EVALUACION'){
    request.apoyosInclusivos=(request.apoyosInclusivos||[]).filter(id=>id!=='modelado');
    request.adecuacionesPIE=(request.adecuacionesPIE||[]).filter(text=>!/modelado/i.test(text));
@@ -149,5 +196,5 @@
   }
   return generated;
  }
- return {readProfiles,saveProfile,removeProfile,exportProfiles,importProfiles,parseProfileBackup,packageFor,preservePackageMaterial,openPackageMaterial,generateMissingPackage};
+ return {readProfiles,saveProfile,removeProfile,exportProfiles,importProfiles,parseProfileBackup,teacherPreferences,readTeacherMemory,saveTeacherMemory,teacherMemoryExtras,packageFor,preservePackageMaterial,openPackageMaterial,generateMissingPackage};
 });

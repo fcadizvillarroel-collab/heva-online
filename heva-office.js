@@ -381,9 +381,9 @@ function renderCover(ppt,theme,material,total){
  const cover=ppt.addSlide(),contrast=theme.background==='FFFFFF'&&theme.main==='111111';
  const editorial=theme.layout==='editorial',clean=theme.layout==='clean',warm=theme.layout==='warm';
  // La fotografía genérica nunca debe definir el tema de una asignatura.
- const image=material.imagenPortadaHEVA===true&&!editorial&&!clean&&root.HEVASlideDesign?.options(material).imagenes!==false?root.HEVAVisualAssets?.cover:null;
+ const image=material.imagenPortadaHEVA===true&&root.HEVASlideDesign?.options(material).imagenes!==false?root.HEVAVisualAssets?.cover:null;
  cover.background={color:contrast?'FFFFFF':editorial?theme.background:(theme.cover||theme.main)};
- if(image&&!contrast)cover.addImage({data:image,x:0,y:0,w:13.333,h:7.5,altText:'Cuaderno y materiales de estudio. Imagen decorativa generada.'});
+ if(image&&!contrast)cover.addImage({data:image,...(editorial||clean?{x:7.35,y:2.1,w:5,h:2.8125}:{x:0,y:0,w:13.333,h:7.5}),altText:'Cuaderno y materiales de estudio. Imagen decorativa generada.'});
  const color=contrast?'111111':editorial?theme.main:'FFFFFF',title=String(material.titulo||'Presentación educativa');
  const size=title.length>100?30:title.length>65?35:editorial?43:44;
  if(editorial){

@@ -20,7 +20,10 @@ if(require.main===module)(async()=>{
  };
 
  const guide=fixture();
+ await page.waitForFunction(()=>document.documentElement.dataset.hevaTestAccordions==='ready');
  await page.evaluate(m=>{materialActual=m;renderizarDocumentoEnPantalla();cambiarHerramienta('crear')},guide);
+ const resultStage=page.locator('details#heva-stage-4');
+ if(!await resultStage.evaluate(node=>node.open))await resultStage.locator(':scope > summary').click();
  const sheet=page.locator('#hoja-material');
  await sheet.getByRole('heading',{name:guide.titulo,exact:true}).waitFor();
  const reading=sheet.locator('[data-heva-path="introduccionLectura"]');

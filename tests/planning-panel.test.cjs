@@ -17,3 +17,49 @@ m.planClase[1].recursosUsados=['Texto o documento','Noticia'];m.planClase[2].com
 });
 test('selected planning ticket overrides the hidden generic switch in the generation prompt',()=>{const p=plan();p.incluirTicketSalida=false;p.planificacionClase.comprobaciones=['ticket'];assert.doesNotMatch(P.prompt(p),/No incluyas ticketSalida/);assert.match(P.prompt(p),/preguntas concretas en ticketSalida/);});
 test('teacher planning includes subject explanations and editable moment fields in shared export blocks',()=>{const p=plan(),m=P.finalize(P.schema('PLANIFICACION',p),p);assert.ok(m.sintesisDocente.conceptos);m.sintesisDocente.ejemplo='Un saludo, una petición concreta y un agradecimiento.';m.planClase[1].consigna='Organiza tu solicitud en tres partes.';const blocks=P.blocks(m);assert.ok(blocks.some(b=>b.path==='sintesisDocente.ejemplo'&&b.text.includes('agradecimiento')));const row=blocks.find(b=>b.kind==='planning-moment'&&b.title.startsWith('Desarrollo'));assert.ok(row.fields.some(f=>f.path==='planClase.1.consigna'));assert.match(row.text,/Organiza tu solicitud/);assert.ok(!blocks.some(b=>b.title==='Instrucciones'));assert.match(P.prompt(p),/materia disciplinar/);});
+
+const calendarCourse={asignatura:'Lenguaje y Comunicación',nivel:'I Medio',marcoCurricular:'Decreto 257'};
+const leapPeriod={id:'curso-2028',nombre:'Abrir y cerrar solicitudes',horizonte:'unidad',inicio:'2028-02-28',fin:'2028-03-07',dias:[1,2],exclusiones:['2028-03-06'],duracion:60,curso:calendarCourse};
+
+test('calendar uses civil dates without shifting days or inserting a holiday class',()=>{
+ for(const horizonte of Object.keys(C.calendarHorizons)){
+  const calendar=C.scheduleCalendar({...leapPeriod,horizonte});
+  assert.deepEqual(calendar.sesiones.map(s=>s.fecha),['2028-02-28','2028-02-29','2028-03-07']);
+  assert.deepEqual(calendar.curso,calendarCourse);
+ }
+ assert.throws(()=>C.scheduleCalendar({...leapPeriod,inicio:'2027-02-29'}),/intervalo válido/);
+ assert.throws(()=>C.scheduleCalendar({...leapPeriod,exclusiones:['2028-02-30']}),/fechas excluidas/);
+ assert.throws(()=>C.scheduleCalendar({...leapPeriod,dias:[]}),/día de clases/);
+});
+
+test('reprogramming retains the exact lesson goal, material link and supports without mutating the original',()=>{
+ const calendar=C.scheduleCalendar(leapPeriod),original=JSON.stringify(calendar);
+ const p=plan(),encargo={...calendarCourse,objetivoAprendizaje:p.objetivoAprendizaje,temaEspecifico:p.temaEspecifico,planificacionClase:p.planificacionClase};
+ const changes={fecha:'2028-03-01',duracion:75,nota:'Proponer lectura acompañada a quienes faltaron.',materialId:'version-3',encargo};
+ assert.throws(()=>C.updateSession(calendar,'2028-02-28',{...changes,fecha:'2028-02-29'}),/Ya hay una sesión/);
+ assert.throws(()=>C.updateSession(calendar,'2028-02-28',{...changes,fecha:'2028-03-06'}),/fecha habilitada/);
+ assert.throws(()=>C.updateSession(calendar,'2028-02-28',{...changes,encargo:{...encargo,nivel:'Otro'}}),/otro curso/);
+ const updated=C.updateSession(calendar,'2028-02-28',changes);
+ assert.equal(JSON.stringify(calendar),original);
+ assert.deepEqual(updated.sesiones.map(x=>x.fecha),['2028-02-29','2028-03-01','2028-03-07']);
+ const saved=updated.sesiones[1];
+ assert.equal(saved.id,'2028-02-28');
+ assert.equal(saved.materialId,'version-3');
+ assert.equal(saved.encargo.objetivoAprendizaje,p.objetivoAprendizaje);
+ assert.deepEqual(saved.encargo.planificacionClase.apoyos,['lectura']);
+ assert.deepEqual(C.validate({tipoMaterial:'PLANIFICACION',planificacionClase:saved.encargo.planificacionClase}),[]);
+ const suspended=C.updateSession(updated,saved.id,{...saved,suspendida:true});
+ assert.equal(suspended.sesiones[1].suspendida,true);
+ assert.equal(suspended.sesiones[1].materialId,'version-3');
+});
+
+test('calendar storage is local and updates the selected record without overwriting other calendars',()=>{
+ const storage=new Map();
+ const local={getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v)};
+ const first=C.scheduleCalendar(leapPeriod),other=C.scheduleCalendar({...leapPeriod,id:'otro',nombre:'Semestre I',horizonte:'semestral'});
+ C.saveCalendar(local,first);C.saveCalendar(local,other);
+ const updated=C.updateSession(first,'2028-02-28',{...first.sesiones[0],nota:'Sesión replanificada'});
+ C.saveCalendar(local,updated);
+ assert.deepEqual(C.readCalendars(local),[updated,other]);
+ assert.deepEqual([...storage.keys()],['heva-calendarios-v1']);
+});

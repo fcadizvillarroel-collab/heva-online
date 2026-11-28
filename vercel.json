@@ -23,6 +23,10 @@
       "maxDuration": 60,
       "includeFiles": "node_modules/**"
     },
+    "api/document-import.js": {
+      "maxDuration": 20,
+      "includeFiles": "node_modules/**"
+    },
     "api/diagram.js": {
       "maxDuration": 60
     }
