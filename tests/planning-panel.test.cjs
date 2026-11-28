@@ -123,3 +123,21 @@ test('an interdisciplinary sequence preserves two catalog objectives and their s
  assert.throws(()=>C.interdisciplinaryBrief(encargo,second,{...fields,criterioSecundario:''}),/criterio observable/);
  assert.throws(()=>C.interdisciplinaryBrief({...encargo,oaPrincipal:null},second,fields),/OA principal/);
 });
+
+test('interdisciplinary development rejects a reference to missing practice data',()=>{
+ const p=plan();
+ p.planificacionClase.detalleMetodos+='\nActividad interdisciplinaria común: comparar presupuestos.';
+ const m=P.schema('PLANIFICACION',p);
+ const row=m.planClase[1];
+ row.consigna='Lean los presupuestos del documento impreso.';
+ row.ejemplo='El presupuesto B es más barato.';
+ assert.match(C.prompt(p),/Datos para practicar:/);
+ assert.match(R.fallbackPrompt(p,{},undefined),/Datos para practicar:/);
+ const missing=()=>C.audit(m,p).some(error=>error.includes('Planificación interdisciplinaria'));
+ assert.equal(missing(),true);
+ row.consigna='Datos para practicar: A cobra $16.000 por ocho carpetas y $5.000 de envío. B cobra $19.000 con envío incluido. ¿Cuál conviene y por cuánto?';
+ row.ejemplo='Respuesta de la práctica: B cuesta $19.000 y A $21.000. B cuesta $2.000 menos.';
+ assert.equal(missing(),false);
+ row.consigna+=' '+row.ejemplo;
+ assert.equal(missing(),true);
+});

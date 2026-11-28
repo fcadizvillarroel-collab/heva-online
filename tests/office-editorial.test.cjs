@@ -76,3 +76,30 @@ test('PowerPoint distinguishes complete planning fields and respects the plain l
   for(const field of fields)assert.ok(text.includes(field.title+': '+field.text));
  }
 });
+
+test('PowerPoint compacts long planning sections without losing text or reducing the accessible edition',()=>{
+ const {g,m}=fixture();
+ m.tipoMaterial='PLANIFICACION';
+ const texts=Array.from({length:12},(_,i)=>'Paso '+(i+1)+'. Revisa la información del presupuesto, calcula el costo con el envío y registra una evidencia.');
+ g.HEVA.blocks=()=>[{title:'Diseño de la clase',text:texts.join('\n')}];
+ const standard=g.HEVAOffice.preview(m).pages;
+ m.accesibilidadVisual.letraGrande=true;
+ const accessible=g.HEVAOffice.preview(m).pages;
+ assert.ok(standard.length<accessible.length);
+ const items=standard.slice(1).flatMap(p=>p.elements.filter(e=>e.kind==='text'));
+ for(const text of texts)assert.ok(items.some(e=>e.text.includes(text)));
+ assert.ok(items.filter(e=>e.fontSize===22).every(e=>e.y+e.h<=6.75));
+});
+
+test('PowerPoint keeps the complete practice prompt together when it fits on a planning slide',()=>{
+ const {g,m}=fixture();
+ m.tipoMaterial='PLANIFICACION';
+ const text='Datos para practicar: compara las ofertas.\nOferta A: $1.500 por carpeta y $3.000 de envío.\nOferta B: $1.700 por carpeta y $1.000 de envío.\nCompra ocho carpetas. ¿Cuál es la diferencia?';
+ const fields=[{title:'Consigna para el curso',text}];
+ g.HEVA.blocks=()=>[{title:'Desarrollo',kind:'planning-moment',fields,text:'Consigna para el curso: '+text}];
+ const [slide]=g.HEVAOffice.presentationPages(m);
+ assert.equal(slide.lines.length,1);
+ assert.ok(slide.lines[0].includes('Oferta A:'));
+ assert.ok(slide.lines[0].includes('Oferta B:'));
+ assert.ok(slide.lines[0].includes('¿Cuál es la diferencia?'));
+});
