@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-function mountCalendar(panel,node,C,form,read){
+function mountCalendar(panel,node,C,form,read,loadBrief){
  const byId=id=>document.getElementById(id);
  const course=()=>({asignatura:byId('asignatura')?.value||'',nivel:byId('nivel-epja')?.value||'',marcoCurricular:byId('marco-curricular')?.value||''});
  const details=node('details',null,'bg-white border rounded p-3');
@@ -48,6 +48,11 @@ function mountCalendar(panel,node,C,form,read){
  const context=node('p',null,'text-sm');
  output.append(title,context);
  const session=field(output,'Sesión','planning-calendar-session','select');
+ const sequence=node('fieldset',null,'space-y-2');
+ sequence.append(node('legend','Proponer una secuencia de clases','font-semibold text-sm'),node('p','Usa el OA y el encargo del formulario. Desde la fecha seleccionada se ocupan solo sesiones activas sin encargo ni material vinculado.','text-sm'));
+ const count=field(sequence,'Cantidad de clases','planning-calendar-itinerary-count','input','number');
+ count.min='2';count.max='6';count.step='1';count.value='3';
+ output.append(sequence);
  const date=field(output,'Fecha de la sesión','planning-calendar-date','input','date');
  const duration=field(output,'Duración de la sesión en minutos','planning-calendar-minutes','input','number');
  duration.min='15';duration.max='240';duration.step='1';
@@ -60,15 +65,32 @@ function mountCalendar(panel,node,C,form,read){
  planMode.append(option('keep','Conservar el encargo guardado'),option('assign','Vincular el encargo actual del formulario'),option('clear','Quitar el encargo vinculado'));
  const planSummary=node('pre',null,'whitespace-pre-wrap font-sans text-sm');
  output.append(planSummary);
+ const itinerary=node('fieldset',null,'space-y-2');
+ itinerary.append(node('legend','Itinerario de la sesión','font-semibold text-sm'));
+ const stage=field(itinerary,'Foco de la clase','planning-calendar-itinerary-stage','input','text');
+ const activity=field(itinerary,'Actividad de la clase','planning-calendar-itinerary-activity','textarea');
+ const evidence=field(itinerary,'Evidencia de aprendizaje','planning-calendar-itinerary-evidence','textarea');
+ stage.maxLength=120;activity.maxLength=1000;evidence.maxLength=1000;
+ output.append(itinerary);
  const material=field(output,'Versión de material del historial','planning-calendar-material','select');
  function history(){return typeof readHistory==='function'?(readHistory()||[]):[];}
  const chosen=()=>active?.sesiones.find(entry=>entry.id===session.value);
+ const currentBrief=()=>{
+  const planificacionClase=read();
+  const errors=C.validate({tipoMaterial:'PLANIFICACION',planificacionClase});
+  if(errors.length)throw Error(errors.join(' '));
+  return {...course(),...form(),planificacionClase};
+ };
  function showSession(){
   const current=chosen();
   if(!current)return;
   date.value=current.fecha;duration.value=current.duracion;note.value=current.nota;suspended.checked=current.suspendida===true;
   planMode.value='keep';
   const plan=current.encargo;
+  itinerary.hidden=!plan?.itinerario;
+  stage.value=plan?.itinerario?.titulo||'';
+  activity.value=plan?.itinerario?.actividad||'';
+  evidence.value=plan?.itinerario?.evidencia||'';
   planSummary.textContent=plan?[plan.objetivoAprendizaje,plan.temaEspecifico,C.summary(plan.planificacionClase)].join('\n'):'Sesión sin encargo vinculado.';
   const entries=history().filter(entry=>typeof entry?.id==='string'&&entry.data?.titulo);
   material.replaceChildren(option('','Sin material'),...entries.map(({id,data})=>option(id,data.titulo+(data.version?' · v'+data.version:''))));
@@ -95,16 +117,19 @@ function mountCalendar(panel,node,C,form,read){
   C.saveCalendar(localStorage,calendar);showSaved(calendar.id);showCalendar(calendar);
   status.textContent='Calendario guardado en este navegador.';
  });
+ action(sequence,'Proponer y guardar secuencia',()=>{
+  const sessionId=session.value;
+  const amount=Number(count.value);
+  const next=C.proposeItinerary(active,sessionId,amount,currentBrief());
+  C.saveCalendar(localStorage,next);showCalendar(next,sessionId);
+  status.textContent='Secuencia guardada en '+amount+' sesiones. Selecciona una sesión para revisar o editar su propuesta.';
+ });
  action(output,'Guardar cambios de la sesión',()=>{
   const current=chosen();
   let encargo=current?.encargo;
   if(planMode.value==='clear')encargo=null;
-  if(planMode.value==='assign'){
-   const planificacionClase=read();
-   const errors=C.validate({tipoMaterial:'PLANIFICACION',planificacionClase});
-   if(errors.length)throw Error(errors.join(' '));
-   encargo={...course(),...form(),planificacionClase};
-  }
+  if(planMode.value==='assign')encargo=currentBrief();
+  if(planMode.value==='keep'&&encargo?.itinerario)encargo=C.editItinerary(encargo,{titulo:stage.value,actividad:activity.value,evidencia:evidence.value});
   const next=C.updateSession(active,session.value,{fecha:date.value,duracion:Number(duration.value),nota:note.value,materialId:material.value,encargo,suspendida:suspended.checked});
   const sessionId=session.value;
   C.saveCalendar(localStorage,next);showCalendar(next,sessionId);
@@ -114,6 +139,14 @@ function mountCalendar(panel,node,C,form,read){
   const index=history().findIndex(entry=>entry.id===chosen()?.materialId);
   if(index<0)throw Error('La versión vinculada no está disponible en el historial de este navegador.');
   recuperarHistorial(index);
+ });
+ action(itinerary,'Cargar encargo guardado en el formulario',()=>{
+  const encargo=chosen()?.encargo;
+  if(!encargo?.itinerario)throw Error('Selecciona una sesión con itinerario.');
+  const selected=course();
+  if(Object.keys(selected).some(key=>selected[key]!==encargo[key])||form().objetivoAprendizaje!==encargo.objetivoAprendizaje)throw Error('Selecciona en el formulario el mismo curso y OA que se muestran en el encargo.');
+  loadBrief(encargo);
+  status.textContent='Encargo cargado. Puedes revisarlo y generar la planificación desde el formulario.';
  });
  saved.addEventListener('change',()=>{
   try{const entry=C.readCalendars(localStorage).find(item=>item.id===saved.value);showCalendar(entry);}
@@ -163,7 +196,25 @@ function updateTimes(){const t=C.times({duracion:Number(minutes.value)});for(con
 minutes.addEventListener('input',updateTimes);minutes.addEventListener('change',updateTimes);
 function refresh(){const planning=type.value==='PLANIFICACION';panel.hidden=!planning;for(const id of ['heva-unified-pedagogy','heva-access-details','heva-design-details','heva-depth-details']){const e=$(id);if(e)e.hidden=planning;}const e=$('heva-design');if(e)e.closest('details')?e.closest('details').hidden=planning:e.hidden=planning;const contract=$('contrato-material');if(planning&&contract){contract.replaceChildren(node('strong','Planificación de una clase'),node('p','Selecciona contenidos, metodología, recursos y evaluación. La planificación tendrá inicio, desarrollo y cierre según el tiempo elegido.'));}if(planning){if($('integrated-lab'))$('integrated-lab').open=false;suggest();refreshSummary();}}
 window.hevaPlanningExtras=()=>{if(type.value!=='PLANIFICACION')return{};suggest();const c=read(),errors=C.validate({tipoMaterial:'PLANIFICACION',planificacionClase:c});if(errors.length)throw Error(errors.join('; '));const map={modelado:'MODELADO',fuentes:'FUENTES',casos:'CASOS',problemas:'PROBLEMAS',lectura:'LECTURA',escritura:'MODELADO',simulacion:'CASOS',debate:'FUENTES',indagacion:'PROBLEMAS'};const primary=c.metodos.find(id=>map[id]);return{planificacionClase:c,disenoPedagogico:null,planIntegrado:null,estrategiaDidactica:HEVAPedagogy.strategy(map[primary]||'MODELADO').name,adecuacionesPIE:c.apoyos.map(id=>C.groups.apoyos[id])};};
-mountCalendar(panel,node,C,form,read);
+function loadBrief(encargo){
+ const c=encargo.planificacionClase;
+ $('tema-especifico').value=encargo.temaEspecifico;
+ suggest();
+ minutes.value=c.duracion;
+ const remaining=new Set(c.contenidos);
+ for(const input of contentBox.querySelectorAll('input'))input.checked=remaining.delete(input.value);
+ custom.value=[...remaining].join('\n');
+ for(const input of panel.querySelectorAll('input[data-planning-group]'))input.checked=(c[input.dataset.planningGroup]||[]).includes(input.value);
+ mode.value=c.modoMateriales;
+ detail.value=c.detalleMetodos||'';
+ controls['planning-own'].value=c.materialPropio||'';
+ controls['planning-product'].value=c.producto||'';
+ const t=C.times(c);
+ for(const key of ['inicio','desarrollo','cierre'])controls['planning-time-'+key].value=t[key];
+ summaryEdited=false;
+ refreshSummary();
+}
+mountCalendar(panel,node,C,form,read,loadBrief);
 type.addEventListener('change',refresh);$('select-oa').addEventListener('change',()=>{suggest();});$('texto-oa').addEventListener('input',suggest);$('asignatura').addEventListener('change',suggest);
 const oldUpdate=window.actualizarObjetivosYEstrategias;window.actualizarObjetivosYEstrategias=async function(...args){const r=await oldUpdate.apply(this,args);refresh();return r;};
 refresh();

@@ -20,3 +20,12 @@ Base de trabajo `2713500`, publicación verificada de la PR #109. El desarrollo 
 - Se renderizaron y se inspeccionaron las dos portadas PowerPoint con LibreOffice sobre una guía real de Filosofía. [Portadas verificadas](evidencias/heva-asistente-fase2/portadas.webp).
 - Memoria, calendario y conservación del encargo se probaron además con Chromium. La evaluación docente, el comparador cualitativo avanzado, la revisión de plataformas externas y la ampliación de visualizaciones editables se mantienen como trabajo de fases siguientes.
 - Los documentos binarios se procesan al solicitar la extracción. IA, importación binaria y sincronización siguen dependiendo de red. No se activaron servicios de pago, sincronización alojada ni cuentas.
+
+## Seguimiento posterior a la publicación del asistente
+
+La PR #110 se integró en `a39e3ad` y Vercel publicó ese SHA. Continúa la Fase 2 en una rama separada para secuencias y fuentes.
+
+- **Itinerarios.** Una acción propone entre dos y seis sesiones progresivas en el calendario. Conserva OA y encargo originales y omite sesiones suspendidas, con encargo o material. Se pueden editar foco, actividad y evidencia. En Chromium sin red se comprobó una secuencia de tres clases y el envío de la segunda clase editada al formulario canónico. Los documentos de cada sesión se generan en ese flujo.
+- **Contraste de dos fuentes.** El panel envía hasta 4.500 caracteres de cada documento al Studio. El servidor solo devuelve contrastes si encuentra los dos extractos literales en los fragmentos entregados. En Chromium se importaron documentos reales y se comprobó que una respuesta simulada con una cita inventada se descarta. Las citas localizadas permiten revisar el contraste y su interpretación. [Captura de contraste](evidencias/heva-asistente-fase2/contraste.webp).
+- **Conversión.** La prueba del asistente detectó que la frase «convierte esta presentación en una guía» podía seleccionar el tipo de origen. El asistente ahora extrae el destino explícito. La prueba real posterior llegó al generador con el tipo guía y rechazó una lectura de 240 palabras según el mínimo vigente. El plan derivado ahora explicita un objetivo de 340 a 400 palabras para la lectura y conserva el marco y el OA.
+- **Pendientes de alcance.** Generación coordinada de todos los documentos de un itinerario, unidades con OA diferenciados de dos asignaturas y validación pedagógica de la síntesis, con proveedor real, siguen pendientes.

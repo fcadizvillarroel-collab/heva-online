@@ -66,6 +66,7 @@ test('Assistant directs a numbered request to an existing block and recognizes a
  assert.deepEqual(S.conversationAction(m,'Mejora la actividad 9'),{kind:'missing'});
  assert.deepEqual(S.conversationAction(m,'Amplía la explicación'),{kind:'edit',section:'lectura'});
  assert.deepEqual(S.conversationAction(m,'Genera una evaluación basada en esta guía'),{kind:'convert',target:'EVALUACION'});
+ assert.deepEqual(S.conversationAction({...m,tipoMaterial:'PRESENTACION'},'Convierte esta presentación en una guía para trabajar sin internet'),{kind:'convert',target:'GUIA'});
  assert.deepEqual(S.conversationAction(m,'Crea una versión para estudiantes ausentes'),{kind:'adapt',target:'RECUPERACION'});
  const p=S.conversionPlan(m,'PRESENTACION');
  assert.equal(p.cantAlternativas,0);
@@ -74,4 +75,13 @@ test('Assistant directs a numbered request to an existing block and recognizes a
  assert.equal(p.derivacion.origenVersion,2);
  assert.match(S.link({titulo:'Nueva'},p).titulo,/conversión/);
  assert.equal(m.tipoMaterial,'GUIA');
+});
+
+test('document synthesis only returns contrasts with excerpts found in both bounded sources',()=>{
+ const source=S.comparisonSources([{id:'1',titulo:'Primero',texto:'La evaluación utiliza datos de asistencia.'},{id:'2',titulo:'Segundo',texto:'La evaluación se apoya en el registro de asistencia.'}]);
+ const valid={tipo:'coincidencia',interpretacion:'Ambos usan evidencia de asistencia.',cita1:'utiliza datos de asistencia',cita2:'registro de asistencia'};
+ const invalid={...valid,cita2:'registro de disciplinas'};
+ assert.deepEqual(S.checkedComparison(source,{contrastes:[valid,invalid]}),{contrastes:[valid],omitidos:1});
+ assert.throws(()=>S.checkedComparison(source,{contrastes:[invalid]}),/citas localizadas/);
+ assert.throws(()=>S.comparisonSources([{id:'1',titulo:'Primero',texto:'fragmento'}]),/dos documentos/);
 });

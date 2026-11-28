@@ -63,3 +63,37 @@ test('calendar storage is local and updates the selected record without overwrit
  assert.deepEqual(C.readCalendars(local),[updated,other]);
  assert.deepEqual([...storage.keys()],['heva-calendarios-v1']);
 });
+
+test('an itinerary applies one literal OA in progressive classes and preserves occupied or suspended dates',()=>{
+ const calendar=C.scheduleCalendar({...leapPeriod,fin:'2028-03-14'});
+ const [first,second,third,fourth,fifth]=calendar.sesiones;
+ const occupied=C.updateSession(calendar,second.id,{...second,materialId:'saved-version'});
+ const prepared=C.updateSession(occupied,third.id,{...third,suspendida:true});
+ const encargo={...calendarCourse,...plan()};
+ assert.throws(()=>C.proposeItinerary(prepared,first.id,4,encargo),/faltan sesiones/);
+ assert.throws(()=>C.proposeItinerary(prepared,first.id,3,{...encargo,nivel:'Otro'}),/otro curso/);
+ const next=C.proposeItinerary(prepared,first.id,3,encargo);
+ assert.deepEqual(next.sesiones.filter(s=>s.encargo).map(s=>s.id),[first.id,fourth.id,fifth.id]);
+ assert.deepEqual(next.sesiones.filter(s=>s.encargo).map(s=>s.encargo.itinerario.titulo),['Explorar y modelar','Practicar con apoyo','Transferir y comprobar']);
+ assert.deepEqual(next.sesiones[1],prepared.sesiones[1]);
+ assert.deepEqual(next.sesiones[2],prepared.sesiones[2]);
+ for(const {encargo:brief} of next.sesiones.filter(s=>s.encargo)){
+  assert.equal(brief.objetivoAprendizaje,encargo.objetivoAprendizaje);
+  assert.deepEqual(brief.planificacionClase.apoyos,encargo.planificacionClase.apoyos);
+  assert.deepEqual(C.validate(brief),[]);
+ }
+ assert.equal(prepared.sesiones[0].encargo,null);
+});
+
+test('editing an itinerary reapplies its new activity and evidence to the canonical brief only once',()=>{
+ const calendar=C.scheduleCalendar(leapPeriod),encargo={...calendarCourse,...plan()};
+ const first=C.proposeItinerary(calendar,calendar.sesiones[0].id,2,encargo).sesiones[0].encargo;
+ const fields={titulo:'Examinar modelos',actividad:'Comparar dos solicitudes impresas.',evidencia:'Justificar cuál comunica mejor la petición.'};
+ const next=C.editItinerary(first,fields);
+ assert.deepEqual(C.editItinerary(next,fields),next);
+ assert.match(C.prompt(next),/Comparar dos solicitudes impresas/);
+ assert.match(C.prompt(next),/Justificar cuál comunica mejor la petición/);
+ assert.match(next.planificacionClase.detalleMetodos,/Simular una solicitud dirigida a una institución/);
+ assert.doesNotMatch(C.prompt(next),/Recuperar experiencias del curso/);
+ assert.throws(()=>C.editItinerary(first,{...fields,evidencia:''}),/evidencia/);
+});

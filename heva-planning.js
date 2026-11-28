@@ -83,6 +83,33 @@ function updateSession(calendar,id,{fecha,duracion,nota,materialId,encargo,suspe
  const next={...session,fecha,duracion,nota:String(nota||'').trim(),materialId:String(materialId||''),encargo:savedPlan,suspendida:suspendida===true};
  return {...calendar,sesiones:calendar.sesiones.map(entry=>entry===session?next:entry).sort((a,b)=>a.fecha.localeCompare(b.fecha))};
 }
+const itineraryStages=[
+ {titulo:'Explorar y modelar',actividad:'Recuperar experiencias del curso y modelar un ejemplo completo, explicando cada decisión.',evidencia:'Identificar un paso del ejemplo y explicar para qué sirve.'},
+ {titulo:'Practicar con apoyo',actividad:'Resolver un caso similar en parejas con pasos visibles y una devolución durante el trabajo.',evidencia:'Entregar la resolución y corregir un paso con apoyo.'},
+ {titulo:'Aplicar con variaciones',actividad:'Introducir una condición diferente y comparar dos formas de responder a la situación.',evidencia:'Explicar qué cambió y justificar la respuesta elegida.'},
+ {titulo:'Revisar y mejorar',actividad:'Revisar una respuesta incompleta, detectar qué falta y reescribirla aplicando criterios compartidos.',evidencia:'Mostrar qué mejoró entre la primera versión y la revisada.'},
+ {titulo:'Consolidar',actividad:'Resolver una situación con menos apoyo e incorporar una breve comprobación entre pares.',evidencia:'Presentar la respuesta y comprobarla con un criterio.'},
+ {titulo:'Transferir y comprobar',actividad:'Resolver una situación nueva de forma autónoma y cerrar con una síntesis que permita retomar el trabajo tras una ausencia.',evidencia:'Entregar una respuesta propia y explicar cómo aplicar lo aprendido en otra situación.'}
+];
+function editItinerary(encargo,fields){
+ const itinerario=Object.fromEntries(['titulo','actividad','evidencia'].map(key=>[key,String(fields[key]||'').trim()]));
+ if(!itinerario.titulo||itinerario.titulo.length>120||['actividad','evidencia'].some(key=>!itinerario[key]||itinerario[key].length>1000))throw Error('Completa el foco, la actividad y la evidencia respetando los límites de extensión.');
+ const base=encargo.itinerario?.base||{detalleMetodos:encargo.planificacionClase.detalleMetodos||'',producto:encargo.planificacionClase.producto||''};
+ const planificacionClase={...encargo.planificacionClase,detalleMetodos:[itinerario.titulo,itinerario.actividad,base.detalleMetodos].filter(Boolean).join('\n'),producto:[itinerario.evidencia,base.producto].filter(Boolean).join('\n')};
+ const errors=validate({tipoMaterial:'PLANIFICACION',planificacionClase});
+ if(errors.length)throw Error(errors.join(' '));
+ return {...encargo,itinerario:{...itinerario,base},planificacionClase};
+}
+function proposeItinerary(calendar,startId,count,encargo){
+ if(!Number.isInteger(count)||count<2||count>itineraryStages.length)throw Error('Elige entre dos y seis clases para la secuencia.');
+ if(!encargo?.planificacionClase)throw Error('Completa el encargo de clase antes de proponer la secuencia.');
+ const start=calendar.sesiones.find(entry=>entry.id===startId);
+ if(!start)throw Error('Selecciona la sesión desde la que comenzará la secuencia.');
+ const targets=calendar.sesiones.filter(entry=>entry.fecha>=start.fecha&&!entry.suspendida&&!entry.encargo&&!entry.materialId).slice(0,count);
+ if(targets.length<count)throw Error('Desde esa fecha faltan sesiones activas sin encargo ni material vinculado.');
+ const stages=[...itineraryStages.slice(0,count-1),itineraryStages.at(-1)];
+ return targets.reduce((next,session,index)=>updateSession(next,session.id,{...session,encargo:editItinerary(encargo,stages[index])}),calendar);
+}
 function readCalendars(storage){
  const value=JSON.parse(storage.getItem(calendarKey)||'[]');
  if(!Array.isArray(value)||value.some(x=>typeof x?.id!=='string'||!Array.isArray(x.sesiones)))throw Error('El calendario local no se pudo leer.');
@@ -93,6 +120,6 @@ function saveCalendar(storage,calendar){
  storage.setItem(calendarKey,JSON.stringify([calendar,...records.filter(x=>x.id!==calendar.id)]));
  return calendar;
 }
-return {groups,suggestions,duration,times,validate,summary,prompt,audit,calendarHorizons,scheduleCalendar,updateSession,readCalendars,saveCalendar};
+return {groups,suggestions,duration,times,validate,summary,prompt,audit,calendarHorizons,scheduleCalendar,updateSession,editItinerary,proposeItinerary,readCalendars,saveCalendar};
 });
 
