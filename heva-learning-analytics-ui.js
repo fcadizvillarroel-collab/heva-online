@@ -158,6 +158,18 @@
    threshold.value='60';results.replaceChildren();state.textContent='Registro local eliminado.';
   }));
   actions.append(calculate,save,newApplicationButton,download,remove);
+  if(window.HEVAMoodle){
+   const moodle=button('Exportar alternativas para Moodle',execute(()=>{
+    validateCurrent();
+    const file=HEVAMoodle.exportQuiz(materialActual);
+    const omitted=file.omitted.length?' Omitidas: '+file.omitted.join('; ')+'.':'';
+    if(!file.exported)throw Error('No hay alternativas completas que exportar.'+omitted);
+    HEVAOffice.download(new Blob([file.xml],{type:'application/xml;charset=utf-8'}),'HEVA_preguntas_moodle.xml');
+    state.textContent=file.exported+' preguntas exportadas.'+omitted;
+   }));
+   actions.append(moodle);
+  }
+
   panel.append(actions,state,results);
   let edited=false;
   panel.oninput=()=>{

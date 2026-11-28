@@ -46,9 +46,13 @@ function mount(){
 
  const query=field(controls,'Buscar por título, tema, OA o contenido','input');
  query.type='search';
+ const conceptsLabel=node('label','','flex items-center gap-2 text-sm');
+ const concepts=node('input');concepts.type='checkbox';
+ conceptsLabel.append(concepts,node('span','Incluir términos relacionados'));
+ controls.append(conceptsLabel);
  for(const fieldName of library.fields)fields[fieldName]=field(filters,labels[fieldName],'select');
  controls.append(filters,button('Limpiar búsqueda y filtros',()=>{
-  query.value='';
+  query.value='';concepts.checked=false;
   for(const select of Object.values(fields))select.value='';
   render();
  }),button('Descargar inventario de materiales',()=>{
@@ -70,6 +74,7 @@ function mount(){
   const card=node('article','','border rounded p-3 space-y-2');
   const title=node('h3',material.titulo,'font-bold text-base');
   card.append(title);
+  if(record.conceptMatch)card.append(node('p','Coincidencia por término relacionado','text-sm'));
   const meta=library.fields.filter(field=>material[field]).map(field=>labelFor(field,material[field]));
   card.append(node('p',[...meta,'Versión '+material.version,material.fecha].filter(Boolean).join(' · '),'text-sm'));
   if(material.tema)card.append(node('p',material.tema,'text-sm'));
@@ -112,7 +117,7 @@ function mount(){
  }
  function matches(){
   const criteria=Object.fromEntries(Object.entries(fields).map(([key,control])=>[key,control.value]));
-  return library.search(records,{query:query.value,...criteria});
+  return library.search(records,{query:query.value,concepts:concepts.checked,...criteria});
  }
  function render(){
   const filtered=matches();
@@ -137,6 +142,7 @@ function mount(){
   render();
  }
  query.addEventListener('input',render);
+ concepts.addEventListener('change',render);
  filters.addEventListener('change',render);
  window.cargarHistorial=refresh;
  window.addEventListener('storage',event=>{if(event.key==='heva_historial'||event.key===null)refresh();});

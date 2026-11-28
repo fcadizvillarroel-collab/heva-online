@@ -139,7 +139,7 @@ if(require.main===module)(async()=>{
  await page.evaluate(()=>cambiarHerramienta('guardados'));
  const exchange=page.locator('#panel-guardados').getByText('Intercambiar un material docente',{exact:true});
  await exchange.click();
- const testMaterial={tipoMaterial:'GUIA',titulo:'Guía compartida de prueba',introduccionLectura:'Lectura sintética',materialId:'fuente-de-prueba',version:2};
+ const testMaterial={tipoMaterial:'GUIA',titulo:'Guía compartida de prueba',introduccionLectura:'Lectura sintética de una cotización',materialId:'fuente-de-prueba',version:2};
  const share=await page.evaluate(m=>HEVAMaterialExchange.serialize(m,'Equipo docente QA'),testMaterial);
  const beforeImport=await page.evaluate(()=>readHistory().length);
  await page.locator('#panel-guardados input[type=file]').setInputFiles({name:'heva-test.json',mimeType:'application/json',buffer:Buffer.from(share)});
@@ -150,6 +150,9 @@ if(require.main===module)(async()=>{
  assert.notEqual(imported[0].materialId,testMaterial.materialId);
  await page.locator('#heva-material-library input[type=search]').fill('Lectura sintética');
  await page.locator('#lista-guardados').getByText('Guía compartida de prueba',{exact:true}).waitFor();
+ await page.locator('#heva-material-library input[type=search]').fill('presupuesto');
+ await page.getByLabel('Incluir términos relacionados').check();
+ await page.locator('#lista-guardados').getByText('Coincidencia por término relacionado',{exact:true}).waitFor();
  await page.locator('#panel-guardados').screenshot({path:'/tmp/heva-qa/fase3-banco.png'});
  const assessment=fixture('EVALUACION');
  assessment.preguntasAlternativas=[{enunciado:'Elige la mejor decisión según el caso.',alternativas:[{letra:'A',texto:'Una'},{letra:'B',texto:'Otra'},{letra:'C',texto:'Tercera'},{letra:'D',texto:'Cuarta'}],claveCorrecta:'A'}];
@@ -170,7 +173,16 @@ if(require.main===module)(async()=>{
  const csv=page.waitForEvent('download');
  await analytics.getByRole('button',{name:'Descargar resultados CSV'}).click();
  assert.match(fs.readFileSync(await (await csv).path(),'utf8'),/Alternativa 1,4,1,3,4,75.0,60,5,2,5,40.0,60/);
+ const moodle=page.waitForEvent('download');
+ await analytics.getByRole('button',{name:'Exportar alternativas para Moodle'}).click();
+ const moodleFile=await moodle;
+ assert.equal(moodleFile.suggestedFilename(),'HEVA_preguntas_moodle.xml');
+ const quiz=fs.readFileSync(await moodleFile.path(),'utf8');
+ assert.deepEqual(await page.evaluate(xml=>{
+  const document=new DOMParser().parseFromString(xml,'application/xml');
+  return [document.querySelectorAll('parsererror').length,document.querySelectorAll('quiz question').length,document.querySelector('answer[fraction="100"] text')?.textContent];
+ },quiz),[0,1,'Una']);
  await analytics.screenshot({path:'/tmp/heva-qa/fase3-resultados.png'});
  await context.setOffline(false);
- assert.deepEqual(errors,[]);console.log(JSON.stringify({browser:'Chromium',checks:['abrir interfaz','editor de bloques','ajustes accesibles','lectura por sección','comparación','Word real','PPTX real','vista previa','reordenar y referencias','deshacer','encargo offline','persistencia de acceso','perfil de curso offline tras recarga','paquete de unidad','unidad interdisciplinaria y respaldo curricular','seguimiento curricular e informe','intercambio y búsqueda en banco','comparación agregada y CSV offline'],pageErrors:errors,artifacts:'/tmp/heva-qa'}));await browser.close();
+ assert.deepEqual(errors,[]);console.log(JSON.stringify({browser:'Chromium',checks:['abrir interfaz','editor de bloques','ajustes accesibles','lectura por sección','comparación','Word real','PPTX real','vista previa','reordenar y referencias','deshacer','encargo offline','persistencia de acceso','perfil de curso offline tras recarga','paquete de unidad','unidad interdisciplinaria y respaldo curricular','seguimiento curricular e informe','intercambio y búsqueda en banco','comparación agregada y CSV offline','búsqueda por conceptos y Moodle XML'],pageErrors:errors,artifacts:'/tmp/heva-qa'}));await browser.close();
 })().catch(e=>{console.error(e);process.exit(1)});
